@@ -1,6 +1,7 @@
 <template>
-  <h1>Новый проект</h1>
-  <p>Новая ветка</p>
+  <div class="app">
+    <router-view></router-view>
+  </div>
 </template>
 
 <script setup>
