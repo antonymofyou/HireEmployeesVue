@@ -1,23 +1,53 @@
-import { createRouter, createWebHistory } from 'vue-router'
-//import HomeView from '../views/HomeView.vue'
+import { createRouter, createWebHistory } from "vue-router";
+
+import Authorization from "@/pages/authorization/Authorization.vue";
+import HomePage from "@/pages/HomePage.vue";
+import VacanciesPage from "@/pages/vacancy/VacanciesPage.vue";
+import VacancyIdPage from "@/pages/vacancy/VacancyIdPage.vue";
+import VacancyCreate from "@/pages/vacancy/VacancyCreate.vue";
+import CandidatesList from "@/pages/candidates/CandidatesList.vue";
+import CandidatComments from "@/pages/candidates/CandidatComments.vue";
+import VacancyCreate from "@/pages/vacancy/VacancyCreate.vue";
 
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
   routes: [
-    // {
-    //   path: '/',
-    //   name: 'home',
-    //   component: HomeView
-    // },
-    // {
-    //   path: '/about',
-    //   name: 'about',
-    //   // route level code-splitting
-    //   // this generates a separate chunk (About.[hash].js) for this route
-    //   // which is lazy-loaded when the route is visited.
-    //   component: () => import('../views/AboutView.vue')
-    // }
-  ]
-})
+    {
+      path: "/",
+      name: "home",
+      component: HomePage,
+    },
+    {
+      path: "/authorization",
+      name: "auth",
+      component: Authorization,
+    },
+    {
+      path: "/vacancy",
+      name: "vacancy",
+      component: VacanciesPage,
+    },
+    {
+      path: "/vacancy/:id",
+      // name: "home",
+      component: VacancyIdPage,
+    },
+    {
+      path: "/vacancy/create",
+      // name: "home",
+      component: VacancyCreate,
+    },
+    {
+      path: "/candidates",
+      name: "candidates",
+      component: CandidatesList,
+    },
+    {
+      path: "/canditate",
+      name: "candidate",
+      component: CandidatComments,
+    },
+  ],
+});
 
-export default router
+export default router;
