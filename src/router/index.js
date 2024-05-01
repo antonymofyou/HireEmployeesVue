@@ -29,12 +29,12 @@ const router = createRouter({
     },
     {
       path: "/vacancy/:id",
-      // name: "home",
+      name: "Idvacancy",
       component: VacancyIdPage,
     },
     {
       path: "/vacancy/create",
-      // name: "home",
+      name: "create",
       component: VacancyCreate,
     },
     {
