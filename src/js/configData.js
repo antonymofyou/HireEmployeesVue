@@ -1,0 +1,17 @@
+export let configData = {
+  BASE_URL: "https://razrab.nasotku.ru",
+  API_PATH: "/api_razrab/hr/app/api",
+
+  APP_SECRET_KEY_INT: "35610765967829788190",
+  APP_SECRET_KEY_STRING: "Kb6CyKdu9EoXilm3sgQx",
+  FIRST_TOKEN: "aTTtrQwvxPxGO6FOP5dd",
+
+  MANAGER_DEVICE_NAME:
+    "263a4dbe41488fb87214b0032339dbb9f0c8da14c16dfcf13084bf3c2552eca0",
+  MANAGER_TOK_NAME:
+    "3c469e9d6c5875d37a43f353d4f88e61fcf812c66eee3457465a40b0da4153e0",
+  SEEKER_DEVICE_NAME:
+    "263a4dbe41488fb87214b0032339dbb9f0c8da14c16dfcf13084bf3c2552eca1",
+  SEEKER_TOK_NAME:
+    "3c469e9d6c5875d37a43f353d4f88e61fcf812c66eee3457465a40b0da4153e1",
+};
