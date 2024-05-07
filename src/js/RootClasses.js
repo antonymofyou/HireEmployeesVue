@@ -68,17 +68,16 @@ import { configData } from "./configData.js";
         (o = i.charCodeAt(e)) < 128
           ? (a[c++] = o)
           : o < 2048
-            ? ((a[c++] = 192 | (o >> 6)), (a[c++] = 128 | (63 & o)))
-            : o < 55296 || o >= 57344
-              ? ((a[c++] = 224 | (o >> 12)),
-                (a[c++] = 128 | ((o >> 6) & 63)),
-                (a[c++] = 128 | (63 & o)))
-              : ((o =
-                  65536 + (((1023 & o) << 10) | (1023 & i.charCodeAt(++e)))),
-                (a[c++] = 240 | (o >> 18)),
-                (a[c++] = 128 | ((o >> 12) & 63)),
-                (a[c++] = 128 | ((o >> 6) & 63)),
-                (a[c++] = 128 | (63 & o)));
+          ? ((a[c++] = 192 | (o >> 6)), (a[c++] = 128 | (63 & o)))
+          : o < 55296 || o >= 57344
+          ? ((a[c++] = 224 | (o >> 12)),
+            (a[c++] = 128 | ((o >> 6) & 63)),
+            (a[c++] = 128 | (63 & o)))
+          : ((o = 65536 + (((1023 & o) << 10) | (1023 & i.charCodeAt(++e)))),
+            (a[c++] = 240 | (o >> 18)),
+            (a[c++] = 128 | ((o >> 12) & 63)),
+            (a[c++] = 128 | ((o >> 6) & 63)),
+            (a[c++] = 128 | (63 & o)));
       i = a;
     } else {
       if ("object" !== n) throw new Error(h);
@@ -245,19 +244,18 @@ import { configData } from "./configData.js";
             (s = t.charCodeAt(n)) < 128
               ? (a[e >> 2] |= s << y[3 & e++])
               : s < 2048
-                ? ((a[e >> 2] |= (192 | (s >> 6)) << y[3 & e++]),
-                  (a[e >> 2] |= (128 | (63 & s)) << y[3 & e++]))
-                : s < 55296 || s >= 57344
-                  ? ((a[e >> 2] |= (224 | (s >> 12)) << y[3 & e++]),
-                    (a[e >> 2] |= (128 | ((s >> 6) & 63)) << y[3 & e++]),
-                    (a[e >> 2] |= (128 | (63 & s)) << y[3 & e++]))
-                  : ((s =
-                      65536 +
-                      (((1023 & s) << 10) | (1023 & t.charCodeAt(++n)))),
-                    (a[e >> 2] |= (240 | (s >> 18)) << y[3 & e++]),
-                    (a[e >> 2] |= (128 | ((s >> 12) & 63)) << y[3 & e++]),
-                    (a[e >> 2] |= (128 | ((s >> 6) & 63)) << y[3 & e++]),
-                    (a[e >> 2] |= (128 | (63 & s)) << y[3 & e++]));
+              ? ((a[e >> 2] |= (192 | (s >> 6)) << y[3 & e++]),
+                (a[e >> 2] |= (128 | (63 & s)) << y[3 & e++]))
+              : s < 55296 || s >= 57344
+              ? ((a[e >> 2] |= (224 | (s >> 12)) << y[3 & e++]),
+                (a[e >> 2] |= (128 | ((s >> 6) & 63)) << y[3 & e++]),
+                (a[e >> 2] |= (128 | (63 & s)) << y[3 & e++]))
+              : ((s =
+                  65536 + (((1023 & s) << 10) | (1023 & t.charCodeAt(++n)))),
+                (a[e >> 2] |= (240 | (s >> 18)) << y[3 & e++]),
+                (a[e >> 2] |= (128 | ((s >> 12) & 63)) << y[3 & e++]),
+                (a[e >> 2] |= (128 | ((s >> 6) & 63)) << y[3 & e++]),
+                (a[e >> 2] |= (128 | (63 & s)) << y[3 & e++]));
         (this.lastByteIndex = e),
           (this.bytes += e - this.start),
           e >= 64
@@ -669,36 +667,39 @@ export class ApiRootClass {
   }
 
   // Метод отправки запроса
-  request(endPoint, whoIs, callback, errCallback) {
-    // (адрес метода // кто запрашивает(seeker,manager) // коллбэк функция // коллбэк функция ошибки запроса)
-    let url = `${configData.BASE_URL}${configData.API_PATH}${endPoint}`;
+  async request(endPoint, whoIs, callback, errCallback) { // (адрес метода // кто запрашивает(seeker,manager) // коллбэк функция // коллбэк функция ошибки запроса)
+    let url = `${configData.BASE_URL}${configData.API_PATH}${endPoint}`
     this.makeSignature(whoIs);
 
-    axios
-      .post(url, this, {
-        headers: {
-          //'whereFrom': 'js' // Данный заголовок запроса сообщает серверу о том, что запросы приходят с VUE платформы
-        },
-      })
-      .then((response) => {
-        // Обработка ответа сервера
-        if (response.data.success === "-1") {
-          // При success="-1" делаем разлогин пользователя
-          this.logout(whoIs);
-        } else {
-          // В любом другом случае вызываем коллбэк функцию, в которую передаём ответ сервера, и далее обрабатыввем его внутри этой функции
-          callback(response.data);
+    try {
+        let response = await fetch(url, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                //'whereFrom': 'js' // Данный заголовок запроса сообщает серверу о том, что запросы приходят с VUE платформы
+            },
+            body: JSON.stringify(this)
+        });
+
+        if (!response.ok) {
+            throw new Error(`Ошибка HTTP: ${response.status}`);
         }
-      })
-      .catch((err) => {
-        // Обработка ошибки запроса
+
+        let responseData = await response.json();
+
+        if (responseData.success === '-1') { // При success="-1" делаем разлогин пользователя
+            this.logout(whoIs);
+        } else { // В любом другом случае вызываем коллбэк функцию, в которую передаём ответ сервера, и далее обрабатыввем его внутри этой функции
+            callback(responseData);
+        }
+    } catch (err) {
         if (errCallback) {
-          errCallback(err);
+            errCallback(err);
         } else {
-          alert("Ошибка " + url + " " + err);
+            alert('Ошибка '+ url + ' ' + err);
         }
-      });
-  }
+    }
+}
 
   // Метод разлогина пользователя
   logout(whoIs) {
