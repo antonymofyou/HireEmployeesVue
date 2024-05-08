@@ -23,84 +23,84 @@
 
 <script setup>
 import { onMounted } from "vue"
+import { ApiRootClass } from "@/js/RootClasses.js"
+import { configData } from "@/js/configData.js";
+
 let button = null
-import { configData } from "../../js/configData.js";
-import { AuthGetVkAccessTokenFromCode, 
-  AuthGetVkAccessTokenFromCodeResp, 
-  AuthGetNasotkuToken, 
-  AuthGetNasotkuTokenResponse } from "./apiClassesAuth.js";
 
-//Получение кода из вк из гет параметров
-function getCodeFromGet() {
-    return getClassParams().get('code');
+//Получаем значение параметра code из адресной строки
+function getCodeParam() {
+    let params = new URLSearchParams(window.location.search)
+    return params.get('code')
+}
+//Проверяем, что параметр есть в адресной строке
+function checkCodeParam() {
+    return !!getCodeParam()
+}
+//Устанавливаем авторизацию в localstorage
+function setAuth(nasotkuToken, device, userType) {
+    localStorage.setItem(configData.MANAGER_TOK_NAME, nasotkuToken)
+    localStorage.setItem(configData.MANAGER_DEVICE_NAME, device)
+    localStorage.setItem('userType', userType)
+}
+//Получаем токен nasotku //:(токенВК, идентификатор пользователя)
+function getNasotkuTokenFromServer(vkToken, vkUserId) {
+    //Расширяем ApiRootClass новыми полями
+    class AttachVkAccountReq extends ApiRootClass {
+        vkToken = "";
+        vkUserId = "";
+    }
+    //Создаем экземпляр класса
+    let requestClass = new AttachVkAccountReq()
+    requestClass.vkToken = vkToken
+    requestClass.vkUserId = vkUserId
+    requestClass.request(
+        '/auth/get_nasotku_token.php',
+        requestClass,
+        function (response) {
+            setAuth(response.nasotkuToken, response.device, response.userType)
+        },
+        function (err) {
+            console.error(err)
+        }
+    )
 }
 
-//Общая функция для поиска query-параметров
-function getClassParams() {
-    return new URLSearchParams(window.location.search);
-}
+function getVkTokenFromServer() {
+    class AuthGetVkAccessTokenFromCode extends ApiRootClass {
+        code = ''; // code, пришедший от VK для получения access_token
+    }
+    let requestClass = new AuthGetVkAccessTokenFromCode()
+    requestClass.code = getCodeParam()
 
- 
-//Вызов необходимых функций в случае, если в гет параметрах есть code
-if (getCodeFromGet()) {
-    let code = getCodeFromGet()
-    getVkTokenFromServer(code)
-    //window.location.replace('/vacancies')
-}
-
-//Получение токена вк от сервера с помощью code 
-function getVkTokenFromServer(code)  {
-    const requestClass = new AuthGetVkAccessTokenFromCode()
-    const responseClass = new AuthGetVkAccessTokenFromCodeResp()
-
-    requestClass.code = code
-    console.log(requestClass)
     requestClass.request(
         '/auth/get_vk_access_token_from_code.php',
-        'first', 
-        function (response){//успешный результат
-          console.log(response)
-          getManagerTokenFromServer(response.vkToken, response.vkUserId);
+        requestClass,
+        function (response) {
+            getNasotkuTokenFromServer(response.vkToken, response.vkUserId)
         },
-        function (err){//неуспешный результат
-          alert(err);
+        function (err) {
+            console.error(err)
         }
-      );
+    )
+
 }
 
-//Получение nasotkuToken от сервера при помощи вк токена из функции getVkTokenFromServer
-function getManagerTokenFromServer(vkToken, vkUserId) {
-  const requestClass = new AuthGetNasotkuToken()
-  const responseClass = new AuthGetNasotkuTokenResponse()
-
-  requestClass.vkToken = vkToken
-  requestClass.vkUserId = vkUserId
-
-  requestClass.request(
-    '/auth/get_nasotku_token.php',
-    'first',
-    function(response) {
-      console.log(response)
-      localStorage.setItem(configData.MANAGER_DEVICE_NAME, response.device)
-      localStorage.setItem(configData.MANAGER_TOK_NAME, response.nasotkuToken)
-    },
-    function(err) {
-      console.log(err)
-    }
-  )
+if (checkCodeParam()) {
+    getVkTokenFromServer()
 }
 
 
 onMounted(() => {
-    
+
     const sources = [
-    'https://unpkg.com/@vkid/sdk@latest/dist-sdk/umd/index.js'
-  ]
-  sources.forEach(source => {
-    const script = document.createElement('script');
-    script.src = source;
-    document.head.appendChild(script);
-  });
+        'https://unpkg.com/@vkid/sdk@latest/dist-sdk/umd/index.js'
+    ]
+    sources.forEach(source => {
+        const script = document.createElement('script');
+        script.src = source;
+        document.head.appendChild(script);
+    });
     //После монтирования компонента находим кнопку и вешаем событие
     const button = document.getElementById('VKIDSDKAuthButton')
     console.log(button)
