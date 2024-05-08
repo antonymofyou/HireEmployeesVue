@@ -38,10 +38,9 @@ function checkCodeParam() {
     return !!getCodeParam()
 }
 //Устанавливаем авторизацию в localstorage
-function setAuth(nasotkuToken, device, userType) {
+function setAuth(nasotkuToken, device) {
     localStorage.setItem(configData.MANAGER_TOK_NAME, nasotkuToken)
     localStorage.setItem(configData.MANAGER_DEVICE_NAME, device)
-    localStorage.setItem('userType', userType)
 }
 //Получаем токен nasotku //:(токенВК, идентификатор пользователя)
 function getNasotkuTokenFromServer(vkToken, vkUserId) {
@@ -56,9 +55,10 @@ function getNasotkuTokenFromServer(vkToken, vkUserId) {
     requestClass.vkUserId = vkUserId
     requestClass.request(
         '/auth/get_nasotku_token.php',
-        requestClass,
+        'first',
         function (response) {
-            setAuth(response.nasotkuToken, response.device, response.userType)
+            console.log(response)
+            setAuth(response.nasotkuToken, response.device)
         },
         function (err) {
             console.error(err)
@@ -75,8 +75,9 @@ function getVkTokenFromServer() {
 
     requestClass.request(
         '/auth/get_vk_access_token_from_code.php',
-        requestClass,
+        "first",
         function (response) {
+            console.log(response)
             getNasotkuTokenFromServer(response.vkToken, response.vkUserId)
         },
         function (err) {
