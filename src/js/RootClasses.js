@@ -674,20 +674,23 @@ export class ApiRootClass {
     let url = `${configData.BASE_URL}${configData.API_PATH}${endPoint}`;
     this.makeSignature(whoIs);
 
-    axios
-      .post(url, this, {
-        headers: {
-          //'whereFrom': 'js' // Данный заголовок запроса сообщает серверу о том, что запросы приходят с VUE платформы
-        },
-      })
-      .then((response) => {
+    fetch(url, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        //'whereFrom': 'js', // Данный заголовок запроса сообщает серверу о том, что запросы приходят с VUE платформы
+      },
+      body: JSON.stringify(this)
+    })
+      .then((response) => response.json())
+      .then((data) => {
         // Обработка ответа сервера
-        if (response.data.success === "-1") {
+        if (data.success === "-1") {
           // При success="-1" делаем разлогин пользователя
           this.logout(whoIs);
         } else {
           // В любом другом случае вызываем коллбэк функцию, в которую передаём ответ сервера, и далее обрабатыввем его внутри этой функции
-          callback(response.data);
+          callback(data);
         }
       })
       .catch((err) => {
