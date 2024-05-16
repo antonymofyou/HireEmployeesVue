@@ -66,11 +66,8 @@ function getNasotkuTokenFromServer(vkToken, vkUserId) {
         '/auth/get_nasotku_token.php',
         'first',
         function (response) {
-            //console.log(response)
             if(response.success==='0'){
-                console.log(response)
                 errorMessage.value += ' '+response.message+'.'
-                setAuth(response.nasotkuToken, response.device)
             }
             else setAuth(response.nasotkuToken, response.device)
             
@@ -92,11 +89,9 @@ function getVkTokenFromServer() {
         '/auth/get_vk_access_token_from_code.php',
         "first",
         function (response) {
-            //console.log(response)
             if(response.success==='0'){
-                console.log(response)
                 errorMessage.value = response.message+'.'
-                getNasotkuTokenFromServer(response.vkToken, response.vkUserId)
+                setAuth(undefined, undefined)
             }
             else getNasotkuTokenFromServer(response.vkToken, response.vkUserId)
             
