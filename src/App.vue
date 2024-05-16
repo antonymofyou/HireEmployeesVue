@@ -10,11 +10,13 @@ import { RouterLink, RouterView } from "vue-router";
 </script>
 
 <style>
+:root{
+  --error-color:red;
+}
 * {
   font-family: Verdana, Tahoma, sans-serif;
 }
 body{
   margin: 0;
 }
-
 </style>
