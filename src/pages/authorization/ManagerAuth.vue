@@ -59,11 +59,11 @@ function getNasotkuTokenFromServer(vkToken, vkUserId) {
         '/auth/get_nasotku_token.php',
         'first',
         function (response) {
-            console.log(response)
+            
             setAuth(response.nasotkuToken, response.device)
         },
         function (err) {
-            console.error(err)
+            
         }
     )
 }
@@ -79,11 +79,11 @@ function getVkTokenFromServer() {
         '/auth/get_vk_access_token_from_code.php',
         "first",
         function (response) {
-            console.log(response)
+            
             getNasotkuTokenFromServer(response.vkToken, response.vkUserId)
         },
         function (err) {
-            console.error(err)
+            
         }
     )
 
@@ -106,7 +106,7 @@ onMounted(() => {
     });
     //После монтирования компонента находим кнопку и вешаем событие
     const button = document.getElementById('VKIDSDKAuthButton')
-    console.log(button)
+    
     if (button) {
         // Добавление обработчика клика по кнопке.
         button.onclick = () => {
