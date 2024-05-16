@@ -9,4 +9,12 @@ import { RouterLink, RouterView } from "vue-router";
 //import HelloWorld from './components/HelloWorld.vue'
 </script>
 
-<style scoped></style>
+<style>
+* {
+  font-family: Verdana, Tahoma, sans-serif;
+}
+body{
+  margin: 0;
+}
+
+</style>
