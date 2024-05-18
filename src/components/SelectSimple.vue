@@ -1,3 +1,19 @@
+<template>
+  <div class="select">
+    <label class="select__label" :for="id">{{ labelName }}: </label>
+    <select
+      class="select__field"
+      :id="id"
+      v-model="selectedOption"
+      @change="updateModelValue"
+    >
+      <option v-for="option in options" :value="option.value">
+        {{ option.text }}
+      </option>
+    </select>
+  </div>
+</template>
+
 <script setup>
 import { ref } from 'vue';
 
@@ -31,22 +47,6 @@ const updateModelValue = () => {
   emit('update:modelValue', selectedOption.value);
 };
 </script>
-
-<template>
-  <div class="select">
-    <label class="select__label" :for="id">{{ labelName }}: </label>
-    <select
-      class="select__field"
-      :id="id"
-      v-model="selectedOption"
-      @change="updateModelValue"
-    >
-      <option v-for="option in options" :value="option.value">
-        {{ option.text }}
-      </option>
-    </select>
-  </div>
-</template>
 
 <style scoped>
 .select {

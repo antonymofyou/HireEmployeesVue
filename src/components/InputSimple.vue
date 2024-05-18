@@ -1,3 +1,24 @@
+<template>
+  <div class="input">
+    <label
+      class="input__label" 
+      :class="labelClass"
+      :for="id"
+    >
+      {{ labelName }}: 
+    </label>
+    <component
+      :is="inputType"
+      class="input__field"
+      :class="inputClass"
+      :id="id"
+      v-bind="$attrs"
+      :value="inputValue"
+      @input="updateModelValue($event.target.value)"
+    />
+  </div>
+</template>
+
 <script setup>
 import { ref, computed } from 'vue';
 
@@ -62,28 +83,7 @@ const labelClass = computed(() => ({
 }))
 </script>
 
-<template>
-  <div class="input">
-    <label
-      class="input__label" 
-      :class="labelClass"
-      :for="id"
-    >
-      {{ labelName }}: 
-    </label>
-    <component
-      :is="inputType"
-      class="input__field"
-      :class="inputClass"
-      :id="id"
-      v-bind="$attrs"
-      :value="inputValue"
-      @input="updateModelValue($event.target.value)"
-    />
-  </div>
-</template>
-
-<style>
+<style scoped>
 .input__label {
   display: block;
   margin-bottom: 10px;

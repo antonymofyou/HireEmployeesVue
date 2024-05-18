@@ -1,3 +1,19 @@
+<template>
+  <div class="submit">
+    <button
+      class="submit__button"
+      :class="{ 'submit__button--loading': isActive }"
+      :disabled="isActive"
+      @click="onClick"
+    >
+      <span v-if="isActive" class="submit__spinner"></span>
+      <slot v-else></slot>
+    </button>
+    <span v-if="success === '1'" class="submit__success">{{ message }}</span>
+    <span v-else class="submit__warning">{{ message }}</span>
+  </div>
+</template>
+
 <script setup>
 import { ref } from 'vue';
 
@@ -45,23 +61,6 @@ const onClick = () => {
   });
 };
 </script>
-
-<template>
-  <div class="submit">
-    <button
-      class="submit__button"
-      :class="{ 'submit__button--loading': isActive }"
-      :disabled="isActive"
-      @click="onClick"
-    >
-      <span v-if="isActive" class="submit__spinner"></span>
-      <slot v-else></slot>
-    </button>
-    <span v-if="success === '1'" class="submit__success">{{ message }}</span>
-    <span v-else class="submit__warning">{{ message }}</span>
-  </div>
-</template>
-
 
 <style scoped>
 .submit {

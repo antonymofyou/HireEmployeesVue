@@ -1,6 +1,29 @@
+<template>
+  <div class="question">
+    <InputSimple
+      :modelValue="text"
+      @update:modelValue="updateText"
+      :id="id"
+      :labelName="labelName"
+      inputType="textarea"
+      size="medium"
+    />
+    <div class="question__footer">
+      <SelectSimple
+        :modelValue="isPublished"
+        @update:modelValue="updateIsPublished"
+        :id="`${id}_isPublished`"
+        :options="options"
+        :labelName="selectText"
+      />
+      <button type="button" class="question__remove-btn" title="Удалить вопрос" @click="remove(id)"></button>
+    </div>
+  </div>
+</template>
+
 <script setup>
-import InputComponent from '@/components/InputComponent.vue';
-import SelectComponent from '@/components/SelectComponent.vue';
+import InputSimple from '@/components/InputSimple.vue';
+import SelectSimple from '@/components/SelectSimple.vue';
 import { ref } from 'vue';
 
 /* id вопроса, текст вопроса, опции для измнения статуса публикации, статус публикации вопроса, 
@@ -54,29 +77,6 @@ const updateIsPublished = (newValue) => {
   emit('updateIsPublished', newValue);
 };
 </script>
-
-<template>
-  <div class="question">
-    <InputComponent
-      :modelValue="text"
-      @update:modelValue="updateText"
-      :id="id"
-      :labelName="labelName"
-      inputType="textarea"
-      size="medium"
-    />
-    <div class="question__footer">
-      <SelectComponent
-        :modelValue="isPublished"
-        @update:modelValue="updateIsPublished"
-        :id="`${id}_isPublished`"
-        :options="options"
-        :labelName="selectText"
-      />
-      <button type="button" class="question__remove-btn" title="Удалить вопрос" @click="remove(id)"></button>
-    </div>
-  </div>
-</template>
 
 <style scoped>
 .question__footer {

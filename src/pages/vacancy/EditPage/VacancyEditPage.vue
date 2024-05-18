@@ -1,16 +1,86 @@
+<template>
+  <main class="content vacancy-edit" v-if="isLoaded">
+    <section class="container">
+      <h2 class="vacancy-edit__title">{{ staticText.title }}</h2>
+
+      <div class="vacancy-edit__main">
+        <InputSimple
+          v-model="formData.name"
+          id="name"
+          labelName="Название вакансии"
+          inputType="input"
+          :isLabelBold=true
+          :isTextBold=true
+        />
+
+        <SelectSimple
+          v-model="formData.published"
+          id="isPublished"
+          :options="options"
+          labelName="Опубликована"
+          class="vacancy-edit__is-published-select"
+        />
+      </div>
+
+      <div class="vacancy-edit__description">
+        <InputSimple
+          v-model="formData.description"
+          id="description"
+          labelName="Описание вакансии"
+          inputType="textarea"
+          :isLabelBold=true
+          size="big"
+        />
+      </div>
+
+
+      <div class="vacancy-edit__questions-block">
+        <h2 class="vacancy-edit__questions-title">{{ staticText.questionsTitle }}</h2>
+        <transition-group name="list" tag="div" class="vacancy-edit__questions-list">
+          <VacancyQuestion
+            v-for="(question, index) in formData.questions"
+            :labelName="`Вопрос №${index + 1} (id${question.id})`"
+            :key="question.id"
+            :id="question.id"
+            :text="question.question"
+            :options="options"
+            :isPublished="question.published"
+            @updateText="updateQuestionText(index, $event)"
+            @updateIsPublished="updateIsPublished(index, $event)"
+            :remove="removeQuestion"
+            class="list-item"
+          />
+        </transition-group>
+        <button
+          class="vacancy-edit__add-btn"
+          type="button"
+          title="Добавить вопрос"
+          @click="addQuestion()"
+        ></button>
+      </div>
+
+      <SubmitButton class="vacancy-edit__save-btn" :submit-function="saveChanges">
+        {{ staticText.save }}
+      </SubmitButton>
+
+    </section>
+  </main>
+</template>
+
 <script setup>
-import InputComponent from '@/components/InputComponent.vue';
-import SelectComponent from '@/components/SelectComponent.vue';
-import VacancyQuestion from '@/components/VacancyQuestion.vue';
+import InputSimple from '@/components/InputSimple.vue';
+import SelectSimple from '@/components/SelectSimple.vue';
 import SubmitButton from '@/components/SubmitButton.vue';
+import VacancyQuestion from './components/VacancyQuestion.vue';
 import { ref, computed, onMounted } from 'vue';
 import { useRoute } from 'vue-router';
 
+import { getUserType } from '@/js/getUserType';
 import { VacanciesGetAllVacancyById, 
   VacanciesQuestionsCreateVacancyQuestion,
   VacanciesQuestionsDeleteVacancyQuestion,
   VacanciesUpdateVacancy
-} from '@/js/ApiClassesVacancyEdit';
+} from './js/ApiClassesVacancyEdit.js';
 
 // Индикатор загрузки компонента
 const isLoaded = ref(false);
@@ -38,19 +108,30 @@ const formData = ref({
 
 //Заполняем formData данными с сервера
 onMounted(() => {
-  getVacancyDataManager((vacResp) => {
-    const { vacancy, questions } = vacResp;
+  try {
+    const userType = getUserType();
 
-    formData.value = {
-      name: vacancy.name,
-      published: vacancy.published,
-      description: vacancy.description,
-      questions: questions,
-    };
+    if (userType !== 'manager') {
+      alert("Вы не менеджер");
+      throw new Error('Ошибка авторизации!');
+    }
 
-    // Загрузка завершена
-    isLoaded.value = true;
-  });
+    getVacancyDataManager((vacResp) => {
+      const { vacancy, questions } = vacResp;
+
+      formData.value = {
+        name: vacancy.name,
+        published: vacancy.published,
+        description: vacancy.description,
+        questions: questions,
+      };
+
+      // Загрузка завершена
+      isLoaded.value = true;
+    });
+  } catch (err) {
+    console.error('Произошла ошибка: ', err);
+  }
 });
 
 // Обновление текста вопроса
@@ -177,82 +258,16 @@ const saveChanges = (callback) => {
 };
 </script>
 
-<template>
-  <main class="content vacancy-edit" v-if="isLoaded">
-    <section class="container">
-      <h2>{{ staticText.title }}</h2>
-
-      <div class="vacancy-edit__main">
-        <InputComponent
-          v-model="formData.name"
-          id="name"
-          labelName="Название вакансии"
-          inputType="input"
-          :isLabelBold=true
-          :isTextBold=true
-        />
-
-        <SelectComponent
-          v-model="formData.published"
-          id="isPublished"
-          :options="options"
-          labelName="Опубликована"
-          class="vacancy-edit__is-published-select"
-        />
-      </div>
-
-      <div class="vacancy-edit__description">
-        <InputComponent
-          v-model="formData.description"
-          id="description"
-          labelName="Описание вакансии"
-          inputType="textarea"
-          :isLabelBold=true
-          size="big"
-        />
-      </div>
-
-
-      <div class="vacancy-edit__questions-block">
-        <h2 class="vacancy-edit__questions-title">{{ staticText.questionsTitle }}</h2>
-        <transition-group name="list" tag="div" class="vacancy-edit__questions-list">
-          <VacancyQuestion
-            v-for="(question, index) in formData.questions"
-            :labelName="`Вопрос №${index + 1} (id${question.id})`"
-            :key="question.id"
-            :id="question.id"
-            :text="question.question"
-            :options="options"
-            :isPublished="question.published"
-            @updateText="updateQuestionText(index, $event)"
-            @updateIsPublished="updateIsPublished(index, $event)"
-            :remove="removeQuestion"
-            class="list-item"
-          />
-        </transition-group>
-        <button
-          class="vacancy-edit__add-btn"
-          type="button"
-          title="Добавить вопрос"
-          @click="addQuestion()"
-        ></button>
-      </div>
-
-      <SubmitButton class="vacancy-edit__save-btn" :submit-function="saveChanges">
-        {{ staticText.save }}
-      </SubmitButton>
-
-    </section>
-  </main>
-</template>
-
-
 <style scoped>
 .container {
   display: flex;
   flex-direction: column;
   align-items: center;
   padding: 40px 250px 0;
+}
+
+.vacancy-edit__title {
+  text-align: center;
 }
 
 .vacancy-edit__main {
@@ -327,5 +342,17 @@ const saveChanges = (callback) => {
   top: 20px;
   right: 30px;
   z-index: 10;
+}
+
+@media screen and (max-width: 1200px) {
+  .container {
+    padding: 60px 60px;
+  }
+}
+
+@media screen and (max-width: 800px) {
+  .container {
+    padding: 30px 30px;
+  }
 }
 </style>
