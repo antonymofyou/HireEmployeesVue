@@ -30,7 +30,9 @@
 import { onMounted, ref } from "vue"
 import { ApiRootClass, MainRequestClass } from "@/js/RootClasses.js"
 import { configData } from "@/js/configData.js";
+import { useRouter } from "vue-router"
 
+const router = useRouter();
 let button = null
 let errorMessage = ref()
 
@@ -69,7 +71,10 @@ function getNasotkuTokenFromServer(vkToken, vkUserId) {
             if(response.success==='0'){
                 errorMessage.value += ' '+response.message+'.'
             }
-            else setAuth(response.nasotkuToken, response.device)
+            else {
+                setAuth(response.nasotkuToken, response.device)
+                router.push({name:'home'})
+            }
             
         },
         function (err) {
@@ -141,13 +146,38 @@ onMounted(() => {
 }
 
 .auth {
-    width: 100%;
     max-width: 400px;
     padding: 30px;
     margin-top: 20px;
     border-radius: 20px;
     box-shadow: 0px 0px 100px 32px rgba(0, 0, 0, 0.1);
 }
+
+@media(max-width:480px){
+    h1{
+        font-size:1.5em;
+    }
+    h2{
+        font-size:1em;
+    }
+    .auth{
+        width:80%;
+    }    
+};
+
+@media(min-width:480px){
+    h1{
+        font-size:1.8em;
+    }
+    h2{
+        font-size:1.3em;
+    }
+    .auth {
+        width: 100%
+    }
+};
+
+
 
 .auth__header {
     text-align: center;
