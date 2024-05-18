@@ -12,10 +12,7 @@
 </template>
 
 <script setup>
-
 const props = defineProps(['icon','buttonColor','textColor'])
-const icon = props.icon
-console.log(props.icon);
 </script>
 
 <style scoped>

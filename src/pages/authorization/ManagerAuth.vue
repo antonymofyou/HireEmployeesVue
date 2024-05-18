@@ -25,6 +25,7 @@ import { ApiRootClass } from "@/js/RootClasses.js"
 import { configData } from "@/js/configData.js";
 import { useRouter } from "vue-router"
 
+//Переменные для кастомизации кнопки
 const buttonColor = 'var(--VKColor)'
 const textColor = 'var(--white)'
 
@@ -102,6 +103,10 @@ function getVkTokenFromServer() {
     )
 
 }
+
+if ((localStorage.getItem(configData.MANAGER_TOK_NAME) !== null)
+    && (localStorage.getItem(configData.MANAGER_DEVICE_NAME) !== null))
+        router.push({name:'home'})
 
 if (checkCodeParam()) {
     getVkTokenFromServer()
