@@ -32,6 +32,7 @@ import { onMounted, ref } from "vue"
 import { useRouter } from "vue-router";
 import { MainRequestClass } from "../../../js/RootClasses.js";
 import { configData } from "@/js/configData";
+import { isManager } from "@/js/AuthFunctions";
 import VacancyCard from "./components/VacancyCard.vue"
 import Modal from '@/components/Modal.vue'
 import CustomButton from "@/components/CustomButton.vue";
@@ -42,8 +43,7 @@ const vacancies = ref([]);
 const modalButtonOkColor = "var(--light-violet)"
 const modalButtonOkTextColor = "var(--white)"
 
-if ((localStorage.getItem(configData.MANAGER_TOK_NAME) === null)
-  && (localStorage.getItem(configData.MANAGER_DEVICE_NAME) === null))
+if (!isManager())
   router.push({ name: 'home' })
 
 // получение всех вакансий
