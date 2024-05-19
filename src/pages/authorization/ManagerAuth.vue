@@ -5,7 +5,7 @@
             <h2 class="auth__header">Войдите как менеджер</h2>
             <CustomButton @click="authorizeVK()" :button-color="buttonColor" :text-color="textColor">
                 <template v-slot:icon>
-                    <img src="@/assets/icons/VKIcon.svg">
+                    <img src="./assets/icons/VKIcon.svg">
                 </template>
                 <template v-slot:text>
                     Войти через VK ID
