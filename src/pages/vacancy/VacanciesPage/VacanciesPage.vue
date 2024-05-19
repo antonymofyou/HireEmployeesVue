@@ -2,15 +2,29 @@
   <section class="vacancies">
     <h1 class="vacancies__title">Вакансии</h1>
     <div class="vacancies__box-vacancies">
-      <button
-          type="button"
-          class="vacancies__add-vacancy-btn"
-          title="Добавить вакансию"
-          ></button>
+      <button type="button" class="vacancies__add-vacancy-btn" title="Добавить вакансию"
+        @click="showModal = true"></button>
       <VacancyCard v-for="vacancy in vacancies" :key="vacancy.id" :vacancy="vacancy" />
     </div>
-    <div v-if="vacancies.length===0">На данный момент вакансий нет</div>
+    <div v-if="vacancies.length === 0">На данный момент вакансий нет</div>
   </section>
+  <Teleport to="body">
+    <modal :show="showModal" @close="showModal = false">
+      <template #header>
+        <h3>Создать новую вакансию?</h3>
+      </template>
+      <template #footer-control-buttons>
+        <CustomButton :button-color="modalButtonOkColor" :text-color="modalButtonOkTextColor" @click="createVacancy()">
+          <template #text>
+            Да
+          </template>
+        </CustomButton>
+      </template>
+      <template #close-button-text>
+        Нет
+      </template>
+    </modal>
+  </Teleport>
 </template>
 
 <script setup>
@@ -19,13 +33,18 @@ import { useRouter } from "vue-router";
 import { MainRequestClass } from "../../../js/RootClasses.js";
 import { configData } from "@/js/configData";
 import VacancyCard from "./components/VacancyCard.vue"
+import Modal from '@/components/Modal.vue'
+import CustomButton from "@/components/CustomButton.vue";
 
+const showModal = ref(false)
 const router = useRouter();
 const vacancies = ref([]);
+const modalButtonOkColor = "var(--light-violet)"
+const modalButtonOkTextColor = "var(--white)"
 
 if ((localStorage.getItem(configData.MANAGER_TOK_NAME) === null)
-    && (localStorage.getItem(configData.MANAGER_DEVICE_NAME) === null))
-        router.push({name:'home'})
+  && (localStorage.getItem(configData.MANAGER_DEVICE_NAME) === null))
+  router.push({ name: 'home' })
 
 // получение всех вакансий
 function getAllVacanciesManager() {
@@ -40,6 +59,26 @@ function getAllVacanciesManager() {
     },
     function (err) {//неуспешный результат
       alert(err);
+    }
+  );
+}
+
+function createVacancy() {
+  class VacanciesCreateVacancy extends MainRequestClass {
+    name = ''; // название вакансии (не обяз.)
+    description = ''; // описание вакансии (не обяз.)
+    published = ''; // статус публикации у вакансии (0/1) (не обяз., по умолчанию 0)
+  }
+
+  let requestClass = new VacanciesCreateVacancy();
+  
+  requestClass.request(
+    '/vacancies/create_vacancy.php',
+    'manager', 
+    function (response){//успешный результат
+      router.push({name:'create'})
+    },
+    function (err){//неуспешный результат
     }
   );
 }
@@ -69,7 +108,7 @@ onMounted(() => {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(min-content, 300px));
   justify-content: center;
-  gap: 20px;
+  gap: 15px;
   margin-top: 40px;
   width: 100%;
 }
@@ -87,13 +126,13 @@ onMounted(() => {
   transition: 0.3s;
   grid-column: 1 / 2;
   grid-row: 1 / 2;
-  
+
   padding: 0;
   border: 0;
   cursor: pointer;
 }
 
-.vacancies__add-vacancy-btn:hover{
+.vacancies__add-vacancy-btn:hover {
   background-color: var(--white)
 }
 

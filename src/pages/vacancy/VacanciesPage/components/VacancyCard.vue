@@ -8,13 +8,20 @@
                 </span>
             </div>
             <div class="vacancy__id">id: {{ vacancy.id }}</div>
-            <div class="vacancy__btn">Редактировать</div>
+            <div class="vacancy__btn" @click="goToEditVacancy()">Редактировать</div>
         </div>
     </article>
 </template>
 
 <script setup>
+import { useRouter } from 'vue-router';
+
+const router = useRouter();
 const props = defineProps(['vacancy']);
+
+function goToEditVacancy(){
+    router.push('/vacancy/'+props.vacancy.id)
+}
 </script>
 
 <style scoped>

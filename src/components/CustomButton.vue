@@ -12,7 +12,12 @@
 </template>
 
 <script setup>
-const props = defineProps(['icon','buttonColor','textColor'])
+import { onMounted, ref, useSlots } from 'vue';
+
+const props = defineProps(['buttonColor','textColor']);
+const slots = useSlots()
+let marginLeft='';
+slots.icon==undefined?marginLeft='0px':marginLeft='-28px'
 </script>
 
 <style scoped>
@@ -59,7 +64,7 @@ const props = defineProps(['icon','buttonColor','textColor'])
 }
 
 .VkIdWebSdk__button_icon+.VkIdWebSdk__button_text {
-    margin-left: -28px;
+    margin-left: v-bind(marginLeft);
 }
 
 .VkIdWebSdk__button_text {
