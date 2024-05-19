@@ -1,13 +1,14 @@
 <template>
     <article class="vacancy">
-        <div class="vacancy__box-info">
-            <div class="vacancy__name">{{ vacancy.name }}</div>
+        <div class="vacancy__name">{{ vacancy.name }}</div>
+        <div class="vacancy__description">
             <div class="vacancy__status">
                 Статус: <span class="vacancy__status-style">
                     {{ vacancy.published === '1' ? 'Открыто' : 'Закрыто' }}
                 </span>
             </div>
             <div class="vacancy__id">id: {{ vacancy.id }}</div>
+            <div class="vacancy__btn">Редактировать</div>
         </div>
     </article>
 </template>
@@ -20,7 +21,7 @@ const props = defineProps(['vacancy']);
 .vacancy {
     max-width: 300px;
     width: 100%;
-    padding: 40px 50px;
+    padding: 40px 30px 10px;
     height: 270px;
     box-sizing: border-box;
     background-color: #fff;
@@ -29,7 +30,6 @@ const props = defineProps(['vacancy']);
     display: flex;
     flex-direction: column;
     justify-content: space-between;
-    gap: 40px;
     word-wrap: break-word;
     overflow-y: auto;
 }
@@ -41,8 +41,15 @@ const props = defineProps(['vacancy']);
     font-weight: 600;
 }
 
+.vacancy__description{
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    gap:10px;
+}
+
 .vacancy__status {
-    margin: 7px 0 0 0;
+    margin: 0;
     font-size: 14px;
     line-height: 20px;
     font-weight: 400;
@@ -53,9 +60,23 @@ const props = defineProps(['vacancy']);
 }
 
 .vacancy__id {
-    margin: 15px 0 0 0;
+    margin: 0;
     font-size: 16px;
     line-height: 22px;
     font-weight: 400;
+}
+
+.vacancy__btn {
+  font-size: 14px;
+  line-height: 20px;
+  font-weight: 400;
+  background-color: var(--transparent-blue);
+  padding:5px;
+  border-radius:5px;
+  color: var(--white);
+  text-align: center;
+  padding: 5px;
+  border: 0;
+  cursor: pointer;
 }
 </style>

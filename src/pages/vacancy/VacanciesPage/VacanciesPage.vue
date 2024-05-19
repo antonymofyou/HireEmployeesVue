@@ -1,10 +1,15 @@
 <template>
   <section class="vacancies">
     <h1 class="vacancies__title">Вакансии</h1>
-    <div v-if="vacancies.length>0" class="vacancies__box-vacancies">
+    <div class="vacancies__box-vacancies">
+      <button
+          type="button"
+          class="vacancies__add-vacancy-btn"
+          title="Добавить вакансию"
+          ></button>
       <VacancyCard v-for="vacancy in vacancies" :key="vacancy.id" :vacancy="vacancy" />
     </div>
-    <div v-else>На данный момент вакансий нет</div>
+    <div v-if="vacancies.length===0">На данный момент вакансий нет</div>
   </section>
 </template>
 
@@ -30,6 +35,7 @@ function getAllVacanciesManager() {
     '/vacancies/get_all_vacancies.php',
     'manager',
     function (response) {//успешный результат
+      console.log(response)
       vacancies.value = response.vacancies;
     },
     function (err) {//неуспешный результат
@@ -66,5 +72,37 @@ onMounted(() => {
   gap: 20px;
   margin-top: 40px;
   width: 100%;
+}
+
+.vacancies__add-vacancy-btn {
+  max-width: 300px;
+  width: 100%;
+  height: 270px;
+  border-radius: 10px;
+  box-shadow: 0 1px 10px rgba(0, 0, 0, .3);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  background-color: var(--milk);
+  transition: 0.3s;
+  grid-column: 1 / 2;
+  grid-row: 1 / 2;
+  
+  padding: 0;
+  border: 0;
+  cursor: pointer;
+}
+
+.vacancies__add-vacancy-btn:hover{
+  background-color: var(--white)
+}
+
+.vacancies__add-vacancy-btn::before {
+  content: '';
+  opacity: .6;
+  background-image: url(./assets/icons/plus-icon.svg);
+  background-size: 100% 100%;
+  width: 30px;
+  height: 30px;
 }
 </style>
