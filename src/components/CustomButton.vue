@@ -12,11 +12,13 @@
 </template>
 
 <script setup>
-import { onMounted, ref, useSlots } from 'vue';
+import { useSlots } from 'vue';
 
 const props = defineProps(['buttonColor','textColor']);
+//Используем слоты для проверки, что иконка добавлена
 const slots = useSlots()
 let marginLeft='';
+//Меняем отступ, если иконка отсуствует
 slots.icon==undefined?marginLeft='0px':marginLeft='-28px'
 </script>
 

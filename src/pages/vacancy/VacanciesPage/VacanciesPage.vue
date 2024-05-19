@@ -37,12 +37,15 @@ import VacancyCard from "./components/VacancyCard.vue"
 import Modal from '@/components/Modal.vue'
 import CustomButton from "@/components/CustomButton.vue";
 
+//Флаг для модального окна
 const showModal = ref(false)
 const router = useRouter();
 const vacancies = ref([]);
+//Переменные для цвета кнопки "Да" в модальном окне
 const modalButtonOkColor = "var(--light-violet)"
 const modalButtonOkTextColor = "var(--white)"
 
+//Проверка авторизации пользователя
 if (!isManager())
   router.push({ name: 'home' })
 
@@ -54,7 +57,6 @@ function getAllVacanciesManager() {
     '/vacancies/get_all_vacancies.php',
     'manager',
     function (response) {//успешный результат
-      console.log(response)
       vacancies.value = response.vacancies;
     },
     function (err) {//неуспешный результат
@@ -63,6 +65,7 @@ function getAllVacanciesManager() {
   );
 }
 
+//Создание новой вакансии
 function createVacancy() {
   class VacanciesCreateVacancy extends MainRequestClass {
     name = ''; // название вакансии (не обяз.)
