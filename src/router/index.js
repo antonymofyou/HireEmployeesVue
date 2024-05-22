@@ -1,6 +1,5 @@
 import { createRouter, createWebHistory } from "vue-router";
 
-import Authorization from "@/pages/authorization/Authorization.vue";
 import ManagerAuth from "@/pages/authorization/ManagerAuth.vue";
 import HomePage from "@/pages/HomePage.vue";
 import VacanciesPage from "@/pages/vacancy/VacanciesPage.vue";
@@ -17,11 +16,6 @@ const router = createRouter({
       path: "/",
       name: "home",
       component: HomePage,
-    },
-    {
-      path: "/authorization",
-      name: "auth",
-      component: Authorization,
     },
     {
       path: "/auth",

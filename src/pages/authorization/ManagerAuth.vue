@@ -112,19 +112,6 @@ if (checkCodeParam()) {
     getVkTokenFromServer()
 }
 
-
-onMounted(() => {
-
-    const sources = [
-        'https://unpkg.com/@vkid/sdk@latest/dist-sdk/umd/index.js'
-    ]
-    sources.forEach(source => {
-        const script = document.createElement('script');
-        script.src = source;
-        document.head.appendChild(script);
-    });
-});
-
 </script>
 
 <style scoped>
