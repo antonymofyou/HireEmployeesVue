@@ -24,6 +24,7 @@ import { onMounted, ref } from "vue"
 import { ApiRootClass } from "@/js/RootClasses.js"
 import { configData } from "@/js/configData.js";
 import { useRouter } from "vue-router"
+import { isManager } from "@/js/AuthFunctions";
 
 //Переменные для кастомизации кнопки
 const buttonColor = 'var(--VKColor)'
@@ -104,26 +105,12 @@ function getVkTokenFromServer() {
 
 }
 
-if ((localStorage.getItem(configData.MANAGER_TOK_NAME) !== null)
-    && (localStorage.getItem(configData.MANAGER_DEVICE_NAME) !== null))
+if (isManager())
         router.push({name:'home'})
 
 if (checkCodeParam()) {
     getVkTokenFromServer()
 }
-
-
-onMounted(() => {
-
-    const sources = [
-        'https://unpkg.com/@vkid/sdk@latest/dist-sdk/umd/index.js'
-    ]
-    sources.forEach(source => {
-        const script = document.createElement('script');
-        script.src = source;
-        document.head.appendChild(script);
-    });
-});
 
 </script>
 
