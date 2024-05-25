@@ -10,18 +10,19 @@ import { RouterLink, RouterView } from "vue-router";
 </script>
 
 <style>
-:root{
-  --error-color:red;
+:root {
+  --error-color: red;
+  --success-color: #00d100;
   --white: #ffffff;
   --VKColor: #0077ff;
-  --milk:#ecede8;
-  --transparent-blue:rgba(0, 0, 252, .6);
-  --light-violet:#8D6DD7;
+  --milk: #ecede8;
+  --transparent-blue: #0000fc99;
+  --light-violet: #8d6dd7;
 }
 * {
   font-family: Verdana, Tahoma, sans-serif;
 }
-body{
+body {
   margin: 0;
 }
 </style>

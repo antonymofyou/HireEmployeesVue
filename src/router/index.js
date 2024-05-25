@@ -1,13 +1,12 @@
 import { createRouter, createWebHistory } from "vue-router";
 
-import ManagerAuth from "@/pages/authorization/ManagerAuth.vue";
 import HomePage from "@/pages/HomePage.vue";
-import VacanciesPage from "@/pages/vacancy/VacanciesPage/VacanciesPage.vue";
-import VacancyIdPage from "@/pages/vacancy/VacancyIdPage.vue";
-import VacancyCreate from "@/pages/vacancy/VacancyCreate.vue";
+import ManagerAuth from "@/pages/authorization/ManagerAuth.vue";
+import VacanciesList from "@/pages/vacancy/VacanciesPage/VacanciesList.vue";
+import VacancyIdPage from "@/pages/vacancy/VacanciesPage/components/VacancyIdPage.vue";
+import VacancyEditPage from "@/pages/vacancy/EditPage/VacancyEditPage.vue";
 import CandidatesList from "@/pages/candidates/CandidatesList.vue";
 import CandidatComments from "@/pages/candidates/CandidatComments.vue";
-import VacancyEditPage from "@/pages/vacancy/EditPage/VacancyEditPage.vue";
 
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
@@ -25,7 +24,7 @@ const router = createRouter({
     {
       path: "/vacancy",
       name: "vacancy",
-      component: VacanciesPage,
+      component: VacanciesList,
     },
     {
       path: "/vacancy/:id",
@@ -33,9 +32,9 @@ const router = createRouter({
       component: VacancyIdPage,
     },
     {
-      path: "/vacancy/create",
-      name: "create",
-      component: VacancyCreate,
+      path: "/vacancy_edit/:id",
+      name: "vacancy_edit",
+      component: VacancyEditPage,
     },
     {
       path: "/candidates",
@@ -46,12 +45,7 @@ const router = createRouter({
       path: "/canditate",
       name: "candidate",
       component: CandidatComments,
-    },
-    {
-      path: "/vacancy_edit/:id",
-      name: "vacancy_edit",
-      component: VacancyEditPage,
-    },
+    }
   ],
 });
 
