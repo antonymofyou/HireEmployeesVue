@@ -20,7 +20,7 @@
 
 <script setup>
 import CustomButton from "@/components/CustomButton.vue"
-import { onMounted, ref } from "vue"
+import { ref } from "vue"
 import { ApiRootClass } from "@/js/RootClasses.js"
 import { configData } from "@/js/configData.js";
 import { useRouter } from "vue-router"
