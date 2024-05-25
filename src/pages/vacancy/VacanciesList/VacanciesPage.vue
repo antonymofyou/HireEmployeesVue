@@ -56,12 +56,12 @@
       </template>
       <template #footer-control-buttons>
         <div class="modal__submit">
-          <SubmitButton
+          <ButtonSimple
             class="vacancy__add-create-btn"
             :submit-function="createVacancy"
           >
-            Создать
-          </SubmitButton>
+            <template v-slot:text>Создать</template>
+          </ButtonSimple>
         </div>
       </template>
     </Modal>
@@ -77,7 +77,7 @@ import VacancyCard from "./components/VacancyCard.vue";
 import Modal from "@/components/Modal.vue";
 import InputSimple from "@/components/InputSimple.vue";
 import SelectSimple from "@/components/SelectSimple.vue";
-import SubmitButton from "@/components/SubmitButton.vue";
+import ButtonSimple from "@/components/ButtonSimple.vue";
 
 //Флаг для модального окна
 const showModal = ref(false);

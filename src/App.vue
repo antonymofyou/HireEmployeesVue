@@ -18,9 +18,15 @@ import { RouterLink, RouterView } from "vue-router";
   --milk: #ecede8;
   --transparent-blue: #0000fc99;
   --light-violet: #8d6dd7;
+  --cornflower-blue: #6666fd;
+  --cinnabar: #e94141;
+  --link-water: #ece9f9;
+  --apple: #49bf49;
 }
 * {
   font-family: Verdana, Tahoma, sans-serif;
+
+  box-sizing: border-box;
 }
 body {
   margin: 0;
