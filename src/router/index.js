@@ -22,8 +22,8 @@ const router = createRouter({
       component: ManagerAuth,
     },
     {
-      path: "/vacancy",
-      name: "vacancy",
+      path: "/vacancies_list",
+      name: "vacanciesList",
       component: VacanciesList,
     },
     {
