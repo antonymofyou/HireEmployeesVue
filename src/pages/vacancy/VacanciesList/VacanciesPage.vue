@@ -41,8 +41,9 @@
         <SelectSimple
           v-model="formData.published"
           id="isPublished"
-          :options="options"
           labelName="Опубликована"
+          :options="options"
+          :model-value="0"
         />
 
         <InputSimple
@@ -55,7 +56,9 @@
         />
       </template>
       <template #footer-control-buttons>
-        <div class="modal__submit">
+        <div
+          :class="modalButtonActive ? 'modal__submit' : 'modal__submit-success'"
+        >
           <ButtonSimple
             class="vacancy__add-create-btn"
             :submit-function="createVacancy"
@@ -81,6 +84,9 @@ import ButtonSimple from "@/components/ButtonSimple.vue";
 
 //Флаг для модального окна
 const showModal = ref(false);
+
+//Флаг для кнопки submit модального окна
+const modalButtonActive = ref(true);
 
 // Данные вакансии: название, описание, статус публикации
 const formData = ref({
@@ -135,6 +141,16 @@ function createVacancy(callback) {
     function (response) {
       //успешный результат
       callback(response);
+
+      // установка флага для кнопки "создать вакансию"
+      modalButtonActive.value = false;
+
+      //закрытие модального окна и сброс флага кнопки "создать"
+      setTimeout(() => {
+        showModal.value = false;
+        modalButtonActive.value = true;
+      }, 3000);
+
       //получение нового списка вакансий
       getAllVacanciesManager();
     },
@@ -187,7 +203,7 @@ onMounted(() => {
   background-color: var(--milk);
   transition: 0.3s;
 
-  position: absolute;
+  position: fixed;
   top: 60px;
   right: 50px;
 
@@ -236,10 +252,17 @@ onMounted(() => {
   filter: opacity(0.6);
 }
 
-.modal__submit {
+.modal__submit,
+.modal__submit-success {
   width: 100%;
   display: flex;
   justify-content: center;
+}
+
+.modal__submit-success {
+  >>> .submit__button {
+    display: none;
+  }
 }
 
 .vacancy__add-create-btn {
@@ -247,6 +270,4 @@ onMounted(() => {
   align-items: center;
   gap: 10px;
 }
-
-
 </style>
