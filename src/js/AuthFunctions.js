@@ -19,3 +19,8 @@ export function isSeeker() {
 
   return (deviceIsCorrect && tokenIsCorrect) ? true : false;
 }
+
+export function logOutSeeker() {
+  localStorage.removeItem(configData.SEEKER_DEVICE_NAME);
+  localStorage.removeItem(configData.SEEKER_TOK_NAME);
+}
