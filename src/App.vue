@@ -14,9 +14,17 @@ import { RouterLink, RouterView } from "vue-router";
   --error-color:red;
   --white: #ffffff;
   --VKColor: #0077ff;
+
+  --cornflower-blue: #6666fd;
+  --cinnabar: #e94141;
+  --link-water: #ece9f9;
+  --apple: #49bf49;
+  --ronchi: #e7c950;
 }
 * {
   font-family: Verdana, Tahoma, sans-serif;
+
+  box-sizing: border-box;
 }
 body{
   margin: 0;
