@@ -1,36 +1,56 @@
 <template>
-  <div class="submit">
+  <div class="submit" :class="alignClass">
     <button
       class="submit__button"
-      :class="{ 'submit__button--loading': isActive }"
       :disabled="isActive"
       @click="onClick"
     >
       <span v-if="isActive" class="submit__spinner"></span>
-      <slot v-else></slot>
+      <div class="submit__icon" v-if="$slots['icon'] && !isActive" >
+        <slot name="icon"></slot>
+      </div>
+      <span class="submit__text" :class="{ 'submit__text--bold': isBold }">
+        <slot name="text"></slot>
+      </span>
     </button>
-    <span v-if="success === '1'" class="submit__success">{{ message }}</span>
-    <span v-else class="submit__warning">{{ message }}</span>
+    <span v-if="success === '1'" class="submit__result submit__result--success">{{ message }}</span>
+    <span v-else class="submit__result submit__result--warning">{{ message }}</span>
   </div>
 </template>
 
+
+
 <script setup>
-import { ref } from 'vue';
+import { ref, computed } from 'vue';
 
 // Функция события, текст успешного выполнения, текст ошибочного выполнения
 const props = defineProps({
+  textColor: {
+    type: String,
+    default: defaultTextColor,
+  },
+  buttonColor: {
+    type: String,
+    default: defaultButtonColor,
+  },
   submitFunction: {
     type: Function,
-    required: true,
   },
   successText: {
     type: String,
-    default: 'Данные успешно сохранены!',
+    default: '',
   },
   warningText: {
     type: String,
     default: 'Ошибка!',
   },
+  isBold: {
+    type: Boolean,
+  },
+  align: {
+    type: String,
+    default: 'start',
+  }
 });
 
 // Статус кнопки (активна - отправляется запрос, блокируется; не аквтивна - доступна для нажатия)
@@ -43,22 +63,34 @@ const success = ref('');
 // Сообщение для отображения после отправки
 const message = ref('');
 
+//Переменные для кастомизации кнопки
+const defaultButtonColor = 'var(--cornflower-blue)';
+const defaultTextColor = 'var(--white)';
+
+// Выравнивание расположения кнопки и сообщения о выполнении
+const alignClass = computed(() => ({
+  'submit--align-start': props.align === 'start',
+  'submit--align-end': props.align === 'end',
+}));
+
 const onClick = () => {
-  // Кнопка переводится в активное состояние выполнения
-  isActive.value = true;
+  // Если передана функция отправки, Вызываем её
+  if (props.submitFunction) {
+    props.submitFunction((response) => {
+      // Кнопка переводится в активное состояние выполнения
+      isActive.value = true;
 
-  // Вызываем функцию отправки
-  props.submitFunction((response) => {
-    // получаем данные о статусе и сообщении
-    const { message: resMessage, success: resSuccess } = response;
+      // получаем данные о статусе и сообщении
+      const { message: resMessage, success: resSuccess } = response;
 
-    // Заполняем данными из ответа
-    success.value = resSuccess;
-    message.value = resSuccess === '1' ? resMessage || props.successText : resMessage || props.warningText;
+      // Заполняем данными из ответа
+      success.value = resSuccess;
+      message.value = resSuccess === '1' ? resMessage || props.successText : resMessage || props.warningText;
 
-    // Кнопка переводится в неактивное состояние
-    isActive.value = false;
-  });
+      // Кнопка переводится в неактивное состояние
+      isActive.value = false;
+    });
+  };
 };
 </script>
 
@@ -66,70 +98,83 @@ const onClick = () => {
 .submit {
   display: flex;
   flex-direction: column;
+}
+
+.submit--align-start {
+  align-items: flex-start;
+}
+
+.submit--align-end {
   align-items: flex-end;
+  text-align: end;
 }
 
 .submit__button {
-	position: relative;
+  position: relative;
+
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 5px;
 
   padding: 10px 15px;
-
-	cursor: pointer;
-
-	border: none;
+  cursor: pointer;
+  border: none;
   border-radius: 10px;
-	outline: none;
-
-	color: white;
-  background-color: rgba(0, 0, 252, .6);
-
-	transition: all 0.5s ease-out;
+  outline: none;
+  color: v-bind(textColor);
+  background-color: v-bind(buttonColor);
+  transition: all 0.5s ease-out;
 }
 
 .submit__button:hover {
-  background-color: rgba(0, 0, 252, .75);
+  opacity: 0.8;
 }
 
 .submit__button:disabled {
-  background-color: rgba(0, 0, 252, .4);
-
+  opacity: 0.5;
   cursor: default;
 }
 
+.submit__icon {
+  width: 20px;
+  height: 20px;
+}
 
-.submit__button--loading {
-	border-radius: 50px;
-	width: 36px;
-  height: 36px;
+.submit__text {
+  line-height: 20px;
+}
+
+.submit__text--bold {
+  font-weight: 600;
 }
 
 .submit__spinner {
-  position: absolute;
-	top: 4px;
-  left: 4px;
-
-	display: block;
-	width: 28px;
-	height: 28px;
-  box-sizing: border-box;
-
-	background: transparent;
-	border-top: 4px solid white;
-	border-left: 4px solid transparent;
-	border-right: 4px solid transparent;
-	border-bottom: 4px solid transparent;
-	border-radius: 100%;
-	animation: spin 0.6s ease-out infinite;
+  display: inline-block;
+  width: 10px;
+  height: 10px;
+  border: 3px solid v-bind(textColor);
+  border-top: 3px solid transparent;
+  border-radius: 50%;
+  animation: spin 0.6s linear infinite;
+  margin-right: 5px;
 }
+
 @keyframes spin {
-	100% {transform: rotate(360deg)}
+  100% {
+    transform: rotate(360deg);
+  }
 }
 
-.submit__success {
-  color: rgb(73, 191, 73);
+.submit__result {
+  font-size: 12px;
 }
 
-.submit__warning {
-  color: rgb(233, 65, 65);
+.submit__result--success {
+  color: var(--apple);
+}
+
+.submit__result--warning {
+  color: var(--cinnabar);
 }
 </style>
