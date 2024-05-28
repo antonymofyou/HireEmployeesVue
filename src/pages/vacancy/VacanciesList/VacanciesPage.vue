@@ -1,12 +1,12 @@
 <template>
   <section class="vacancies">
     <h1 class="vacancies__title">Вакансии</h1>
-    <button
-      type="button"
+    <TopSquareButton
       class="vacancies__add-vacancy-btn"
-      title="Добавить вакансию"
       @click="showModal = true"
-    ></button>
+      :icon="plusIcon"
+    >
+    </TopSquareButton>
     <div class="vacancies__box-vacancies">
       <VacancyCard
         v-for="vacancy in vacancies"
@@ -16,8 +16,11 @@
     </div>
     <div v-if="vacancies.length === 0">На данный момент вакансий нет</div>
   </section>
+
+  <!-- Встраивание компонента Modal в DOM -->
   <Teleport to="body">
-    <Modal :show="showModal">
+    <!-- Открытие модального окна добавления вакансии -->
+    <Modal :show="showModal" v-if="!modalSuccess">
       <template #header>
         <div class="modal__close">
           <button class="modal__close-btn" @click="showModal = false">
@@ -28,7 +31,7 @@
         <h3>Создать новую вакансию?</h3>
       </template>
 
-      <template #body>
+      <template #body v-if="!modalSuccess">
         <InputSimple
           v-model="formData.name"
           id="name"
@@ -43,7 +46,7 @@
           id="isPublished"
           labelName="Опубликована"
           :options="options"
-          :model-value="0"
+          :model-value="options[0].value"
         />
 
         <InputSimple
@@ -56,14 +59,28 @@
         />
       </template>
       <template #footer-control-buttons>
-        <div
-          :class="modalButtonActive ? 'modal__submit' : 'modal__submit-success'"
-        >
+        <div class="modal__submit">
           <ButtonSimple
             class="vacancy__add-create-btn"
             :submit-function="createVacancy"
           >
             <template v-slot:text>Создать</template>
+          </ButtonSimple>
+        </div>
+      </template>
+    </Modal>
+    <!-- Открытие модального окна успешного создания вакансии -->
+    <Modal :show="modalSuccess">
+      <template #header>
+        <h3>Вакансия создана!</h3>
+      </template>
+      <template #body>
+        <div class="modal__success">
+          <ButtonSimple @click="modalSuccess = false">
+            <template v-slot:text>Закрыть</template>
+          </ButtonSimple>
+          <ButtonSimple @click="$router.push({ hash: vacancyId })">
+            <template v-slot:text>Перейти к вакансии</template>
           </ButtonSimple>
         </div>
       </template>
@@ -77,16 +94,24 @@ import { useRouter } from "vue-router";
 import { MainRequestClass } from "../../../js/RootClasses.js";
 import { isManager } from "@/js/AuthFunctions";
 import VacancyCard from "./components/VacancyCard.vue";
+import plusIcon from "./assets/icons/plus-icon.svg";
 import Modal from "@/components/Modal.vue";
 import InputSimple from "@/components/InputSimple.vue";
 import SelectSimple from "@/components/SelectSimple.vue";
 import ButtonSimple from "@/components/ButtonSimple.vue";
+import TopSquareButton from "@/components/TopSquareButton.vue";
 
-//Флаг для модального окна
+const router = useRouter();
+
+//Проверка авторизации пользователя
+if (!isManager()) router.push({ name: "home" });
+
+// Вакансии
+const vacancies = ref([]);
+
+//Флаги для модального окна
 const showModal = ref(false);
-
-//Флаг для кнопки submit модального окна
-const modalButtonActive = ref(true);
+const modalSuccess = ref(false);
 
 // Данные вакансии: название, описание, статус публикации
 const formData = ref({
@@ -95,17 +120,11 @@ const formData = ref({
   published: "",
 });
 
-// Опции для селектов
+// Опции для селекта
 const options = [
   { text: "Нет", value: "0" },
   { text: "Да", value: "1" },
 ];
-
-const router = useRouter();
-const vacancies = ref([]);
-
-//Проверка авторизации пользователя
-if (!isManager()) router.push({ name: "home" });
 
 // получение всех вакансий
 function getAllVacanciesManager() {
@@ -142,14 +161,14 @@ function createVacancy(callback) {
       //успешный результат
       callback(response);
 
-      // установка флага для кнопки "создать вакансию"
-      modalButtonActive.value = false;
+      //сброс формы
+      formData.value.name = "";
+      formData.value.description = "";
+      formData.value.published = "";
 
-      //закрытие модального окна и сброс флага кнопки "создать"
-      setTimeout(() => {
-        showModal.value = false;
-        modalButtonActive.value = true;
-      }, 3000);
+      //закрытие модального окна создания и открытие модального окна успешного создания"
+      showModal.value = false;
+      modalSuccess.value = true;
 
       //получение нового списка вакансий
       getAllVacanciesManager();
@@ -192,24 +211,9 @@ onMounted(() => {
 }
 
 .vacancies__add-vacancy-btn {
-  max-width: 40px;
-  width: 100%;
-  height: 40px;
-  border-radius: 10px;
-  box-shadow: 0 1px 10px rgba(0, 0, 0, 0.3);
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  background-color: var(--milk);
-  transition: 0.3s;
-
   position: fixed;
   top: 60px;
   right: 50px;
-
-  padding: 0;
-  border: 0;
-  cursor: pointer;
 }
 
 @media screen and (max-width: 426px) {
@@ -217,19 +221,6 @@ onMounted(() => {
     top: 20px;
     right: 20px;
   }
-}
-
-.vacancies__add-vacancy-btn:hover {
-  background-color: var(--white);
-}
-
-.vacancies__add-vacancy-btn::before {
-  content: "";
-  opacity: 0.6;
-  background-image: url(./assets/icons/plus-icon.svg);
-  background-size: 100% 100%;
-  width: 25px;
-  height: 25px;
 }
 
 .modal__close {
@@ -252,19 +243,17 @@ onMounted(() => {
   filter: opacity(0.6);
 }
 
-.modal__submit,
-.modal__submit-success {
+.modal__submit {
   width: 100%;
   display: flex;
   justify-content: center;
 }
 
-.modal__submit-success {
-  >>> .submit__button {
-    display: none;
-  }
+.modal__success {
+  display: flex;
+  align-items: center;
+  gap: 10px;
 }
-
 .vacancy__add-create-btn {
   display: flex;
   align-items: center;
