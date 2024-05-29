@@ -12,6 +12,7 @@
         v-for="vacancy in vacancies"
         :key="vacancy.id"
         :vacancy="vacancy"
+        :ref="`vacancy_${vacancy.id}`"
       />
     </div>
     <div v-if="vacancies.length === 0">На данный момент вакансий нет</div>
@@ -69,6 +70,7 @@
         </div>
       </template>
     </Modal>
+
     <!-- Открытие модального окна успешного создания вакансии -->
     <Modal :show="modalSuccess">
       <template #header>
@@ -79,7 +81,16 @@
           <ButtonSimple @click="modalSuccess = false">
             <template v-slot:text>Закрыть</template>
           </ButtonSimple>
-          <ButtonSimple @click="$router.push({ hash: vacancyId })">
+
+          <!-- Кнопка перехода к созданной вакансии и закрытия модального окна. Происходит обращение к глобальному объекту refs, который содержит ссылки на ref карточек vacancy_id. через $el(ключ DOM элемента).scrollIntoView происходит переход к созданной вакансии -->
+          <ButtonSimple
+            @click="
+              modalSuccess = false;
+              $refs[`vacancy_${createdVacancyId}`][0].$el.scrollIntoView({
+                behavior: 'smooth',
+              });
+            "
+          >
             <template v-slot:text>Перейти к вакансии</template>
           </ButtonSimple>
         </div>
@@ -91,7 +102,7 @@
 <script setup>
 import { onMounted, ref } from "vue";
 import { useRouter } from "vue-router";
-import { MainRequestClass } from "../../../js/RootClasses.js";
+import { MainRequestClass } from "@/js/RootClasses";
 import { isManager } from "@/js/AuthFunctions";
 import VacancyCard from "./components/VacancyCard.vue";
 import plusIcon from "./assets/icons/plus-icon.svg";
@@ -108,6 +119,9 @@ if (!isManager()) router.push({ name: "home" });
 
 // Вакансии
 const vacancies = ref([]);
+
+// Id созданной вакансии
+const createdVacancyId = ref(null);
 
 //Флаги для модального окна
 const showModal = ref(false);
@@ -161,6 +175,9 @@ function createVacancy(callback) {
       //успешный результат
       callback(response);
 
+      //получение Id созданной вакансии
+      createdVacancyId.value = response.vacancy.id;
+
       //сброс формы
       formData.value.name = "";
       formData.value.description = "";
@@ -180,6 +197,7 @@ function createVacancy(callback) {
   );
 }
 
+//Получение данных вакансии при загрузке страницы
 onMounted(() => {
   getAllVacanciesManager();
 });
