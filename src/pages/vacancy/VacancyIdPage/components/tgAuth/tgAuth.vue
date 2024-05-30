@@ -10,6 +10,7 @@
     />
     <p v-if="isError" class="tg-auth__warning">{{ errorMessage }}</p>
   </div>
+  <Notification v-if="errorMessage" :message="errorMessage"/>
 </template>
 
 <script setup>
@@ -18,6 +19,8 @@ import { telegramLoginTemp } from 'vue3-telegram-login';
 
 import { AuthGetCandidateToken } from "./js/ApiClassesTgAuth.js";
 import { configData } from '@/js/configData.js';
+
+import Notification from '@/components/ErrorNotification.vue';
 
 // Состояние авторизации для обновления
 const props = defineProps({
@@ -37,6 +40,18 @@ const staticText = {
   errorMessage: 'Произошла ошибка при авторизации',
 };
 
+// Уведомление об ошибке
+const errorMessage = ref('');
+
+const showErrorNotification = (message) => {
+  // Сброс в пустую строку для повторного отображения после закрытия
+  errorMessage.value = '';
+  // Асинхронная установка нового сообщения
+  setTimeout(() => {
+    errorMessage.value = message;
+  }, 0);
+};
+
 // Произошла ли ошибка
 const isError = ref(false);
 
@@ -53,11 +68,10 @@ const getCandidateToken = (user) => {
       localStorage.setItem(configData.SEEKER_DEVICE_NAME, response.device);
       emit('update:isLoggedIn', !props.isLoggedIn);
     },
-    function(err) { // неуспешный результат
-      isError.value = true;
-      throw new Error(err);
-    }
-  );
+    (err) => {  // неуспешный результат
+      console.error('Произошла ошибка при авторизации: ', err);
+      showErrorNotification(`Произошла ошибка при авторизации`);
+    });
 };
 </script>
 
