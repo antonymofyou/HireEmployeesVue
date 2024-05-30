@@ -74,6 +74,12 @@ export class ApiRootClass {
 
   // Метод отправки запроса
   async request(endPoint, whoIs, callback, errCallback) { // (адрес метода // кто запрашивает(seeker,manager) // коллбэк функция // коллбэк функция ошибки запроса)
+    if(!errCallback) {
+      errCallback = (err)=> { 
+        alert(err); 
+      }
+    }
+    
     let url = `${configData.BASE_URL}${configData.API_PATH}${endPoint}`
     this.makeSignature(whoIs);
 
@@ -88,7 +94,7 @@ export class ApiRootClass {
         });
 
         if (!response.ok) {
-            throw new Error(`Ошибка HTTP: ${response.status}`);
+            errCallback(`Ошибка HTTP: ${response.status}`);
         }
 
         let responseData = await response.json();
@@ -99,11 +105,7 @@ export class ApiRootClass {
             callback(responseData);
         }
     } catch (err) {
-        if (errCallback) {
-            errCallback(err);
-        } else {
-            alert('Ошибка '+ url + ' ' + err);
-        }
+        errCallback(err);
     }
   }
 
