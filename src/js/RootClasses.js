@@ -1,5 +1,6 @@
 import { sha256 } from "js-sha256";
 import { configData } from "./configData.js";
+import { logOut } from "./AuthFunctions.js";
 
 export class ApiRootClass {
   signature = "";
@@ -100,28 +101,13 @@ export class ApiRootClass {
         let responseData = await response.json();
 
         if (responseData.success === '-1') { // При success="-1" делаем разлогин пользователя
-            this.logout(whoIs);
+            logOut(whoIs);
         } else { // В любом другом случае вызываем коллбэк функцию, в которую передаём ответ сервера, и далее обрабатыввем его внутри этой функции
             callback(responseData);
         }
     } catch (err) {
         errCallback(err);
     }
-  }
-
-  // Метод разлогина пользователя
-  logout(whoIs) {
-    switch (whoIs) {
-      case "manager":
-        localStorage.removeItem(configData.MANAGER_TOK_NAME);
-        localStorage.removeItem(configData.MANAGER_DEVICE_NAME);
-        break;
-      case "seeker":
-        localStorage.removeItem(configData.SEEKER_TOK_NAME);
-        localStorage.removeItem(configData.SEEKER_DEVICE_NAME);
-        break;
-    }
-    //window.location.reload();
   }
 }
 

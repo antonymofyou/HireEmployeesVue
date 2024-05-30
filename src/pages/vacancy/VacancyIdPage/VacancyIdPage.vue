@@ -2,6 +2,25 @@
   <tgAuth v-if="!isLoggedIn" v-model:isLoggedIn="isLoggedIn"/>
   <main v-else-if="isLoaded" class="content vacancy">
     <header class="vacancy__header">
+      <div class="vacancy__auth">
+        <div class="vacancy__auth-info">
+          <img class="vacancy__tg-logo" src="./assets/icons/tg.svg">
+          <span class="vacancy__auth-nick">{{ candidateData.user.nickname }}</span>
+        </div>
+        <ButtonSimple
+          class="vacancy__header-btn"
+          :buttonColor="staticText.logOutButtonColor"
+          :submitFunction="logOutSeeker"
+        >
+          <template v-slot:text>
+            {{ staticText.logOut }}
+          </template>
+          <template v-slot:icon>
+            <img src="./assets/icons/logOut.svg">
+          </template>
+        </ButtonSimple>
+      </div>
+
       <ButtonSimple
         v-if="statusData.isAnswering"
         class="vacancy__header-btn"
@@ -25,25 +44,6 @@
           @cancel="handleCancelSave"
         />
       </Teleport>
-
-      <div class="vacancy__auth">
-        <div class="vacancy__auth-info">
-          <img class="vacancy__tg-logo" src="./assets/icons/tg.svg">
-          <span class="vacancy__auth-nick">{{ candidateData.user.nickname }}</span>
-        </div>
-        <ButtonSimple
-          class="vacancy__header-btn"
-          :buttonColor="staticText.logOutButtonColor"
-          :submitFunction="logOut"
-        >
-          <template v-slot:text>
-            {{ staticText.logOut }}
-          </template>
-          <template v-slot:icon>
-            <img src="./assets/icons/logOut.svg">
-          </template>
-        </ButtonSimple>
-      </div>
     </header>
     <section class="container">
       <h2 class="vacancy__title">{{ staticText.title }}</h2>
@@ -106,7 +106,7 @@ import { useRoute } from 'vue-router';
 
 import tgAuth from './components/tgAuth/tgAuth.vue';
 
-import { isSeeker, logOutSeeker } from "@/js/AuthFunctions";
+import { isSeeker, logOut } from "@/js/AuthFunctions";
 
 import { VacanciesGetVacancyById, 
     CandidatesSendCandidateAnswers, 
@@ -125,8 +125,8 @@ const isLoaded = ref(false);
 const isLoggedIn = ref(true);
 
 // Разлогин пользователя
-const logOut = () => {
-  logOutSeeker();
+const logOutSeeker = () => {
+  logOut('seeker');
   isLoggedIn.value = false;
 }
 
@@ -509,6 +509,7 @@ sendFunction.value = sendAnswersWrapper;
   z-index: 10;
 
   display: flex;
+  flex-direction: row-reverse;
   justify-content: space-between;
   width: 100%;
 

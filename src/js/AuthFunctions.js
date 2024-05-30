@@ -20,7 +20,16 @@ export function isSeeker() {
   return (deviceIsCorrect && tokenIsCorrect) ? true : false;
 }
 
-export function logOutSeeker() {
-  localStorage.removeItem(configData.SEEKER_DEVICE_NAME);
-  localStorage.removeItem(configData.SEEKER_TOK_NAME);
+export function logOut(whoIs) {
+  // Метод разлогина пользователя
+  switch (whoIs) {
+    case "manager":
+      localStorage.removeItem(configData.MANAGER_TOK_NAME);
+      localStorage.removeItem(configData.MANAGER_DEVICE_NAME);
+      break;
+    case "seeker":
+      localStorage.removeItem(configData.SEEKER_TOK_NAME);
+      localStorage.removeItem(configData.SEEKER_DEVICE_NAME);
+      break;
+  }
 }
