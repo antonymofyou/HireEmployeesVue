@@ -78,10 +78,6 @@
       </template>
       <template #body>
         <div class="modal__success">
-          <ButtonSimple @click="modalSuccess = false">
-            <template v-slot:text>Закрыть</template>
-          </ButtonSimple>
-
           <!-- Кнопка перехода к созданной вакансии и закрытия модального окна. Происходит обращение к глобальному объекту refs, который содержит ссылки на ref карточек vacancy_id. через $el(ключ DOM элемента).scrollIntoView происходит переход к созданной вакансии -->
           <ButtonSimple
             @click="
@@ -91,7 +87,17 @@
               });
             "
           >
-            <template v-slot:text>Перейти к вакансии</template>
+            <template v-slot:text>Закрыть</template>
+          </ButtonSimple>
+
+          <!-- Кнопка перехода к редактивроанию созданной вакансии -->
+          <ButtonSimple
+            @click="
+              modalSuccess = false;
+              $router.push(`/vacancy_edit/${createdVacancyId}`);
+            "
+          >
+            <template v-slot:text>Редактировать</template>
           </ButtonSimple>
         </div>
       </template>
