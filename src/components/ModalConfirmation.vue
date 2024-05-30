@@ -1,5 +1,4 @@
 <template>
-  <div>
   <Modal :show="show">
     <template v-slot:header>
       <h3 class="modal-confirmation__title">{{ title }}</h3>
@@ -35,9 +34,7 @@
         </ButtonSimple>
       </div>
     </template>
-
   </Modal>
-</div>
 </template>
 
 <script setup>
