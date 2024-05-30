@@ -90,7 +90,7 @@
             <template v-slot:text>Закрыть</template>
           </ButtonSimple>
 
-          <!-- Кнопка перехода к редактивроанию созданной вакансии -->
+          <!-- Кнопка перехода к редактированию созданной вакансии -->
           <ButtonSimple
             @click="
               modalSuccess = false;
