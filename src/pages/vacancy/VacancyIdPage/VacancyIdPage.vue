@@ -16,18 +16,20 @@
         </template>
       </ButtonSimple>
 
-      <ModalConfirmation
-        :show="showModalOnSave"
-        confirmText="Сохранить"
-        text="Вы уже сохранили ответы на другом устройстве. При повторном сохранении, предыдущие данные будут утеряны."
-        @confirm="handleConfirmSave"
-        @cancel="handleCancelSave"
-      />
+      <Teleport to="body">
+        <ModalConfirmation
+          :show="showModalOnSave"
+          confirmText="Сохранить"
+          text="Вы уже сохранили ответы на другом устройстве. При повторном сохранении, предыдущие данные будут утеряны."
+          @confirm="handleConfirmSave"
+          @cancel="handleCancelSave"
+        />
+      </Teleport>
 
       <div class="vacancy__auth">
         <div class="vacancy__auth-info">
           <img class="vacancy__tg-logo" src="./assets/icons/tg.svg">
-          <span class="vacancy__auth-nick">{{ userData.nickname }}</span>
+          <span class="vacancy__auth-nick">{{ candidateData.user.nickname }}</span>
         </div>
         <ButtonSimple
           class="vacancy__header-btn"
@@ -47,15 +49,15 @@
       <h2 class="vacancy__title">{{ staticText.title }}</h2>
 
       <div class="vacancy__info-block">
-        <h3>Вакансия: <span class="vacancy__name">{{ vacancyData.name }}</span></h3> 
+        <h3>Вакансия: <span class="vacancy__name">{{ candidateData.vacancy.name }}</span></h3> 
         <span class="vacancy__status" :class="statusData.class">{{ statusData.text }}</span>
-        <div class="vacancy__description" v-html="vacancyData.description"></div>
+        <div class="vacancy__description" v-html="candidateData.vacancy.description"></div>
       </div>
 
       <div class="vacancy__questions-block">
         <div class="vacancy__questions-list">
           <InputSimple
-            :modelValue="userData.fio"
+            :modelValue="candidateData.user.fio"
             @update:modelValue="updateUserFIO"
             id="fio"
             labelName="ФИО"
@@ -65,7 +67,7 @@
             :disabled="!statusData.isAnswering"
           />
           <VacancyIdQuestion
-            v-for="(question, index) in vacancyData.questions"
+            v-for="(question, index) in candidateData.vacancy.questions"
             :title="`Вопрос №${index + 1}`"
             :key="question.id"
             :question="question.question"
@@ -95,6 +97,7 @@
       />
     </section>
   </main>
+  <Notification v-if="errorMessage" :message="errorMessage"/>
 </template>
 
 <script setup>
@@ -113,6 +116,7 @@ import VacancyIdQuestion from './components/VacancyIdQuestion.vue';
 import ButtonSimple from '@/components/ButtonSimple.vue';
 import InputSimple from '@/components/InputSimple.vue';
 import ModalConfirmation from '@/components/ModalConfirmation.vue';
+import Notification from '@/components/ErrorNotification.vue';
 
 // Индикатор загрузки компонента
 const isLoaded = ref(false);
@@ -130,6 +134,18 @@ const logOut = () => {
 const route = useRoute();
 const vacancyId = ref(route.params.id);
 
+// Уведомление об ошибке
+const errorMessage = ref('');
+
+const showErrorNotification = (message) => {
+  // Сброс в пустую строку для повторного отображения после закрытия
+  errorMessage.value = '';
+  // Асинхронная установка нового сообщения
+  setTimeout(() => {
+    errorMessage.value = message;
+  }, 0);
+};
+
 // Статичный текст страницы
 const staticText = {
   title: 'Заполнение вакансии',
@@ -139,79 +155,95 @@ const staticText = {
   logOutButtonColor: 'var(--cinnabar)',
 };
 
-// Никнейм и ФИО пользователя
-const userData = ref({
-  nickname:'',
-  fio: '',
+// Данные кандидата: пользователь (ник, фио) и вакансия (название, опиание, статус, вопросы)
+const candidateData = ref({
+  user: {
+    nickname:'',
+    fio: '',
+  },
+  vacancy: {
+    name: '',
+    description: '',
+    status: '',
+    questions: [],
+  }
 });
 
 // Обновление ФИО пользователя
 const updateUserFIO = (value) => {
-  userData.value.fio = value;
+  candidateData.value.user.fio = value;
 };
 
-// Данные вакансии: название, описание, статус публикации, массив вопросов
-const vacancyData = ref({
-  name: '',
-  description: '',
-  status: '',
-  questions: [],
-});
-
 //Заполнение vacancyData данными с сервера
-const fetchData = () => {
-  try {
-    getVacancyDataSeeker((vacResp) => {
-      const { vacancy, questions } = vacResp;
+const fetchCandidateData = (callback) => {
+  getVacancyDataSeeker((vacResp) => {
+    // Получение данных о вакансии (название, описание, статус) и массива вопросов
+    const { vacancy, questions } = vacResp;
 
-      // Если у вопроса еще нет ответа, то добавляем в качестве ответа пустую строку
-      questions.forEach(item => {
-        if (!item.hasOwnProperty('answer')) {
-          item['answer'] = '';
-        }
-      });
+    getCandidateFromServer((userResp) => {
+      // Получение ника и ФИО пользователя
+      const { tgNickname, fio } = userResp;
 
-      vacancyData.value = {
-        name: vacancy.name,
-        description: vacancy.description,
-        status: vacancy.status,
-        questions: questions,
+      // Формирование объекта со всеми данными по кандидату (вакансии и пользователе)
+      const dataFromServer = {
+        user: {
+          nickname: tgNickname,
+          fio: fio,
+        },
+        vacancy: {
+          name: vacancy.name,
+          description: vacancy.description,
+          status: vacancy.status,
+          questions: questions,
+        },
       };
 
-      // Получение ника и ФИО пользователя
-      getCandidateFromServer((data) => {
-        userData.value = {
-          nickname: data.tgNickname,
-          fio: data.fio,
-        };
-
-        // Загрузка завершена
-        isLoaded.value = true;
-      });
-    });
-  } catch (err) {
+        // успешно, передаём данные
+        callback(dataFromServer);
+      },
+      // если возникла ошибка
+      (err) => {
+        console.error('Произошла ошибка при загрузке данных: ', err);
+        showErrorNotification(`Произошла ошибка при загрузке данных вакансии`);
+      }
+    );
+  },
+  // если возникла ошибка
+  (err) => {
     console.error('Произошла ошибка при загрузке данных: ', err);
-  }
-}
+    showErrorNotification(`Произошла ошибка при загрузке данных вакансии`);
+  });
+};
+
+// Обновление данных кандидата (вакансии и пользователя)
+const updateCandidateData = (dataFromServer) => {
+  candidateData.value = dataFromServer;
+};
 
 // Наблюдение за изменением isLoggedIn и загрузка данных при необходимости
 watch(isLoggedIn, (newValue) => {
   if (newValue) {
-    fetchData();
+    fetchCandidateData((dataFromServer) => updateCandidateData(dataFromServer));
   }
 });
 
-// Проверка состояния при монтировании компонента
+// Проверка состояния при монтировании компонента и загрузка данных при необходимости
 onMounted(() => {
   isLoggedIn.value = isSeeker();
+
   if (isLoggedIn.value) {
-    fetchData();
+    fetchCandidateData((dataFromServer) => {
+      updateCandidateData(dataFromServer);
+
+      // Загрузка завершена
+      isLoaded.value = true;
+    });
   }
 });
 
 //Объект с текстом и классом статуса вакансии
 const statusData = computed(() => {
-  if (vacancyData.value.status === 'ANSWERING') {
+  if (candidateData.value.vacancy.status === 'ANSWERING') {
     return {
       isAnswering: true,
       text: 'Вы еще не откликались на эту вакансию',
@@ -227,103 +259,108 @@ const statusData = computed(() => {
 
 // Обновление текста ответа
 const updateAnswerText = (index, value) => {
-  vacancyData.value.questions[index].answer = value;
+  candidateData.value.vacancy.questions[index].answer = value;
 };
 
 // Получение данных по текущей вакансии с сервера
-const getVacancyDataSeeker = (callback) => {
-    let requestClass = new VacanciesGetVacancyById()
-    requestClass.vacancyId = vacancyId.value;
+const getVacancyDataSeeker = (successCallback, errorCallback) => {
+  let requestClass = new VacanciesGetVacancyById()
+  requestClass.vacancyId = vacancyId.value;
 
-    requestClass.request(
-      '/vacancies/get_vacancy_by_id.php',
-      'seeker',
-      function(response) {  // успешный результат
-        callback(response);
-      },
-      function(err) { // неуспешный результат
-        throw new Error(err);
-      }
-    );
+  requestClass.request(
+    '/vacancies/get_vacancy_by_id.php',
+    'seeker',
+    function(response) {  // успешный результат
+      successCallback(response);
+    },
+    function(err) { // неуспешный результат
+      errorCallback(err);
+    }
+  );
 };
 
 // Получение информации о текущем пользователе
-const getCandidateFromServer = (callback) => {
-    let requestClass = new CandidatesGetCandidateUserInfo();
+const getCandidateFromServer = (successCallback, errorCallback) => {
+  let requestClass = new CandidatesGetCandidateUserInfo();
 
-    requestClass.request(
-        '/candidates/get_candidate_user_info.php',
-        'seeker',
-        function(response) { // успешный результат
-            callback(response.userInfo);
-        },
-        function(err) { // неуспешный результат
-            throw new Error(err);
-        }
-    )
-}
+  requestClass.request(
+    '/candidates/get_candidate_user_info.php',
+    'seeker',
+    function(response) { // успешный результат
+      successCallback(response.userInfo);
+    },
+    function(err) { // неуспешный результат
+      errorCallback(err);
+    }
+  );
+};
 
-// Формирование объекта с ответами для отправки изменений на сервер
-const formattedAnswers = computed(() => {
-  // Фильтрация заполненных ответов
-  return vacancyData.value.questions.filter((item) => item.answer !== '').reduce((acc, item) => {
+//Отправка ФИО и никнейма пользователя на сервер
+const sendUserData = (successCallback, errorCallback) => {
+  let requestClass = new CandidatesGetCandidateUserInfo();
+  requestClass.userInfo = candidateData.value.user;
+
+  requestClass.request(
+    '/candidates/get_candidate_user_info.php',
+    'seeker',
+    function(response) { // успешный результат
+      successCallback(response);
+    },
+    function(err) { // неуспешный результат
+      errorCallback(err);
+    }
+  );
+};
+
+// Функция для сохранения и отправки ответов
+const submitAnswers = ({ force = 0, finish = 0 } = {}, successCallback, errorCallback) => {
+  // Формирование объекта с ответами для отправки изменений на сервер
+  const formattedAnswers = candidateData.value.vacancy.questions.reduce((acc, item) => {
     // Ключ - id вопроса, значение - ответ
     acc[item.id] = item.answer; 
     return acc;
   }, {});
-});
 
-// Логика сохранения ответов
+  // Сначала отправляем данные пользователя, а затем через колбэк ответы пользователя
+  sendUserData(() => {
+    let requestClass = new CandidatesSendCandidateAnswers();
+    requestClass.answers = formattedAnswers;
+    requestClass.forceSave = force;
+    requestClass.finish = finish;
 
-// Сохранение ответов без изменения статуса вакансии на SENT
-const saveAnswers = (callback) => {
-  let requestClass = new CandidatesSendCandidateAnswers();
-  requestClass.answers = formattedAnswers.value;
-  requestClass.finish = 0;
-  requestClass.request(
-    '/candidates/send_candidate_answers.php',
-    'seeker',
-    function(response) { // успешный результат
-      callback(response);
-    },
-    function(err) { // неуспешный результат
-      throw new Error(err);
-    }
-  );
-};
-
-// Принудительное сохранение ответов без изменения статуса вакансии на SENT
-const forceSaveAnswers = (callback) => {
-  let requestClass = new CandidatesSendCandidateAnswers();
-  requestClass.answers = formattedAnswers.value;
-  requestClass.forceSave = 1;
-  requestClass.finish = 0;
-  requestClass.request(
-    '/candidates/send_candidate_answers.php',
-    'seeker',
-    function(response) { // успешный результат
-      callback(response);
-    },
-    function(err) { // неуспешный результат
-      throw new Error(err);
-    }
-  );
+    requestClass.request(
+      '/candidates/send_candidate_answers.php',
+      'seeker',
+      function(response) { // успешный результат
+        successCallback(response);
+      },
+      function(err) { // неуспешный результат
+        errorCallback(err);
+      }
+    );
+  });
 };
 
 // Показ модального окна при сохранении
 const showModalOnSave = ref(false);
-// Текущая функция сохранения
+// Текущая функция сохранения для дальнейшего вызова при подтверждении
 const currentSaveFunction = ref(null);
 
 // Обработка сохранения с проверкой пришедшего success
-const saveAnswersWrapper = (callback) => {
-  saveAnswers((response) => {
+const saveAnswersWrapper = (successCallback, errorCallback) => {
+  submitAnswers({ force: 0, finish: 0 }, (response) => {
+    // Если уже было сохранение на другом устройстве, функция принудительного сохранения становится текущей
     if (response.success === "22") {
       showModalOnSave.value = true;
-      currentSaveFunction.value = () => forceSaveAnswers(callback);
+      currentSaveFunction.value = () => submitAnswers({ force: 1, finish: 0 }, successCallback, errorCallback);
     } else {
-      callback(response);
+      successCallback(response);
     }
+  },
+  // если возникла ошибка
+  (err) => {
+    console.error('Произошла ошибка при сохранении данных: ', err);
+    showErrorNotification(`Произошла ошибка: не удалось сохранить данные`);
   });
 };
 
@@ -342,71 +379,38 @@ const handleCancelSave = () => {
 };
 
 // Обработчик нажатия кнопки сохранения
-const handleSave = (callback) => {
-  saveAnswersWrapper(callback);
+const handleSave = (successCallback, errorCallback) => {
+  saveAnswersWrapper(successCallback, errorCallback);
 };
 
 // Изначально функция сохранения — это saveAnswersWrapper
 currentSaveFunction.value = saveAnswersWrapper;
 
-// Логика отправки ответов
-
+// Показ модального окна при отправке
+const showModalOnSend = ref(false);
+// Функция отправки для дальнейшего вызова при подтверждении
 const sendFunction = ref(null);
 
 const sendAnswersWrapper = (callback) => {
   showModalOnSend.value = true;
-  sendFunction.value = () => sendUserDataAndAnswers(callback);
+  sendFunction.value = () => sendAnswers(callback);
 };
 
 //Отправка ответов на сервер и изменение статуса вакансии на SENT
 const sendAnswers = (callback) => {
-  let requestClass = new CandidatesSendCandidateAnswers()
-  requestClass.answers = formattedAnswers.value;
-  requestClass.finish = 1;
-  requestClass.request(
-    '/candidates/send_candidate_answers.php',
-    'seeker',
-    function(response) { // успешный результат
-      callback(response);
-    },
-    function(err) { // неуспешный результат
-      throw new Error(err);
+  submitAnswers({ finish: 1 }, (response) => {
+    callback(response);
+    // Если данные успешно отправились, обновляем данные кандидата
+    if (response.success === '1') {
+      fetchCandidateData((dataFromServer) => updateCandidateData(dataFromServer));
     }
-  );
-};
-
-//Отправка ФИО и никнейма пользователя на сервер
-const sendUserData = (callback) => {
-  let requestClass = new CandidatesGetCandidateUserInfo();
-  requestClass.userInfo = userData.value;
-
-  requestClass.request(
-    '/candidates/get_candidate_user_info.php',
-    'seeker',
-    function(response) { // успешный результат
-        callback(response);
-    },
-    function(err) { // неуспешный результат
-        throw new Error(err);
-    }
-  );
-};
-
-const sendUserDataAndAnswers = (callback) => {
-  sendUserData(() => {
-    sendAnswers((response) => {
-      callback(response);
-
-      // Если ответы успешно отправлены, отправляем запрос на получение обновленных данных для отображения на странице
-      if (response.success === '1') {
-        fetchData();
-      }
-    });
+  },
+  // если возникла ошибка
+  (err) => {
+    console.error('Произошла ошибка при отправке данных: ', err);
+    showErrorNotification(`Произошла ошибка: не удалось отправить данные`);
   });
 };
-
-// Показ модального окна при отправке
-const showModalOnSend = ref(false);
 
 // Обработчик подтверждения отправки в модальном окне
 const handleConfirmSend = () => {
@@ -463,7 +467,7 @@ sendFunction.value = sendAnswersWrapper;
 .vacancy__questions-list {
   display: flex;
   flex-direction: column;
-  gap: 25px;
+  gap: 35px;
   width: 100%;
 }
 
