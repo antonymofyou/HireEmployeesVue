@@ -39,15 +39,14 @@ function goToEditVacancy() {
   display: flex;
   flex-direction: column;
   justify-content: space-between;
-  word-wrap: break-word;
-  overflow-y: auto;
-  scrollbar-width: thin;
 }
 
 .vacancy__name {
+  overflow: hidden;
+  word-wrap: break-word;
   margin: 0;
-  font-size: 17px;
-  line-height: 32px;
+  font-size: 15px;
+  line-height: 28px;
   font-weight: 600;
 }
 
