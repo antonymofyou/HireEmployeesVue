@@ -1,39 +1,33 @@
 <template>
   <tgAuth v-if="!isLoggedIn" v-model:isLoggedIn="isLoggedIn"/>
-  <main v-else-if="isLoaded" class="content vacancy">
+  <main v-else-if="isLoaded && isSuccessfulLoad" class="content vacancy">
     <header class="vacancy__header">
       <div class="vacancy__auth">
         <div class="vacancy__auth-info">
           <img class="vacancy__tg-logo" src="./assets/icons/tg.svg">
           <span class="vacancy__auth-nick">{{ candidateData.user.nickname }}</span>
         </div>
-        <ButtonSimple
+        <ButtonMain
           class="vacancy__header-btn"
-          :buttonColor="staticText.logOutButtonColor"
-          :submitFunction="logOutSeeker"
+          :buttonColor="'var(--cinnabar)'"
+          @click="logOutSeeker"
         >
-          <template v-slot:text>
-            {{ staticText.logOut }}
-          </template>
-          <template v-slot:icon>
-            <img src="./assets/icons/logOut.svg">
-          </template>
-        </ButtonSimple>
+          <template v-slot:text>Выйти</template>
+          <template v-slot:icon><img src="./assets/icons/logOut.svg"></template>
+        </ButtonMain>
       </div>
 
-      <ButtonSimple
+      <ButtonMain
         v-if="statusData.isAnswering"
         class="vacancy__header-btn"
-        :submitFunction="handleSave"
-        successText="Данные успешно сохранены!"
+        :isActive="isActiveSave"
+        :success="successSave"
+        :message="messageSave"
+        @click="handleSave"
       >
-        <template v-slot:text>
-          {{ staticText.save }}
-        </template>
-        <template v-slot:icon>
-          <img src="@/assets/icons/save.svg">
-        </template>
-      </ButtonSimple>
+        <template v-slot:text>Сохранить</template>
+        <template v-slot:icon><img src="@/assets/icons/save.svg"></template>
+      </ButtonMain>
 
       <Teleport to="body">
         <ModalConfirmation
@@ -46,7 +40,7 @@
       </Teleport>
     </header>
     <section class="container">
-      <h2 class="vacancy__title">{{ staticText.title }}</h2>
+      <h2 class="vacancy__title">Заполнение вакансии</h2>
 
       <div class="vacancy__info-block">
         <h3>Вакансия: <span class="vacancy__name">{{ candidateData.vacancy.name }}</span></h3> 
@@ -79,14 +73,18 @@
         </div>
       </div>
 
-      <ButtonSimple v-if="statusData.isAnswering" class="vacancy__send-btn" :align="'end'" :submitFunction="handleSend">
-        <template v-slot:text>
-          {{ staticText.send }}
-        </template>
-        <template v-slot:icon>
-          <img src="@/assets/icons/send.svg">
-        </template>
-      </ButtonSimple>
+      <ButtonMain
+        v-if="statusData.isAnswering"
+        class="vacancy__send-btn"
+        :isActive="isActiveSend"
+        :success="successSend"
+        :message="messageSend"
+        :align="'end'"
+        @click="handleSend"
+      >
+        <template v-slot:text>Отправить</template>
+        <template v-slot:icon><img src="@/assets/icons/send.svg"></template>
+      </ButtonMain>
 
       <ModalConfirmation
         :show="showModalOnSend"
@@ -97,6 +95,9 @@
       />
     </section>
   </main>
+  <div v-else-if="!isLoaded" class="spinner">
+    <SpinnerMain/>
+  </div>
   <Notification v-if="errorMessage" :message="errorMessage"/>
 </template>
 
@@ -113,13 +114,17 @@ import { VacanciesGetVacancyById,
     CandidatesGetCandidateUserInfo,
     } from "./js/ApiClassesVacancy.js"; 
 import VacancyIdQuestion from './components/VacancyIdQuestion.vue';
-import ButtonSimple from '@/components/ButtonSimple.vue';
+import ButtonMain from '@/components/ButtonMain.vue';
 import InputSimple from '@/components/InputSimple.vue';
 import ModalConfirmation from '@/components/ModalConfirmation.vue';
 import Notification from '@/components/ErrorNotification.vue';
+import SpinnerMain from '@/components/SpinnerMain.vue';
 
 // Индикатор загрузки компонента
 const isLoaded = ref(false);
+
+// Индикатор успешной загрузки
+const isSuccessfulLoad = ref(false);
 
 // Состояние авторизации
 const isLoggedIn = ref(true);
@@ -137,22 +142,9 @@ const vacancyId = ref(route.params.id);
 // Уведомление об ошибке
 const errorMessage = ref('');
 
+// Показ уведомления об ошибке
 const showErrorNotification = (message) => {
-  // Сброс в пустую строку для повторного отображения после закрытия
-  errorMessage.value = '';
-  // Асинхронная установка нового сообщения
-  setTimeout(() => {
-    errorMessage.value = message;
-  }, 0);
-};
-
-// Статичный текст страницы
-const staticText = {
-  title: 'Заполнение вакансии',
-  logOut: 'Выйти',
-  save: 'Сохранить',
-  send: 'Отправить',
-  logOutButtonColor: 'var(--cinnabar)',
+  errorMessage.value = message;
 };
 
 // Данные кандидата: пользователь (ник, фио) и вакансия (название, опиание, статус, вопросы)
@@ -203,6 +195,8 @@ const fetchCandidateData = (callback) => {
       },
       // если возникла ошибка
       (err) => {
+        // Загрузка завершена неуспешно
+        isLoaded.value = true;
         console.error('Произошла ошибка при загрузке данных: ', err);
         showErrorNotification(`Произошла ошибка при загрузке данных вакансии`);
       }
@@ -210,6 +204,8 @@ const fetchCandidateData = (callback) => {
   },
   // если возникла ошибка
   (err) => {
+    // Загрузка завершена неуспешно
+    isLoaded.value = true;
     console.error('Произошла ошибка при загрузке данных: ', err);
     showErrorNotification(`Произошла ошибка при загрузке данных вакансии`);
   });
@@ -235,8 +231,9 @@ onMounted(() => {
     fetchCandidateData((dataFromServer) => {
       updateCandidateData(dataFromServer);
 
-      // Загрузка завершена
+      // Загрузка завершена успешно
       isLoaded.value = true;
+      isSuccessfulLoad.value = true;
     });
   }
 });
@@ -279,7 +276,7 @@ const getVacancyDataSeeker = (successCallback, errorCallback) => {
   );
 };
 
-// Получение информации о текущем пользователе
+// Получение информации о текущем пользователе с сервера
 const getCandidateFromServer = (successCallback, errorCallback) => {
   let requestClass = new CandidatesGetCandidateUserInfo();
 
@@ -341,98 +338,153 @@ const submitAnswers = ({ force = 0, finish = 0 } = {}, successCallback, errorCal
   });
 };
 
+/*  Логика сохранения ответов  */
 // Показ модального окна при сохранении
 const showModalOnSave = ref(false);
-// Текущая функция сохранения для дальнейшего вызова при подтверждении
-const currentSaveFunction = ref(null);
+// Статус кнопки сохранения
+const isActiveSave = ref(false);
+// Статус выполнения сохранения
+const successSave = ref('');
+// Сообщение после выполнения сохранения
+const messageSave = ref('');
 
-// Обработка сохранения с проверкой пришедшего success
-const saveAnswersWrapper = (successCallback, errorCallback) => {
+// При изменении полей сообщение о сохранении стирается
+watch(candidateData, (newValue) => {
+  if (newValue) {
+    messageSave.value = '';
+  }
+}, { deep: true });
+
+
+// Обработка возникновения ошибки при запросе
+const errorHandleSave = (errMessage) => {
+  successSave.value = '0';
+  messageSave.value = `Ошибка: ${errMessage}`;
+  isActiveSave.value = false;
+}
+
+// Обработчик нажатия кнопки сохранения
+const handleSave = () => {
+  isActiveSave.value = true;
   submitAnswers({ force: 0, finish: 0 }, (response) => {
-    // Если уже было сохранение на другом устройстве, функция принудительного сохранения становится текущей
-    if (response.success === "22") {
+    // получаем данные о статусе и сообщении
+    const { message: resMessage, success: resSuccess } = response;
+
+    // Если уже было сохранение на другом устройстве, октрываем модальное окно с подтверждение
+    if (resSuccess === "22") {
+      isActiveSave.value = false;
       showModalOnSave.value = true;
-      currentSaveFunction.value = () => submitAnswers({ force: 1, finish: 0 }, successCallback, errorCallback);
     } else {
-      successCallback(response);
+        // Заполняем данными из ответа
+        successSave.value = resSuccess;
+        if (resSuccess === '1') {
+           messageSave.value = 'Данные успешно сохранены';
+        } else {
+          messageSave.value = resMessage;
+        }
+
+        // Кнопка переводится в неактивное состояние
+        isActiveSave.value = false;
     }
   },
-  // если возникла ошибка
+  // Возникла ошибка
   (err) => {
-    console.error('Произошла ошибка при сохранении данных: ', err);
-    showErrorNotification(`Произошла ошибка: не удалось сохранить данные`);
+    errorHandleSave(err);
   });
 };
 
 // Обработчик подтверждения сохранения в модальном окне
 const handleConfirmSave = () => {
+  isActiveSave.value = true;
   showModalOnSave.value = false;
   // Вызов принудительного сохранения
-  if (currentSaveFunction.value) {
-    currentSaveFunction.value();
-  }
+  submitAnswers({ force: 1, finish: 0 },
+    // успешный резльутат
+    (response) => {
+      // получаем данные о статусе и сообщении
+      const { message: resMessage, success: resSuccess } = response;
+
+      // Заполняем данными из ответа
+      successSave.value = resSuccess;
+      if (resSuccess === '1') {
+        messageSave.value = 'Данные успешно сохранены';
+      } else {
+        messageSave.value = resMessage;
+      }
+
+      // Кнопка переводится в неактивное состояние
+      isActiveSave.value = false;
+    },
+    // Возникла ошибка
+    (err) => {
+      errorHandleSave(err);
+  });
 };
 
 // Обработчик отмены сохранения в модальном окне
 const handleCancelSave = () => {
   showModalOnSave.value = false;
+  
+  // Закрытие модального окна подтвреждения отправки, если отменено сохранение
+  showModalOnSend.value = false;
 };
 
-// Обработчик нажатия кнопки сохранения
-const handleSave = (successCallback, errorCallback) => {
-  saveAnswersWrapper(successCallback, errorCallback);
-};
-
-// Изначально функция сохранения — это saveAnswersWrapper
-currentSaveFunction.value = saveAnswersWrapper;
-
+/*  Логика отправки ответов  */
 // Показ модального окна при отправке
 const showModalOnSend = ref(false);
-// Функция отправки для дальнейшего вызова при подтверждении
-const sendFunction = ref(null);
+// Статус кнопки отправки
+const isActiveSend = ref(false);
+// Статус выполнения отправки
+const successSend = ref('');
+// Сообщение после выполнения отправки
+const messageSend = ref('');
 
-const sendAnswersWrapper = (callback) => {
+// Обработка возникновения ошибки при запросе
+const errorHandleSend = (errMessage) => {
+  successSend.value = '0';
+  messageSend.value = `Ошибка: ${errMessage}`;
+  isActiveSend.value = false;
+}
+
+// Обработчик нажатия кнопки сохранения
+const handleSend = () => {
+  // Перед отправкой - сохраняем данные
+  handleSave();
+
   showModalOnSend.value = true;
-  sendFunction.value = () => sendAnswers(callback);
-};
-
-//Отправка ответов на сервер и изменение статуса вакансии на SENT
-const sendAnswers = (callback) => {
-  submitAnswers({ finish: 1 }, (response) => {
-    callback(response);
-    // Если данные успешно отправились, обновляем данные кандидата
-    if (response.success === '1') {
-      fetchCandidateData((dataFromServer) => updateCandidateData(dataFromServer));
-    }
-  },
-  // если возникла ошибка
-  (err) => {
-    console.error('Произошла ошибка при отправке данных: ', err);
-    showErrorNotification(`Произошла ошибка: не удалось отправить данные`);
-  });
 };
 
 // Обработчик подтверждения отправки в модальном окне
 const handleConfirmSend = () => {
+  isActiveSend.value = true;
   showModalOnSend.value = false;
-  // Вызов отправки
-  if (sendFunction.value) {
-    sendFunction.value();
-  }
+
+  //Отправка ответов на сервер и изменение статуса вакансии на SENT
+  submitAnswers({ finish: 1 },
+    // успешный резльутат
+    (response) => {
+      // получаем данные о статусе и сообщении
+      const { message: resMessage, success: resSuccess } = response;
+      // Если данные успешно отправились, обновляем данные кандидата
+      if (resSuccess === '1') {
+        fetchCandidateData((dataFromServer) => updateCandidateData(dataFromServer));
+      } else {
+        errorHandleSend(resMessage)
+      }
+
+      // Кнопка переводится в неактивное состояние
+      isActiveSend.value = false;
+    },
+    // если возникла ошибка
+    (err) => {
+      errorHandleSend(err);
+    });
 };
 
 // Обработчик отмены отправки в модальном окне
 const handleCancelSend = () => {
   showModalOnSend.value = false;
 };
-
-// Обработчик нажатия кнопки отправки
-const handleSend = (callback) => {
-  sendAnswersWrapper(callback);
-};
-
-// Изначально функция отправки — это sendAnswersWrapper
-sendFunction.value = sendAnswersWrapper;
 </script>
 
 <style>
@@ -441,6 +493,15 @@ sendFunction.value = sendAnswersWrapper;
   flex-direction: column;
 
   padding: 100px 250px 40px;
+}
+
+.spinner {
+  max-width: 25vh;
+  height: 100vh;
+  
+  display: flex;
+  align-items: center;
+  margin: 0 auto;
 }
 
 .vacancy__title {
