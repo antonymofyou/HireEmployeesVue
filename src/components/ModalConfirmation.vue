@@ -47,37 +47,48 @@ import ButtonSimple from '@/components/ButtonSimple.vue';
 const props = defineProps({
   show: {
     type: Boolean,
+    default: false,
+    required: true,
   },
   title: {
     type: String,
     default: 'Подтверждение',
+    required: false,
   },
   text: {
     type: String,
+    default: '',
+    required: false,
   },
   confirmText: {
     type: String,
     default: 'Отправить',
+    required: false,
   },
   cancelText: {
     type: String,
     default: 'Отмена',
+    required: false,
   },
   confirmTextColor: {
     type: String,
     default: defaultConfirmTextColor,
+    required: false,
   },
   confirmButtonColor: {
     type: String,
     default: defaultConfirmBtnColor,
+    required: false,
   },
   cancelTextColor: {
     type: String,
     default: defaultCancelTextColor,
+    required: false,
   },
   cancelButtonColor: {
     type: String,
     default: defaultCancelBtnColor,
+    required: false,
   },
 });
 

@@ -1,16 +1,15 @@
 <template>
   <div class="tg-auth">
-    <h1 class="tg-auth__title">{{ staticText.title }}</h1>
-    <p class="tg-auth__message">{{ staticText.message }}</p>
+    <h1 class="tg-auth__title">Авторизация</h1>
+    <p class="tg-auth__message">Войдите через Telegram, чтобы заполнить анкету</p>
     <telegram-login-temp
       mode="callback"
       telegram-login="bt21hirebot"
       @callback="getCandidateToken"
       class="tg-auth__button"
     />
-    <p v-if="isError" class="tg-auth__warning">{{ errorMessage }}</p>
+    <p v-if="isError" class="tg-auth__warning">Ошибка: {{ errorMessage }}</p>
   </div>
-  <Notification v-if="errorMessage" :message="errorMessage"/>
 </template>
 
 <script setup>
@@ -20,12 +19,11 @@ import { telegramLoginTemp } from 'vue3-telegram-login';
 import { AuthGetCandidateToken } from "./js/ApiClassesTgAuth.js";
 import { configData } from '@/js/configData.js';
 
-import Notification from '@/components/ErrorNotification.vue';
-
 // Состояние авторизации для обновления
 const props = defineProps({
   isLoggedIn: {
     type: Boolean,
+    default: false,
     required: true,
   },
 });
@@ -33,24 +31,8 @@ const props = defineProps({
 // Обновление данных об авторизации в родителе
 const emit = defineEmits(['update:isLoggedIn']);
 
-// Статичный текст компонента
-const staticText = {
-  title: 'Авторизация',
-  message: 'Войдите через Telegram, чтобы заполнить анкету',
-  errorMessage: 'Произошла ошибка при авторизации',
-};
-
 // Уведомление об ошибке
 const errorMessage = ref('');
-
-const showErrorNotification = (message) => {
-  // Сброс в пустую строку для повторного отображения после закрытия
-  errorMessage.value = '';
-  // Асинхронная установка нового сообщения
-  setTimeout(() => {
-    errorMessage.value = message;
-  }, 0);
-};
 
 // Произошла ли ошибка
 const isError = ref(false);
@@ -69,8 +51,8 @@ const getCandidateToken = (user) => {
       emit('update:isLoggedIn', !props.isLoggedIn);
     },
     (err) => {  // неуспешный результат
-      console.error('Произошла ошибка при авторизации: ', err);
-      showErrorNotification(`Произошла ошибка при авторизации`);
+      isError.value = true;
+      errorMessage.value = err;
     });
 };
 </script>

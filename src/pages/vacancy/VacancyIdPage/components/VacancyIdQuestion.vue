@@ -22,18 +22,23 @@ import { ref } from 'vue';
 const props = defineProps({
     title: {
       type: String,
+      default: '',
+      required: true,
     },
     question: {
       type: String,
+      default: '',
       required: true,
     },
     answer: {
       type: String,
       default: '',
+      required: true,
     },
     disabled: {
       type: Boolean,
       default: false,
+      required: true,
     }
 });
 
