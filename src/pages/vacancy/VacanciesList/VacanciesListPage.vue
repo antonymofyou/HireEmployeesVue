@@ -106,22 +106,22 @@
 </template>
 
 <script setup>
-import { onMounted, ref } from "vue";
-import { useRouter } from "vue-router";
-import { MainRequestClass } from "@/js/RootClasses";
-import { isManager } from "@/js/AuthFunctions";
-import VacancyCard from "./components/VacancyCard.vue";
-import plusIcon from "./assets/icons/plus-icon.svg";
-import Modal from "@/components/Modal.vue";
-import InputSimple from "@/components/InputSimple.vue";
-import SelectSimple from "@/components/SelectSimple.vue";
-import ButtonSimple from "@/components/ButtonSimple.vue";
-import TopSquareButton from "@/components/TopSquareButton.vue";
+import { onMounted, ref } from 'vue';
+import { useRouter } from 'vue-router';
+import { MainRequestClass } from '@/js/RootClasses';
+import { isManager } from '@/js/AuthFunctions';
+import VacancyCard from './components/VacancyCard.vue';
+import plusIcon from './assets/icons/plus-icon.svg';
+import Modal from '@/components/Modal.vue';
+import InputSimple from '@/components/InputSimple.vue';
+import SelectSimple from '@/components/SelectSimple.vue';
+import ButtonSimple from '@/components/ButtonSimple.vue';
+import TopSquareButton from '@/components/TopSquareButton.vue';
 
 const router = useRouter();
 
 //Проверка авторизации пользователя
-if (!isManager()) router.push({ name: "home" });
+if (!isManager()) router.push({ name: 'home' });
 
 // Вакансии
 const vacancies = ref([]);
@@ -135,15 +135,15 @@ const modalSuccess = ref(false);
 
 // Данные вакансии: название, описание, статус публикации
 const formData = ref({
-  name: "",
-  description: "",
-  published: "",
+  name: '',
+  description: '',
+  published: '',
 });
 
 // Опции для селекта
 const options = [
-  { text: "Нет", value: "0" },
-  { text: "Да", value: "1" },
+  { text: 'Нет', value: '0' },
+  { text: 'Да', value: '1' },
 ];
 
 // получение всех вакансий
@@ -151,8 +151,8 @@ function getAllVacanciesManager() {
   let requestClass = new MainRequestClass();
 
   requestClass.request(
-    "/vacancies/get_all_vacancies.php",
-    "manager",
+    '/vacancies/get_all_vacancies.php',
+    'manager',
     function (response) {
       //успешный результат
       vacancies.value = response.vacancies;
@@ -175,8 +175,8 @@ function createVacancy(callback) {
   let requestClass = new VacanciesCreateVacancy();
 
   requestClass.request(
-    "/vacancies/create_vacancy.php",
-    "manager",
+    '/vacancies/create_vacancy.php',
+    'manager',
     function (response) {
       //успешный результат
       callback(response);
@@ -185,9 +185,9 @@ function createVacancy(callback) {
       createdVacancyId.value = response.vacancy.id;
 
       //сброс формы
-      formData.value.name = "";
-      formData.value.description = "";
-      formData.value.published = "";
+      formData.value.name = '';
+      formData.value.description = '';
+      formData.value.published = '';
 
       //закрытие модального окна создания и открытие модального окна успешного создания"
       showModal.value = false;

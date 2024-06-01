@@ -21,7 +21,7 @@
 </template>
 
 <script setup>
-import { ref, computed } from "vue";
+import { ref, computed } from 'vue';
 
 // Цвет текста, цвет кнопки, функция события, текст успешного выполнения,
 // текст ошибочного выполнения, жирный шрифт текст, выравнивание ошибки
@@ -39,18 +39,18 @@ const props = defineProps({
   },
   successText: {
     type: String,
-    default: "",
+    default: '',
   },
   warningText: {
     type: String,
-    default: "Ошибка!",
+    default: 'Ошибка!',
   },
   isBold: {
     type: Boolean,
   },
   align: {
     type: String,
-    default: "start",
+    default: 'start',
   },
 });
 
@@ -59,19 +59,19 @@ const props = defineProps({
 const isActive = ref(false);
 
 // Статус выполнения (1 - success, 0 - warning)
-const success = ref("");
+const success = ref('');
 
 // Сообщение для отображения после отправки
-const message = ref("");
+const message = ref('');
 
 //Переменные для кастомизации кнопки
-const defaultButtonColor = "var(--cornflower-blue)";
-const defaultTextColor = "var(--white)";
+const defaultButtonColor = 'var(--cornflower-blue)';
+const defaultTextColor = 'var(--white)';
 
 // Выравнивание расположения кнопки и сообщения о выполнении
 const alignClass = computed(() => ({
-  "submit--align-start": props.align === "start",
-  "submit--align-end": props.align === "end",
+  'submit--align-start': props.align === 'start',
+  'submit--align-end': props.align === 'end',
 }));
 
 const onClick = () => {
@@ -87,7 +87,7 @@ const onClick = () => {
       // Заполняем данными из ответа
       success.value = resSuccess;
       message.value =
-        resSuccess === "1"
+        resSuccess === '1'
           ? resMessage || props.successText
           : resMessage || props.warningText;
 

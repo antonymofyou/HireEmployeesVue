@@ -2,25 +2,27 @@
   <article class="candidate">
     <div class="candidate__box">
       <div class="candidate__description">
-        <div class="candidate__name"><b>ФИО:</b> {{ candidate.fio }}</div>
-        <div class="candidate__date">
+        <span class="candidate__name"><b>ФИО:</b> {{ candidate.fio }}</span>
+        <span class="candidate__date">
           <b>Дата отклика: </b>{{ candidate.createdAt }}
-        </div>
+        </span>
       </div>
-      <div class="candidate__status">{{ candidate.status }}</div>
+      <span class="candidate__status">{{ candidate.status }}</span>
       <div class="candidate__btn">
-        <div class="candidate__id"><b>ID:</b> {{ candidate.candidateId }}</div>
-        <ButtonSimple @click="goToCandidate()">
+        <span class="candidate__id"
+          ><b>ID:</b> {{ candidate.candidateId }}</span
+        >
+        <ButtonMain @click="goToCandidate()">
           <template v-slot:text>&#9658;</template>
-        </ButtonSimple>
+        </ButtonMain>
       </div>
     </div>
   </article>
 </template>
 
 <script setup>
-import { useRouter } from "vue-router";
-import ButtonSimple from "@/components/ButtonSimple.vue";
+import { useRouter } from 'vue-router';
+import ButtonMain from '@/components/ButtonMain.vue';
 
 const router = useRouter();
 
@@ -34,7 +36,10 @@ const props = defineProps({
 
 //Переход на карточку кандидата
 function goToCandidate() {
-  router.push({ name: "candidate", query: { candidateId: props.candidate.candidateId } });
+  router.push({
+    name: 'candidate',
+    query: { candidateId: props.candidate.candidateId },
+  });
 }
 </script>
 
@@ -84,4 +89,13 @@ function goToCandidate() {
   justify-content: space-between;
 }
 
+@media screen and (max-width: 560px) {
+  .candidate__box {
+    flex-direction: column;
+    gap: 5px;
+  }
+  .candidate__btn {
+    flex-direction: row;
+  }
+}
 </style>

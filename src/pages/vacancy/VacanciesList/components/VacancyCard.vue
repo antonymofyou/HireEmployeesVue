@@ -16,13 +16,13 @@
 </template>
 
 <script setup>
-import { useRouter } from "vue-router";
+import { useRouter } from 'vue-router';
 
 const router = useRouter();
-const props = defineProps(["vacancy"]);
+const props = defineProps(['vacancy']);
 
 function goToEditVacancy() {
-  router.push("/vacancy_edit/" + props.vacancy.id);
+  router.push('/vacancy_edit/' + props.vacancy.id);
 }
 </script>
 
