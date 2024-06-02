@@ -304,7 +304,9 @@ const submitAnswers = ({ force = 0, finish = 0 } = {}, successCallback, errorCal
     // Ответы пользователя, данные пользователя, принудительное сохранение, изменение статуса отклика
     let requestClass = new CandidatesSendCandidateAnswers();
     requestClass.answers = formattedAnswers;
-    requestClass.userInfo = candidateData.value.user;
+    requestClass.userInfo = {
+      fio: candidateData.value.user.fio,
+    };
     requestClass.forceSave = force;
     requestClass.finish = finish;
 
