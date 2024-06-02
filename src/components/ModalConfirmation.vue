@@ -38,7 +38,6 @@
 </template>
 
 <script setup>
-import { defineProps } from 'vue';
 import Modal from '@/components/Modal.vue';
 import ButtonSimple from '@/components/ButtonSimple.vue';
 

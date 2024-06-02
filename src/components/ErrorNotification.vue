@@ -8,7 +8,6 @@
 
 <script setup>
 import { ref, watch } from 'vue';
-import { defineProps } from 'vue';
 
 // Сообщение об ошибке
 const props = defineProps({

@@ -13,7 +13,7 @@
 </template>
 
 <script setup>
-import { defineProps, defineEmits, ref } from 'vue'
+import { ref } from 'vue'
 import { telegramLoginTemp } from 'vue3-telegram-login';
 
 import { AuthGetCandidateToken } from "./js/ApiClassesTgAuth.js";
