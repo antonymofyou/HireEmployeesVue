@@ -292,23 +292,6 @@ const getCandidateFromServer = (successCallback, errorCallback) => {
   );
 };
 
-//Отправка ФИО и никнейма пользователя на сервер
-const sendUserData = (successCallback, errorCallback) => {
-  let requestClass = new CandidatesGetCandidateUserInfo();
-  requestClass.userInfo = candidateData.value.user;
-
-  requestClass.request(
-    '/candidates/get_candidate_user_info.php',
-    'seeker',
-    function(response) { // успешный результат
-      successCallback(response);
-    },
-    function(err) { // неуспешный результат
-      errorCallback(err);
-    }
-  );
-};
-
 // Функция для сохранения и отправки ответов
 const submitAnswers = ({ force = 0, finish = 0 } = {}, successCallback, errorCallback) => {
   // Формирование объекта с ответами для отправки изменений на сервер
@@ -318,10 +301,10 @@ const submitAnswers = ({ force = 0, finish = 0 } = {}, successCallback, errorCal
     return acc;
   }, {});
 
-  // Сначала отправляем данные пользователя, а затем через колбэк ответы пользователя
-  sendUserData(() => {
+    // Ответы пользователя, данные пользователя, принудительное сохранение, изменение статуса отклика
     let requestClass = new CandidatesSendCandidateAnswers();
     requestClass.answers = formattedAnswers;
+    requestClass.userInfo = candidateData.value.user;
     requestClass.forceSave = force;
     requestClass.finish = finish;
 
@@ -335,7 +318,7 @@ const submitAnswers = ({ force = 0, finish = 0 } = {}, successCallback, errorCal
         errorCallback(err);
       }
     );
-  });
+
 };
 
 /*  Логика сохранения ответов  */
