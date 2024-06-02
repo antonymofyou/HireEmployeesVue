@@ -74,7 +74,7 @@ export class ApiRootClass {
   }
 
   // Метод отправки запроса
-  async request(endPoint, whoIs, callback, errCallback) { // (адрес метода // кто запрашивает(seeker,manager) // коллбэк функция // коллбэк функция ошибки запроса)
+  async request(endPoint, whoIs, successCallback, errCallback) { // (адрес метода // кто запрашивает(seeker,manager) // коллбэк функция // коллбэк функция ошибки запроса)
     if(!errCallback) {
       errCallback = (err)=> { 
         alert(err); 
@@ -102,11 +102,18 @@ export class ApiRootClass {
 
         if (responseData.success === '-1') { // При success="-1" делаем разлогин пользователя
             logOut(whoIs);
-        } else { // В любом другом случае вызываем коллбэк функцию, в которую передаём ответ сервера, и далее обрабатыввем его внутри этой функции
-            callback(responseData);
+            errCallback(`Разлогин: ${response.message}`);
+        } 
+        else if(responseData.success === null || responseData.success === undefined){
+            errCallback(`Ошибка - не прилетело значение success`);
+        }
+        else if(responseData.success === '0'){
+            errCallback(`Ошибка обработки бэка: ${response.message}`);
+        }else { // В любом другом случае вызываем коллбэк функцию, в которую передаём ответ сервера, и далее обрабатыввем его внутри этой функции
+            successCallback(responseData);
         }
     } catch (err) {
-        errCallback(err);
+        errCallback(`Какая-то ошибка запроса: ${err}`);
     }
   }
 }
