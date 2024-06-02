@@ -22,6 +22,7 @@ import { RouterLink, RouterView } from "vue-router";
   --cinnabar: #e94141;
   --link-water: #ece9f9;
   --apple: #49bf49;
+  --ronchi: #e7c950;
 }
 * {
   font-family: Verdana, Tahoma, sans-serif;
