@@ -22,7 +22,7 @@ const router = useRouter();
 const props = defineProps(['vacancy']);
 
 function goToEditVacancy() {
-  router.push('/vacancy_edit/' + props.vacancy.id);
+  router.push({ name: 'vacancy_edit', params: { id: props.vacancy.id } });
 }
 </script>
 

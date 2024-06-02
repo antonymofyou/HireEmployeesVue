@@ -94,14 +94,17 @@
           <ButtonSimple
             @click="
               modalSuccess = false;
-              $router.push(`/vacancy_edit/${createdVacancyId}`);
+              $router.push({name: 'vacancy_edit', params: {id: createdVacancyId}});
             "
           >
             <template v-slot:text>Редактировать</template>
           </ButtonSimple>
         </div>
       </template>
+
     </Modal>
+    <!-- Вывод сообщения о ошибке -->
+      <ErrorNotification v-if="errorMessage" :message="errorMessage" />
   </Teleport>
 </template>
 
@@ -117,11 +120,15 @@ import InputSimple from '@/components/InputSimple.vue';
 import SelectSimple from '@/components/SelectSimple.vue';
 import ButtonSimple from '@/components/ButtonSimple.vue';
 import TopSquareButton from '@/components/TopSquareButton.vue';
+import ErrorNotification from '@/components/ErrorNotification.vue';
 
 const router = useRouter();
 
 //Проверка авторизации пользователя
 if (!isManager()) router.push({ name: 'home' });
+
+// Отображение ошибки
+const errorMessage = ref(''); 
 
 // Вакансии
 const vacancies = ref([]);
@@ -159,7 +166,7 @@ function getAllVacanciesManager() {
     },
     function (err) {
       //неуспешный результат
-      alert(err);
+      errorMessage.value = err;
     }
   );
 }
@@ -198,7 +205,7 @@ function createVacancy(callback) {
     },
     function (err) {
       //неуспешный результат
-      alert(err);
+      errorMessage.value = err;
     }
   );
 }

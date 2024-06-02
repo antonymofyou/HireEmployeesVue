@@ -1,5 +1,6 @@
 import { sha256 } from "js-sha256";
 import { configData } from "./configData.js";
+import { logOut } from "./AuthFunctions.js";
 
 export class ApiRootClass {
   signature = "";
@@ -73,7 +74,13 @@ export class ApiRootClass {
   }
 
   // Метод отправки запроса
-  async request(endPoint, whoIs, callback, errCallback) { // (адрес метода // кто запрашивает(seeker,manager) // коллбэк функция // коллбэк функция ошибки запроса)
+  async request(endPoint, whoIs, successCallback, errCallback) { // (адрес метода // кто запрашивает(seeker,manager) // коллбэк функция // коллбэк функция ошибки запроса)
+    if(!errCallback) {
+      errCallback = (err)=> { 
+        alert(err); 
+      }
+    }
+    
     let url = `${configData.BASE_URL}${configData.API_PATH}${endPoint}`
     this.makeSignature(whoIs);
 
@@ -88,38 +95,26 @@ export class ApiRootClass {
         });
 
         if (!response.ok) {
-            throw new Error(`Ошибка HTTP: ${response.status}`);
+            errCallback(`Ошибка HTTP: ${response.status}`);
         }
 
         let responseData = await response.json();
 
         if (responseData.success === '-1') { // При success="-1" делаем разлогин пользователя
-            this.logout(whoIs);
-        } else { // В любом другом случае вызываем коллбэк функцию, в которую передаём ответ сервера, и далее обрабатыввем его внутри этой функции
-            callback(responseData);
+            logOut(whoIs);
+            errCallback(`Разлогин: ${responseData.message}`);
+        } 
+        else if(responseData.success === null || responseData.success === undefined){
+            errCallback(`Ошибка - не прилетело значение success`);
+        }
+        else if(responseData.success === '0'){
+            errCallback(`Ошибка обработки бэка: ${responseData.message}`);
+        }else { // В любом другом случае вызываем коллбэк функцию, в которую передаём ответ сервера, и далее обрабатыввем его внутри этой функции
+            successCallback(responseData);
         }
     } catch (err) {
-        if (errCallback) {
-            errCallback(err);
-        } else {
-            alert('Ошибка '+ url + ' ' + err);
-        }
+        errCallback(`Какая-то ошибка запроса: ${err}`);
     }
-  }
-
-  // Метод разлогина пользователя
-  logout(whoIs) {
-    switch (whoIs) {
-      case "manager":
-        localStorage.removeItem(configData.MANAGER_TOK_NAME);
-        localStorage.removeItem(configData.MANAGER_DEVICE_NAME);
-        break;
-      case "seeker":
-        localStorage.removeItem(configData.SEEKER_TOK_NAME);
-        localStorage.removeItem(configData.SEEKER_DEVICE_NAME);
-        break;
-    }
-    //window.location.reload();
   }
 }
 
