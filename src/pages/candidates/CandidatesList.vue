@@ -28,10 +28,13 @@
     </div>
 
     <div class="candidates__box-candidates">
+      <!-- Отображение прелоадера  -->
+      <SpinnerMain v-if="isLoading" style="width: 50px" />
+      <span v-else-if="filterCandidates(candidates, status).length === 0">Кандидатов пока нет</span>
       <CandidateCard
-        v-for="candidate in filterCandidates(candidates, status)"
-        :key="candidate.candidateId"
-        :candidate="candidate"
+      v-for="candidate in filterCandidates(candidates, status)"
+      :key="candidate.candidateId"
+      :candidate="candidate"
       />
     </div>
     <!-- Встраивание элемента в DOM дерево -->
@@ -50,6 +53,7 @@ import { MainRequestClass } from '@/js/RootClasses';
 import CandidateCard from './components/CandidateCard.vue';
 import ErrorNotification from '@/components/ErrorNotification.vue';
 import SelectMain from '@/components/SelectMain.vue';
+import SpinnerMain from '@/components/SpinnerMain.vue';
 
 const router = useRouter();
 const route = useRoute();
@@ -64,8 +68,9 @@ const vacancyId = ref(''); // ID вакансии
 const status = ref('Все'); // Статус кандидата
 const candidateStatus = ref([{ name: 'Все', id: 'Все' }]); // Статусы кандидатов
 
-//Флаг загрузки данных
+//Флаги загрузки данных
 const dataFetched = ref(false);
+const isLoading = ref(false);
 
 // Отображение ошибки
 const errorMessage = ref('');
@@ -96,6 +101,7 @@ function getAllVacanciesManager() {
         });
       });
 
+      // Установление флага загрузки данных
       dataFetched.value = true;
     },
     function (err) {
@@ -112,14 +118,19 @@ function getAllCandidatesManager() {
   }
   let requestClass = new CandidatesGetCandidatesByVacancyId();
 
+  // Установление флага прелоадера
+  isLoading.value = true;
+
   //Получение списка кандидатов
-  if (vacancyId) {
+  if (vacancyId.value) {
     requestClass.request(
       '/candidates/get_candidates_by_vacancy_id.php',
       'manager',
       function (response) {
         //успешный результат
         candidates.value = response.candidates;
+
+        isLoading.value = false;
       },
       function (err) {
         //неуспешный результат
@@ -137,7 +148,7 @@ function getVacancyStatuses() {
   let requestClass = new VacanciesGetVacanciesStatuses();
 
   //Получение статусов
-  if (vacancyId) {
+  if (vacancyId.value) {
     requestClass.request(
       '/vacancies/get_vacancies_statuses.php',
       'manager',
@@ -162,6 +173,7 @@ const updateVacancyId = () => {
     query: { ...route.query, vacancyId: vacancyId.value, status: status.value },
   });
 };
+
 //Обработчик смены query параметра при смене id
 const updateStatus = () => {
   router.push({ query: { ...route.query, status: status.value } });

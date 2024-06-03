@@ -9,13 +9,15 @@
     </TopSquareButton>
     <div class="vacancies__box-vacancies">
       <VacancyCard
-        v-for="vacancy in vacancies"
-        :key="vacancy.id"
-        :vacancy="vacancy"
-        :ref="`vacancy_${vacancy.id}`"
+      v-for="vacancy in vacancies"
+      :key="vacancy.id"
+      :vacancy="vacancy"
+      :ref="`vacancy_${vacancy.id}`"
       />
     </div>
-    <div v-if="vacancies.length === 0">На данный момент вакансий нет</div>
+    <!-- Отображение прелоадера  -->
+    <SpinnerMain v-if="isLoading" style="width: 50px" />
+    <div v-if="vacancies.length === 0 && !isLoading">На данный момент вакансий нет</div>
   </section>
 
   <!-- Встраивание компонента Modal в DOM -->
@@ -94,17 +96,19 @@
           <ButtonSimple
             @click="
               modalSuccess = false;
-              $router.push({name: 'vacancy_edit', params: {id: createdVacancyId}});
+              $router.push({
+                name: 'vacancy_edit',
+                params: { id: createdVacancyId },
+              });
             "
           >
             <template v-slot:text>Редактировать</template>
           </ButtonSimple>
         </div>
       </template>
-
     </Modal>
     <!-- Вывод сообщения о ошибке -->
-      <ErrorNotification v-if="errorMessage" :message="errorMessage" />
+    <ErrorNotification v-if="errorMessage" :message="errorMessage" />
   </Teleport>
 </template>
 
@@ -121,6 +125,7 @@ import SelectSimple from '@/components/SelectSimple.vue';
 import ButtonSimple from '@/components/ButtonSimple.vue';
 import TopSquareButton from '@/components/TopSquareButton.vue';
 import ErrorNotification from '@/components/ErrorNotification.vue';
+import SpinnerMain from '@/components/SpinnerMain.vue';
 
 const router = useRouter();
 
@@ -128,7 +133,10 @@ const router = useRouter();
 if (!isManager()) router.push({ name: 'home' });
 
 // Отображение ошибки
-const errorMessage = ref(''); 
+const errorMessage = ref('');
+
+//Флаги загрузки данных
+const isLoading = ref(false);
 
 // Вакансии
 const vacancies = ref([]);
@@ -157,12 +165,15 @@ const options = [
 function getAllVacanciesManager() {
   let requestClass = new MainRequestClass();
 
+  isLoading.value = true;
   requestClass.request(
     '/vacancies/get_all_vacancies.php',
     'manager',
     function (response) {
       //успешный результат
       vacancies.value = response.vacancies;
+
+      isLoading.value = false;
     },
     function (err) {
       //неуспешный результат
