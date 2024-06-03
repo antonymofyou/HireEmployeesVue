@@ -1,7 +1,10 @@
 <template>
-  <div class="select-box-main" :class="{ active: openSelect }">
-    <div class="options-container-main" :style="optionsContainerStyle">
-      <div class="option-main"
+  <div class="select-box-main" :class="{ active: openSelect }" v-click-outside="closeSelect">
+    <!-- Компонент плавного открытия селекта -->
+    <Transition>
+    <div class="options-container-main" :style="optionsContainerStyle" v-if="openSelect">
+      <div class="option-main" 
+        
         v-for="option in options"
         :key="option.id"
         @click="setSelected(option)"
@@ -10,6 +13,7 @@
         <label>{{ option.name }}</label>
       </div>
     </div>
+  </Transition>
 
     <div @click="toggleSelect" class="selected-main">
       <span v-if="selected"
@@ -30,6 +34,9 @@
 
 <script setup>
 import { ref, computed, onMounted, watch } from 'vue';
+
+
+
 
 // Модель для обновления, опции селекта
 // опции - массив объектов с полями: name, id, color (color опционален)
@@ -63,6 +70,10 @@ const setSelected = (option) => {
   emit('update:modelValue', option.id);
 };
 
+const closeSelect = () => {
+  openSelect.value = false;
+}
+
 // Переключатель открытия селекта
 const toggleSelect = () => {
   openSelect.value = !openSelect.value;
@@ -73,21 +84,12 @@ const optionsContainerStyle = computed(() => {
   const maxHeight = props.options.length > 5 ? '200px' : 'none';
   return {
     maxHeight: maxHeight,
-    opacity: openSelect.value ? 1 : 0,
   };
 });
 
 // Установка значения и орбаботчика при монтировании
 onMounted(() => {
   selected.value = props.options.find(option => option.id == props.modelValue) || null;
-  
-  window.addEventListener('click', (e) => {
-    if (openSelect.value) {
-      if (!e.target.closest(`#${id}`)) {
-        openSelect.value = false;
-      }
-    }
-  });
 });
 
 // Отслеживание изменений
@@ -143,7 +145,6 @@ watch(() => props.modelValue, (newValue) => {
 
 .active .options-container-main {
   max-height: 200px;
-  opacity: 1;
 }
 
 .dark .options-container-main {
@@ -213,5 +214,17 @@ watch(() => props.modelValue, (newValue) => {
 .radio-main {
   display: none;
 }
+
+/* Transition */
+.v-enter-active,
+.v-leave-active {
+  transition: opacity 0.5s ease;
+}
+
+.v-enter-from,
+.v-leave-to {
+  opacity: 0;
+}
 </style>
+
 
