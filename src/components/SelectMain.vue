@@ -3,7 +3,7 @@
     <!-- Компонент плавного открытия селекта -->
     <Transition>
     <div class="options-container-main" :style="optionsContainerStyle" v-if="openSelect">
-      <div class="option-main" 
+      <div class="option-main"
         
         v-for="option in options"
         :key="option.id"
@@ -34,9 +34,6 @@
 
 <script setup>
 import { ref, computed, onMounted, watch } from 'vue';
-
-
-
 
 // Модель для обновления, опции селекта
 // опции - массив объектов с полями: name, id, color (color опционален)
@@ -70,6 +67,7 @@ const setSelected = (option) => {
   emit('update:modelValue', option.id);
 };
 
+// Закрытие селекта
 const closeSelect = () => {
   openSelect.value = false;
 }
@@ -96,6 +94,25 @@ onMounted(() => {
 watch(() => props.modelValue, (newValue) => {
   selected.value = props.options.find(option => option.id == newValue) || null;
 });
+
+// Директива для закрытия селекта по клику снаружи
+const vClickOutside = {
+  beforeMount(el, binding) {
+    el.clickOutsideEvent = function (event) {
+      // Проверка местоположения элемента
+      if (!(el === event.target || el.contains(event.target))) {
+        // Вызываем метод после срабатывания клика снаружи
+        binding.value(event);
+      }
+    };
+    // Добавляем обработчик нажатия
+    document.addEventListener("click", el.clickOutsideEvent);
+  },
+  unmounted(el) {
+    // Удаляем обработчик при размонтировании
+    document.removeEventListener("click", el.clickOutsideEvent);
+  },
+};
 </script>
 
 <style scoped>
