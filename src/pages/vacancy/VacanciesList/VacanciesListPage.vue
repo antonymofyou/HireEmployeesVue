@@ -9,15 +9,17 @@
     </TopSquareButton>
     <div class="vacancies__box-vacancies">
       <VacancyCard
-      v-for="vacancy in vacancies"
-      :key="vacancy.id"
-      :vacancy="vacancy"
-      :ref="`vacancy_${vacancy.id}`"
+        v-for="vacancy in vacancies"
+        :key="vacancy.id"
+        :vacancy="vacancy"
+        :ref="`vacancy_${vacancy.id}`"
       />
     </div>
     <!-- Отображение прелоадера  -->
     <SpinnerMain v-if="isLoading" style="width: 50px" />
-    <div v-if="vacancies.length === 0 && !isLoading">На данный момент вакансий нет</div>
+    <div v-if="vacancies.length === 0 && !isLoading">
+      На данный момент вакансий нет
+    </div>
   </section>
 
   <!-- Встраивание компонента Modal в DOM -->
@@ -72,14 +74,15 @@
         </div>
       </template>
     </Modal>
-
     <!-- Открытие модального окна успешного создания вакансии -->
     <Modal :show="modalSuccess">
-      <template #header>
+      <template #header v-if="!isLoading">
         <h3>Вакансия создана!</h3>
       </template>
       <template #body>
-        <div class="modal__success">
+        <!-- Отображение прелоадера  -->
+        <SpinnerMain v-if="isLoading" style="width: 50px" />
+        <div class="modal__success" v-if="!isLoading">
           <!-- Кнопка перехода к созданной вакансии и закрытия модального окна. Происходит обращение к глобальному объекту refs, который содержит ссылки на ref карточек vacancy_id. через $el(ключ DOM элемента).scrollIntoView происходит переход к созданной вакансии -->
           <ButtonSimple
             @click="
@@ -178,6 +181,7 @@ function getAllVacanciesManager() {
     function (err) {
       //неуспешный результат
       errorMessage.value = err;
+      isLoading.value = false;
     }
   );
 }
@@ -192,12 +196,12 @@ function createVacancy(callback) {
 
   let requestClass = new VacanciesCreateVacancy();
 
+  isLoading.value = true;
   requestClass.request(
     '/vacancies/create_vacancy.php',
     'manager',
     function (response) {
       //успешный результат
-      callback(response);
 
       //получение Id созданной вакансии
       createdVacancyId.value = response.vacancy.id;
@@ -211,12 +215,15 @@ function createVacancy(callback) {
       showModal.value = false;
       modalSuccess.value = true;
 
+      isLoading.value = false;
+
       //получение нового списка вакансий
       getAllVacanciesManager();
     },
     function (err) {
       //неуспешный результат
       errorMessage.value = err;
+      isLoading.value = false;
     }
   );
 }

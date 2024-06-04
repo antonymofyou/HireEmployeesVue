@@ -30,11 +30,16 @@
     <div class="candidates__box-candidates">
       <!-- Отображение прелоадера  -->
       <SpinnerMain v-if="isLoading" style="width: 50px" />
-      <span v-else-if="filterCandidates(candidates, status).length === 0">Кандидатов пока нет</span>
+      <span
+        v-else-if="
+          vacancyId && filterCandidates(candidates, status).length === 0
+        "
+        >Кандидатов пока нет</span
+      >
       <CandidateCard
-      v-for="candidate in filterCandidates(candidates, status)"
-      :key="candidate.candidateId"
-      :candidate="candidate"
+        v-for="candidate in filterCandidates(candidates, status)"
+        :key="candidate.candidateId"
+        :candidate="candidate"
       />
     </div>
     <!-- Встраивание элемента в DOM дерево -->
@@ -129,12 +134,12 @@ function getAllCandidatesManager() {
       function (response) {
         //успешный результат
         candidates.value = response.candidates;
-
         isLoading.value = false;
       },
       function (err) {
         //неуспешный результат
         errorMessage.value = err;
+        isLoading.value = false;
       }
     );
   }
