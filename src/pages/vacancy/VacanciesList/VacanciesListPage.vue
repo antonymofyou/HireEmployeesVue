@@ -46,13 +46,15 @@
           :isTextBold="true"
         />
 
-        <SelectSimple
-          v-model="formData.published"
-          id="isPublished"
-          labelName="Опубликована"
-          :options="options"
-          :model-value="options[0].value"
-        />
+        <div class="modal__is-published">
+          <span>Опубликовано:</span>
+          <SelectMain
+            v-model="formData.published"
+            :options="options"
+            :model-value="options[0].id"
+
+          />
+        </div>
 
         <InputSimple
           v-model="formData.description"
@@ -124,11 +126,11 @@ import VacancyCard from './components/VacancyCard.vue';
 import plusIcon from './assets/icons/plus-icon.svg';
 import Modal from '@/components/Modal.vue';
 import InputSimple from '@/components/InputSimple.vue';
-import SelectSimple from '@/components/SelectSimple.vue';
 import ButtonSimple from '@/components/ButtonSimple.vue';
 import TopSquareButton from '@/components/TopSquareButton.vue';
 import ErrorNotification from '@/components/ErrorNotification.vue';
 import SpinnerMain from '@/components/SpinnerMain.vue';
+import SelectMain from '@/components/SelectMain.vue';
 
 const router = useRouter();
 
@@ -159,10 +161,10 @@ const formData = ref({
 });
 
 // Опции для селекта
-const options = [
-  { text: 'Нет', value: '0' },
-  { text: 'Да', value: '1' },
-];
+const options = ref([
+  { name: 'Нет', id: '0' },
+  { name: 'Да', id: '1' },
+]);
 
 // получение всех вакансий
 function getAllVacanciesManager() {
@@ -290,6 +292,12 @@ onMounted(() => {
 
 .modal__close-btn:hover {
   filter: opacity(0.6);
+}
+
+.modal__is-published {
+  display: flex;
+  align-items: center;
+  gap: 10px;
 }
 
 .modal__submit {

@@ -3,10 +3,10 @@ import { createRouter, createWebHistory } from "vue-router";
 import HomePage from "@/pages/HomePage.vue";
 import ManagerAuth from "@/pages/authorization/ManagerAuth.vue";
 import VacanciesListPage from "@/pages/vacancy/VacanciesList/VacanciesListPage.vue";
-import VacancyIdPage from "@/pages/vacancy/VacancyIdPage.vue";
+import VacancyIdPage from "@/pages/vacancy/VacancyIdPage/VacancyIdPage.vue";
 import VacancyEditPage from "@/pages/vacancy/EditPage/VacancyEditPage.vue";
 import CandidatesList from "@/pages/candidates/CandidatesList.vue";
-import CandidateComments from "@/pages/candidates/CandidateComments.vue";
+import CandidatComments from "@/pages/candidates/CandidatComments.vue";
 
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
@@ -44,7 +44,7 @@ const router = createRouter({
     {
       path: "/canditate",
       name: "candidate",
-      component: CandidateComments,
+      component: CandidatComments,
     }
   ],
 });

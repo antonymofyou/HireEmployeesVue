@@ -1,6 +1,6 @@
 <template>
   <div class="input">
-    <label
+    <label v-if="labelName"
       class="input__label" 
       :class="labelClass"
       :for="id"
@@ -14,6 +14,7 @@
       :id="id"
       v-bind="$attrs"
       :value="inputValue"
+      :placeholder="placeholder"
       @input="updateModelValue($event.target.value)"
     />
   </div>
@@ -38,11 +39,9 @@ const props = defineProps({
   },
   id: {
     type: String,
-    required: true,
   },
   labelName: {
     type: String,
-    required: true,
   },
   isLabelBold: {
     type: Boolean,
@@ -55,6 +54,9 @@ const props = defineProps({
   size: {
     type: String,
     default: 'small',
+  },
+  placeholder: {
+    type: String,
   },
 });
 
@@ -74,6 +76,7 @@ const inputClass = computed(() => ({
   'input__field--textarea': props.inputType === 'textarea',
   'input__field--bold': props.isTextBold,
   'input__field--medium': props.size === 'medium',
+  'input__field--extra-medium': props.size === 'extra-medium',
   'input__field--big':  props.size === 'big',
 }));
 
@@ -110,6 +113,10 @@ const labelClass = computed(() => ({
   outline: 2px solid rgba(0, 0, 252, .6);
 }
 
+.input__field:disabled {
+  background: rgb(243, 243, 243);
+}
+
 .input__field--bold {
   font-weight: 600;
 }
@@ -120,6 +127,10 @@ const labelClass = computed(() => ({
 
 .input__field--medium {
   height: 85px;
+}
+
+.input__field--extra-medium {
+  height: 150px;
 }
 
 .input__field--big {

@@ -1,5 +1,5 @@
 <template>
-  <div class="submit">
+  <div class="submit" :class="alignClass">
     <button
       class="submit__button"
       :disabled="isActive"
@@ -19,10 +19,12 @@
 </template>
 
 
-<script setup>
-import { ref } from 'vue';
 
-// Функция события, текст успешного выполнения, текст ошибочного выполнения
+<script setup>
+import { ref, computed } from 'vue';
+
+// Цвет текста, цвет кнопки, функция события, текст успешного выполнения, 
+// текст ошибочного выполнения, жирный шрифт текст, выравнивание ошибки
 const props = defineProps({
   textColor: {
     type: String,
@@ -37,7 +39,7 @@ const props = defineProps({
   },
   successText: {
     type: String,
-    default: 'Данные успешно сохранены!',
+    default: '',
   },
   warningText: {
     type: String,
@@ -45,6 +47,10 @@ const props = defineProps({
   },
   isBold: {
     type: Boolean,
+  },
+  align: {
+    type: String,
+    default: 'start',
   }
 });
 
@@ -62,13 +68,19 @@ const message = ref('');
 const defaultButtonColor = 'var(--cornflower-blue)';
 const defaultTextColor = 'var(--white)';
 
+// Выравнивание расположения кнопки и сообщения о выполнении
+const alignClass = computed(() => ({
+  'submit--align-start': props.align === 'start',
+  'submit--align-end': props.align === 'end',
+}));
+
 const onClick = () => {
   // Если передана функция отправки, Вызываем её
   if (props.submitFunction) {
-    // Кнопка переводится в активное состояние выполнения
-    isActive.value = true;
-
     props.submitFunction((response) => {
+      // Кнопка переводится в активное состояние выполнения
+      isActive.value = true;
+
       // получаем данные о статусе и сообщении
       const { message: resMessage, success: resSuccess } = response;
 
@@ -84,6 +96,20 @@ const onClick = () => {
 </script>
 
 <style scoped>
+.submit {
+  display: flex;
+  flex-direction: column;
+}
+
+.submit--align-start {
+  align-items: flex-start;
+}
+
+.submit--align-end {
+  align-items: flex-end;
+  text-align: end;
+}
+
 .submit__button {
   position: relative;
 
