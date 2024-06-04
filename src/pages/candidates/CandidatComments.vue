@@ -64,7 +64,7 @@ onMounted(requestComments);
   </div>
 </template>
 
-<style scopred>
+<style scoped>
 .comments_comment:not(:last-child) {
   margin-bottom: 10px;
 }
