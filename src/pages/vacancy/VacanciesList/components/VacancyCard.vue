@@ -46,7 +46,7 @@ function goToEditVacancy() {
   word-wrap: break-word;
   margin: 0;
   font-size: 15px;
-  line-height: 28px;
+  line-height: 20px;
   font-weight: 600;
 }
 
