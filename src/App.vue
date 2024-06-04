@@ -27,6 +27,11 @@ import { RouterLink, RouterView } from "vue-router";
   --tundora: #4e4b4b;
   --black-squeeze: #edf6f9;
   --ronchi: #e7c950;
+  --mine-shaft: #212121;
+  --shark: #1f222a;
+  --tundora: #4e4b4b;
+  --black-squeeze: #edf6f9;
+
 }
 * {
   font-family: Verdana, Tahoma, sans-serif;
