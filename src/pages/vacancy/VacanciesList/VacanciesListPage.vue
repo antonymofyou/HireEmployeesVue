@@ -118,24 +118,24 @@
 </template>
 
 <script setup>
-import { onMounted, ref } from 'vue';
-import { useRouter } from 'vue-router';
-import { MainRequestClass } from '@/js/RootClasses';
-import { isManager } from '@/js/AuthFunctions';
-import VacancyCard from './components/VacancyCard.vue';
-import plusIcon from './assets/icons/plus-icon.svg';
-import Modal from '@/components/Modal.vue';
-import InputSimple from '@/components/InputSimple.vue';
-import ButtonSimple from '@/components/ButtonSimple.vue';
-import TopSquareButton from '@/components/TopSquareButton.vue';
-import ErrorNotification from '@/components/ErrorNotification.vue';
-import SpinnerMain from '@/components/SpinnerMain.vue';
-import SelectMain from '@/components/SelectMain.vue';
+import { onMounted, ref } from "vue";
+import { useRouter } from "vue-router";
+import { MainRequestClass } from "@/js/RootClasses";
+import { isManager } from "@/js/AuthFunctions";
+import VacancyCard from "./components/VacancyCard.vue";
+import plusIcon from "./assets/icons/plus-icon.svg";
+import Modal from "@/components/Modal.vue";
+import InputSimple from "@/components/InputSimple.vue";
+import ButtonSimple from "@/components/ButtonSimple.vue";
+import TopSquareButton from "@/components/TopSquareButton.vue";
+import ErrorNotification from "@/components/ErrorNotification.vue";
+import SpinnerMain from "@/components/SpinnerMain.vue";
+import SelectMain from "@/components/SelectMain.vue";
 
 const router = useRouter();
 
 //Проверка авторизации пользователя
-if (!isManager()) router.push({ name: 'home' });
+if (!isManager()) router.push({ name: "home" });
 
 // Отображение ошибки
 const errorMessage = ref('');
@@ -155,15 +155,15 @@ const modalSuccess = ref(false);
 
 // Данные вакансии: название, описание, статус публикации
 const formData = ref({
-  name: '',
-  description: '',
-  published: '',
+  name: "",
+  description: "",
+  published: "",
 });
 
 // Опции для селекта
 const options = ref([
-  { name: 'Нет', id: '0' },
-  { name: 'Да', id: '1' },
+  { name: "Нет", id: "0" },
+  { name: "Да", id: "1" },
 ]);
 
 // получение всех вакансий
@@ -172,8 +172,8 @@ function getAllVacanciesManager() {
 
   isLoading.value = true;
   requestClass.request(
-    '/vacancies/get_all_vacancies.php',
-    'manager',
+    "/vacancies/get_all_vacancies.php",
+    "manager",
     function (response) {
       //успешный результат
       vacancies.value = response.vacancies;
@@ -200,8 +200,8 @@ function createVacancy(callback) {
 
   isLoading.value = true;
   requestClass.request(
-    '/vacancies/create_vacancy.php',
-    'manager',
+    "/vacancies/create_vacancy.php",
+    "manager",
     function (response) {
       //успешный результат
 
@@ -209,9 +209,9 @@ function createVacancy(callback) {
       createdVacancyId.value = response.vacancy.id;
 
       //сброс формы
-      formData.value.name = '';
-      formData.value.description = '';
-      formData.value.published = '';
+      formData.value.name = "";
+      formData.value.description = "";
+      formData.value.published = "";
 
       //закрытие модального окна создания и открытие модального окна успешного создания"
       showModal.value = false;

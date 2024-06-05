@@ -1,5 +1,5 @@
 <template>
-  <article class="vacancy">
+  <div class="vacancy">
     <div class="vacancy__id">id: {{ vacancy.id }}</div>
     <div class="vacancy__name">{{ vacancy.name }}</div>
 
@@ -12,17 +12,17 @@
       </div>
       <div class="vacancy__btn" @click="goToEditVacancy()">Редактировать</div>
     </div>
-  </article>
+  </div>
 </template>
 
 <script setup>
-import { useRouter } from 'vue-router';
+import { useRouter } from "vue-router";
 
 const router = useRouter();
-const props = defineProps(['vacancy']);
+const props = defineProps(["vacancy"]);
 
 function goToEditVacancy() {
-  router.push({ name: 'vacancy_edit', params: { id: props.vacancy.id } });
+  router.push({ name: "vacancy_edit", params: { id: props.vacancy.id } });
 }
 </script>
 

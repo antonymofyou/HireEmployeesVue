@@ -1,5 +1,5 @@
 <template>
-  <article class="candidate">
+  <div class="candidate">
     <div class="candidate__box">
       <div class="candidate__description">
         <span class="candidate__name"><b>ФИО:</b> {{ candidate.fio }}</span>
@@ -17,7 +17,7 @@
         </ButtonMain>
       </div>
     </div>
-  </article>
+  </div>
 </template>
 
 <script setup>
@@ -45,7 +45,6 @@ function goToCandidate() {
 
 <style scoped>
 .candidate {
-  max-width: 90%;
   width: 100%;
   padding: 15px 30px 15px;
   box-sizing: border-box;
