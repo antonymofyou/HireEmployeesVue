@@ -36,16 +36,14 @@
     <div class="candidates__box-candidates">
       <!-- Отображение прелоадера  -->
       <SpinnerMain v-if="isLoading" style="width: 50px" />
-      <span
-        v-else-if="
-          vacancyId && filterCandidates(candidates, status).length === 0
-        "
+      <span v-else-if="vacancyId && candidates.length === 0"
         >Кандидатов пока нет</span
       >
       <CandidateCard
-        v-for="candidate in filterCandidates(candidates, status)"
+        v-for="candidate in candidates"
         :key="candidate.candidateId"
         :candidate="candidate"
+        :vacancyId="vacancyId"
       />
     </div>
     <!-- Встраивание элемента в DOM дерево -->
@@ -126,6 +124,7 @@ function getAllVacanciesManager() {
 function getAllCandidatesManager() {
   class CandidatesGetCandidatesByVacancyId extends MainRequestClass {
     vacancyId = vacancyId.value; // ID вакансии, отклики для которой нужно получить
+    status = status.value === 'Все' ? '' : status.value; // статус отклика, по которому нужно получить отклики (если пустая строка, то этот фильтр не учитывается)
   }
   let requestClass = new CandidatesGetCandidatesByVacancyId();
 
@@ -190,14 +189,6 @@ const updateStatus = () => {
   router.push({ query: { ...route.query, status: status.value } });
 };
 
-//Фильтрация кандидатов по статусу
-const filterCandidates = (array, status) => {
-  if (status === 'Все') {
-    return array;
-  }
-  return array.filter((candidate) => candidate.status === status);
-};
-
 //Получение списка кандидатов при загрузке страницы
 onMounted(() => {
   getAllVacanciesManager();
@@ -207,12 +198,20 @@ onMounted(() => {
   }
 });
 
-//Получение списка кандидатов при обновлении query параметра vacancyId
+//Получение списка кандидатов и статусов при обновлении query параметров
 watch(
   () => route.query.vacancyId,
   () => {
-    getAllCandidatesManager();
     getVacancyStatuses();
+    getAllCandidatesManager();
+  }
+);
+
+//Получение списка кандидатов при обновлении query status
+watch(
+  () => route.query.status,
+  () => {
+    getAllCandidatesManager();
   }
 );
 </script>

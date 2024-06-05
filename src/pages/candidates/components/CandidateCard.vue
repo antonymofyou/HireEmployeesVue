@@ -26,19 +26,23 @@ import ButtonMain from '@/components/ButtonMain.vue';
 
 const router = useRouter();
 
-//Объявление пропса
+//Объявление пропсов
 const props = defineProps({
   candidate: {
     type: Object,
     required: true,
   },
+  vacancyId: {
+    type: String,
+    required: true,
+  }
 });
 
-//Переход на карточку кандидата
+//Переход на карточку комментариев кандидата
 function goToCandidate() {
   router.push({
     name: 'candidate',
-    query: { candidateId: props.candidate.candidateId },
+    query: { vacancyId: props.vacancyId, candidateId: props.candidate.candidateId },
   });
 }
 </script>
