@@ -6,15 +6,19 @@
       <span v-if="!vacancyId" class="candidates__filter-title"
         >Выберите вакансию:</span
       >
-      <span v-if="vacancyId && dataFetched" class="candidates__filter-title">Вакансия:</span>
+      <span v-if="vacancyId && dataFetched" class="candidates__filter-title"
+        >Вакансия:</span
+      >
       <SelectMain
         v-if="dataFetched"
         v-model="vacancyId"
         :options="vacanciesIds"
         @update:modelValue="updateVacancyId"
       />
-      
-      <span v-if="vacancyId && dataFetched" class="candidates__filter-title">Статус:</span>
+
+      <span v-if="vacancyId && dataFetched" class="candidates__filter-title"
+        >Статус:</span
+      >
       <SelectMain
         v-if="vacancyId !== '' && dataFetched"
         v-model="status"
@@ -241,5 +245,11 @@ watch(
   margin-top: 40px;
   width: 100%;
   max-width: 95%;
+}
+
+@media screen and (max-width: 470px) {
+  .candidates__filter {
+    flex-direction: column;
+  }
 }
 </style>
