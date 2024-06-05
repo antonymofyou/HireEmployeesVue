@@ -1,3 +1,20 @@
+<template>
+  <div class="comments">
+    <template v-if="comments.length">
+      <CommentCard
+        v-for="{ comment, updatedAt, createdAt, id } in comments"
+        :updatedAt
+        :createdAt
+        :key="id"
+        class="comments__comment"
+      >
+        {{ comment }}
+      </CommentCard>
+    </template>
+    <p v-else>Нет комментариев</p>
+  </div>
+</template>
+
 <script setup>
 import { ref, onMounted } from 'vue';
 import { MainRequestClass } from '@/js/RootClasses';
@@ -42,23 +59,6 @@ const requestComments = () => {
 
 onMounted(requestComments);
 </script>
-
-<template>
-  <div class="comments">
-    <template v-if="comments.length">
-      <CommentCard
-        v-for="{ comment, updatedAt, createdAt, id } in comments"
-        :updatedAt
-        :createdAt
-        :key="id"
-        class="comments__comment"
-      >
-        {{ comment }}
-      </CommentCard>
-    </template>
-    <p v-else>Нет комментариев</p>
-  </div>
-</template>
 
 <style scoped>
 .comments__comment:not(:last-child) {

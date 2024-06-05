@@ -1,3 +1,12 @@
+<template>
+  <div class="comment">
+    <p class="comment__date">{{ formattedDate }}</p>
+    <p class="comment__text">
+      <slot></slot>
+    </p>
+  </div>
+</template>
+
 <script setup>
 import { computed } from 'vue';
 
@@ -25,15 +34,6 @@ const formattedDate = computed(() => {
   return createdAt === updatedAt ? createdAt : `${updatedAt} (изменено)`;
 });
 </script>
-
-<template>
-  <div class="comment">
-    <p class="comment__date">{{ formattedDate }}</p>
-    <p class="comment__text">
-      <slot></slot>
-    </p>
-  </div>
-</template>
 
 <style scoped>
 .comment {
