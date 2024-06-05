@@ -6,7 +6,7 @@ import VacanciesListPage from "@/pages/vacancy/VacanciesList/VacanciesListPage.v
 import VacancyIdPage from "@/pages/vacancy/VacancyIdPage/VacancyIdPage.vue";
 import VacancyEditPage from "@/pages/vacancy/EditPage/VacancyEditPage.vue";
 import CandidatesList from "@/pages/candidates/CandidatesList.vue";
-import CandidatComments from "@/pages/candidates/CandidatComments.vue";
+import CandidatComments from "@/pages/candidates/CandidateComments/CandidateComments.vue";
 
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
