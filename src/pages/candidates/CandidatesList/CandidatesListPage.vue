@@ -3,9 +3,7 @@
     <h1 class="candidates__title">Кандидаты вакансии</h1>
 
     <div class="candidates__filter">
-      <div v-if="!vacancyId">
-        Выберите вакансию:
-      </div>
+      <div v-if="!vacancyId">Выберите вакансию:</div>
       <div class="candidates__filter-title">
         <div v-if="vacancyId && dataFetched">Вакансия:</div>
         <SelectMain
@@ -226,13 +224,17 @@ watch(
 
 .candidates__filter {
   display: flex;
+  justify-content: center;
   align-items: center;
-  gap: 10px;
+  flex-wrap: wrap;
+  gap: 30px;
 }
+
 .candidates__filter-title {
   display: flex;
   align-items: center;
   gap: 5px;
+  flex-wrap: wrap;
 }
 
 .candidates__description {
@@ -248,15 +250,14 @@ watch(
   margin-top: 40px;
   width: 100%;
   max-width: 95%;
+  :nth-child(n) {
+    max-width: 700px;
+  }
 }
 
-@media screen and (max-width: 470px) {
+@media screen and (max-width: 450px) {
   .candidates__filter {
-    flex-direction: column;
-  }
-
-  .candidates__filter-title {
-    gap: 2px;
+    gap: 15px;
   }
 }
 </style>
