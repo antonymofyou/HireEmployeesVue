@@ -102,13 +102,13 @@ export class ApiRootClass {
 
         if (responseData.success === '-1') { // При success="-1" делаем разлогин пользователя
             logOut(whoIs);
-            errCallback(`Разлогин: ${response.message}`);
+            errCallback(`Разлогин: ${responseData.message}`);
         } 
         else if(responseData.success === null || responseData.success === undefined){
             errCallback(`Ошибка - не прилетело значение success`);
         }
         else if(responseData.success === '0'){
-            errCallback(`Ошибка обработки бэка: ${response.message}`);
+            errCallback(`Ошибка обработки бэка: ${responseData.message}`);
         }else { // В любом другом случае вызываем коллбэк функцию, в которую передаём ответ сервера, и далее обрабатыввем его внутри этой функции
             successCallback(responseData);
         }

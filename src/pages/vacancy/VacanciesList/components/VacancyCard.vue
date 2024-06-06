@@ -1,5 +1,5 @@
 <template>
-  <article class="vacancy">
+  <div class="vacancy">
     <div class="vacancy__id">id: {{ vacancy.id }}</div>
     <div class="vacancy__name">{{ vacancy.name }}</div>
 
@@ -12,7 +12,7 @@
       </div>
       <div class="vacancy__btn" @click="goToEditVacancy()">Редактировать</div>
     </div>
-  </article>
+  </div>
 </template>
 
 <script setup>
@@ -22,7 +22,7 @@ const router = useRouter();
 const props = defineProps(["vacancy"]);
 
 function goToEditVacancy() {
-  router.push("/vacancy_edit/" + props.vacancy.id);
+  router.push({ name: "vacancy_edit", params: { id: props.vacancy.id } });
 }
 </script>
 
@@ -46,7 +46,7 @@ function goToEditVacancy() {
   word-wrap: break-word;
   margin: 0;
   font-size: 15px;
-  line-height: 28px;
+  line-height: 20px;
   font-weight: 600;
 }
 
