@@ -43,7 +43,6 @@
 import { ref, computed, onMounted } from 'vue';
 import CommentCard from '@/pages/candidates/CandidateComments/components/CommentCard.vue';
 import SpinnerMain from '@/components/SpinnerMain.vue';
-import ButtonMain from '@/components/ButtonMain.vue';
 import CommentAddition from './CommentAddition.vue';
 import {
   CandidatesSetCandidateComment,

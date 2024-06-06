@@ -20,31 +20,43 @@
     </p>
 
     <div class="comment__buttons">
-      <ButtonMain
+      <button
         v-if="!isEditMode"
+        class="button button--edit"
+        aria-label="Редактировать"
+        title="Редактировать"
         @click="onEditMode"
       >
-        <template #text>Редактировать</template>
-      </ButtonMain>
+        <IconEdit />
+      </button>
 
       <template v-else>
-        <ButtonMain @click="updateComment">
-          <template #text>Сохранить</template>
-        </ButtonMain>
-        <ButtonMain
-          @click="cancelUpdate"
-          :buttonColor="'var(--shark)'"
+        <button
+          class="button button--save"
+          aria-label="Сохранить"
+          title="Сохранить"
+          @click="updateComment"
         >
-          <template #text>Отменить</template>
-        </ButtonMain>
+          <IconSave />
+        </button>
+        <button
+          class="button button--close"
+          aria-label="Отменить"
+          title="Отменить"
+          @click="cancelUpdate"
+        >
+          <IconClose />
+        </button>
       </template>
 
-      <ButtonMain
+      <button
+        class="button button--delete"
+        aria-label="Удалить"
+        title="Удалить"
         @click="emit('delete', { id: props.comment.id })"
-        buttonColor="var(--cinnabar)"
       >
-        <template #text>Удалить</template>
-      </ButtonMain>
+        <IconDelete />
+      </button>
     </div>
   </div>
 </template>
@@ -52,6 +64,10 @@
 <script setup>
 import { computed, ref } from 'vue';
 import ButtonMain from '@/components/ButtonMain.vue';
+import IconSave from './IconSave.vue';
+import IconEdit from './IconEdit.vue';
+import IconDelete from './IconDelete.vue';
+import IconClose from './IconClose.vue';
 
 const props = defineProps({
   comment: {
@@ -75,12 +91,14 @@ const offEditMode = () => (isEditMode.value = false);
 const onEditMode = () => (isEditMode.value = true);
 
 const updateComment = () => {
-  emit('updateComment', { id: props.comment.id, comment: comment.value });
+  if (!(comment.value === initialValue)) {
+    emit('updateComment', { id: props.comment.id, comment: comment.value });
+  }
   offEditMode();
 };
 
 const cancelUpdate = () => {
-  comment = initialValue;
+  comment.value = initialValue;
   offEditMode();
 };
 
@@ -104,6 +122,53 @@ const formattedDate = computed(() => {
   border-radius: 10px;
   box-shadow: 0 1px 10px rgba(0, 0, 0, 0.3);
   background-color: var(--white);
+}
+
+.button {
+  --button-color: var(--white);
+  --button-bg: var(--milk);
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: none;
+  border-radius: 5px;
+  padding: 10px;
+  color: var(--button-color);
+  background-color: var(--button-bg);
+  font-size: 20px;
+  outline-offset: 2px;
+  outline-color: var(--button-color);
+  transition: all 0.15s ease-in-out;
+}
+
+.button:not(:disabled):hover {
+  opacity: 0.8;
+  cursor: pointer;
+}
+
+.button:active {
+  opacity: 1;
+}
+
+.button:disabled {
+  opacity: 0.4;
+}
+
+.button--delete {
+  --button-bg: var(--error-color);
+}
+
+.button--save {
+  --button-bg: var(--success-color);
+}
+
+.button--close {
+  --button-bg: var(--tundora);
+}
+
+.button--edit {
+  --button-bg: var(--cornflower-blue);
 }
 
 .comment__date,

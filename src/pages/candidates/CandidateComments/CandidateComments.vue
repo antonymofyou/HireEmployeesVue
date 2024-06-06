@@ -15,7 +15,7 @@ import CommentsBlock from './components/CommentsBlock.vue';
 
 const route = useRoute();
 const vacancyId = route.query.vacancyId;
-const candidateId = route.query.candidateId;
+const candidateId = "1" || route.query.candidateId;
 </script>
 
 <style scoped>
