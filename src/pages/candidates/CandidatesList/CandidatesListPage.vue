@@ -3,28 +3,27 @@
     <h1 class="candidates__title">Кандидаты вакансии</h1>
 
     <div class="candidates__filter">
-      <span v-if="!vacancyId" class="candidates__filter-title"
-        >Выберите вакансию:</span
-      >
-      <span v-if="vacancyId && dataFetched" class="candidates__filter-title"
-        >Вакансия:</span
-      >
-      <SelectMain
-        v-if="dataFetched"
-        v-model="vacancyId"
-        :options="vacanciesIds"
-        @update:modelValue="updateVacancyId"
-      />
-
-      <span v-if="vacancyId && dataFetched" class="candidates__filter-title"
-        >Статус:</span
-      >
-      <SelectMain
-        v-if="vacancyId !== '' && dataFetched"
-        v-model="status"
-        :options="candidateStatus"
-        @update:modelValue="updateStatus"
-      />
+      <div v-if="!vacancyId">
+        Выберите вакансию:
+      </div>
+      <div class="candidates__filter-title">
+        <div v-if="vacancyId && dataFetched">Вакансия:</div>
+        <SelectMain
+          v-if="dataFetched"
+          v-model="vacancyId"
+          :options="vacanciesIds"
+          @update:modelValue="updateVacancyId"
+        />
+      </div>
+      <div class="candidates__filter-title">
+        <div v-if="vacancyId && dataFetched">Статус:</div>
+        <SelectMain
+          v-if="vacancyId !== '' && dataFetched"
+          v-model="status"
+          :options="candidateStatus"
+          @update:modelValue="updateStatus"
+        />
+      </div>
     </div>
 
     <div class="candidates__description" v-if="vacancyId !== ''">
@@ -230,6 +229,11 @@ watch(
   align-items: center;
   gap: 10px;
 }
+.candidates__filter-title {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+}
 
 .candidates__description {
   margin-top: 30px;
@@ -249,6 +253,10 @@ watch(
 @media screen and (max-width: 470px) {
   .candidates__filter {
     flex-direction: column;
+  }
+
+  .candidates__filter-title {
+    gap: 2px;
   }
 }
 </style>
