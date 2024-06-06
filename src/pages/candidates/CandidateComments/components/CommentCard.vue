@@ -22,33 +22,18 @@
     <div class="comment__buttons">
       <ButtonMain
         v-if="!isEditMode"
-        @click="
-          () => {
-            onEditMode();
-          }
-        "
+        @click="onEditMode"
       >
         <template #text>Редактировать</template>
       </ButtonMain>
 
       <template v-else>
-        <ButtonMain
-          @click="
-            () => {
-              offEditMode();
-              emit('updateComment', { id: props.comment.id, comment });
-            }
-          "
-        >
+        <ButtonMain @click="updateComment">
           <template #text>Сохранить</template>
         </ButtonMain>
         <ButtonMain
-          @click="
-            () => {
-              offEditMode();
-              comment = initialValue;
-            }
-          "
+          @click="cancelUpdate"
+          :buttonColor="'var(--shark)'"
         >
           <template #text>Отменить</template>
         </ButtonMain>
@@ -84,12 +69,20 @@ const initialValue = props.comment.comment;
 const comment = ref(initialValue);
 
 // Отключение режима редактирования, возвращение к начальному значению
-const offEditMode = () => {
-  isEditMode.value = false;
-  // comment.value = initialValue;
-};
+const offEditMode = () => (isEditMode.value = false);
+
 // Включение режима редактирования
 const onEditMode = () => (isEditMode.value = true);
+
+const updateComment = () => {
+  emit('updateComment', { id: props.comment.id, comment: comment.value });
+  offEditMode();
+};
+
+const cancelUpdate = () => {
+  comment = initialValue;
+  offEditMode();
+};
 
 // Форматирование даты под RU локаль
 const formatDate = (date) => {
@@ -135,6 +128,7 @@ const formattedDate = computed(() => {
 }
 
 .comment__textarea {
+  font-size: 16px;
   width: 100%;
   margin-bottom: 10px;
   padding: 10px;

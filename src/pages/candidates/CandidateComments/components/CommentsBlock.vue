@@ -6,51 +6,49 @@
     >
       <SpinnerMain class="comments__spinner" />
     </div>
-    <h2><slot></slot></h2>
+
+    <h2>{{ headingText }}</h2>
+
     <p
-      v-if="errorMessage"
+      v-if="errorMessage && !isLoading"
       class="comments__error"
     >
       {{ errorMessage }}
     </p>
-    <template v-else>
-      <template v-if="comments.length">
-        <CommentCard
-          v-for="comment in comments"
-          :comment
-          :key="comment.id"
-          @delete="(payload) => createComment('delete', payload)"
-          @update-comment="(payload) => createComment('update', payload)"
-          class="comments__comment"
-        />
-      </template>
-      <p v-else>Нет комментариев</p>
 
-      <div class="comments__input">
-        <label for="comment-input">Создать комментарий</label>
-        <textarea
-          v-model="comment"
-          id="comment-input"
-          class="comments__textarea"
-          rows="5"
-        ></textarea>
-        <ButtonMain
-          class="comments__button"
-          @click="createComment('create', { comment })"
-        >
-          <template #text>Добавить комментарий</template>
-        </ButtonMain>
+    <template v-else>
+      <div class="comments__list">
+        <div v-if="comments.length">
+          <CommentCard
+            v-for="comment in comments"
+            :comment
+            :key="comment.id"
+            class="comments__comment"
+            @delete="deleteComment"
+            @update-comment="updateComment"
+          />
+        </div>
+        <p v-else>Нет комментариев</p>
       </div>
+
+      <CommentAddition
+        v-model="newComment"
+        @create-comment="createComment({ comment: newComment })"
+      />
     </template>
   </div>
 </template>
 
 <script setup>
 import { ref, computed, onMounted } from 'vue';
-import { MainRequestClass } from '@/js/RootClasses';
 import CommentCard from '@/pages/candidates/CandidateComments/components/CommentCard.vue';
 import SpinnerMain from '@/components/SpinnerMain.vue';
 import ButtonMain from '@/components/ButtonMain.vue';
+import CommentAddition from './CommentAddition.vue';
+import {
+  CandidatesSetCandidateComment,
+  CandidateGetCandidateComments,
+} from '../js/CommentsClasses.js';
 
 const props = defineProps({
   // ID вакансии, если передано - получаем комментарии для кандидата по отношению к отклику, иначе общие комментарии для кандидата
@@ -67,66 +65,68 @@ const props = defineProps({
 
 // Массив комментариев
 const comments = ref([]);
+// Состояние загрузки
 const isLoading = ref(false);
+// Сообщение об ошибке
 const errorMessage = ref('');
-const comment = ref('');
+// Значение нового комментария
+const newComment = ref('');
 
+// Формируем строку вида "for_otklic:id" или "for_candidate"
 const commentFor = computed(
   () => `for_${props.vacancyId ? 'otklic:' + props.vacancyId : 'candidate'}`,
 );
 
-const createComment = (action, payload) => {
-  class CandidatesSetCandidateComment extends MainRequestClass {
-    candidateId = '';
-    action = '';
+const headingText = computed(() => {
+  return props.vacancyId
+    ? 'Комментарии на отклик кандидата'
+    : 'Комментарии на кандидата';
+});
 
-    commentFor = '';
-    commentId = '';
-    commentText = '';
-  }
-
+// Функция для работы с комментариями, принимает action ('create', 'update', 'delete') и payload {id, comment}
+const dispatchComments = (action, payload) => {
   const requestInstance = new CandidatesSetCandidateComment();
   requestInstance.candidateId = props.candidateId;
   requestInstance.action = action;
+  requestInstance.commentFor = commentFor.value;
+  requestInstance.commentText = payload.comment || '';
+  requestInstance.commentId = payload.id || '';
 
-  if (action === 'create') {
-    requestInstance.commentFor = commentFor.value;
-  }
-
-  if (action === 'create' || action === 'update') {
-    requestInstance.commentText = payload.comment;
-  }
-
-  if (action === 'delete' || action === 'update') {
-    requestInstance.commentId = payload.id;
-  }
-
-  requestInstance.request(
-    '/candidates/set_candidate_comment.php',
-    'manager',
-    () => {
-      if (action === 'create') {
-        comment.value = '';
-      }
-      requestComments();
-    },
-    (err) => {
-      console.log(err);
-    },
-  );
+  return (onSuccess, onError) =>
+    requestInstance.request(
+      '/candidates/set_candidate_comment.php',
+      'manager',
+      onSuccess,
+      onError,
+    );
 };
 
-const requestComments = () => {
-  class CandidateGetCandidateComments extends MainRequestClass {
-    commentFor = '';
-    candidateId = '';
+// Обновление комментария
+const updateComment = (payload) => {
+  dispatchComments('update', payload)(requestComments);
+};
+// Удаление комментария
+const deleteComment = (payload) => {
+  dispatchComments('delete', payload)(requestComments);
+};
+// Создание комментария
+const createComment = (payload) => {
+  if (payload.comment) {
+    const onCreateSuccess = () => {
+      requestComments();
+      newComment.value = '';
+    };
+    dispatchComments('create', payload)(onCreateSuccess);
   }
-  const requestInstance = new CandidateGetCandidateComments();
+};
 
-  // Формируем строку вида for_candidate или for_otklic:id
+// Запрос комментариев
+const requestComments = () => {
+  const requestInstance = new CandidateGetCandidateComments();
   requestInstance.commentFor = commentFor.value;
   requestInstance.candidateId = props.candidateId;
 
+  // При старте запроса состояние загрузки меняется на true и обнуляется значение сообщения об ошибке
   isLoading.value = true;
   errorMessage.value = '';
 
@@ -138,10 +138,7 @@ const requestComments = () => {
       isLoading.value = false;
     },
     (err) => {
-      console.log(err);
-      if (err) {
-        errorMessage.value = err;
-      }
+      errorMessage.value = err || 'Произошла ошибка при получении комментариев';
       isLoading.value = false;
     },
   );
@@ -169,28 +166,7 @@ onMounted(requestComments);
   color: var(--error-color);
 }
 
-.comments__input {
-  display: flex;
-  flex-direction: column;
-  gap: 10px;
-}
-
-.comments__button {
-  align-self: flex-start;
-}
-
-.comments__textarea {
-  resize: none;
-  padding: 10px;
-  border: none;
-  border-radius: 10px;
-  border-color: var(--mine-shaft);
-  outline: 1px solid var(--tundora);
-  background-color: var(--white);
-}
-
-.comments__textarea:focus {
-  outline-width: 2px;
-  outline-color: var(--cornflower-blue);
+.comments__list {
+  margin-bottom: 10px;
 }
 </style>

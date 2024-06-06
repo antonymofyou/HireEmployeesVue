@@ -1,13 +1,11 @@
 <template>
   <div class="container">
-    <h1 class="heading">Лист комментариев</h1>
-    <CommentsBlock :candidate-id>Комментарии на кандидата</CommentsBlock>
+    <h1 class="heading">Комментарии</h1>
+    <CommentsBlock :candidate-id />
     <CommentsBlock
       :candidate-id
       :vacancy-id
-    >
-      Комментарии на отклик кандидата
-    </CommentsBlock>
+    />
   </div>
 </template>
 
