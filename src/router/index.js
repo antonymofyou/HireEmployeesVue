@@ -49,4 +49,12 @@ const router = createRouter({
   ],
 });
 
+router.beforeEach((to, from, next) => {
+  if (to.name !== "home" && !isManager()) {
+    next({ name: "home" });
+  } else {
+    next();
+  }
+});
+
 export default router;

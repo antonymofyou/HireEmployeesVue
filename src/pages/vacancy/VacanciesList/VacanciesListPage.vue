@@ -109,7 +109,6 @@
 import { onMounted, ref } from "vue";
 import { useRouter } from "vue-router";
 import { MainRequestClass } from "@/js/RootClasses";
-import { isManager } from "@/js/AuthFunctions";
 import VacancyCard from "./components/VacancyCard.vue";
 import plusIcon from "./assets/icons/plus-icon.svg";
 import Modal from "@/components/Modal.vue";
@@ -119,9 +118,6 @@ import ButtonSimple from "@/components/ButtonSimple.vue";
 import TopSquareButton from "@/components/TopSquareButton.vue";
 
 const router = useRouter();
-
-//Проверка авторизации пользователя
-if (!isManager()) router.push({ name: "home" });
 
 // Вакансии
 const vacancies = ref([]);
@@ -176,7 +172,7 @@ function createVacancy(callback) {
 
   requestClass.request(
     "/vacancies/create_vacancy.php",
-    "manager",
+    "seeker",
     function (response) {
       //успешный результат
       callback(response);
