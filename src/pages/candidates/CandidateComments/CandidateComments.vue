@@ -24,7 +24,7 @@ const candidateId = '1' || route.query.candidateId;
 
 <style scoped>
 .container {
-  padding: 0 30px;
+  padding: 0 20px;
 }
 
 .comments-block {

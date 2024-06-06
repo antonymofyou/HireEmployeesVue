@@ -14,7 +14,10 @@
             title="Редактировать"
             @click="onEditMode"
           >
-            <IconEdit />
+            <img
+              class="icon"
+              src="@/assets/icons/edit.svg"
+            />
           </button>
           <template v-else>
             <button
@@ -23,7 +26,10 @@
               title="Сохранить"
               @click="updateComment"
             >
-              <IconSave />
+              <img
+                class="icon"
+                src="@/assets/icons/save-black.svg"
+              />
             </button>
             <button
               class="button button--close"
@@ -31,7 +37,10 @@
               title="Отменить"
               @click="cancelUpdate"
             >
-              <IconClose />
+              <img
+                class="icon"
+                src="@/assets/icons/close.svg"
+              />
             </button>
           </template>
         </template>
@@ -43,7 +52,10 @@
           title="Удалить"
           @click="isModalOpened = true"
         >
-          <IconDelete />
+          <img
+            class="icon"
+            src="@/assets/icons/delete.svg"
+          />
         </button>
       </div>
     </div>
@@ -81,10 +93,6 @@
 <script setup>
 import { computed, ref } from 'vue';
 import ModalConfirmation from '@/components/ModalConfirmation.vue';
-import IconSave from './IconSave.vue';
-import IconEdit from './IconEdit.vue';
-import IconDelete from './IconDelete.vue';
-import IconClose from './IconClose.vue';
 
 const props = defineProps({
   // Объект комментария
@@ -156,16 +164,24 @@ const formattedDate = computed(() => {
   background-color: var(--white);
 }
 
+.icon {
+  width: 100%;
+  height: 100%;
+  display: block;
+}
+
 .button {
   --button-color: var(--mine-shaft);
   --button-bg: var(--milk);
+  width: 25px;
+  height: 25px;
 
   display: flex;
   align-items: center;
   justify-content: center;
   border: none;
   border-radius: 5px;
-  padding: 5px;
+  padding: 4px;
   color: var(--button-color);
   background-color: var(--button-bg);
   font-size: 16px;
@@ -202,6 +218,7 @@ const formattedDate = computed(() => {
 .comment__manager {
   font-weight: bold;
   font-size: 14px;
+  margin-right: 5px;
 }
 
 .comment__buttons {
