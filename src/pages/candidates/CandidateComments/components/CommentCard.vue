@@ -1,68 +1,70 @@
 <template>
   <div class="comment">
-    <div class="comment__info">
+    <div class="comment__controls">
       <p class="comment__manager">{{ props.comment.managerName }}</p>
-      <p class="comment__date">{{ formattedDate }}</p>
-    </div>
-
-    <textarea
-      v-if="isEditMode"
-      v-model="comment"
-      row="2"
-      class="comment__textarea"
-    >
-    </textarea>
-    <p
-      v-else
-      class="comment__text"
-    >
-      {{ props.comment.comment }}
-    </p>
-
-    <div
-      v-if="userCanEdit || userCanDelete"
-      class="comment__buttons"
-    >
-      <template v-if="userCanEdit">
-        <button
-          v-if="!isEditMode"
-          class="button button--edit"
-          aria-label="Редактировать"
-          title="Редактировать"
-          @click="onEditMode"
-        >
-          <IconEdit />
-        </button>
-        <template v-else>
-          <button
-            class="button button--save"
-            aria-label="Сохранить"
-            title="Сохранить"
-            @click="updateComment"
-          >
-            <IconSave />
-          </button>
-          <button
-            class="button button--close"
-            aria-label="Отменить"
-            title="Отменить"
-            @click="cancelUpdate"
-          >
-            <IconClose />
-          </button>
-        </template>
-      </template>
-
-      <button
-        v-if="userCanDelete"
-        class="button button--delete"
-        aria-label="Удалить"
-        title="Удалить"
-        @click="isModalOpened = true"
+      <div
+        v-if="userCanEdit || userCanDelete"
+        class="comment__buttons"
       >
-        <IconDelete />
-      </button>
+        <template v-if="userCanEdit">
+          <button
+            v-if="!isEditMode"
+            class="button button--edit"
+            aria-label="Редактировать"
+            title="Редактировать"
+            @click="onEditMode"
+          >
+            <IconEdit />
+          </button>
+          <template v-else>
+            <button
+              class="button button--save"
+              aria-label="Сохранить"
+              title="Сохранить"
+              @click="updateComment"
+            >
+              <IconSave />
+            </button>
+            <button
+              class="button button--close"
+              aria-label="Отменить"
+              title="Отменить"
+              @click="cancelUpdate"
+            >
+              <IconClose />
+            </button>
+          </template>
+        </template>
+
+        <button
+          v-if="userCanDelete"
+          class="button button--delete"
+          aria-label="Удалить"
+          title="Удалить"
+          @click="isModalOpened = true"
+        >
+          <IconDelete />
+        </button>
+      </div>
     </div>
+
+    <div class="comment__info">
+      <textarea
+        v-if="isEditMode"
+        v-model="comment"
+        rows="2"
+        class="comment__textarea"
+      >
+      </textarea>
+      <p
+        v-else
+        class="comment__text"
+      >
+        {{ props.comment.comment }}
+      </p>
+    </div>
+
+    <p class="comment__date">{{ formattedDate }}</p>
 
     <ModalConfirmation
       :show="isModalOpened"
@@ -85,6 +87,7 @@ import IconDelete from './IconDelete.vue';
 import IconClose from './IconClose.vue';
 
 const props = defineProps({
+  // Объект комментария
   comment: {
     type: Object,
     required: true,
@@ -108,6 +111,7 @@ const offEditMode = () => (isEditMode.value = false);
 // Включение режима редактирования
 const onEditMode = () => (isEditMode.value = true);
 
+// Обновление комментария, если он изменился и отмена режима редактирования
 const updateComment = () => {
   if (!(comment.value === initialValue)) {
     emit('updateComment', { id: props.comment.id, comment: comment.value });
@@ -115,6 +119,7 @@ const updateComment = () => {
   offEditMode();
 };
 
+// Отмена режима редактирования и возвращение к начальному значению
 const cancelUpdate = () => {
   comment.value = initialValue;
   offEditMode();
@@ -123,10 +128,14 @@ const cancelUpdate = () => {
 // Форматирование даты под RU локаль
 const formatDate = (date) => {
   const d = new Date(date);
-  return `${d.toLocaleDateString('ru-RU')} ${d.toLocaleTimeString('ru-RU')}`;
+  return `${d.toLocaleDateString('ru-RU')} ${d
+    .toLocaleTimeString('ru-RU')
+    .slice(0, -3)}`;
 };
 
+// Права на редактирование
 const userCanEdit = props.comment.canEdit === '1';
+// Права на удаление
 const userCanDelete = props.comment.canDelete === '1';
 
 // Если даты создания и изменения совпадают - отображаем дату создания, иначе отображаем дату изменения и пометку "изменено"
@@ -139,14 +148,16 @@ const formattedDate = computed(() => {
 
 <style scoped>
 .comment {
-  padding: 12px;
+  display: flex;
+  flex-direction: column;
+  padding: 8px;
   border-radius: 10px;
   box-shadow: 0 1px 10px rgba(0, 0, 0, 0.3);
   background-color: var(--white);
 }
 
 .button {
-  --button-color: var(--white);
+  --button-color: var(--mine-shaft);
   --button-bg: var(--milk);
 
   display: flex;
@@ -154,10 +165,10 @@ const formattedDate = computed(() => {
   justify-content: center;
   border: none;
   border-radius: 5px;
-  padding: 10px;
+  padding: 5px;
   color: var(--button-color);
   background-color: var(--button-bg);
-  font-size: 20px;
+  font-size: 16px;
   outline-offset: 2px;
   outline-color: var(--button-color);
   transition: all 0.15s ease-in-out;
@@ -176,20 +187,10 @@ const formattedDate = computed(() => {
   opacity: 0.4;
 }
 
-.button--delete {
-  --button-bg: var(--error-color);
-}
-
-.button--save {
-  --button-bg: var(--success-color);
-}
-
-.button--close {
-  --button-bg: var(--tundora);
-}
-
-.button--edit {
-  --button-bg: var(--cornflower-blue);
+.comment__controls {
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 5px;
 }
 
 .comment__date,
@@ -199,12 +200,8 @@ const formattedDate = computed(() => {
 }
 
 .comment__manager {
-  font-size: 20px;
-}
-
-.comment__info,
-.comment__text {
-  margin-bottom: 10px;
+  font-weight: bold;
+  font-size: 14px;
 }
 
 .comment__buttons {
@@ -216,7 +213,6 @@ const formattedDate = computed(() => {
 .comment__textarea {
   font-size: 16px;
   width: 100%;
-  margin-bottom: 10px;
   padding: 10px;
   resize: none;
   border: none;
@@ -237,5 +233,6 @@ const formattedDate = computed(() => {
 
 .comment__date {
   font-size: 10px;
+  text-align: right;
 }
 </style>

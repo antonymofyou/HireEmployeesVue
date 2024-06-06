@@ -32,7 +32,7 @@
       </div>
 
       <CommentAddition
-        v-model="newComment"
+        v-model.trim="newComment"
         @create-comment="createComment({ comment: newComment })"
       />
     </template>
@@ -76,6 +76,7 @@ const commentFor = computed(
   () => `for_${props.vacancyId ? 'otklic:' + props.vacancyId : 'candidate'}`,
 );
 
+// Заголовок блока, если передано ID вакансии - "Комментарии на отклик кандидата", иначе "Комментарии на кандидата"
 const headingText = computed(() => {
   return props.vacancyId
     ? 'Комментарии на отклик кандидата'
@@ -104,10 +105,12 @@ const dispatchComments = (action, payload) => {
 const updateComment = (payload) => {
   dispatchComments('update', payload)(requestComments);
 };
+
 // Удаление комментария
 const deleteComment = (payload) => {
   dispatchComments('delete', payload)(requestComments);
 };
+
 // Создание комментария
 const createComment = (payload) => {
   if (payload.comment) {
