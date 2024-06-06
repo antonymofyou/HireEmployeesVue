@@ -18,7 +18,9 @@ import { useRoute } from 'vue-router';
 import CommentsBlock from './components/CommentsBlock.vue';
 
 const route = useRoute();
+// ID вакансии
 const vacancyId = route.query.vacancyId;
+// ID кандидата
 const candidateId = '1' || route.query.candidateId;
 </script>
 
