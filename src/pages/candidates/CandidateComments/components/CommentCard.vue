@@ -19,51 +19,66 @@
       {{ props.comment.comment }}
     </p>
 
-    <div class="comment__buttons">
-      <button
-        v-if="!isEditMode"
-        class="button button--edit"
-        aria-label="Редактировать"
-        title="Редактировать"
-        @click="onEditMode"
-      >
-        <IconEdit />
-      </button>
-
-      <template v-else>
+    <div
+      v-if="userCanEdit || userCanDelete"
+      class="comment__buttons"
+    >
+      <template v-if="userCanEdit">
         <button
-          class="button button--save"
-          aria-label="Сохранить"
-          title="Сохранить"
-          @click="updateComment"
+          v-if="!isEditMode"
+          class="button button--edit"
+          aria-label="Редактировать"
+          title="Редактировать"
+          @click="onEditMode"
         >
-          <IconSave />
+          <IconEdit />
         </button>
-        <button
-          class="button button--close"
-          aria-label="Отменить"
-          title="Отменить"
-          @click="cancelUpdate"
-        >
-          <IconClose />
-        </button>
+        <template v-else>
+          <button
+            class="button button--save"
+            aria-label="Сохранить"
+            title="Сохранить"
+            @click="updateComment"
+          >
+            <IconSave />
+          </button>
+          <button
+            class="button button--close"
+            aria-label="Отменить"
+            title="Отменить"
+            @click="cancelUpdate"
+          >
+            <IconClose />
+          </button>
+        </template>
       </template>
 
       <button
+        v-if="userCanDelete"
         class="button button--delete"
         aria-label="Удалить"
         title="Удалить"
-        @click="emit('delete', { id: props.comment.id })"
+        @click="isModalOpened = true"
       >
         <IconDelete />
       </button>
     </div>
+
+    <ModalConfirmation
+      :show="isModalOpened"
+      :confirm-button-color="'var(--cinnabar)'"
+      text="Вы уверены, что хотите удалить комментарий?"
+      cancel-text="Отмена"
+      confirm-text="Удалить"
+      @confirm="emit('delete', { id: props.comment.id })"
+      @cancel="isModalOpened = false"
+    />
   </div>
 </template>
 
 <script setup>
 import { computed, ref } from 'vue';
-import ButtonMain from '@/components/ButtonMain.vue';
+import ModalConfirmation from '@/components/ModalConfirmation.vue';
 import IconSave from './IconSave.vue';
 import IconEdit from './IconEdit.vue';
 import IconDelete from './IconDelete.vue';
@@ -77,6 +92,9 @@ const props = defineProps({
 });
 
 const emit = defineEmits(['delete', 'updateComment']);
+
+// Состояние модального окна
+const isModalOpened = ref(false);
 // Режим редактирования комментария
 const isEditMode = ref(false);
 // Начальное значение комментария
@@ -107,6 +125,9 @@ const formatDate = (date) => {
   const d = new Date(date);
   return `${d.toLocaleDateString('ru-RU')} ${d.toLocaleTimeString('ru-RU')}`;
 };
+
+const userCanEdit = props.comment.canEdit === '1';
+const userCanDelete = props.comment.canDelete === '1';
 
 // Если даты создания и изменения совпадают - отображаем дату создания, иначе отображаем дату изменения и пометку "изменено"
 const formattedDate = computed(() => {
@@ -142,7 +163,7 @@ const formattedDate = computed(() => {
   transition: all 0.15s ease-in-out;
 }
 
-.button:not(:disabled):hover {
+.button:where(:not(:disabled)):hover {
   opacity: 0.8;
   cursor: pointer;
 }
