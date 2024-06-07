@@ -63,14 +63,17 @@
     <div class="comment__info">
       <textarea
         v-if="isEditMode"
-        v-model="comment"
-        rows="2"
+        v-model.trim="comment"
+        @input="setHeight"
+        ref="editingTextareaRef"
+        :style="{ height: height + 'px' }"
         class="comment__textarea"
       >
       </textarea>
       <p
         v-else
         class="comment__text"
+        ref="commentParagraphRef"
       >
         {{ props.comment.comment }}
       </p>
@@ -91,7 +94,7 @@
 </template>
 
 <script setup>
-import { computed, ref } from 'vue';
+import { computed, ref, watchEffect } from 'vue';
 import ModalConfirmation from '@/components/ModalConfirmation.vue';
 
 const props = defineProps({
@@ -112,12 +115,32 @@ const isEditMode = ref(false);
 const initialValue = props.comment.comment;
 // Текст комментария
 const comment = ref(initialValue);
+// Нода параграфа комментария
+const commentParagraphRef = ref(null);
+// Нода поля для редактирования комментария
+const editingTextareaRef = ref(null);
+// Высота поля для редактирования комментария
+const height = ref(50);
+
+// Фокус на поле для редактирования комментария при открытии режима редактирования
+watchEffect(() => {
+  if (editingTextareaRef.value) {
+    editingTextareaRef.value.focus();
+  }
+});
+
+// Перевычисление высоты поля для редактирования комментария
+const setHeight = (e) => (height.value = e.target.scrollHeight);
 
 // Отключение режима редактирования, возвращение к начальному значению
 const offEditMode = () => (isEditMode.value = false);
 
 // Включение режима редактирования
-const onEditMode = () => (isEditMode.value = true);
+const onEditMode = () => {
+  // Устанавливаем высоту поля для редактирования комментария равной значению высоты параграфа комментария + 10px для отступа
+  height.value = commentParagraphRef.value.scrollHeight + 10;
+  isEditMode.value = true;
+};
 
 // Обновление комментария, если он изменился и отмена режима редактирования
 const updateComment = () => {
@@ -230,10 +253,11 @@ const formattedDate = computed(() => {
 .comment__textarea {
   font-size: 16px;
   width: 100%;
-  padding: 10px;
+  min-height: 50px;
+  padding: 5px;
   resize: none;
   border: none;
-  border-radius: 10px;
+  border-radius: 8px;
   border-color: var(--mine-shaft);
   outline: 1px solid var(--tundora);
   background-color: var(--white);
