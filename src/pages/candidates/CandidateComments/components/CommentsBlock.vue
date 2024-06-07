@@ -103,22 +103,40 @@ const dispatchComments = (action, payload) => {
 
 // Обновление комментария
 const updateComment = (payload) => {
-  dispatchComments('update', payload)(requestComments);
+  // Обновление комментария в массиве без перезапроса на сервер
+  const onUpdateSuccess = () => {
+    const id = comments.value.findIndex((comment) => comment.id === payload.id);
+    comments.value[id].comment = payload.comment;
+  };
+  // Функция для запроса на обновление комментария
+  const requestFn = dispatchComments('update', payload);
+  requestFn(onUpdateSuccess);
 };
 
 // Удаление комментария
 const deleteComment = (payload) => {
-  dispatchComments('delete', payload)(requestComments);
+  // Удаление комментария из массива без перезапроса на сервер
+  const onDeleteSuccess = () => {
+    comments.value = comments.value.filter(
+      (comment) => comment.id !== payload.id,
+    );
+  };
+  // Функция для запроса на удаление комментария
+  const requestFn = dispatchComments('delete', payload);
+  requestFn(onDeleteSuccess);
 };
 
 // Создание комментария
 const createComment = (payload) => {
   if (payload.comment) {
+    // Перезапрос комментариев, очистка поля для нового комментария
     const onCreateSuccess = () => {
       requestComments();
       newComment.value = '';
     };
-    dispatchComments('create', payload)(onCreateSuccess);
+    // Функция для запроса на создание комментария
+    const requestFn = dispatchComments('create', payload);
+    requestFn(onCreateSuccess);
   }
 };
 
@@ -139,8 +157,8 @@ const requestComments = () => {
       comments.value = response.comments;
       isLoading.value = false;
     },
-    (err) => {
-      errorMessage.value = err || 'Произошла ошибка при получении комментариев';
+    () => {
+      errorMessage.value = 'Произошла ошибка при получении комментариев';
       isLoading.value = false;
     },
   );

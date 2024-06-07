@@ -19,9 +19,9 @@ import CommentsBlock from './components/CommentsBlock.vue';
 
 const route = useRoute();
 // ID вакансии
-const vacancyId = route.query.vacancyId;
+const vacancyId = route.query.vacancyid;
 // ID кандидата
-const candidateId = '1' || route.query.candidateId;
+const candidateId = route.query.candidateid;
 </script>
 
 <style scoped>
