@@ -15,7 +15,11 @@
         :ref="`vacancy_${vacancy.id}`"
       />
     </div>
-    <div v-if="vacancies.length === 0">На данный момент вакансий нет</div>
+    <!-- Отображение прелоадера  -->
+    <SpinnerMain v-if="isLoading" style="width: 50px" />
+    <div v-if="vacancies.length === 0 && !isLoading">
+      На данный момент вакансий нет
+    </div>
   </section>
 
   <!-- Встраивание компонента Modal в DOM -->
@@ -42,13 +46,15 @@
           :isTextBold="true"
         />
 
-        <SelectSimple
-          v-model="formData.published"
-          id="isPublished"
-          labelName="Опубликована"
-          :options="options"
-          :model-value="options[0].value"
-        />
+        <div class="modal__is-published">
+          <span>Опубликовано:</span>
+          <SelectMain
+            v-model="formData.published"
+            :options="options"
+            :model-value="options[0].id"
+
+          />
+        </div>
 
         <InputSimple
           v-model="formData.description"
@@ -70,14 +76,15 @@
         </div>
       </template>
     </Modal>
-
     <!-- Открытие модального окна успешного создания вакансии -->
     <Modal :show="modalSuccess">
-      <template #header>
+      <template #header v-if="!isLoading">
         <h3>Вакансия создана!</h3>
       </template>
       <template #body>
-        <div class="modal__success">
+        <!-- Отображение прелоадера  -->
+        <SpinnerMain v-if="isLoading" style="width: 50px" />
+        <div class="modal__success" v-if="!isLoading">
           <!-- Кнопка перехода к созданной вакансии и закрытия модального окна. Происходит обращение к глобальному объекту refs, который содержит ссылки на ref карточек vacancy_id. через $el(ключ DOM элемента).scrollIntoView происходит переход к созданной вакансии -->
           <ButtonSimple
             @click="
@@ -90,11 +97,14 @@
             <template v-slot:text>Закрыть</template>
           </ButtonSimple>
 
-          <!-- Кнопка перехода к редактивроанию созданной вакансии -->
+          <!-- Кнопка перехода к редактированию созданной вакансии -->
           <ButtonSimple
             @click="
               modalSuccess = false;
-              $router.push(`/vacancy_edit/${createdVacancyId}`);
+              $router.push({
+                name: 'vacancy_edit',
+                params: { id: createdVacancyId },
+              });
             "
           >
             <template v-slot:text>Редактировать</template>
@@ -102,6 +112,8 @@
         </div>
       </template>
     </Modal>
+    <!-- Вывод сообщения о ошибке -->
+    <ErrorNotification v-if="errorMessage" :message="errorMessage" />
   </Teleport>
 </template>
 
@@ -113,11 +125,19 @@ import VacancyCard from "./components/VacancyCard.vue";
 import plusIcon from "./assets/icons/plus-icon.svg";
 import Modal from "@/components/Modal.vue";
 import InputSimple from "@/components/InputSimple.vue";
-import SelectSimple from "@/components/SelectSimple.vue";
 import ButtonSimple from "@/components/ButtonSimple.vue";
 import TopSquareButton from "@/components/TopSquareButton.vue";
+import ErrorNotification from "@/components/ErrorNotification.vue";
+import SpinnerMain from "@/components/SpinnerMain.vue";
+import SelectMain from "@/components/SelectMain.vue";
 
 const router = useRouter();
+
+// Отображение ошибки
+const errorMessage = ref('');
+
+//Флаги загрузки данных
+const isLoading = ref(false);
 
 // Вакансии
 const vacancies = ref([]);
@@ -137,31 +157,35 @@ const formData = ref({
 });
 
 // Опции для селекта
-const options = [
-  { text: "Нет", value: "0" },
-  { text: "Да", value: "1" },
-];
+const options = ref([
+  { name: "Нет", id: "0" },
+  { name: "Да", id: "1" },
+]);
 
 // получение всех вакансий
 function getAllVacanciesManager() {
   let requestClass = new MainRequestClass();
 
+  isLoading.value = true;
   requestClass.request(
     "/vacancies/get_all_vacancies.php",
     "manager",
     function (response) {
       //успешный результат
       vacancies.value = response.vacancies;
+
+      isLoading.value = false;
     },
     function (err) {
       //неуспешный результат
-      alert(err);
+      errorMessage.value = err;
+      isLoading.value = false;
     }
   );
 }
 
 //Создание новой вакансии
-function createVacancy(callback) {
+function createVacancy() {
   class VacanciesCreateVacancy extends MainRequestClass {
     name = formData.value.name; // название вакансии (не обяз.)
     description = formData.value.description; // описание вакансии (не обяз.)
@@ -170,12 +194,12 @@ function createVacancy(callback) {
 
   let requestClass = new VacanciesCreateVacancy();
 
+  isLoading.value = true;
   requestClass.request(
     "/vacancies/create_vacancy.php",
-    "seeker",
+    "manager",
     function (response) {
       //успешный результат
-      callback(response);
 
       //получение Id созданной вакансии
       createdVacancyId.value = response.vacancy.id;
@@ -189,12 +213,16 @@ function createVacancy(callback) {
       showModal.value = false;
       modalSuccess.value = true;
 
+      isLoading.value = false;
+
       //получение нового списка вакансий
       getAllVacanciesManager();
     },
     function (err) {
       //неуспешный результат
-      alert(err);
+      showModal.value = false;
+      errorMessage.value = err;
+      isLoading.value = false;
     }
   );
 }
@@ -261,6 +289,12 @@ onMounted(() => {
 
 .modal__close-btn:hover {
   filter: opacity(0.6);
+}
+
+.modal__is-published {
+  display: flex;
+  align-items: center;
+  gap: 10px;
 }
 
 .modal__submit {

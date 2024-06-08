@@ -100,15 +100,18 @@ export class ApiRootClass {
 
         let responseData = await response.json();
 
-        if (responseData.success === '-1') { // При success="-1" делаем разлогин пользователя
-            logOut(whoIs);
-            errCallback(`Разлогин: ${response.message}`);
+        if (responseData.success === '-1') { // При success="-1" делаем разлогин пользователя, выдаем ошибку и перезагружаем страницу
+          logOut(whoIs)
+          errCallback(`Разлогин: ${responseData.message}, перезагрузка страницы...`);
+          setTimeout(() => {
+            location.reload();
+          }, 3000);
         } 
         else if(responseData.success === null || responseData.success === undefined){
             errCallback(`Ошибка - не прилетело значение success`);
         }
         else if(responseData.success === '0'){
-            errCallback(`Ошибка обработки бэка: ${response.message}`);
+            errCallback(`Ошибка обработки бэка: ${responseData.message}`);
         }else { // В любом другом случае вызываем коллбэк функцию, в которую передаём ответ сервера, и далее обрабатыввем его внутри этой функции
             successCallback(responseData);
         }

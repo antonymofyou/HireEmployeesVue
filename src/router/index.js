@@ -1,12 +1,13 @@
 import { createRouter, createWebHistory } from "vue-router";
+import { isManager, isSeeker } from "@/js/AuthFunctions";
 
 import HomePage from "@/pages/HomePage.vue";
 import ManagerAuth from "@/pages/authorization/ManagerAuth.vue";
 import VacanciesListPage from "@/pages/vacancy/VacanciesList/VacanciesListPage.vue";
 import VacancyIdPage from "@/pages/vacancy/VacancyIdPage/VacancyIdPage.vue";
 import VacancyEditPage from "@/pages/vacancy/EditPage/VacancyEditPage.vue";
-import CandidatesList from "@/pages/candidates/CandidatesList.vue";
 import CandidatComments from "@/pages/candidates/CandidatComments.vue";
+import CandidatesList from "@/pages/candidates/CandidatesList/CandidatesListPage.vue";
 
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
@@ -37,7 +38,7 @@ const router = createRouter({
       component: VacancyEditPage,
     },
     {
-      path: "/candidates",
+      path: "/candidates_list",
       name: "candidates",
       component: CandidatesList,
     },
@@ -49,9 +50,23 @@ const router = createRouter({
   ],
 });
 
+// Проверка условий при роутинге
 router.beforeEach((to, from, next) => {
-  if (to.name !== "home" && !isManager()) {
-    next({ name: "home" });
+  // Базовый путь для всех неавторизованных пользователей
+  const baseRoute =
+  to.name !== "managerAuth" && to.name !== "home" && to.name !== "Idvacancy";
+
+  const goHome = { name: "home" };
+  
+  //Проверка на наличие авторизации пользователя
+  if (baseRoute && !isManager() && !isSeeker()) {
+    next(goHome);
+  } else if (to.name === "managerAuth" && isManager()) { // Редирект менеджера со страницы авторизации для менеджера
+    next(goHome);
+  } else if (to.name === "Idvacancy" && isManager()) { // Редирект менеджера со страницы вакансии для кандидата
+    next(goHome);
+  } else if (baseRoute && !isManager()) { // Редирект кандидата со страниц предназначенных для менеджера
+    next(goHome);
   } else {
     next();
   }
