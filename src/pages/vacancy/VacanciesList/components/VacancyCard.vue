@@ -10,19 +10,36 @@
         </span>
         <span v-else class="vacancy__status-style-reject">Не опубликована</span>
       </div>
-      <div class="vacancy__btn" @click="goToEditVacancy()">Редактировать</div>
+
+      <div class="vacancy__buttons">
+        <ButtonMain class="vacancy__btn" :align="'start'" @click="goToVacancy()"
+          ><template v-slot:text>Отклики</template>
+        </ButtonMain>
+        <ButtonMain
+          class="vacancy__btn"
+          :align="'start'"
+          @click="goToEditVacancy()"
+          ><template v-slot:text>Редактировать</template>
+        </ButtonMain>
+      </div>
     </div>
   </div>
 </template>
 
 <script setup>
 import { useRouter } from "vue-router";
+import ButtonMain from "@/components/ButtonMain.vue";
+
 
 const router = useRouter();
 const props = defineProps(["vacancy"]);
 
 function goToEditVacancy() {
   router.push({ name: "vacancy_edit", params: { id: props.vacancy.id } });
+}
+
+function goToVacancy() {
+  router.push({ name: "candidates", query: { vacancyId: props.vacancy.id } });
 }
 </script>
 
@@ -82,17 +99,8 @@ function goToEditVacancy() {
   font-weight: 400;
 }
 
-.vacancy__btn {
-  font-size: 14px;
-  line-height: 20px;
-  font-weight: 400;
-  background-color: var(--transparent-blue);
-  padding: 5px;
-  border-radius: 5px;
-  color: var(--white);
-  text-align: center;
-  padding: 5px;
-  border: 0;
-  cursor: pointer;
+.vacancy__buttons {
+  display: flex;
+  gap: 10px;
 }
 </style>
