@@ -103,6 +103,7 @@ export class ApiRootClass {
         if (responseData.success === '-1') { // При success="-1" делаем разлогин пользователя
             logOut(whoIs);
             errCallback(`Разлогин: ${responseData.message}`);
+            location.reload();
         } 
         else if(responseData.success === null || responseData.success === undefined){
             errCallback(`Ошибка - не прилетело значение success`);
