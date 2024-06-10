@@ -189,7 +189,7 @@ function getAllVacanciesManager() {
 }
 
 //Создание новой вакансии
-function createVacancy(callback) {
+function createVacancy() {
   class VacanciesCreateVacancy extends MainRequestClass {
     name = formData.value.name; // название вакансии (не обяз.)
     description = formData.value.description; // описание вакансии (не обяз.)
@@ -224,6 +224,7 @@ function createVacancy(callback) {
     },
     function (err) {
       //неуспешный результат
+      showModal.value = false;
       errorMessage.value = err;
       isLoading.value = false;
     }
