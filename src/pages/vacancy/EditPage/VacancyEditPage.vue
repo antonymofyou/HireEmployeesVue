@@ -1,5 +1,12 @@
 <template>
   <main class="content vacancy-edit" v-if="isLoaded">
+    <TopSquareButton
+      class="vacancy-edit__back-btn"
+      :icon="iconBack"
+      @click="$router.push({ name: 'vacanciesList' })"
+    >
+
+    </TopSquareButton>
     <section class="container">
       <h2 class="vacancy-edit__title">{{ staticText.title }}</h2>
 
@@ -71,6 +78,8 @@
 import InputSimple from '@/components/InputSimple.vue';
 import SelectSimple from '@/components/SelectSimple.vue';
 import SubmitButton from '@/components/SubmitButton.vue';
+import TopSquareButton from '@/components/TopSquareButton.vue';
+import iconBack from '@/assets/icons/back.svg?url';
 import VacancyQuestion from './components/VacancyQuestion.vue';
 import { ref, computed, onMounted } from 'vue';
 import { useRoute } from 'vue-router';
@@ -342,6 +351,12 @@ const saveChanges = (callback) => {
   top: 20px;
   right: 30px;
   z-index: 10;
+}
+
+.vacancy-edit__back-btn {
+  position: fixed;
+  top: 20px;
+  left: 30px;
 }
 
 @media screen and (max-width: 1200px) {
