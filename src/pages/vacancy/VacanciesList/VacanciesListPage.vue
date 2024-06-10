@@ -123,7 +123,7 @@ import { useRouter } from "vue-router";
 import { MainRequestClass } from "@/js/RootClasses";
 import { isManager } from "@/js/AuthFunctions";
 import VacancyCard from "./components/VacancyCard.vue";
-import plusIcon from "@/assets/icons/plus.svg?url";
+import plusIcon from "@/assets/icons/plus.svg";
 import Modal from "@/components/Modal.vue";
 import InputSimple from "@/components/InputSimple.vue";
 import ButtonMain from "@/components/ButtonMain.vue";

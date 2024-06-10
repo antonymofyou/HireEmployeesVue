@@ -68,7 +68,7 @@ import ErrorNotification from '@/components/ErrorNotification.vue';
 import SelectMain from '@/components/SelectMain.vue';
 import SpinnerMain from '@/components/SpinnerMain.vue';
 import TopSquareButton from '@/components/TopSquareButton.vue';
-import iconBack from '@/assets/icons/back.svg?url';
+import iconBack from '@/assets/icons/back.svg';
 
 const router = useRouter();
 const route = useRoute();

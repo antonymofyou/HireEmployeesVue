@@ -79,7 +79,7 @@ import InputSimple from '@/components/InputSimple.vue';
 import SelectSimple from '@/components/SelectSimple.vue';
 import SubmitButton from '@/components/SubmitButton.vue';
 import TopSquareButton from '@/components/TopSquareButton.vue';
-import iconBack from '@/assets/icons/back.svg?url';
+import iconBack from '@/assets/icons/back.svg';
 import VacancyQuestion from './components/VacancyQuestion.vue';
 import { ref, computed, onMounted } from 'vue';
 import { useRoute } from 'vue-router';
