@@ -25,7 +25,7 @@
   <!-- Встраивание компонента Modal в DOM -->
   <Teleport to="body">
     <!-- Открытие модального окна добавления вакансии -->
-    <Modal :show="showModal" v-if="!modalSuccess">
+    <Modal :show="showModal" v-if="!modalSuccess" @click.self="showModal = false">
       <template #header>
         <div class="modal__close">
           <button class="modal__close-btn" @click="showModal = false">
@@ -67,17 +67,17 @@
       </template>
       <template #footer-control-buttons>
         <div class="modal__submit">
-          <ButtonSimple
+          <ButtonMain
             class="vacancy__add-create-btn"
-            :submit-function="createVacancy"
+            @click="createVacancy"
           >
             <template v-slot:text>Создать</template>
-          </ButtonSimple>
+          </ButtonMain>
         </div>
       </template>
     </Modal>
     <!-- Открытие модального окна успешного создания вакансии -->
-    <Modal :show="modalSuccess">
+    <Modal :show="modalSuccess"  @click.self="modalSuccess = false">
       <template #header v-if="!isLoading">
         <h3>Вакансия создана!</h3>
       </template>
@@ -86,7 +86,7 @@
         <SpinnerMain v-if="isLoading" style="width: 50px" />
         <div class="modal__success" v-if="!isLoading">
           <!-- Кнопка перехода к созданной вакансии и закрытия модального окна. Происходит обращение к глобальному объекту refs, который содержит ссылки на ref карточек vacancy_id. через $el(ключ DOM элемента).scrollIntoView происходит переход к созданной вакансии -->
-          <ButtonSimple
+          <ButtonMain
             @click="
               modalSuccess = false;
               $refs[`vacancy_${createdVacancyId}`][0].$el.scrollIntoView({
@@ -95,10 +95,10 @@
             "
           >
             <template v-slot:text>Закрыть</template>
-          </ButtonSimple>
+          </ButtonMain>
 
           <!-- Кнопка перехода к редактированию созданной вакансии -->
-          <ButtonSimple
+          <ButtonMain
             @click="
               modalSuccess = false;
               $router.push({
@@ -108,7 +108,7 @@
             "
           >
             <template v-slot:text>Редактировать</template>
-          </ButtonSimple>
+          </ButtonMain>
         </div>
       </template>
     </Modal>
@@ -118,7 +118,7 @@
 </template>
 
 <script setup>
-import { onMounted, ref } from "vue";
+import { onMounted, ref, watch } from "vue";
 import { useRouter } from "vue-router";
 import { MainRequestClass } from "@/js/RootClasses";
 import { isManager } from "@/js/AuthFunctions";
@@ -126,7 +126,7 @@ import VacancyCard from "./components/VacancyCard.vue";
 import plusIcon from "./assets/icons/plus-icon.svg";
 import Modal from "@/components/Modal.vue";
 import InputSimple from "@/components/InputSimple.vue";
-import ButtonSimple from "@/components/ButtonSimple.vue";
+import ButtonMain from "@/components/ButtonMain.vue";
 import TopSquareButton from "@/components/TopSquareButton.vue";
 import ErrorNotification from "@/components/ErrorNotification.vue";
 import SpinnerMain from "@/components/SpinnerMain.vue";
@@ -189,7 +189,7 @@ function getAllVacanciesManager() {
 }
 
 //Создание новой вакансии
-function createVacancy(callback) {
+function createVacancy() {
   class VacanciesCreateVacancy extends MainRequestClass {
     name = formData.value.name; // название вакансии (не обяз.)
     description = formData.value.description; // описание вакансии (не обяз.)
@@ -224,6 +224,7 @@ function createVacancy(callback) {
     },
     function (err) {
       //неуспешный результат
+      showModal.value = false;
       errorMessage.value = err;
       isLoading.value = false;
     }
@@ -234,6 +235,14 @@ function createVacancy(callback) {
 onMounted(() => {
   getAllVacanciesManager();
 });
+
+//Отслеживание флагов модальных окон для сокрытия скролла
+watch(
+  ()=> [showModal.value, modalSuccess.value],
+  ()=> {
+    document.body.style.overflow = showModal.value || modalSuccess.value ? "hidden" : "unset"
+  }
+)
 </script>
 
 <style scoped>
