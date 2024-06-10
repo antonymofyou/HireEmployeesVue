@@ -1,5 +1,12 @@
 <template>
   <section class="candidates">
+    <TopSquareButton
+      class="candidates__back-btn"
+      :icon="iconBack"
+      @click="$router.push({ name: 'vacanciesList' })"
+    >
+    </TopSquareButton>
+
     <h1 class="candidates__title">Кандидаты вакансии</h1>
 
     <div class="candidates__filter">
@@ -60,6 +67,8 @@ import CandidateCard from './components/CandidateCard.vue';
 import ErrorNotification from '@/components/ErrorNotification.vue';
 import SelectMain from '@/components/SelectMain.vue';
 import SpinnerMain from '@/components/SpinnerMain.vue';
+import TopSquareButton from '@/components/TopSquareButton.vue';
+import iconBack from '@/assets/icons/back.svg';
 
 const router = useRouter();
 const route = useRoute();
@@ -253,6 +262,12 @@ watch(
   :nth-child(n) {
     max-width: 700px;
   }
+}
+
+.candidates__back-btn {
+  position: fixed;
+  top: 20px;
+  left: 30px;
 }
 
 @media screen and (max-width: 450px) {
