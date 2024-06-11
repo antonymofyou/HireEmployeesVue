@@ -66,12 +66,39 @@
           >
             <img src='@/assets/icons/add.svg' class="vacancy-edit__add-btn-icon">
           </button>
+
+          <ButtonMain
+            buttonColor="var(--cinnabar)"
+            type="button"
+            @click="showModalOnRemoveVacancy = true"
+          >
+            <template v-slot:text>Удалить вакансию</template>
+          </ButtonMain>
+
+          <Teleport to="body">
+            <ModalConfirmation
+              :show="showModalOnRemoveVacancy"
+              confirmText="Удалить"
+              text="Вы уверены, что хотите удалить вакансию? Это действие нельзя отменить"
+              confirmButtonColor="var(--cinnabar)"
+              @confirm="handleConfirmRemoveVacancy"
+              @cancel="handleCancelRemoveVacancy"
+            />
+          </Teleport>
         </div>
       </div>
 
-      <SubmitButton class="vacancy-edit__save-btn" :submit-function="saveChanges">
+<!--      <SubmitButton class="vacancy-edit__save-btn" :submit-function="saveChanges">
         Сохранить
-      </SubmitButton>
+      </SubmitButton>-->
+
+      <ButtonMain
+        class="vacancy-edit__save-btn"
+        @click="saveChanges"
+      >
+        <template v-slot:text>Сохранить</template>
+        <template v-slot:icon><img src="@/assets/icons/save.svg"></template>
+      </ButtonMain>
 
     </section>
   </main>
@@ -93,6 +120,9 @@ import { VacanciesGetAllVacancyById,
   VacanciesQuestionsDeleteVacancyQuestion,
   VacanciesUpdateVacancy
 } from './js/ApiClassesVacancyEdit.js';
+import { MainRequestClass } from "@/js/RootClasses";
+import ButtonMain from "@/components/ButtonMain.vue";
+import ModalConfirmation from "@/components/ModalConfirmation.vue";
 
 const route = useRoute();
 const router = useRouter();
@@ -120,6 +150,9 @@ const formData = ref({
   questions: [],
 });
 
+// Показ модального окна при удалении вакансии
+const showModalOnRemoveVacancy = ref(false);
+
 //Заполняем formData данными с сервера
 onMounted(() => {
   try {
@@ -146,9 +179,15 @@ const updateQuestionText = (index, value) => {
   formData.value.questions[index].question = value;
 };
 
+
 // Обновление статуса публикации вопроса
 const updateIsPublished = (index, value) => {
   formData.value.questions[index].published = value;
+};
+
+// Отмена удаления вакансии
+const handleCancelRemoveVacancy = () => {
+  showModalOnRemoveVacancy.value = false;
 };
 
 // Работа с API
@@ -217,6 +256,22 @@ const removeQuestion = (id) => {
   removeQuestionFromServer(() => {
     formData.value.questions = formData.value.questions.filter((question) => question.id !== id);
   }, id);
+};
+
+// Удаление вакансии
+function handleConfirmRemoveVacancy(callback)  {
+  let removeVacancy = new MainRequestClass();
+  removeVacancy.vacancyId = vacancyId.value;
+  removeVacancy.request(
+    '/vacancies/delete_vacancy.php',
+    'manager',
+    function (response) {
+      router.go(-1);
+    },
+    function (err) {
+      alert(err);
+    }
+  );
 };
 
 // Формирование объекта с вопросами для отправки изменений на сервер
@@ -320,6 +375,10 @@ const saveChanges = (callback) => {
 
 .vacancy-edit__questions-footer {
   margin-top: 20px;
+  display: flex;
+  width: 100%;
+  justify-content: space-between;
+  align-items: center;
 }
 
 .vacancy-edit__add-btn {
@@ -330,7 +389,9 @@ const saveChanges = (callback) => {
   transition: 0.2s ease transform;
   border: 0;
   background-color: transparent;
+  margin-left: 45%;
 }
+
 
 .vacancy-edit__add-btn-icon {
   width: 60px;
