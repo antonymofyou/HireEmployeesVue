@@ -8,7 +8,7 @@
 
     </TopSquareButton>
     <section class="container">
-      <h2 class="vacancy-edit__title">{{ staticText.title }}</h2>
+      <h2 class="vacancy-edit__title">Редактирование вакансии</h2>
 
       <div class="vacancy-edit__main">
         <InputSimple
@@ -20,13 +20,13 @@
           :isTextBold=true
         />
 
-        <SelectSimple
-          v-model="formData.published"
-          id="isPublished"
-          :options="options"
-          labelName="Опубликована"
-          class="vacancy-edit__is-published-select"
-        />
+        <div class="vacancy-edit__select">
+          <span class="vacancy-edit__select-label">Опубликована:</span>
+          <SelectMain
+            v-model="formData.published"
+            :options="options"
+          />
+        </div>
       </div>
 
       <div class="vacancy-edit__description">
@@ -40,13 +40,12 @@
         />
       </div>
 
-
       <div class="vacancy-edit__questions-block">
-        <h2 class="vacancy-edit__questions-title">{{ staticText.questionsTitle }}</h2>
+        <h2 class="vacancy-edit__questions-title">Вопросы вакансии</h2>
         <transition-group name="list" tag="div" class="vacancy-edit__questions-list">
           <VacancyQuestion
             v-for="(question, index) in formData.questions"
-            :labelName="`Вопрос №${index + 1} (id${question.id})`"
+            :labelName="`Вопрос №${index + 1}`"
             :key="question.id"
             :id="question.id"
             :text="question.question"
@@ -58,16 +57,20 @@
             class="list-item"
           />
         </transition-group>
-        <button
-          class="vacancy-edit__add-btn"
-          type="button"
-          title="Добавить вопрос"
-          @click="addQuestion()"
-        ></button>
+        <div class="vacancy-edit__questions-footer">
+          <button
+            class="vacancy-edit__add-btn"
+            type="button"
+            title="Добавить вопрос"
+            @click="addQuestion"
+          >
+            <img src='@/assets/icons/add.svg' class="vacancy-edit__add-btn-icon">
+          </button>
+        </div>
       </div>
 
       <SubmitButton class="vacancy-edit__save-btn" :submit-function="saveChanges">
-        {{ staticText.save }}
+        Сохранить
       </SubmitButton>
 
     </section>
@@ -76,36 +79,38 @@
 
 <script setup>
 import InputSimple from '@/components/InputSimple.vue';
-import SelectSimple from '@/components/SelectSimple.vue';
+import SelectMain from '@/components/SelectMain.vue';
 import SubmitButton from '@/components/SubmitButton.vue';
 import TopSquareButton from '@/components/TopSquareButton.vue';
 import iconBack from '@/assets/icons/back.svg';
 import VacancyQuestion from './components/VacancyQuestion.vue';
 import { ref, computed, onMounted } from 'vue';
-import { useRoute } from 'vue-router';
+import { useRoute, useRouter } from 'vue-router';
 
-import { getUserType } from '@/js/getUserType';
+import { isManager } from '@/js/AuthFunctions';
 import { VacanciesGetAllVacancyById, 
   VacanciesQuestionsCreateVacancyQuestion,
   VacanciesQuestionsDeleteVacancyQuestion,
   VacanciesUpdateVacancy
 } from './js/ApiClassesVacancyEdit.js';
 
+const route = useRoute();
+const router = useRouter();
+
+// Получение из роута id текущей вакансии
+const vacancyId = ref(route.params.id);
+
+//Проверка авторизации пользователя
+if (!isManager()) router.push({ name: 'home' });
+
 // Индикатор загрузки компонента
 const isLoaded = ref(false);
 
 // Опции для селектов
 const options = [
-  { text: 'Нет', value: '0' },
-  { text: 'Да', value: '1' },
+  { name: 'Нет', id: '0', color: 'var(--cinnabar)' },
+  { name: 'Да', id: '1', color: 'var(--apple)' },
 ];
-
-// Статичный текст страницы
-const staticText = {
-  title: 'Редактирование вакансии',
-  questionsTitle: 'Вопросы вакансии',
-  save: 'Сохранить',
-};
 
 // Данные вакансии: название, описание, статус публикации, массив вопросов
 const formData = ref({
@@ -118,13 +123,6 @@ const formData = ref({
 //Заполняем formData данными с сервера
 onMounted(() => {
   try {
-    const userType = getUserType();
-
-    if (userType !== 'manager') {
-      alert("Вы не менеджер");
-      throw new Error('Ошибка авторизации!');
-    }
-
     getVacancyDataManager((vacResp) => {
       const { vacancy, questions } = vacResp;
 
@@ -152,10 +150,6 @@ const updateQuestionText = (index, value) => {
 const updateIsPublished = (index, value) => {
   formData.value.questions[index].published = value;
 };
-
-// Получение из роута id текущей вакансии
-const route = useRoute();
-const vacancyId = ref(route.params.id);
 
 // Работа с API
 
@@ -283,8 +277,16 @@ const saveChanges = (callback) => {
   width: 100%;
 }
 
-.vacancy-edit__is-published-select {
+.vacancy-edit__select {
+  display: flex;
+  align-items: baseline;
+  gap: 10px;
+
   margin-top: 15px;
+}
+
+.vacancy-edit__select-label {
+  font-weight: 600;
 }
 
 .vacancy-edit__description {
@@ -312,20 +314,27 @@ const saveChanges = (callback) => {
 .vacancy-edit__questions-list {
   display: flex;
   flex-direction: column;
-  gap: 35px;
+  gap: 50px;
   width: 100%;
 }
 
+.vacancy-edit__questions-footer {
+  margin-top: 20px;
+}
+
 .vacancy-edit__add-btn {
-  background-image: url('@/assets/icons/add.svg');
-  background-size: 100% 100%;
-  background-color: transparent;
-  border: 0;
+  padding: 0;
+
   cursor: pointer;
-  width: 40px;
-  height: 40px;
-  border-radius: 50%;
+
   transition: 0.2s ease transform;
+  border: 0;
+  background-color: transparent;
+}
+
+.vacancy-edit__add-btn-icon {
+  width: 60px;
+  height: 60px;
 }
 
 .vacancy-edit__add-btn:hover {

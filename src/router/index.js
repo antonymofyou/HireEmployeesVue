@@ -4,7 +4,7 @@ import HomePage from "@/pages/HomePage.vue";
 import ManagerAuth from "@/pages/authorization/ManagerAuth.vue";
 import VacanciesListPage from "@/pages/vacancy/VacanciesList/VacanciesListPage.vue";
 import VacancyIdPage from "@/pages/vacancy/VacancyIdPage/VacancyIdPage.vue";
-import VacancyEditPage from "@/pages/vacancy/EditPage/VacancyEditPage.vue";
+import VacancyEditPage from "@/pages/vacancy/VacancyEdit/VacancyEditPage.vue";
 import CandidatComments from "@/pages/candidates/CandidatComments.vue";
 import CandidatesList from "@/pages/candidates/CandidatesList/CandidatesListPage.vue";
 
