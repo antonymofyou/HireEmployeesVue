@@ -1,24 +1,18 @@
 <template>
   <div class="comments">
-    <div
-      v-if="isLoading"
-      class="comments__spinner-wrapper"
-    >
+    <div v-if="isLoading" class="comments__spinner-wrapper">
       <SpinnerMain class="comments__spinner" />
     </div>
 
     <h2>{{ headingText }}</h2>
 
-    <p
-      v-if="errorMessage && !isLoading"
-      class="comments__error"
-    >
+    <p v-if="errorMessage && !isLoading" class="comments__error">
       {{ errorMessage }}
     </p>
 
     <template v-else>
       <div class="comments__list">
-        <div v-if="comments.length">
+        <template v-if="comments.length">
           <CommentCard
             v-for="comment in comments"
             :comment
@@ -27,7 +21,7 @@
             @delete="deleteComment"
             @update-comment="updateComment"
           />
-        </div>
+        </template>
         <p v-else>Нет комментариев</p>
       </div>
 
@@ -73,7 +67,7 @@ const newComment = ref('');
 
 // Формируем строку вида "for_otklic:id" или "for_candidate"
 const commentFor = computed(
-  () => `for_${props.vacancyId ? 'otklic:' + props.vacancyId : 'candidate'}`,
+  () => `for_${props.vacancyId ? 'otklic:' + props.vacancyId : 'candidate'}`
 );
 
 // Заголовок блока, если передано ID вакансии - "Комментарии на отклик кандидата", иначе "Комментарии на кандидата"
@@ -92,21 +86,30 @@ const dispatchComments = (action, payload) => {
   requestInstance.commentText = payload.comment || '';
   requestInstance.commentId = payload.id || '';
 
-  return (onSuccess, onError) =>
+  const onError = (err) => {
+    errorMessage.value = err.message;
+  };
+
+  return (onSuccess) =>
     requestInstance.request(
       '/candidates/set_candidate_comment.php',
       'manager',
       onSuccess,
-      onError,
+      onError
     );
 };
 
 // Обновление комментария
 const updateComment = (payload) => {
   // Обновление комментария в массиве без перезапроса на сервер
-  const onUpdateSuccess = () => {
-    const id = comments.value.findIndex((comment) => comment.id === payload.id);
-    comments.value[id].comment = payload.comment;
+  const onUpdateSuccess = (res) => {
+    if (res.success) {
+      const id = comments.value.findIndex(
+        (comment) => comment.id === payload.id
+      );
+      comments.value[id].comment = payload.comment;
+      comments.value[id].updatedAt = res.comment.updatedAt;
+    }
   };
   // Функция для запроса на обновление комментария
   const requestFn = dispatchComments('update', payload);
@@ -118,7 +121,7 @@ const deleteComment = (payload) => {
   // Удаление комментария из массива без перезапроса на сервер
   const onDeleteSuccess = () => {
     comments.value = comments.value.filter(
-      (comment) => comment.id !== payload.id,
+      (comment) => comment.id !== payload.id
     );
   };
   // Функция для запроса на удаление комментария
@@ -130,8 +133,8 @@ const deleteComment = (payload) => {
 const createComment = (payload) => {
   if (payload.comment) {
     // Перезапрос комментариев, очистка поля для нового комментария
-    const onCreateSuccess = () => {
-      requestComments();
+    const onCreateSuccess = (res) => {
+      comments.value.push(res.comment);
       newComment.value = '';
     };
     // Функция для запроса на создание комментария
@@ -160,7 +163,7 @@ const requestComments = () => {
     () => {
       errorMessage.value = 'Произошла ошибка при получении комментариев';
       isLoading.value = false;
-    },
+    }
   );
 };
 
@@ -188,5 +191,9 @@ onMounted(requestComments);
 
 .comments__list {
   margin-bottom: 10px;
+  padding: 10px;
+  max-height: 16em;
+  overflow-y: auto;
+  scrollbar-width: thin;
 }
 </style>

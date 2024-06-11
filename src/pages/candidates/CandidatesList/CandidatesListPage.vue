@@ -166,13 +166,13 @@ function getVacancyStatuses() {
   //Получение статусов
   if (vacancyId.value) {
     requestClass.request(
-      '/vacancies/get_vacancies_statuses.php',
+      '/vacancies/get_vacancy_statuses.php',
       'manager',
       function (response) {
         //успешный результат
         candidateStatus.value = [{ name: 'Все', id: 'Все' }];
         response.statuses.map((status) => {
-          candidateStatus.value.push({ name: status, id: status });
+          candidateStatus.value.push({ name: status.statusName, id: status.statusComment });
         });
       },
       function (err) {

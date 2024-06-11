@@ -2,10 +2,7 @@
   <div class="comment">
     <div class="comment__controls">
       <p class="comment__manager">{{ props.comment.managerName }}</p>
-      <div
-        v-if="userCanEdit || userCanDelete"
-        class="comment__buttons"
-      >
+      <div v-if="userCanEdit || userCanDelete" class="comment__buttons">
         <template v-if="userCanEdit">
           <button
             v-if="!isEditMode"
@@ -14,10 +11,7 @@
             title="Редактировать"
             @click="onEditMode"
           >
-            <img
-              class="icon"
-              src="@/assets/icons/edit.svg"
-            />
+            <img class="icon" src="@/assets/icons/edit.svg" />
           </button>
           <template v-else>
             <button
@@ -26,10 +20,7 @@
               title="Сохранить"
               @click="updateComment"
             >
-              <img
-                class="icon"
-                src="@/assets/icons/save-black.svg"
-              />
+              <img class="icon" src="@/assets/icons/save-black.svg" />
             </button>
             <button
               class="button button--close"
@@ -37,10 +28,7 @@
               title="Отменить"
               @click="cancelUpdate"
             >
-              <img
-                class="icon"
-                src="@/assets/icons/close.svg"
-              />
+              <img class="icon" src="@/assets/icons/close.svg" />
             </button>
           </template>
         </template>
@@ -52,10 +40,7 @@
           title="Удалить"
           @click="isModalOpened = true"
         >
-          <img
-            class="icon"
-            src="@/assets/icons/delete.svg"
-          />
+          <img class="icon" src="@/assets/icons/delete.svg" />
         </button>
       </div>
     </div>
@@ -70,11 +55,7 @@
         class="comment__textarea"
       >
       </textarea>
-      <p
-        v-else
-        class="comment__text"
-        ref="commentParagraphRef"
-      >
+      <p v-else class="comment__text" ref="commentParagraphRef">
         {{ props.comment.comment }}
       </p>
     </div>
@@ -87,14 +68,17 @@
       text="Вы уверены, что хотите удалить комментарий?"
       cancel-text="Отмена"
       confirm-text="Удалить"
-      @confirm="emit('delete', { id: props.comment.id })"
+      @confirm="
+        emit('delete', { id: props.comment.id }), (isModalOpened = false)
+      "
       @cancel="isModalOpened = false"
+      @click.self="isModalOpened = false"
     />
   </div>
 </template>
 
 <script setup>
-import { computed, ref, watchEffect } from 'vue';
+import { computed, ref, watch } from 'vue';
 import ModalConfirmation from '@/components/ModalConfirmation.vue';
 
 const props = defineProps({
@@ -123,9 +107,11 @@ const editingTextareaRef = ref(null);
 const height = ref(50);
 
 // Фокус на поле для редактирования комментария при открытии режима редактирования
-watchEffect(() => {
-  if (editingTextareaRef.value) {
-    editingTextareaRef.value.focus();
+watch(
+  () => editingTextareaRef.value,
+  () => {
+    if (editingTextareaRef.value) {
+      editingTextareaRef.value.focus();
   }
 });
 
@@ -173,8 +159,18 @@ const userCanDelete = props.comment.canDelete === '1';
 const formattedDate = computed(() => {
   const created = formatDate(props.comment.createdAt);
   const updated = formatDate(props.comment.updatedAt);
-  return created === updated ? created : `${updated} (изменено)`;
+  return props.comment.createdAt === props.comment.updatedAt
+    ? created
+    : `${updated} (изменено)`;
 });
+
+//Отслеживание флага модального окна для сокрытия скролла
+watch(
+  () => isModalOpened.value,
+  () => {
+    document.body.style.overflow = isModalOpened.value ? 'hidden' : 'unset';
+  }
+);
 </script>
 
 <style scoped>
@@ -251,7 +247,7 @@ const formattedDate = computed(() => {
 }
 
 .comment__textarea {
-  font-size: 16px;
+  font-size: 12px;
   width: 100%;
   min-height: 50px;
   padding: 5px;
@@ -269,7 +265,8 @@ const formattedDate = computed(() => {
 }
 
 .comment__text {
-  font-size: 16px;
+  font-size: 12px;
+  word-break: break-all;
 }
 
 .comment__date {
