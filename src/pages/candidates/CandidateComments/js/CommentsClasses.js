@@ -19,3 +19,7 @@ export class CandidateGetCandidateComments extends MainRequestClass {
   // текст комментария
   candidateId = '';
 }
+
+export class VacanciesGetAllVacancyById extends MainRequestClass {
+  vacancyId = ''; // ID вакансии, которую нужно получить
+}

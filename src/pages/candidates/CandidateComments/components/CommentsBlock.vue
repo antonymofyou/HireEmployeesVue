@@ -1,13 +1,13 @@
 <template>
   <div class="comments">
+    <h2>{{ headingText }}</h2>
+
     <div v-if="isLoading" class="comments__spinner-wrapper">
       <SpinnerMain class="comments__spinner" />
     </div>
 
-    <h2>{{ headingText }}</h2>
-
-    <p v-if="errorMessage && !isLoading" class="comments__error">
-      {{ errorMessage }}
+    <p v-if="mainErrorMessage && !isLoading" class="comments__error">
+      {{ mainErrorMessage }}
     </p>
 
     <template v-else>
@@ -22,7 +22,7 @@
             @update-comment="updateComment"
           />
         </template>
-        <p v-else>Нет комментариев</p>
+        <p v-if="!isLoading && !comments.length">Нет комментариев</p>
       </div>
 
       <CommentAddition
@@ -30,6 +30,9 @@
         @create-comment="createComment({ comment: newComment })"
       />
     </template>
+    <Teleport to="body">
+      <ErrorNotification v-if="errorMessage" :message="errorMessage" />
+    </Teleport>
   </div>
 </template>
 
@@ -42,6 +45,7 @@ import {
   CandidatesSetCandidateComment,
   CandidateGetCandidateComments,
 } from '../js/CommentsClasses.js';
+import ErrorNotification from '@/components/ErrorNotification.vue';
 
 const props = defineProps({
   // ID вакансии, если передано - получаем комментарии для кандидата по отношению к отклику, иначе общие комментарии для кандидата
@@ -60,7 +64,8 @@ const props = defineProps({
 const comments = ref([]);
 // Состояние загрузки
 const isLoading = ref(false);
-// Сообщение об ошибке
+// Сообщение об ошибках
+const mainErrorMessage = ref('');
 const errorMessage = ref('');
 // Значение нового комментария
 const newComment = ref('');
@@ -86,16 +91,16 @@ const dispatchComments = (action, payload) => {
   requestInstance.commentText = payload.comment || '';
   requestInstance.commentId = payload.id || '';
 
-  const onError = (err) => {
-    errorMessage.value = err.message;
-  };
+  errorMessage.value = '';
 
   return (onSuccess) =>
     requestInstance.request(
       '/candidates/set_candidate_comment.php',
       'manager',
       onSuccess,
-      onError
+      (err) => {
+        errorMessage.value = err;
+      }
     );
 };
 
@@ -151,7 +156,7 @@ const requestComments = () => {
 
   // При старте запроса состояние загрузки меняется на true и обнуляется значение сообщения об ошибке
   isLoading.value = true;
-  errorMessage.value = '';
+  mainErrorMessage.value = '';
 
   requestInstance.request(
     '/candidates/get_candidate_comments.php',
@@ -161,7 +166,7 @@ const requestComments = () => {
       isLoading.value = false;
     },
     () => {
-      errorMessage.value = 'Произошла ошибка при получении комментариев';
+      mainErrorMessage.value = 'Произошла ошибка при получении комментариев';
       isLoading.value = false;
     }
   );

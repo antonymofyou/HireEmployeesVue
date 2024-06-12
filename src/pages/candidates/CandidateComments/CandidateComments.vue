@@ -6,8 +6,14 @@
       :icon="backIcon"
     >
     </TopSquareButton>
-    <h1 class="heading">Комментарии</h1>
+    <h1 class="heading">Ответы на вакансию и комментарии</h1>
     <template v-if="candidateId || (vacancyId && candidateId)">
+      <QuestionsBlock
+        v-if="vacancyId && candidateId"
+        :vacancy-id
+        :candidate-id
+        class="questions-block"
+      />
       <CommentsBlock v-if="candidateId" :candidate-id class="comments-block" />
       <CommentsBlock
         v-if="vacancyId && candidateId"
@@ -23,8 +29,9 @@
 <script setup>
 import { useRoute } from 'vue-router';
 import CommentsBlock from './components/CommentsBlock.vue';
-import backIcon from "@/assets/icons/back.svg";
+import backIcon from '@/assets/icons/back.svg';
 import TopSquareButton from '@/components/TopSquareButton.vue';
+import QuestionsBlock from './components/QuestionsBlock.vue';
 
 const route = useRoute();
 // ID вакансии
@@ -38,7 +45,7 @@ const candidateId = route.query.candidateId;
   padding: 0 20px;
 }
 
-.comments-block {
+.comments-block, .questions-block {
   margin-bottom: 50px;
   border: 1px solid var(--cornflower-blue);
   border-radius: 1em;

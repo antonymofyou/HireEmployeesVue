@@ -42,7 +42,7 @@ const router = createRouter({
       component: CandidatesList,
     },
     {
-      path: "/canditate",
+      path: "/candidate",
       name: "candidate",
       component: CandidateComments,
     }
