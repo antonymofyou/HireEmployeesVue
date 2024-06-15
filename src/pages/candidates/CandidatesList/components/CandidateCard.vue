@@ -32,17 +32,16 @@ const props = defineProps({
     type: Object,
     required: true,
   },
-  vacancyId: {
-    type: String,
-    required: true,
-  }
 });
 
 //Переход на карточку комментариев кандидата
 function goToCandidate() {
   router.push({
     name: 'candidate',
-    query: { vacancyId: props.vacancyId, candidateId: props.candidate.candidateId },
+    query: {
+      candidateId: props.candidate.candidateId,
+      respondId: props.candidate.otklikId,
+    },
   });
 }
 </script>

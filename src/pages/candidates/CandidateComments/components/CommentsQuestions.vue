@@ -1,152 +1,121 @@
 <template>
-  <div class="questions">
-    <div class="questions__header">
-      <h2>Ответы на вопросы вакансии</h2>
+  <div class="universal">
+    <div class="universal">
+      <div class="universal__header">
+        <h2>{{ props.type === "questions" ? "Ответы на вопросы вакансии" : "Информация о кандидате" }} </h2>
 
-      <button class="questions__header-btn" @click="showQuestions">
-        <b> {{ show ? '&or;' : '&and;' }}</b>
-      </button>
-    </div>
+        <button v-if="props.type === 'questions'" class="universal__header-btn" @click="showQuestions">
+          <ArrowIcon
+            :class="[
+              'universal__header-arrowicon',
+              { 'universal__header-arrowicon--active': show },
+            ]"
+          />
+        </button>
+      </div>
 
-    <p v-if="mainErrorMessage" class="questions__error">
-      {{ mainErrorMessage }}
-    </p>
+      <div v-if="props.type === 'candidate'" class="universal__info">
+        <p><b>ФИО: </b>{{ respondInfo.info?.fio }}</p>
+        <p><b>Телеграм: </b> {{ respondInfo.info?.tgNickname }}</p>
+      </div>
 
-    <template v-else>
-      <Transition>
-        <div class="questions__list" v-if="show">
-          <template v-if="questions.length">
+      <!-- Вопросы вакансии и ответы кандидата -->
+      <Transition v-if="props.type === 'questions'">
+        <div class="universal__list" v-if="show">
+          <p v-if="errorMessage" class="universal__error">
+            {{ errorMessage }}
+          </p>
+          <template v-if="respondInfo.answers.length">
             <div
-              class="questions__question"
-              v-for="question in questions"
-              :key="question.id"
+              class="universal__question"
+              v-for="question in respondInfo.answers.length"
+              :key="question.questionId"
             >
-              <div class="questions__question-text">
+              <div class="universal__question-text">
                 <p><b>Вопрос:</b></p>
                 <p>{{ question.question }}</p>
               </div>
-              <div class="questions__question-text">
+              <div class="universal__question-text">
                 <p><b>Ответ:</b></p>
                 <p>{{ question.answer }}</p>
               </div>
               <hr />
             </div>
           </template>
-          <p v-else>Нет вопросов</p>
+          <p v-if="!errorMessage && !respondInfo.answers.length">
+            Нет вопросов
+          </p>
         </div>
       </Transition>
-    </template>
+    </div>
   </div>
 </template>
 
 <script setup>
-import { ref, onMounted } from 'vue';
-import { VacanciesGetAllVacancyById } from '../js/CommentsClasses.js';
-import ButtonMain from '@/components/ButtonMain.vue';
+import { onMounted, ref } from 'vue';
+import { CandidatesGetOtklikAnswers } from '../js/CommentsClasses';
+import ArrowIcon from '@/assets/icons/arrow-down.svg?component';
 
 const props = defineProps({
-  // ID вакансии
-  vacancyId: {
+  // ID отклика
+  respondId: {
     type: String,
     required: true,
   },
-  // ID кандидата
-  candidateId: {
+  // Тип компонента. Вопросы/ответы кандидата или информация о кандидате
+  type: {
     type: String,
     required: true,
   },
 });
 
-// Массив вопросов
-const questions = ref([
-  {
-    id: 0,
-    question: 'Question',
-    answer: 'answer',
-  },
-  {
-    id: 0,
-    question: 'Question',
-    answer: 'answer',
-  },
-  {
-    id: 0,
-    question: 'Question',
-    answer: 'answer',
-  },
-  {
-    id: 0,
-    question: 'Question',
-    answer: 'answer',
-  },
-  {
-    id: 0,
-    question: 'Question',
-    answer: 'answer',
-  },
-  {
-    id: 0,
-    question: 'Question',
-    answer: 'answer',
-  },
-  {
-    id: 0,
-    question: 'Question',
-    answer:
-      'answer answeran sweransweransweransweransweransweransweransweransweransweransweransweransweransweransweransweransweranswer answeransweransweransweransweransweransweransweranswer',
-  },
-]);
-
-// Сообщение об ошибках
-const mainErrorMessage = ref('');
-// Состояние загрузки
-const isLoading = ref(false);
+// Массив данных к отклику
+const respondInfo = ref([]);
+// Сообщение об ошибке
+const errorMessage = ref('');
 // Флаг показа вопросов
 const show = ref(false);
 
-// Запрос вопросов
-const requestQuestions = () => {
-  const requestInstance = new VacanciesGetAllVacancyById();
-  requestInstance.vacancyId = props.vacancyId;
+// Запрос данных по ответам кандидата
+const requestCandidateInfo = () => {
+  const requestInstance = new CandidatesGetOtklikAnswers();
+  requestInstance.otklikId = props.respondId;
+  errorMessage.value = '';
 
-  isLoading.value = true;
   requestInstance.request(
-    '/vacancies/get_all_vacancy_by_id.php',
+    '/candidates/get_otklik_answers.php',
     'manager',
     (response) => {
-      //questions.value = response.questions;
-      isLoading.value = false;
+      respondInfo.value = { answers: response.answers, info: response.info };
     },
-    (error) => {
-      isLoading.value = false;
-      mainErrorMessage.value = error;
-    }
+    (err) => (errorMessage.value = err)
   );
 };
 
+// Показать/скрыть вопросы
 const showQuestions = () => {
   show.value = !show.value;
 };
 
-onMounted(requestQuestions);
+onMounted(requestCandidateInfo);
 </script>
 
 <style scoped>
-.questions {
+.universal {
   transition: all 0.5s ease;
 }
-.questions__list {
+.universal__list {
   margin-bottom: 10px;
   padding: 10px;
 }
 
-.questions__header {
+.universal__header {
   display: flex;
   justify-content: space-between;
   align-items: center;
 }
 
-.questions__question-text {
+.universal__question-text {
   word-break: break-all;
   :nth-child(1) {
     margin-bottom: 0;
@@ -156,18 +125,29 @@ onMounted(requestQuestions);
   }
 }
 
-.questions__error {
+.universal__error {
   color: var(--error-color);
 }
 
-.questions__header-btn{
+.universal__header-btn {
+  display: flex;
+  align-items: center;
   border: none;
   background-color: transparent;
   cursor: pointer;
-
-  font-size: 25px;
 }
 
+.universal__header-arrowicon {
+  transition: all 0.3s ease;
+  width: 3em;
+  height: 3em;
+}
+
+.universal__header-arrowicon--active {
+  transform: rotateX(180deg);
+}
+
+/* Transition */
 .v-enter-active,
 .v-leave-active {
   transition: opacity 0.2s ease;

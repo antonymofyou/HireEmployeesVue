@@ -47,7 +47,7 @@
         v-for="candidate in candidates"
         :key="candidate.candidateId"
         :candidate="candidate"
-        :vacancyId="vacancyId"
+        :respond="candidate.otklikId"
       />
     </div>
     <!-- Встраивание элемента в DOM дерево -->

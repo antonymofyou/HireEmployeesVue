@@ -7,17 +7,17 @@
     >
     </TopSquareButton>
     <h1 class="heading">Информация об отклике кандидата</h1>
-    <template v-if="candidateId || (vacancyId && candidateId)">
-      <CommentsCandidate
-        v-if="candidateId"
-        :vacancy-id
-        :candidate-id
-        class="container__candidate-block"
+    <template v-if="candidateId || respondId">
+      <CommentsQuestions
+        v-if="respondId"
+        :respond-id
+        type="candidate"
+        class="container__questions-block"
       />
       <CommentsQuestions
-        v-if="vacancyId && candidateId"
-        :vacancy-id
-        :candidate-id
+        v-if="respondId"
+        :respond-id
+        type="questions"
         class="container__questions-block"
       />
       <CommentsBlock
@@ -26,8 +26,8 @@
         class="container__comments-block"
       />
       <CommentsBlock
-        v-if="vacancyId && candidateId"
-        :vacancy-id
+        v-if="respondId && candidateId"
+        :respond-id
         :candidate-id
         class="container__comments-block"
       />
@@ -42,13 +42,13 @@ import CommentsBlock from './components/CommentsBlock.vue';
 import backIcon from '@/assets/icons/back.svg';
 import TopSquareButton from '@/components/TopSquareButton.vue';
 import CommentsQuestions from './components/CommentsQuestions.vue';
-import CommentsCandidate from './components/CommentsCandidate.vue';
 
 const route = useRoute();
-// ID вакансии
-const vacancyId = route.query.vacancyId;
+// ID отклика
+const respondId = route.query.respondId;
 // ID кандидата
 const candidateId = route.query.candidateId;
+
 </script>
 
 <style scoped>
@@ -57,8 +57,7 @@ const candidateId = route.query.candidateId;
 }
 
 .container__comments-block,
-.container__questions-block,
-.container__candidate-block {
+.container__questions-block {
   margin-bottom: 50px;
   border: 1px solid var(--cornflower-blue);
   border-radius: 1em;

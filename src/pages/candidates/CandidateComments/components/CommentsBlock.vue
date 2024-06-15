@@ -49,7 +49,7 @@ import ErrorNotification from '@/components/ErrorNotification.vue';
 
 const props = defineProps({
   // ID вакансии, если передано - получаем комментарии для кандидата по отношению к отклику, иначе общие комментарии для кандидата
-  vacancyId: {
+  respondId: {
     type: String,
     default: '',
   },
@@ -70,14 +70,14 @@ const errorMessage = ref('');
 // Значение нового комментария
 const newComment = ref('');
 
-// Формируем строку вида "for_otklic:id" или "for_candidate"
+// Формируем строку вида "for_otklik:id" или "for_candidate"
 const commentFor = computed(
-  () => `for_${props.vacancyId ? 'otklic:' + props.vacancyId : 'candidate'}`
+  () => `for_${props.respondId ? 'otklik:' + props.respondId : 'candidate'}`
 );
 
 // Заголовок блока, если передано ID вакансии - "Комментарии на отклик кандидата", иначе "Комментарии на кандидата"
 const headingText = computed(() => {
-  return props.vacancyId
+  return props.respondId
     ? 'Комментарии на отклик кандидата'
     : 'Комментарии на кандидата';
 });
