@@ -5,7 +5,7 @@ import ManagerAuth from "@/pages/authorization/ManagerAuth.vue";
 import VacanciesListPage from "@/pages/vacancy/VacanciesList/VacanciesListPage.vue";
 import VacancyIdPage from "@/pages/vacancy/VacancyIdPage/VacancyIdPage.vue";
 import VacancyEditPage from "@/pages/vacancy/EditPage/VacancyEditPage.vue";
-import CandidatComments from "@/pages/candidates/CandidatComments.vue";
+import CandidateComments from "@/pages/candidates/CandidateComments/CandidateComments.vue";
 import CandidatesList from "@/pages/candidates/CandidatesList/CandidatesListPage.vue";
 
 const router = createRouter({
@@ -42,9 +42,9 @@ const router = createRouter({
       component: CandidatesList,
     },
     {
-      path: "/canditate",
+      path: "/candidate",
       name: "candidate",
-      component: CandidatComments,
+      component: CandidateComments,
     }
   ],
 });
