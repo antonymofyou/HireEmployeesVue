@@ -9,6 +9,7 @@ import CandidatComments from "@/pages/candidates/CandidatComments.vue";
 import CandidatesList from "@/pages/candidates/CandidatesList/CandidatesListPage.vue";
 
 
+
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
   routes: [
@@ -47,6 +48,7 @@ const router = createRouter({
       name: "candidate",
       component: CandidatComments,
     },
+
 
   ],
 });

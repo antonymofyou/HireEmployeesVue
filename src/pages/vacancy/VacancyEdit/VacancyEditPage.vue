@@ -30,12 +30,17 @@
       </div>
 
       <div class="vacancy-edit__description">
-        <InputSimple
+<!--        <InputSimple
           v-model="formData.description"
           id="description"
           labelName="Описание вакансии"
           inputType="textarea"
           :isLabelBold=true
+          size="big"
+        />-->
+        <div class="vacancy-edit__description-label">Описание вакансии:</div>
+        <MyEditor
+          v-model="formData.description"
           size="big"
         />
       </div>
@@ -102,9 +107,16 @@
 
     </section>
   </main>
+
+  <Teleport to="body">
+    <!-- Вывод сообщения о ошибке -->
+    <ErrorNotification v-if="errorMessage" :message="errorMessage" />
+  </Teleport>
+
 </template>
 
 <script setup>
+import Editor from '@tinymce/tinymce-vue'
 import InputSimple from '@/components/InputSimple.vue';
 import SelectMain from '@/components/SelectMain.vue';
 import SubmitButton from '@/components/SubmitButton.vue';
@@ -123,6 +135,8 @@ import { VacanciesGetAllVacancyById,
 import { MainRequestClass } from "@/js/RootClasses";
 import ButtonMain from "@/components/ButtonMain.vue";
 import ModalConfirmation from "@/components/ModalConfirmation.vue";
+import ErrorNotification from "@/components/ErrorNotification.vue";
+import MyEditor from "@/components/MyEditor.vue";
 
 const route = useRoute();
 const router = useRouter();
@@ -153,6 +167,9 @@ const formData = ref({
 // Показ модального окна при удалении вакансии
 const showModalOnRemoveVacancy = ref(false);
 
+// Отображение ошибки
+const errorMessage = ref('');
+
 //Заполняем formData данными с сервера
 onMounted(() => {
   try {
@@ -170,7 +187,7 @@ onMounted(() => {
       isLoaded.value = true;
     });
   } catch (err) {
-    console.error('Произошла ошибка: ', err);
+    errorMessage.value = err;
   }
 });
 
@@ -204,7 +221,7 @@ const getVacancyDataManager = (callback) => {
       callback(response); 
     },
     function (err) { // неуспешный результат
-      alert(err);
+      errorMessage.value = err;
     }
   );
 };
@@ -221,7 +238,7 @@ const addQuestionToServer = (callback) => {
       callback(response);
     },
     function (err) { // неуспешный результат
-      alert(err);
+      errorMessage.value = err;
     }
   );
 };
@@ -246,7 +263,7 @@ const removeQuestionFromServer = (callback, id) => {
       callback(response);
     },
     function (err) { // неуспешный результат
-      alert(err);
+      errorMessage.value = err;
     }
   );
 };
@@ -269,7 +286,7 @@ function handleConfirmRemoveVacancy(callback)  {
       router.go(-1);
     },
     function (err) {
-      alert(err);
+      errorMessage.value = err;
     }
   );
 };
@@ -307,10 +324,11 @@ const saveChanges = (callback) => {
     '/vacancies/update_vacancy.php',
     'manager', 
     function (response) {
-      callback(response); // успешный результат
+      /*callback(response);*/// успешный результат
+      router.go(-1);
     },
-    function (err) { // неуспешный результат
-      alert(err);
+    function (err) {// неуспешный результат
+      errorMessage.value = err;
     }
   );
 };
@@ -347,6 +365,11 @@ const saveChanges = (callback) => {
 .vacancy-edit__description {
   margin-top: 50px;
   width: 100%;
+}
+
+.vacancy-edit__description-label {
+  margin-bottom: 10px;
+  font-weight: 600;
 }
 
 .vacancy-edit__questions-block {

@@ -56,13 +56,18 @@
           />
         </div>
 
-        <InputSimple
+<!--        <InputSimple
           v-model="formData.description"
           id="description"
           labelName="Описание вакансии"
           inputType="textarea"
           :isLabelBold="true"
           size="big"
+        />-->
+        <MyEditor
+          v-model="formData.description"
+          size="big"
+          :staticToolbar="true"
         />
       </template>
       <template #footer-control-buttons>
@@ -131,6 +136,7 @@ import TopSquareButton from "@/components/TopSquareButton.vue";
 import ErrorNotification from "@/components/ErrorNotification.vue";
 import SpinnerMain from "@/components/SpinnerMain.vue";
 import SelectMain from "@/components/SelectMain.vue";
+import MyEditor from "@/components/MyEditor.vue";
 
 const router = useRouter();
 
