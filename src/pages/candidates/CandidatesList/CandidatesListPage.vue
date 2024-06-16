@@ -1,13 +1,14 @@
 <template>
   <section class="candidates">
-    <TopSquareButton
-      class="candidates__back-btn"
-      :icon="iconBack"
-      @click="$router.push({ name: 'vacanciesList' })"
-    >
-    </TopSquareButton>
-
-    <h1 class="candidates__title">Кандидаты вакансии</h1>
+    <div class="candidates__title">
+      <TopSquareButton
+        class="candidates__back-btn"
+        :icon="iconBack"
+        @click="$router.push({ name: 'vacanciesList' })"
+      >
+      </TopSquareButton>
+      <h1>Кандидаты вакансии</h1>
+    </div>
 
     <div class="candidates__filter">
       <div v-if="!vacancyId">Выберите вакансию:</div>
@@ -233,12 +234,13 @@ watch(
   display: flex;
   flex-direction: column;
   align-items: center;
-  margin-top: 100px;
   padding-bottom: 80px;
 }
 
 .candidates__title {
+  width: 100%;
   text-align: center;
+  margin-bottom: 20px;
 }
 
 .candidates__filter {
@@ -247,7 +249,6 @@ watch(
   align-items: center;
   flex-wrap: wrap;
   gap: 30px;
-  margin-top: 30px;
 }
 
 .candidates__filter-title {
@@ -258,6 +259,7 @@ watch(
 }
 
 .candidates__description {
+  text-align: center;
   margin-top: 30px;
 }
 
@@ -276,9 +278,8 @@ watch(
 }
 
 .candidates__back-btn {
-  position: fixed;
+  position: relative;
   top: 20px;
-  left: 30px;
 }
 
 @media screen and (max-width: 450px) {

@@ -1,7 +1,7 @@
 <template>
   <div class="vacancy">
     <div class="vacancy__header">
-      <h2>Информация о вакансии</h2>
+      <h2>Вакансия</h2>
     </div>
 
     <p v-if="errorMessage" class="vacancy__error">

@@ -1,17 +1,20 @@
 <template>
   <section class="comments">
-    <TopSquareButton
-      class="comments__back-btn"
-      @click="
-        $router.push({
-          name: 'candidates',
-          query: { vacancyId: vacancyId, status: status },
-        })
-      "
-      :icon="backIcon"
-    >
-    </TopSquareButton>
-    <h1 class="heading">Информация об отклике кандидата</h1>
+    <div class="heading">
+      <TopSquareButton
+        class="comments__back-btn"
+        @click="
+          $router.push({
+            name: 'candidates',
+            query: { vacancyId: vacancyId, status: status },
+          })
+        "
+        :icon="backIcon"
+      >
+      </TopSquareButton>
+      <h1>Отклик на вакансию</h1>
+    </div>
+
     <template v-if="candidateId || respondId">
       <CommentsVacancy
         v-if="vacancyId"
@@ -67,23 +70,21 @@ const status = route.query.status;
 
 <style scoped>
 .comments__comments-block,
-.comments__questions-block, .comments__vacancy-block {
-  margin-bottom: 50px;
+.comments__questions-block,
+.comments__vacancy-block {
+  margin-bottom: 38.5px;
   border: 1px solid var(--cornflower-blue);
   border-radius: 1em;
   padding: 10px 15px;
 }
 
 .heading {
-  margin-top: 40px;
+  text-align: center;
   margin-bottom: 20px;
-  font-size: 35px;
 }
 
 .comments__back-btn {
   position: relative;
   top: 20px;
-  margin-bottom: 10px;
 }
-
 </style>

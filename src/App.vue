@@ -39,6 +39,18 @@ import { RouterView } from 'vue-router';
   padding: 0 20px;
 }
 
+:where(h1) {
+  font-weight: 400;
+}
+
+h1 {
+  font-size: 30px;
+}
+
+h2 {
+  font-size: 22px;
+}
+
 @media screen and (max-width: 425px) {
   h1 {
   font-size: 1.3rem !important;

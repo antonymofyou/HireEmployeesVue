@@ -256,9 +256,7 @@ watch(
 
 .vacancies__title {
   margin: 0;
-  font-size: 35px;
   line-height: 42px;
-  font-weight: 400;
 }
 
 .vacancies__box-vacancies {

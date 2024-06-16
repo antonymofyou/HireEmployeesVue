@@ -277,6 +277,7 @@ const saveChanges = (callback) => {
 
 .vacancy-edit__title {
   text-align: center;
+  margin-bottom: 20px;
 }
 
 .vacancy-edit__main {
@@ -356,7 +357,6 @@ const saveChanges = (callback) => {
 .vacancy-edit__back-btn {
   position: fixed;
   top: 20px;
-  left: 30px;
 }
 
 @media screen and (max-width: 1200px) {
