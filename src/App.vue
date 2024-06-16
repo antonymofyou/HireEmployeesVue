@@ -7,9 +7,10 @@ import { RouterView } from 'vue-router';
 </script>
 
 <style>
+/* Обнуляющие стили */
 *,
 ::before,
-::after {
+::after { 
   font-family: Verdana, Tahoma, sans-serif;
   margin: 0;
   padding: 0;
@@ -35,10 +36,12 @@ import { RouterView } from 'vue-router';
   --black-squeeze: #edf6f9;
 }
 
+/* Временно установлено для app, пока не будет пернесен main */
 #app {
   padding: 0 20px;
 }
 
+/* :where принимает массив селекторов */
 :where(h1) {
   font-weight: 400;
 }
@@ -51,6 +54,9 @@ h2 {
   font-size: 22px;
 }
 
+/* Глобальные правила для мобильных устройств 
+   important - для перезаписи стилей
+*/
 @media screen and (max-width: 425px) {
   h1 {
   font-size: 1.3rem !important;

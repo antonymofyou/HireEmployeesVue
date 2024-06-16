@@ -30,13 +30,13 @@ const props = defineProps({
   },
 });
 
-// Массив данных к отклику
+// Объект информации по вакансии
 const vacancyInfo = ref({});
 // Сообщение об ошибке
 const errorMessage = ref('');
 
-// Запрос данных по ответам кандидата
-const requestVacacnyInfo = () => {
+// Запрос данных по вакансии
+const requestVacancyInfo = () => {
   const requestInstance = new VacanciesGetAllVacancyById();
   requestInstance.vacancyId = props.vacancyId;
   errorMessage.value = '';
