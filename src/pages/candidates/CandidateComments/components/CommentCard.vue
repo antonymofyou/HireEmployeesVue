@@ -236,7 +236,7 @@ watch(
 
 .comment__manager {
   font-weight: bold;
-  font-size: 14px;
+  font-size: 12px;
   margin-right: 5px;
 }
 
@@ -266,7 +266,6 @@ watch(
 
 .comment__text {
   font-size: 12px;
-  word-break: break-all;
 }
 
 .comment__date {

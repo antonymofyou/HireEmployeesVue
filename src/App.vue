@@ -1,15 +1,21 @@
 <template>
-  <div class="app">
-    <router-view></router-view>
-  </div>
+  <router-view></router-view>
 </template>
 
 <script setup>
-import { RouterLink, RouterView } from "vue-router";
-//import HelloWorld from './components/HelloWorld.vue'
+import { RouterView } from 'vue-router';
 </script>
 
 <style>
+*,
+::before,
+::after {
+  font-family: Verdana, Tahoma, sans-serif;
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
 :root {
   --error-color: red;
   --success-color: #00d100;
@@ -27,14 +33,22 @@ import { RouterLink, RouterView } from "vue-router";
   --shark: #1f222a;
   --tundora: #4e4b4b;
   --black-squeeze: #edf6f9;
-
 }
-* {
-  font-family: Verdana, Tahoma, sans-serif;
 
-  box-sizing: border-box;
+#app {
+  padding: 0 20px;
 }
-body {
-  margin: 0;
+
+@media screen and (max-width: 425px) {
+  h1 {
+  font-size: 1.3rem !important;
+}
+  h2 {
+    font-size: 1rem !important;
+  }
+
+  p {
+    font-size: 0.85rem !important;
+  }
 }
 </style>

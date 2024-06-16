@@ -44,9 +44,12 @@
         >Кандидатов пока нет</span
       >
       <CandidateCard
+        v-if="vacancyId && !isLoading"
         v-for="candidate in candidates"
         :key="candidate.candidateId"
         :candidate="candidate"
+        :vacancy-id="vacancyId"
+        :status="status"
         :respond="candidate.otklikId"
       />
     </div>
@@ -172,7 +175,10 @@ function getVacancyStatuses() {
         //успешный результат
         candidateStatus.value = [{ name: 'Все', id: 'Все' }];
         response.statuses.map((status) => {
-          candidateStatus.value.push({ name: status.statusName, id: status.statusComment });
+          candidateStatus.value.push({
+            name: status.statusName,
+            id: status.statusComment,
+          });
         });
       },
       function (err) {
@@ -227,8 +233,12 @@ watch(
   display: flex;
   flex-direction: column;
   align-items: center;
-  margin-top: 60px;
+  margin-top: 100px;
   padding-bottom: 80px;
+}
+
+.candidates__title {
+  text-align: center;
 }
 
 .candidates__filter {
@@ -237,6 +247,7 @@ watch(
   align-items: center;
   flex-wrap: wrap;
   gap: 30px;
+  margin-top: 30px;
 }
 
 .candidates__filter-title {

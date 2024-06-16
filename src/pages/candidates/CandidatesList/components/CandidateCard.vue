@@ -32,6 +32,14 @@ const props = defineProps({
     type: Object,
     required: true,
   },
+  vacancyId: {
+    type: String,
+    required: true,
+  },
+  status: {
+    type: String,
+    required: true,
+  },
 });
 
 //Переход на карточку комментариев кандидата
@@ -41,6 +49,8 @@ function goToCandidate() {
     query: {
       candidateId: props.candidate.candidateId,
       respondId: props.candidate.otklikId,
+      vacancyId: props.vacancyId,
+      status: props.status,
     },
   });
 }

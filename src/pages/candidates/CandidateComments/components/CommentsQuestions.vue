@@ -1,53 +1,65 @@
 <template>
   <div class="universal">
-    <div class="universal">
-      <div class="universal__header">
-        <h2>{{ props.type === "questions" ? "Ответы на вопросы вакансии" : "Информация о кандидате" }} </h2>
+    <div class="universal__header">
+      <h2>
+        {{
+          props.type === 'questions'
+            ? 'Ответы на вопросы вакансии'
+            : 'Информация о кандидате'
+        }}
+      </h2>
 
-        <button v-if="props.type === 'questions'" class="universal__header-btn" @click="showQuestions">
-          <ArrowIcon
-            :class="[
-              'universal__header-arrowicon',
-              { 'universal__header-arrowicon--active': show },
-            ]"
-          />
-        </button>
-      </div>
+      <button
+        v-if="props.type === 'questions'"
+        class="universal__header-btn"
+        @click="showQuestions"
+      >
+        <ArrowIcon
+          :class="[
+            'universal__header-arrowicon',
+            { 'universal__header-arrowicon--active': show },
+          ]"
+        />
+      </button>
+    </div>
 
-      <div v-if="props.type === 'candidate'" class="universal__info">
+    <div v-if="props.type === 'candidate'" class="universal__info">
+      <p v-if="errorMessage" class="universal__error">
+        {{ errorMessage }}
+      </p>
+      <template v-else>
         <p><b>ФИО: </b>{{ respondInfo.info?.fio }}</p>
         <p><b>Телеграм: </b> {{ respondInfo.info?.tgNickname }}</p>
-      </div>
-
-      <!-- Вопросы вакансии и ответы кандидата -->
-      <Transition v-if="props.type === 'questions'">
-        <div class="universal__list" v-if="show">
-          <p v-if="errorMessage" class="universal__error">
-            {{ errorMessage }}
-          </p>
-          <template v-if="respondInfo.answers.length">
-            <div
-              class="universal__question"
-              v-for="question in respondInfo.answers.length"
-              :key="question.questionId"
-            >
-              <div class="universal__question-text">
-                <p><b>Вопрос:</b></p>
-                <p>{{ question.question }}</p>
-              </div>
-              <div class="universal__question-text">
-                <p><b>Ответ:</b></p>
-                <p>{{ question.answer }}</p>
-              </div>
-              <hr />
-            </div>
-          </template>
-          <p v-if="!errorMessage && !respondInfo.answers.length">
-            Нет вопросов
-          </p>
-        </div>
-      </Transition>
+        <p><b>Статус: </b> {{ respondInfo.info?.status }}</p></template
+      >
     </div>
+
+    <!-- Вопросы вакансии и ответы кандидата -->
+    <Transition v-if="props.type === 'questions'">
+      <div class="universal__list" v-if="show">
+        <p v-if="errorMessage" class="universal__error">
+          {{ errorMessage }}
+        </p>
+        <template v-else="respondInfo.answers.length">
+          <div
+            class="universal__question"
+            v-for="question in respondInfo.answers"
+            :key="question.questionId"
+          >
+            <div class="universal__question-text">
+              <p><b>Вопрос:</b></p>
+              <p v-html="question.question"></p>
+            </div>
+            <div class="universal__question-text">
+              <p><b>Ответ:</b></p>
+              <p>{{ question.answer }}</p>
+            </div>
+            <hr />
+          </div>
+        </template>
+        <p v-if="!errorMessage && !respondInfo.answers.length">Нет данных</p>
+      </div>
+    </Transition>
   </div>
 </template>
 
@@ -101,10 +113,12 @@ onMounted(requestCandidateInfo);
 </script>
 
 <style scoped>
-.universal {
-  transition: all 0.5s ease;
+p {
+  margin-bottom: 5px;
 }
+
 .universal__list {
+  margin-top: 20px;
   margin-bottom: 10px;
   padding: 10px;
 }
@@ -113,6 +127,14 @@ onMounted(requestCandidateInfo);
   display: flex;
   justify-content: space-between;
   align-items: center;
+}
+
+.universal__info {
+  margin-top: 20px;
+}
+
+.universal__question {
+  margin-bottom: 20px;
 }
 
 .universal__question-text {
