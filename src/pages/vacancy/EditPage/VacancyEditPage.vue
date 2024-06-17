@@ -1,5 +1,5 @@
 <template>
-  <main class="content vacancy-edit" v-if="isLoaded">
+  <div class="content vacancy-edit" v-if="isLoaded">
     <TopSquareButton
       class="vacancy-edit__back-btn"
       :icon="iconBack"
@@ -71,7 +71,7 @@
       </SubmitButton>
 
     </section>
-  </main>
+  </div>
 </template>
 
 <script setup>

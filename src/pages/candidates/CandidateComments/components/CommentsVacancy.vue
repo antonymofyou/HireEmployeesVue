@@ -55,27 +55,12 @@ onMounted(requestVacancyInfo);
 </script>
 
 <style scoped>
-p {
-  margin-bottom: 5px;
-}
-
-.vacancy__list {
-  margin-bottom: 10px;
-  padding: 10px;
-}
-
 .vacancy__header {
   display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin-bottom: 20px;
 }
 
 .vacancy__error {
   color: var(--error-color);
 }
 
-.vacancy__description :deep(:where(ol, ul)) {
-  padding-left: 15px;
-}
 </style>

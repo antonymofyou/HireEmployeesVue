@@ -1,5 +1,7 @@
 <template>
-  <router-view></router-view>
+  <main>
+    <router-view></router-view>
+  </main>
 </template>
 
 <script setup>
@@ -7,15 +9,6 @@ import { RouterView } from 'vue-router';
 </script>
 
 <style>
-/* Обнуляющие стили */
-*,
-::before,
-::after {
-  margin: 0;
-  padding: 0;
-  box-sizing: border-box;
-}
-
 :root {
   font-family: Verdana, Tahoma, sans-serif;
   --error-color: red;
@@ -36,17 +29,16 @@ import { RouterView } from 'vue-router';
   --black-squeeze: #edf6f9;
 }
 
-/* Временно установлено для app, пока не будет пернесен main */
-#app {
+body {
+  margin: 0;
+}
+
+main {
   padding: 0 20px;
 }
 
-/* :where принимает массив селекторов */
-:where(h1) {
-  font-weight: 400;
-}
-
 h1 {
+  font-weight: 400;
   font-size: 30px;
 }
 
@@ -54,19 +46,15 @@ h2 {
   font-size: 22px;
 }
 
-/* Глобальные правила для мобильных устройств 
-   important - для перезаписи стилей
-*/
 @media screen and (max-width: 425px) {
   h1 {
-    font-size: 1.3rem !important;
+    font-size: 21px;
   }
   h2 {
-    font-size: 1rem !important;
+    font-size: 16px;
   }
-
   p {
-    font-size: 0.85rem !important;
+    font-size: 13px;
   }
 }
 </style>

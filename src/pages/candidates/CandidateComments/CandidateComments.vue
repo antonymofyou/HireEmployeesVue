@@ -74,7 +74,7 @@ const status = route.query.status;
 .comments__vacancy-block {
   margin-bottom: 38.5px;
   border: 1px solid var(--cornflower-blue);
-  border-radius: 1em;
+  border-radius: 15px;
   padding: 10px 15px;
 }
 

@@ -2,11 +2,7 @@
   <div class="universal">
     <div class="universal__header">
       <h2>
-        {{
-          props.type === 'questions'
-            ? 'Ответы кандидата'
-            : 'Кандидат'
-        }}
+        {{ props.type === 'questions' ? 'Ответы кандидата' : 'Кандидат' }}
       </h2>
 
       <button
@@ -113,24 +109,10 @@ onMounted(requestCandidateInfo);
 </script>
 
 <style scoped>
-p {
-  margin-bottom: 5px;
-}
-
-.universal__list {
-  margin-top: 20px;
-  margin-bottom: 10px;
-  padding: 10px;
-}
-
 .universal__header {
   display: flex;
   justify-content: space-between;
   align-items: center;
-}
-
-.universal__info {
-  margin-top: 20px;
 }
 
 .universal__question {
@@ -161,8 +143,8 @@ p {
 
 .universal__header-arrowicon {
   transition: all 0.3s ease;
-  width: 3em;
-  height: 3em;
+  width: 40px;
+  height: 40px;
 }
 
 .universal__header-arrowicon--active {

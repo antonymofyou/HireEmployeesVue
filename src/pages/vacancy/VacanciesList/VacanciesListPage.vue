@@ -272,6 +272,7 @@ watch(
   position: fixed;
   top: 60px;
   right: 50px;
+  display: flex;
 }
 
 @media screen and (max-width: 426px) {
