@@ -29,12 +29,12 @@ import { RouterView } from 'vue-router';
   --black-squeeze: #edf6f9;
 }
 
-body {
-  margin: 0;
-}
-
 * {
   box-sizing: border-box;
+}
+
+body {
+  margin: 0;
 }
 
 main {
