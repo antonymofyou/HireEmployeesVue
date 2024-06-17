@@ -43,7 +43,7 @@ import InputSimple from '@/components/InputSimple.vue';
 import SelectMain from '@/components/SelectMain.vue';
 import ModalConfirmation from '@/components/ModalConfirmation.vue';
 import { ref } from 'vue';
-import MyEditor from "@/components/MyEditor.vue";
+import MyEditor from "@/components/TextEditor.vue";
 
 /* id вопроса, текст вопроса, опции для измнения статуса публикации, статус публикации вопроса, 
 имя лейбла, функция для удаления вопроса */

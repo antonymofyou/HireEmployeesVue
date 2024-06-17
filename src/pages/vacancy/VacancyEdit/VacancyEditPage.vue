@@ -38,10 +38,10 @@
           :isLabelBold=true
           size="big"
         />-->
-        <div class="vacancy-edit__description-label">Описание вакансии:</div>
-        <MyEditor
+        <TextEditor
           v-model="formData.description"
           size="big"
+          label="Описание вакансии:"
         />
       </div>
 
@@ -136,7 +136,7 @@ import { MainRequestClass } from "@/js/RootClasses";
 import ButtonMain from "@/components/ButtonMain.vue";
 import ModalConfirmation from "@/components/ModalConfirmation.vue";
 import ErrorNotification from "@/components/ErrorNotification.vue";
-import MyEditor from "@/components/MyEditor.vue";
+import TextEditor from "@/components/TextEditor.vue";
 
 const route = useRoute();
 const router = useRouter();

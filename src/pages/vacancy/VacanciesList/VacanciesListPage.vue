@@ -64,10 +64,11 @@
           :isLabelBold="true"
           size="big"
         />-->
-        <MyEditor
+        <TextEditor
           v-model="formData.description"
           size="big"
           :staticToolbar="true"
+          label="Описание вакансии:"
         />
       </template>
       <template #footer-control-buttons>
@@ -136,7 +137,7 @@ import TopSquareButton from "@/components/TopSquareButton.vue";
 import ErrorNotification from "@/components/ErrorNotification.vue";
 import SpinnerMain from "@/components/SpinnerMain.vue";
 import SelectMain from "@/components/SelectMain.vue";
-import MyEditor from "@/components/MyEditor.vue";
+import TextEditor from "@/components/TextEditor.vue";
 
 const router = useRouter();
 

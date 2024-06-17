@@ -28,6 +28,10 @@ const props = defineProps({
   staticToolbar: {
     type: Boolean,
     default: false,
+  },
+  label: {
+    type: String,
+    default: '',
   }
 });
 
@@ -45,13 +49,18 @@ const editor = useEditor({
   editorProps: {
     attributes: {
       class:
-        'editor-content-inside',
+        'text-editor-content-inside',
     },
+
   },
 });
 
 const firstClick = ref(true);
-const toolbar = ref(false);
+const toolbar = ref(props.staticToolbar);
+
+if (toolbar.value){
+  firstClick.value = false;
+}
 
 
 
@@ -61,55 +70,62 @@ function showToolbar (editor)  {
     firstClick.value = false;
   }
   editor.chain().focus().run()
-
+  console.log(editor.isFocused)
 }
+
+
 
 
 
 </script>
 
 <template>
+  <div v-if="props.label" class="text-editor__label">
+    {{props.label}}
+  </div>
   <div
-    class="my-editor__container"
-    :class="{'editor-size-big': props.size === 'big',
-    'editor-size-medium': props.size === 'medium',
+    class="text-editor__container"
+    :class="{'text-editor-size-big': props.size === 'big',
+    'text-editor-size-medium': props.size === 'medium',
     }"
     @click="showToolbar(editor)"
+    tabindex="1"
+
   >
 
       <section
         v-if="toolbar"
-        class="my-editor__button-group"
+        class="text-editor__button-group"
       >
         <button
           type="button"
-          @click="editor.chain().focus().toggleBold().run()"
-          :class="{ 'my-editor__is-active': editor.isActive('bold') }"
+          @click="editor?.chain().focus().toggleBold().run()"
+          :class="{ 'text-editor__is-active': editor?.isActive('bold') }"
           class="p-1"
         >
           <BoldIcon title="Bold" />
         </button>
         <button
           type="button"
-          @click="editor.chain().focus().toggleItalic().run()"
-          :class="{ 'my-editor__is-active': editor.isActive('italic') }"
+          @click="editor?.chain().focus().toggleItalic().run()"
+          :class="{ 'text-editor__is-active': editor?.isActive('italic') }"
           class="p-1"
         >
           <ItalicIcon title="Italic" />
         </button>
         <button
           type="button"
-          @click="editor.chain().focus().toggleUnderline().run()"
-          :class="{ 'my-editor__is-active': editor.isActive('underline') }"
+          @click="editor?.chain().focus().toggleUnderline().run()"
+          :class="{ 'text-editor__is-active': editor?.isActive('underline') }"
           class="p-1"
         >
           <UnderlineIcon title="Underline" />
         </button>
         <button
           type="button"
-          @click="editor.chain().focus().toggleHeading({ level: 1 }).run()"
+          @click="editor?.chain().focus().toggleHeading({ level: 1 }).run()"
           :class="{
-          'my-editor__is-active': editor.isActive('heading', { level: 1 }),
+          'text-editor__is-active': editor?.isActive('heading', { level: 1 }),
         }"
           class="p-1"
         >
@@ -117,9 +133,9 @@ function showToolbar (editor)  {
         </button>
         <button
           type="button"
-          @click="editor.chain().focus().toggleHeading({ level: 2 }).run()"
+          @click="editor?.chain().focus().toggleHeading({ level: 2 }).run()"
           :class="{
-          'my-editor__is-active': editor.isActive('heading', { level: 2 }),
+          'text-editor__is-active': editor?.isActive('heading', { level: 2 }),
         }"
           class="p-1"
         >
@@ -127,32 +143,32 @@ function showToolbar (editor)  {
         </button>
         <button
           type="button"
-          @click="editor.chain().focus().toggleBulletList().run()"
-          :class="{ 'my-editor__is-active': editor.isActive('bulletList') }"
+          @click="editor?.chain().focus().toggleBulletList().run()"
+          :class="{ 'text-editor__is-active': editor?.isActive('bulletList') }"
           class="p-1"
         >
           <ListIcon title="Bullet List" />
         </button>
         <button
           type="button"
-          @click="editor.chain().focus().toggleOrderedList().run()"
-          :class="{ 'my-editor__is-active': editor.isActive('orderedList') }"
+          @click="editor?.chain().focus().toggleOrderedList().run()"
+          :class="{ 'text-editor__is-active': editor?.isActive('orderedList') }"
           class="p-1"
         >
           <OrderedListIcon title="Ordered List" />
         </button>
         <button
           type="button"
-          @click="editor.chain().focus().toggleBlockquote().run()"
-          :class="{ 'my-editor__is-active': editor.isActive('blockquote') }"
+          @click="editor?.chain().focus().toggleBlockquote().run()"
+          :class="{ 'text-editor__is-active': editor?.isActive('blockquote') }"
           class="p-1"
         >
           <BlockquoteIcon title="Blockquote" />
         </button>
         <button
           type="button"
-          @click="editor.chain().focus().toggleCode().run()"
-          :class="{ 'my-editor__is-active': editor.isActive('code') }"
+          @click="editor?.chain().focus().toggleCode().run()"
+          :class="{ 'text-editor__is-active': editor?.isActive('code') }"
           class="p-1"
         >
           <CodeIcon title="Code" />
@@ -160,7 +176,7 @@ function showToolbar (editor)  {
         <button
 
           type="button"
-          @click="editor.chain().focus().setHorizontalRule().run()"
+          @click="editor?.chain().focus().setHorizontalRule().run()"
           class="p-1"
         >
           <HorizontalRuleIcon title="Horizontal Rule" />
@@ -168,15 +184,15 @@ function showToolbar (editor)  {
         <button
           type="button"
           class="p-1 disabled:text-gray-400"
-          @click="editor.chain().focus().undo().run()"
-          :disabled="!editor.can().chain().focus().undo().run()"
+          @click="editor?.chain().focus().undo().run()"
+          :disabled="!editor?.can().chain().focus().undo().run()"
         >
           <UndoIcon title="Undo" />
         </button>
         <button
           type="button"
-          @click="editor.chain().focus().redo().run()"
-          :disabled="!editor.can().chain().focus().redo().run()"
+          @click="editor?.chain().focus().redo().run()"
+          :disabled="!editor?.can().chain().focus().redo().run()"
           class="p-1 disabled:text-gray-400"
         >
           <RedoIcon title="Redo" />
@@ -185,17 +201,19 @@ function showToolbar (editor)  {
 
     <EditorContent
       :editor="editor"
-      class="editor-content"
-      ref="childElement"
+      class="text=editor-content"
     />
   </div>
 </template>
 
 <style>
+.text-editor__label {
+  margin-bottom: 10px;
+  font-weight: 600;
+}
 
 
-
-.my-editor__container {
+.text-editor__container {
   border: 0;
   border-radius: 10px;
   outline: 1px solid var(--light-gray);
@@ -204,19 +222,19 @@ function showToolbar (editor)  {
   cursor: text;
 }
 
-.editor-size-big {
+.text-editor-size-big {
   min-height: 250px;
 }
 
-.editor-size-medium {
+.text-editor-size-medium {
   min-height: 150px;
 }
 
-.my-editor__container:focus-within {
+.text-editor__container:focus-within {
   outline: 2px solid rgba(0, 0, 252, .6);
 }
 
-.my-editor__button-group {
+.text-editor__button-group {
   display: flex;
   flex-wrap: wrap;
   gap: 0.25rem;
@@ -224,7 +242,7 @@ function showToolbar (editor)  {
 
 }
 
-.my-editor__button-group button {
+.text-editor__button-group button {
   background: var(--milk);
   border-radius: 0.5rem;
   border: none;
@@ -238,16 +256,16 @@ function showToolbar (editor)  {
   transition: all .2s cubic-bezier(.65,.05,.36,1);
 }
 
-.my-editor__button-group button.my-editor__is-active {
+.text-editor__button-group button.text-editor__is-active {
   background: var(--light-violet);
   color: var(--white);
 }
 
-.editor-content-inside {
+.text-editor-content-inside {
   height: 100%;
 }
 
-.editor-content-inside:focus {
+.text-editor-content-inside:focus {
   outline: none;
 }
 
