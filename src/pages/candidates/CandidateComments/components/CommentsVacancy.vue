@@ -51,7 +51,7 @@ const requestVacancyInfo = () => {
   );
 };
 
-onMounted(requestVacacnyInfo);
+onMounted(requestVacancyInfo);
 </script>
 
 <style scoped>

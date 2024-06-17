@@ -10,7 +10,7 @@ import { RouterView } from 'vue-router';
 /* Обнуляющие стили */
 *,
 ::before,
-::after { 
+::after {
   font-family: Verdana, Tahoma, sans-serif;
   margin: 0;
   padding: 0;
@@ -59,8 +59,8 @@ h2 {
 */
 @media screen and (max-width: 425px) {
   h1 {
-  font-size: 1.3rem !important;
-}
+    font-size: 1.3rem !important;
+  }
   h2 {
     font-size: 1rem !important;
   }
