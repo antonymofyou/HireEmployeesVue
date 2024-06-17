@@ -26,13 +26,13 @@ import { RouterView } from 'vue-router';
   --shark: #1f222a;
   --tundora: #4e4b4b;
   --black-squeeze: #edf6f9;
-}
 
+}
 * {
   font-family: Verdana, Tahoma, sans-serif;
+
   box-sizing: border-box;
 }
-
 body {
   margin: 0;
 }

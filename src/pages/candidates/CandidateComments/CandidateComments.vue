@@ -72,7 +72,7 @@ const status = route.query.status;
 .comments__comments-block,
 .comments__questions-block,
 .comments__vacancy-block {
-  margin-bottom: 38.5px;
+  margin-bottom: 38px;
   border: 1px solid var(--cornflower-blue);
   border-radius: 15px;
   padding: 10px 15px;
