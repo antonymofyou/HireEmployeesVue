@@ -1,12 +1,11 @@
 <template>
-  <div class="app">
+  <main>
     <router-view></router-view>
-  </div>
+  </main>
 </template>
 
 <script setup>
-import { RouterLink, RouterView } from "vue-router";
-//import HelloWorld from './components/HelloWorld.vue'
+import { RouterView } from 'vue-router';
 </script>
 
 <style>
@@ -36,5 +35,30 @@ import { RouterLink, RouterView } from "vue-router";
 }
 body {
   margin: 0;
+}
+
+main {
+  padding: 0 20px;
+}
+
+h1 {
+  font-weight: 400;
+  font-size: 30px;
+}
+
+h2 {
+  font-size: 22px;
+}
+
+@media screen and (max-width: 425px) {
+  h1 {
+    font-size: 21px;
+  }
+  h2 {
+    font-size: 16px;
+  }
+  p, span {
+    font-size: 13px;
+  }
 }
 </style>

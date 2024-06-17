@@ -256,9 +256,7 @@ watch(
 
 .vacancies__title {
   margin: 0;
-  font-size: 35px;
   line-height: 42px;
-  font-weight: 400;
 }
 
 .vacancies__box-vacancies {
@@ -274,6 +272,7 @@ watch(
   position: fixed;
   top: 60px;
   right: 50px;
+  display: flex;
 }
 
 @media screen and (max-width: 426px) {

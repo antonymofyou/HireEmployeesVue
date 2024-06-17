@@ -197,8 +197,9 @@ onMounted(requestComments);
 .comments__list {
   margin-bottom: 10px;
   padding: 10px;
-  max-height: 16em;
+  max-height: 260px;
   overflow-y: auto;
   scrollbar-width: thin;
+  border: 1px solid var(--cornflower-blue);
 }
 </style>

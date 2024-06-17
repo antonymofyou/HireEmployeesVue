@@ -1,13 +1,14 @@
 <template>
   <section class="candidates">
-    <TopSquareButton
-      class="candidates__back-btn"
-      :icon="iconBack"
-      @click="$router.push({ name: 'vacanciesList' })"
-    >
-    </TopSquareButton>
-
-    <h1 class="candidates__title">Кандидаты вакансии</h1>
+    <div class="candidates__title">
+      <TopSquareButton
+        class="candidates__back-btn"
+        :icon="iconBack"
+        @click="$router.push({ name: 'vacanciesList' })"
+      >
+      </TopSquareButton>
+      <h1>Кандидаты вакансии</h1>
+    </div>
 
     <div class="candidates__filter">
       <div v-if="!vacancyId">Выберите вакансию:</div>
@@ -44,9 +45,12 @@
         >Кандидатов пока нет</span
       >
       <CandidateCard
+        v-if="vacancyId && !isLoading"
         v-for="candidate in candidates"
         :key="candidate.candidateId"
         :candidate="candidate"
+        :vacancy-id="vacancyId"
+        :status="status"
         :respond="candidate.otklikId"
       />
     </div>
@@ -172,7 +176,10 @@ function getVacancyStatuses() {
         //успешный результат
         candidateStatus.value = [{ name: 'Все', id: 'Все' }];
         response.statuses.map((status) => {
-          candidateStatus.value.push({ name: status.statusName, id: status.statusComment });
+          candidateStatus.value.push({
+            name: status.statusName,
+            id: status.statusComment,
+          });
         });
       },
       function (err) {
@@ -227,8 +234,12 @@ watch(
   display: flex;
   flex-direction: column;
   align-items: center;
-  margin-top: 60px;
   padding-bottom: 80px;
+}
+
+.candidates__title {
+  width: 100%;
+  text-align: center;
 }
 
 .candidates__filter {
@@ -247,6 +258,7 @@ watch(
 }
 
 .candidates__description {
+  text-align: center;
   margin-top: 30px;
 }
 
@@ -265,9 +277,16 @@ watch(
 }
 
 .candidates__back-btn {
-  position: fixed;
+  position: relative;
   top: 20px;
-  left: 30px;
+}
+
+@media screen and (max-width: 350px) {
+  .candidates__title {
+    h1 {
+      margin-top: 30px;
+    }
+  }
 }
 
 @media screen and (max-width: 450px) {

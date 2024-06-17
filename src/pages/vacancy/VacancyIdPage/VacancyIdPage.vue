@@ -1,6 +1,6 @@
 <template>
   <tgAuth v-if="!isLoggedIn" v-model:isLoggedIn="isLoggedIn"/>
-  <main v-else-if="isLoaded && isSuccessfulLoad" class="content vacancy">
+  <div v-else-if="isLoaded && isSuccessfulLoad" class="content vacancy">
     <header class="vacancy__header">
       <div class="vacancy__auth">
         <div class="vacancy__auth-info">
@@ -94,7 +94,7 @@
         @cancel="handleCancelSend"
       />
     </section>
-  </main>
+  </div>
   <div v-else-if="!isLoaded" class="spinner">
     <SpinnerMain/>
   </div>
@@ -472,7 +472,7 @@ const handleCancelSend = () => {
 };
 </script>
 
-<style>
+<style scoped>
 .container {
   display: flex;
   flex-direction: column;
