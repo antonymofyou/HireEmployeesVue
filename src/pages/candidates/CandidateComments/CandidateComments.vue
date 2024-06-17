@@ -87,4 +87,12 @@ const status = route.query.status;
   position: relative;
   top: 20px;
 }
+
+@media screen and (max-width: 350px) {
+  .heading {
+    h1 {
+      margin-top: 30px;
+    }
+  }
+}
 </style>

@@ -75,7 +75,7 @@ p {
   color: var(--error-color);
 }
 
-.vacancy__description :deep(ul, ol) {
+.vacancy__description :deep(:where(ol, ul)) {
   padding-left: 15px;
 }
 </style>

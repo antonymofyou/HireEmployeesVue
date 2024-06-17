@@ -282,6 +282,14 @@ watch(
   top: 20px;
 }
 
+@media screen and (max-width: 350px) {
+  .candidates__title {
+    h1 {
+      margin-top: 30px;
+    }
+  }
+}
+
 @media screen and (max-width: 450px) {
   .candidates__filter {
     gap: 15px;

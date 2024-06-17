@@ -11,13 +11,13 @@ import { RouterView } from 'vue-router';
 *,
 ::before,
 ::after {
-  font-family: Verdana, Tahoma, sans-serif;
   margin: 0;
   padding: 0;
   box-sizing: border-box;
 }
 
 :root {
+  font-family: Verdana, Tahoma, sans-serif;
   --error-color: red;
   --success-color: #00d100;
   --white: #ffffff;
