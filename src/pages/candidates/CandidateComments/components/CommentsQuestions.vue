@@ -25,7 +25,15 @@
       </p>
       <template v-else>
         <p><b>ФИО: </b>{{ respondInfo.info?.fio }}</p>
-        <p><b>Телеграм: </b> {{ respondInfo.info?.tgNickname }}</p>
+        <p>
+          <b>Телеграм: </b>
+          <a
+            target="_blank"
+            :href="`https://t.me/${respondInfo.info?.tgNickname}`"
+          >
+            {{ respondInfo.info?.tgNickname }}
+          </a>
+        </p>
         <p><b>Статус: </b> {{ respondInfo.info?.status }}</p></template
       >
     </div>

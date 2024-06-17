@@ -70,12 +70,12 @@ function getNasotkuTokenFromServer(vkToken, vkUserId) {
             }
             else {
                 setAuth(response.nasotkuToken, response.device)
-                router.push({name:'home'})
+                router.push({name:'vacanciesList'})
             }
             
         },
         function (err) {
-            console.log(err)
+            errorMessage.value = err
         }
     )
 }

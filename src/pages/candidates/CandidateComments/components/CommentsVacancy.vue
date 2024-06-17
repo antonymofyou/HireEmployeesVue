@@ -1,15 +1,12 @@
 <template>
   <div class="vacancy">
     <div class="vacancy__header">
-      <h2>Вакансия</h2>
+      <h2>Вакансия {{ vacancyInfo.name }} (id:{{ vacancyInfo.id }})</h2>
     </div>
-
     <p v-if="errorMessage" class="vacancy__error">
       {{ errorMessage }}
     </p>
     <div v-else class="vacancy__info">
-      <p><b>ID: </b>{{ vacancyInfo.id }}</p>
-      <p><b>Название: </b> {{ vacancyInfo.name }}</p>
       <div>
         <p><b>Описание: </b></p>
         <p class="vacancy__description" v-html="vacancyInfo.description"></p>

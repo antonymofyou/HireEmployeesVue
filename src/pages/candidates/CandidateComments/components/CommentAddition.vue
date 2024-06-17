@@ -5,8 +5,8 @@
       <textarea
         :value="modelValue"
         class="comment-creation__textarea"
-        rows="5"
-        @input="emit('update:modelValue', $event.target.value)"
+        :rows="calculateRows"
+        @input="onInput"
       ></textarea>
     </label>
     <ButtonMain
@@ -20,6 +20,7 @@
 
 <script setup>
 import ButtonMain from '@/components/ButtonMain.vue';
+import { ref } from 'vue';
 
 const props = defineProps({
   modelValue: {
@@ -29,6 +30,15 @@ const props = defineProps({
 });
 
 const emit = defineEmits(['createComment', 'update:modelValue']);
+
+const calculateRows = ref(1);
+
+const onInput = (event) => {
+  const textarea = event.target;
+  const lineCount = textarea.value.split('\n').length;
+  calculateRows.value = Math.max(1, lineCount);
+  emit('update:modelValue', event.target.value)
+};
 </script>
 
 <style scoped>
@@ -44,7 +54,7 @@ const emit = defineEmits(['createComment', 'update:modelValue']);
 }
 
 .comment-creation__textarea {
-  resize: none;
+  resize: vertical;
   padding: 10px;
   border: none;
   border-radius: 10px;
