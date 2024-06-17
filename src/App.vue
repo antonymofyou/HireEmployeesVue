@@ -57,7 +57,7 @@ h2 {
   h2 {
     font-size: 16px;
   }
-  p {
+  p, span {
     font-size: 13px;
   }
 }
