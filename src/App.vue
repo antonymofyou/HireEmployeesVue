@@ -10,7 +10,6 @@ import { RouterView } from 'vue-router';
 
 <style>
 :root {
-  font-family: Verdana, Tahoma, sans-serif;
   --error-color: red;
   --success-color: #00d100;
   --white: #ffffff;
@@ -30,6 +29,7 @@ import { RouterView } from 'vue-router';
 }
 
 * {
+  font-family: Verdana, Tahoma, sans-serif;
   box-sizing: border-box;
 }
 
