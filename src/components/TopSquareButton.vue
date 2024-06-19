@@ -1,6 +1,6 @@
 <template>
   <button class="multi__button">
-    <div>
+    <div class="multi__button-box">
       <slot name="icon"> <img class="multi__button-icon" :src="icon" alt="иконка" /></slot>
     </div>
   </button>
@@ -33,6 +33,12 @@ const props = defineProps({
   padding: 0;
   border: 0;
   cursor: pointer;
+}
+
+.multi__button-box {
+  display: flex;
+  justify-content: center;
+  align-items: center;
 }
 
 .multi__button:hover {

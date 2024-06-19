@@ -30,18 +30,11 @@
       </div>
 
       <div class="vacancy-edit__description">
-<!--        <InputSimple
-          v-model="formData.description"
-          id="description"
-          labelName="Описание вакансии"
-          inputType="textarea"
-          :isLabelBold=true
-          size="big"
-        />-->
         <TextEditor
           v-model="formData.description"
           size="big"
           label="Описание вакансии:"
+          id="0"
         />
       </div>
 
@@ -92,10 +85,6 @@
           </Teleport>
         </div>
       </div>
-
-<!--      <SubmitButton class="vacancy-edit__save-btn" :submit-function="saveChanges">
-        Сохранить
-      </SubmitButton>-->
 
       <ButtonMain
         class="vacancy-edit__save-btn"

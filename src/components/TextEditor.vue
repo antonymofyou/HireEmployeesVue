@@ -16,7 +16,7 @@ import CodeIcon from 'vue-material-design-icons/CodeTags.vue'
 import HorizontalRuleIcon from 'vue-material-design-icons/Minus.vue'
 import UndoIcon from 'vue-material-design-icons/Undo.vue'
 import RedoIcon from 'vue-material-design-icons/Redo.vue'
-import {computed, onMounted, ref} from "vue";
+import {ref} from "vue";
 
 
 const props = defineProps({
@@ -32,6 +32,10 @@ const props = defineProps({
   label: {
     type: String,
     default: '',
+  },
+  id: {
+    type: String,
+    default: '',
   }
 });
 
@@ -42,7 +46,6 @@ const emit = defineEmits(['update:modelValue'])
 const editor = useEditor({
   content: props.modelValue,
   onUpdate: ({ editor }) => {
-    // console.log(editor.getHTML())
     emit('update:modelValue', editor.getHTML())
   },
   extensions: [StarterKit, Underline],
@@ -55,26 +58,22 @@ const editor = useEditor({
   },
 });
 
-const firstClick = ref(true);
+
 const toolbar = ref(props.staticToolbar);
 
-if (toolbar.value){
-  firstClick.value = false;
-}
-
-
-
+//достаём панель инструментов по первому клику только
 function showToolbar (editor)  {
-  if (firstClick.value) {
-    toolbar.value = !toolbar.value;
-    firstClick.value = false;
-  }
+  toolbar.value = true;
   editor.chain().focus().run()
-  console.log(editor.isFocused)
 }
 
-
-
+// если клик вне блока, убираем панель инструментов
+document.addEventListener('click', function(event) {
+  let parentElement = props.id !== '' ? document.getElementById(props.id) : false;
+  if (parentElement && (!parentElement.contains(event.target))) {
+    toolbar.value = false;
+  }
+});
 
 
 </script>
@@ -84,13 +83,12 @@ function showToolbar (editor)  {
     {{props.label}}
   </div>
   <div
+    :id="id"
     class="text-editor__container"
     :class="{'text-editor-size-big': props.size === 'big',
     'text-editor-size-medium': props.size === 'medium',
     }"
     @click="showToolbar(editor)"
-    tabindex="1"
-
   >
 
       <section
@@ -101,7 +99,6 @@ function showToolbar (editor)  {
           type="button"
           @click="editor?.chain().focus().toggleBold().run()"
           :class="{ 'text-editor__is-active': editor?.isActive('bold') }"
-          class="p-1"
         >
           <BoldIcon title="Bold" />
         </button>
@@ -109,7 +106,6 @@ function showToolbar (editor)  {
           type="button"
           @click="editor?.chain().focus().toggleItalic().run()"
           :class="{ 'text-editor__is-active': editor?.isActive('italic') }"
-          class="p-1"
         >
           <ItalicIcon title="Italic" />
         </button>
@@ -117,7 +113,6 @@ function showToolbar (editor)  {
           type="button"
           @click="editor?.chain().focus().toggleUnderline().run()"
           :class="{ 'text-editor__is-active': editor?.isActive('underline') }"
-          class="p-1"
         >
           <UnderlineIcon title="Underline" />
         </button>
@@ -127,7 +122,6 @@ function showToolbar (editor)  {
           :class="{
           'text-editor__is-active': editor?.isActive('heading', { level: 1 }),
         }"
-          class="p-1"
         >
           <H1Icon title="H1" />
         </button>
@@ -137,7 +131,6 @@ function showToolbar (editor)  {
           :class="{
           'text-editor__is-active': editor?.isActive('heading', { level: 2 }),
         }"
-          class="p-1"
         >
           <H2Icon title="H2" />
         </button>
@@ -145,7 +138,6 @@ function showToolbar (editor)  {
           type="button"
           @click="editor?.chain().focus().toggleBulletList().run()"
           :class="{ 'text-editor__is-active': editor?.isActive('bulletList') }"
-          class="p-1"
         >
           <ListIcon title="Bullet List" />
         </button>
@@ -153,7 +145,6 @@ function showToolbar (editor)  {
           type="button"
           @click="editor?.chain().focus().toggleOrderedList().run()"
           :class="{ 'text-editor__is-active': editor?.isActive('orderedList') }"
-          class="p-1"
         >
           <OrderedListIcon title="Ordered List" />
         </button>
@@ -161,7 +152,6 @@ function showToolbar (editor)  {
           type="button"
           @click="editor?.chain().focus().toggleBlockquote().run()"
           :class="{ 'text-editor__is-active': editor?.isActive('blockquote') }"
-          class="p-1"
         >
           <BlockquoteIcon title="Blockquote" />
         </button>
@@ -169,7 +159,6 @@ function showToolbar (editor)  {
           type="button"
           @click="editor?.chain().focus().toggleCode().run()"
           :class="{ 'text-editor__is-active': editor?.isActive('code') }"
-          class="p-1"
         >
           <CodeIcon title="Code" />
         </button>
@@ -177,13 +166,11 @@ function showToolbar (editor)  {
 
           type="button"
           @click="editor?.chain().focus().setHorizontalRule().run()"
-          class="p-1"
         >
           <HorizontalRuleIcon title="Horizontal Rule" />
         </button>
         <button
           type="button"
-          class="p-1 disabled:text-gray-400"
           @click="editor?.chain().focus().undo().run()"
           :disabled="!editor?.can().chain().focus().undo().run()"
         >
@@ -193,7 +180,6 @@ function showToolbar (editor)  {
           type="button"
           @click="editor?.chain().focus().redo().run()"
           :disabled="!editor?.can().chain().focus().redo().run()"
-          class="p-1 disabled:text-gray-400"
         >
           <RedoIcon title="Redo" />
         </button>
@@ -201,7 +187,6 @@ function showToolbar (editor)  {
 
     <EditorContent
       :editor="editor"
-      class="text=editor-content"
     />
   </div>
 </template>
@@ -213,6 +198,7 @@ function showToolbar (editor)  {
 }
 
 
+
 .text-editor__container {
   border: 0;
   border-radius: 10px;
@@ -220,6 +206,21 @@ function showToolbar (editor)  {
   padding: 10px;
   font-family: Arial, sans-serif;
   cursor: text;
+}
+
+.text-editor__container blockquote{
+  border-left: 3px solid var(--light-gray);
+  margin: 1.5rem 0;
+  padding-left: 1rem;
+}
+
+.text-editor__container code {
+  background: var(--shark);
+  border-radius: .5rem;
+  color: var(--white);
+  font-family: JetBrainsMono, monospace;
+  margin: 1.5rem 0;
+  padding: .75rem 1rem;
 }
 
 .text-editor-size-big {
@@ -259,10 +260,6 @@ function showToolbar (editor)  {
 .text-editor__button-group button.text-editor__is-active {
   background: var(--light-violet);
   color: var(--white);
-}
-
-.text-editor-content-inside {
-  height: 100%;
 }
 
 .text-editor-content-inside:focus {

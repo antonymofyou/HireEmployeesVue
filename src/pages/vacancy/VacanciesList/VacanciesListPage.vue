@@ -56,14 +56,6 @@
           />
         </div>
 
-<!--        <InputSimple
-          v-model="formData.description"
-          id="description"
-          labelName="Описание вакансии"
-          inputType="textarea"
-          :isLabelBold="true"
-          size="big"
-        />-->
         <TextEditor
           v-model="formData.description"
           size="big"
@@ -263,9 +255,7 @@ watch(
 
 .vacancies__title {
   margin: 0;
-  font-size: 35px;
   line-height: 42px;
-  font-weight: 400;
 }
 
 .vacancies__box-vacancies {
@@ -281,6 +271,7 @@ watch(
   position: fixed;
   top: 60px;
   right: 50px;
+  display: flex;
 }
 
 @media screen and (max-width: 426px) {
