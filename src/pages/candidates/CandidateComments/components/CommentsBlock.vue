@@ -1,6 +1,17 @@
 <template>
   <div class="comments">
-    <h2>{{ headingText }}</h2>
+    <div class="comments__header">
+      <h2>{{ headingText }}</h2>
+      <EmptyButton v-if="!respondId" @click="showComments"
+        ><template #icon>
+          <ArrowIcon
+            :class="[
+              'comments__header-arrowicon',
+              { 'comments__header-arrowicon--active': show },
+            ]"
+          /> </template
+      ></EmptyButton>
+    </div>
 
     <div v-if="isLoading" class="comments__spinner-wrapper">
       <SpinnerMain class="comments__spinner" />
@@ -11,24 +22,51 @@
     </p>
 
     <template v-else>
-      <div class="comments__list">
-        <template v-if="comments.length">
-          <CommentCard
-            v-for="comment in comments"
-            :comment
-            :key="comment.id"
-            class="comments__comment"
-            @delete="deleteComment"
-            @update-comment="updateComment"
-          />
-        </template>
-        <p v-if="!isLoading && !comments.length">Нет комментариев</p>
-      </div>
+      <template v-if="!respondId">
+        <Transition v-if="show" >
+          <div>
+            <div class="comments__list">
+              <template v-if="comments.length">
+                <CommentCard
+                  v-for="comment in comments"
+                  :comment
+                  :key="comment.id"
+                  class="comments__comment"
+                  @delete="deleteComment"
+                  @update-comment="updateComment"
+                />
+              </template>
+              <p v-if="!isLoading && !comments.length">Нет комментариев</p>
+            </div>
 
-      <CommentAddition
-        v-model.trim="newComment"
-        @create-comment="createComment({ comment: newComment })"
-      />
+            <CommentAddition
+              v-model.trim="newComment"
+              @create-comment="createComment({ comment: newComment })"
+            />
+          </div>
+        </Transition>
+      </template>
+
+      <template v-else>
+        <div class="comments__list">
+          <template v-if="comments.length">
+            <CommentCard
+              v-for="comment in comments"
+              :comment
+              :key="comment.id"
+              class="comments__comment"
+              @delete="deleteComment"
+              @update-comment="updateComment"
+            />
+          </template>
+          <p v-if="!isLoading && !comments.length">Нет комментариев</p>
+        </div>
+
+        <CommentAddition
+          v-model.trim="newComment"
+          @create-comment="createComment({ comment: newComment })"
+        />
+      </template>
     </template>
     <Teleport to="body">
       <ErrorNotification v-if="errorMessage" :message="errorMessage" />
@@ -46,6 +84,8 @@ import {
   CandidateGetCandidateComments,
 } from '../js/CommentsClasses.js';
 import ErrorNotification from '@/components/ErrorNotification.vue';
+import EmptyButton from '@/components/EmptyButton.vue';
+import ArrowIcon from '@/assets/icons/arrow-down.svg?component';
 
 const props = defineProps({
   // ID вакансии, если передано - получаем комментарии для кандидата по отношению к отклику, иначе общие комментарии для кандидата
@@ -60,6 +100,7 @@ const props = defineProps({
   },
 });
 
+
 // Массив комментариев
 const comments = ref([]);
 // Состояние загрузки
@@ -69,6 +110,8 @@ const mainErrorMessage = ref('');
 const errorMessage = ref('');
 // Значение нового комментария
 const newComment = ref('');
+// Флаг показа комментариев
+const show = ref(false);
 
 // Формируем строку вида "for_otklik:id" или "for_candidate"
 const commentFor = computed(
@@ -172,12 +215,32 @@ const requestComments = () => {
   );
 };
 
+const showComments = () => {
+  show.value = !show.value;
+};
+
 onMounted(requestComments);
 </script>
 
 <style scoped>
 .comments__comment:not(:last-child) {
   margin-bottom: 10px;
+}
+
+.comments__header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.comments__header-arrowicon {
+  transition: all 0.3s ease;
+  width: 40px;
+  height: 40px;
+}
+
+.comments__header-arrowicon--active {
+  transform: rotateX(180deg);
 }
 
 .comments__spinner-wrapper {

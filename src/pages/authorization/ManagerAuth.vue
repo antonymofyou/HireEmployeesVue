@@ -31,7 +31,7 @@ const buttonColor = 'var(--VKColor)'
 const textColor = 'var(--white)'
 
 const router = useRouter();
-let errorMessage = ref()
+const errorMessage = ref()
 
 function authorizeVK(){
     location.assign("https://oauth.vk.com/authorize?client_id=51873425&display=page&redirect_uri=http://localhost/auth&response_type=code")
@@ -99,7 +99,7 @@ function getVkTokenFromServer() {
             
         },
         function (err) {
-            console.log(err)
+            errorMessage.value = err
         }
     )
 

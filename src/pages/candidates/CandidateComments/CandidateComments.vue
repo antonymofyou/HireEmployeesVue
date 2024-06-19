@@ -34,13 +34,13 @@
         class="comments__questions-block"
       />
       <CommentsBlock
-        v-if="candidateId"
+        v-if="respondId && candidateId"
+        :respond-id
         :candidate-id
         class="comments__comments-block"
       />
       <CommentsBlock
-        v-if="respondId && candidateId"
-        :respond-id
+        v-if="candidateId"
         :candidate-id
         class="comments__comments-block"
       />
@@ -72,7 +72,7 @@ const status = route.query.status;
 .comments__comments-block,
 .comments__questions-block,
 .comments__vacancy-block {
-  margin-bottom: 38px;
+  margin-bottom: 25px;
   border: 1px solid var(--cornflower-blue);
   border-radius: 15px;
   padding: 10px 15px;
@@ -80,7 +80,6 @@ const status = route.query.status;
 
 .heading {
   text-align: center;
-  margin-bottom: 20px;
 }
 
 .comments__back-btn {

@@ -1,26 +1,22 @@
 <template>
-  <div class="universal">
-    <div class="universal__header">
+  <div class="questions-universal">
+    <div class="questions-universal__header">
       <h2>
         {{ props.type === 'questions' ? 'Ответы кандидата' : 'Кандидат' }}
       </h2>
-
-      <button
-        v-if="props.type === 'questions'"
-        class="universal__header-btn"
-        @click="showQuestions"
-      >
-        <ArrowIcon
-          :class="[
-            'universal__header-arrowicon',
-            { 'universal__header-arrowicon--active': show },
-          ]"
-        />
-      </button>
+      <EmptyButton v-if="props.type === 'questions'" @click="showQuestions"
+        ><template #icon>
+          <ArrowIcon
+            :class="[
+              'questions-universal__header-arrowicon',
+              { 'questions-universal__header-arrowicon--active': show },
+            ]"
+          /> </template
+      ></EmptyButton>
     </div>
 
-    <div v-if="props.type === 'candidate'" class="universal__info">
-      <p v-if="errorMessage" class="universal__error">
+    <div v-if="props.type === 'candidate'" class="questions-universal__info">
+      <p v-if="errorMessage" class="questions-universal__error">
         {{ errorMessage }}
       </p>
       <template v-else>
@@ -40,21 +36,21 @@
 
     <!-- Вопросы вакансии и ответы кандидата -->
     <Transition v-if="props.type === 'questions'">
-      <div class="universal__list" v-if="show">
-        <p v-if="errorMessage" class="universal__error">
+      <div class="questions-universal__list" v-if="show">
+        <p v-if="errorMessage" class="questions-universal__error">
           {{ errorMessage }}
         </p>
         <template v-else="respondInfo.answers.length">
           <div
-            class="universal__question"
+            class="questions-universal__question"
             v-for="question in respondInfo.answers"
             :key="question.questionId"
           >
-            <div class="universal__question-text">
+            <div class="questions-universal__question-text">
               <p><b>Вопрос:</b></p>
               <p v-html="question.question"></p>
             </div>
-            <div class="universal__question-text">
+            <div class="questions-universal__question-text">
               <p><b>Ответ:</b></p>
               <p>{{ question.answer }}</p>
             </div>
@@ -71,6 +67,7 @@
 import { onMounted, ref } from 'vue';
 import { CandidatesGetOtklikAnswers } from '../js/CommentsClasses';
 import ArrowIcon from '@/assets/icons/arrow-down.svg?component';
+import EmptyButton from '@/components/EmptyButton.vue';
 
 const props = defineProps({
   // ID отклика
@@ -117,17 +114,23 @@ onMounted(requestCandidateInfo);
 </script>
 
 <style scoped>
-.universal__header {
+.questions-universal__header {
   display: flex;
   justify-content: space-between;
   align-items: center;
 }
 
-.universal__question {
+.questions-universal__info {
+  * {
+    margin: 10px 0;
+  }
+}
+
+.questions-universal__question {
   margin-bottom: 20px;
 }
 
-.universal__question-text {
+.questions-universal__question-text {
   word-break: break-all;
   :nth-child(1) {
     margin-bottom: 0;
@@ -137,25 +140,17 @@ onMounted(requestCandidateInfo);
   }
 }
 
-.universal__error {
+.questions-universal__error {
   color: var(--error-color);
 }
 
-.universal__header-btn {
-  display: flex;
-  align-items: center;
-  border: none;
-  background-color: transparent;
-  cursor: pointer;
-}
-
-.universal__header-arrowicon {
+.questions-universal__header-arrowicon {
   transition: all 0.3s ease;
   width: 40px;
   height: 40px;
 }
 
-.universal__header-arrowicon--active {
+.questions-universal__header-arrowicon--active {
   transform: rotateX(180deg);
 }
 
