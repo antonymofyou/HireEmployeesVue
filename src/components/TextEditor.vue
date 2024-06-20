@@ -156,13 +156,6 @@ document.addEventListener('click', function(event) {
           <BlockquoteIcon title="Blockquote" />
         </button>
         <button
-          type="button"
-          @click="editor?.chain().focus().toggleCode().run()"
-          :class="{ 'text-editor__is-active': editor?.isActive('code') }"
-        >
-          <CodeIcon title="Code" />
-        </button>
-        <button
 
           type="button"
           @click="editor?.chain().focus().setHorizontalRule().run()"
@@ -266,7 +259,8 @@ document.addEventListener('click', function(event) {
   outline: none;
 }
 
-
-
+.text-editor-content-inside hr {
+  opacity: 0.5;
+}
 
 </style>

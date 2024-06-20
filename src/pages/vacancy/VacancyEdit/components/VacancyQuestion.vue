@@ -17,7 +17,7 @@
         />
       </div>
       <button type="button" class="question__remove-btn" title="Удалить вопрос" @click="showModalOnRemove = true">
-        <img class="icon" src="@/assets/icons/delete.svg" />
+        <DeleteIcon class="icon"/>
       </button>
 
       <Teleport to="body">
@@ -39,6 +39,7 @@ import SelectMain from '@/components/SelectMain.vue';
 import ModalConfirmation from '@/components/ModalConfirmation.vue';
 import { ref } from 'vue';
 import TextEditor from "@/components/TextEditor.vue";
+import DeleteIcon from '@/assets/icons/delete.svg?component';
 
 /* id вопроса, текст вопроса, опции для измнения статуса публикации, статус публикации вопроса, 
 имя лейбла, функция для удаления вопроса */
@@ -135,5 +136,9 @@ const handleCancelRemove = () => {
   display: flex;
   justify-content: center; 
   align-items: center;
+}
+
+.question__footer .icon {
+  transform: scale(2.1);
 }
 </style>
