@@ -277,7 +277,6 @@ const getVacancyDataSeeker = (successCallback, errorCallback) => {
     },
     function(err) { // неуспешный результат
       errorCallback(err);
-      errorMessage.value = err;
     }
   );
 };
@@ -294,7 +293,6 @@ const getCandidateFromServer = (successCallback, errorCallback) => {
     },
     function(err) { // неуспешный результат
       errorCallback(err);
-      errorMessage.value = err;
     }
   );
 };
@@ -325,7 +323,6 @@ const submitAnswers = ({ force = 0, finish = 0 } = {}, successCallback, errorCal
       },
       function(err) { // неуспешный результат
         errorCallback(err);
-        errorMessage.value = err;
       }
     );
 

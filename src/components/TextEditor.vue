@@ -253,7 +253,7 @@ document.addEventListener('click', function(event) {
   font-weight: 500;
   line-height: 1.15;
   margin: 0;
-
+  cursor: pointer;
   transition: all .2s cubic-bezier(.65,.05,.36,1);
 }
 

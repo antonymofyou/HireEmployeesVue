@@ -26,7 +26,7 @@ import { RouterView } from 'vue-router';
   --shark: #1f222a;
   --tundora: #4e4b4b;
   --black-squeeze: #edf6f9;
-  --light-gray: rgb(212 212 212);
+  --light-gray: #d4d4d4;
 
 }
 * {

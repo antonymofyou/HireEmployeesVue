@@ -45,23 +45,6 @@
           :isLabelBold="true"
           :isTextBold="true"
         />
-
-        <div class="modal__is-published">
-          <span>Опубликовано:</span>
-          <SelectMain
-            v-model="formData.published"
-            :options="options"
-            :model-value="options[0].id"
-
-          />
-        </div>
-
-        <TextEditor
-          v-model="formData.description"
-          size="big"
-          :staticToolbar="true"
-          label="Описание вакансии:"
-        />
       </template>
       <template #footer-control-buttons>
         <div class="modal__submit">
@@ -156,14 +139,8 @@ const modalSuccess = ref(false);
 const formData = ref({
   name: "",
   description: "",
-  published: "",
+  published: "0",
 });
-
-// Опции для селекта
-const options = ref([
-  { name: "Нет", id: "0" },
-  { name: "Да", id: "1" },
-]);
 
 // получение всех вакансий
 function getAllVacanciesManager() {

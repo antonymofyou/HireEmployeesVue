@@ -1,4 +1,8 @@
 <template>
+  <!-- Отображение прелоадера  -->
+   <div v-if="!isLoaded" style="text-align: center; margin-top: 100px;">
+    <SpinnerMain style="width: 50px" />
+   </div>
   <main class="content vacancy-edit" v-if="isLoaded">
     <TopSquareButton
       class="vacancy-edit__back-btn"
@@ -7,6 +11,7 @@
     >
 
     </TopSquareButton>
+    
     <section class="container">
       <h2 class="vacancy-edit__title">Редактирование вакансии</h2>
 
@@ -89,9 +94,12 @@
       <ButtonMain
         class="vacancy-edit__save-btn"
         @click="saveChanges"
+        :success="successSave"
+        :message="successMessage"
+        :align="'end'"
       >
         <template v-slot:text>Сохранить</template>
-        <template v-slot:icon><img src="@/assets/icons/save.svg"></template>
+        <template v-slot:icon><img src="@/assets/icons/save-white.svg"></template>
       </ButtonMain>
 
     </section>
@@ -105,10 +113,9 @@
 </template>
 
 <script setup>
-import Editor from '@tinymce/tinymce-vue'
+
 import InputSimple from '@/components/InputSimple.vue';
 import SelectMain from '@/components/SelectMain.vue';
-import SubmitButton from '@/components/SubmitButton.vue';
 import TopSquareButton from '@/components/TopSquareButton.vue';
 import iconBack from '@/assets/icons/back.svg';
 import VacancyQuestion from './components/VacancyQuestion.vue';
@@ -126,6 +133,8 @@ import ButtonMain from "@/components/ButtonMain.vue";
 import ModalConfirmation from "@/components/ModalConfirmation.vue";
 import ErrorNotification from "@/components/ErrorNotification.vue";
 import TextEditor from "@/components/TextEditor.vue";
+import SpinnerMain from "@/components/SpinnerMain.vue";
+import Modal from "@/components/Modal.vue";
 
 const route = useRoute();
 const router = useRouter();
@@ -158,6 +167,9 @@ const showModalOnRemoveVacancy = ref(false);
 
 // Отображение ошибки
 const errorMessage = ref('');
+
+const successSave = ref('');
+const successMessage = ref('');
 
 //Заполняем formData данными с сервера
 onMounted(() => {
@@ -313,8 +325,10 @@ const saveChanges = (callback) => {
     '/vacancies/update_vacancy.php',
     'manager', 
     function (response) {
-      /*callback(response);*/// успешный результат
-      router.go(-1);
+      //callback(response);// успешный результат
+      successMessage.value = 'Данные успешно сохранены!';
+      successSave.value = '1';
+
     },
     function (err) {// неуспешный результат
       errorMessage.value = err;

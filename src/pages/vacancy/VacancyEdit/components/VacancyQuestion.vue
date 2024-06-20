@@ -1,13 +1,5 @@
 <template>
   <div class="question">
-<!--    <InputSimple
-      :modelValue="text"
-      @update:modelValue="updateText"
-      :id="id"
-      :labelName="labelName"
-      inputType="textarea"
-      size="medium"
-    />-->
     <TextEditor
       :modelValue="text"
       @update:modelValue="updateText"
@@ -24,7 +16,9 @@
           :options="options"
         />
       </div>
-      <button type="button" class="question__remove-btn" title="Удалить вопрос" @click="showModalOnRemove = true"></button>
+      <button type="button" class="question__remove-btn" title="Удалить вопрос" @click="showModalOnRemove = true">
+        <img class="icon" src="@/assets/icons/delete.svg" />
+      </button>
 
       <Teleport to="body">
         <ModalConfirmation
@@ -133,7 +127,7 @@ const handleCancelRemove = () => {
   margin-top: 5px;
 }
 .question__remove-btn {
-  background-image: url('@/assets/icons/delete.svg');
+  /* background-image: url('@/assets/icons/delete.svg'); */
   background-size: 100% 100%;
   background-color: transparent;
   width: 20px;
