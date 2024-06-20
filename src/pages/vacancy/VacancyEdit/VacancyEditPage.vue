@@ -99,7 +99,7 @@
         :align="'end'"
       >
         <template v-slot:text>Сохранить</template>
-        <template v-slot:icon><img src="@/assets/icons/save-white.svg"></template>
+        <template v-slot:icon><img src="@/assets/icons/save-black.svg" class="vacancy-edit__icon-button"></template>
       </ButtonMain>
 
     </section>
@@ -134,7 +134,6 @@ import ModalConfirmation from "@/components/ModalConfirmation.vue";
 import ErrorNotification from "@/components/ErrorNotification.vue";
 import TextEditor from "@/components/TextEditor.vue";
 import SpinnerMain from "@/components/SpinnerMain.vue";
-import Modal from "@/components/Modal.vue";
 
 const route = useRoute();
 const router = useRouter();
@@ -422,6 +421,10 @@ const saveChanges = (callback) => {
 .vacancy-edit__add-btn-icon {
   width: 60px;
   height: 60px;
+}
+
+.vacancy-edit__icon-button {
+  filter: invert(100%) sepia(0%) saturate(0%) hue-rotate(0deg) brightness(100%) contrast(100%);
 }
 
 .vacancy-edit__add-btn:hover {
