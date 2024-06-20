@@ -15,6 +15,7 @@
     <p v-if="errorMessage" class="vacancy__error">
       {{ errorMessage }}
     </p>
+    <!-- Открытие/сокрытие вакансии -->
     <Transition v-if="show">
       <div class="vacancy__info">
         <div>
@@ -63,6 +64,7 @@ const requestVacancyInfo = () => {
   );
 };
 
+// Показать/скрыть вакансию
 const showVacancy = () => {
   show.value = !show.value;
 };
@@ -75,6 +77,12 @@ onMounted(requestVacancyInfo);
   display: flex;
   justify-content: space-between;
   align-items: center;
+}
+
+.vacancy__info {
+  * {
+    margin: 10px 0;
+  }
 }
 
 .vacancy__error {

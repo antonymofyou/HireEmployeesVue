@@ -27,3 +27,8 @@ export class VacanciesGetAllVacancyById extends MainRequestClass {
 export class CandidatesGetOtklikAnswers extends MainRequestClass {
   otklikId = ''; // ID отклика, для которого нужно получить ответы
 }
+
+export class CandidatesSetOtklikStatus extends MainRequestClass {
+  otklikId = ''; // ID отклика, статус которого нужно перевести в другой
+  toStatusName = ''; // название статуса, В который нужно перевести отклик
+}

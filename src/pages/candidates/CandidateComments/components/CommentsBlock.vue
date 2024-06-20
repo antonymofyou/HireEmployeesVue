@@ -23,9 +23,10 @@
 
     <template v-else>
       <template v-if="!respondId">
-        <Transition v-if="show" >
+        <!-- Открытие/сокрытие комментариев -->
+        <Transition v-if="show">
           <div>
-            <div class="comments__list">
+            <div class="comments__list" ref="commentsBlock">
               <template v-if="comments.length">
                 <CommentCard
                   v-for="comment in comments"
@@ -48,7 +49,7 @@
       </template>
 
       <template v-else>
-        <div class="comments__list">
+        <div class="comments__list" ref="commentsBlock">
           <template v-if="comments.length">
             <CommentCard
               v-for="comment in comments"
@@ -68,6 +69,7 @@
         />
       </template>
     </template>
+    <!-- Модальное окно сообщения об ошибке -->
     <Teleport to="body">
       <ErrorNotification v-if="errorMessage" :message="errorMessage" />
     </Teleport>
@@ -75,7 +77,7 @@
 </template>
 
 <script setup>
-import { ref, computed, onMounted } from 'vue';
+import { ref, computed, onMounted, watch } from 'vue';
 import CommentCard from '@/pages/candidates/CandidateComments/components/CommentCard.vue';
 import SpinnerMain from '@/components/SpinnerMain.vue';
 import CommentAddition from './CommentAddition.vue';
@@ -100,7 +102,6 @@ const props = defineProps({
   },
 });
 
-
 // Массив комментариев
 const comments = ref([]);
 // Состояние загрузки
@@ -112,6 +113,10 @@ const errorMessage = ref('');
 const newComment = ref('');
 // Флаг показа комментариев
 const show = ref(false);
+// Ref для блока с комментариями
+const commentsBlock = ref(null);
+// ID созданного комментария
+const createdCommentId = ref(null);
 
 // Формируем строку вида "for_otklik:id" или "for_candidate"
 const commentFor = computed(
@@ -182,6 +187,7 @@ const createComment = (payload) => {
   if (payload.comment) {
     // Перезапрос комментариев, очистка поля для нового комментария
     const onCreateSuccess = (res) => {
+      createdCommentId.value = res.comment.id;
       comments.value.push(res.comment);
       newComment.value = '';
     };
@@ -215,9 +221,26 @@ const requestComments = () => {
   );
 };
 
+// Показ комментариев
 const showComments = () => {
   show.value = !show.value;
 };
+
+// При изменении значения свойства "createdCommentId" обновляем положение скролла в конце блока
+watch(
+  () => createdCommentId.value,
+  () => {
+    if (commentsBlock.value) {
+      // Добавляем небольшой задержку, чтобы обновление высоты произошло после изменения контента
+      setTimeout(() => {
+        commentsBlock.value.scrollTo({
+          top: commentsBlock.value.scrollHeight - commentsBlock.value.clientHeight,
+          behavior: 'smooth'
+        });
+      }, 0);
+    }
+  }
+);
 
 onMounted(requestComments);
 </script>

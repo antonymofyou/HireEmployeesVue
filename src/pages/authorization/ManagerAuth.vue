@@ -106,7 +106,7 @@ function getVkTokenFromServer() {
 }
 
 if (isManager())
-        router.push({name:'home'})
+        router.push({name:'vacanciesList'})
 
 if (checkCodeParam()) {
     getVkTokenFromServer()

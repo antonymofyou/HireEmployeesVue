@@ -13,6 +13,15 @@
             ]"
           /> </template
       ></EmptyButton>
+
+      <SelectMain
+        v-if="props.type === 'candidate' && dataFetched"
+        v-model="newStatus"
+        :options="options"
+        :model-value="status[0].id"
+        class="questions-universal__header-select"
+        @update:modelValue="updateStatus"
+      />
     </div>
 
     <div v-if="props.type === 'candidate'" class="questions-universal__info">
@@ -65,9 +74,13 @@
 
 <script setup>
 import { onMounted, ref } from 'vue';
-import { CandidatesGetOtklikAnswers } from '../js/CommentsClasses';
+import {
+  CandidatesGetOtklikAnswers,
+  CandidatesSetOtklikStatus,
+} from '../js/CommentsClasses';
 import ArrowIcon from '@/assets/icons/arrow-down.svg?component';
 import EmptyButton from '@/components/EmptyButton.vue';
+import SelectMain from '@/components/SelectMain.vue';
 
 const props = defineProps({
   // ID отклика
@@ -82,8 +95,24 @@ const props = defineProps({
   },
 });
 
+const options = [
+  {
+    name: 'Анкета',
+    id: 'Анкета',
+  },
+  {
+    name: 'Created',
+    id: 'Created',
+  },
+];
 // Массив данных к отклику
 const respondInfo = ref([]);
+// Статус кандидата
+const status = ref([]);
+// Новый статус кандидата
+const newStatus = ref('');
+// Флаг загрузки данных
+const dataFetched = ref(false);
 // Сообщение об ошибке
 const errorMessage = ref('');
 // Флаг показа вопросов
@@ -94,15 +123,43 @@ const requestCandidateInfo = () => {
   const requestInstance = new CandidatesGetOtklikAnswers();
   requestInstance.otklikId = props.respondId;
   errorMessage.value = '';
+  dataFetched.value = false;
 
   requestInstance.request(
-    '/candidates/get_otklik_answers.php',
+    '/candidates/get_otklik_info.php',
     'manager',
     (response) => {
-      respondInfo.value = { answers: response.answers, info: response.info };
+      respondInfo.value = {
+        answers: response.answers,
+        info: response.info,
+        statusTransfers: response.statusTransfers,
+      };
+      status.value = [{ name: response.info.status, id: response.info.status }];
+      dataFetched.value = true;
     },
     (err) => (errorMessage.value = err)
   );
+};
+
+// Изменение статуса кандидата
+const changeRespondStatus = () => {
+  const requestInstance = new CandidatesSetOtklikStatus();
+  requestInstance.otklikId = props.respondId;
+  requestInstance.toStatusName = newStatus.value;
+  errorMessage.value = '';
+
+  requestInstance.request(
+    '/candidates/set_otklik_status.php',
+    'manager',
+    (response) => {},
+    (err) => (errorMessage.value = err)
+  );
+};
+
+// Обработчик статуса кандидата
+const updateStatus = (value) => {
+  newStatus.value = value;
+  changeRespondStatus();
 };
 
 // Показать/скрыть вопросы
@@ -118,6 +175,10 @@ onMounted(requestCandidateInfo);
   display: flex;
   justify-content: space-between;
   align-items: center;
+}
+
+.questions-universal__header-select {
+  margin-right: 15px;
 }
 
 .questions-universal__info {
