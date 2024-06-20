@@ -129,8 +129,11 @@ const handleCancelRemove = () => {
   background-size: 100% 100%;
   background-color: transparent;
   width: 20px;
-  height: 20px;
+  height: 30px;
   border: 0;
   cursor: pointer;
+  display: flex;
+  justify-content: center; 
+  align-items: center;
 }
 </style>

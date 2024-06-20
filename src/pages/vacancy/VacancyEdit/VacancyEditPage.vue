@@ -99,7 +99,7 @@
         :align="'end'"
       >
         <template v-slot:text>Сохранить</template>
-        <template v-slot:icon><img src="@/assets/icons/save-black.svg" class="vacancy-edit__icon-button"></template>
+        <template v-slot:icon><SaveIcon class="vacancy-edit__icon-button"/></template>
       </ButtonMain>
 
     </section>
@@ -119,7 +119,7 @@ import SelectMain from '@/components/SelectMain.vue';
 import TopSquareButton from '@/components/TopSquareButton.vue';
 import iconBack from '@/assets/icons/back.svg';
 import VacancyQuestion from './components/VacancyQuestion.vue';
-import { ref, computed, onMounted } from 'vue';
+import { ref, computed, onMounted, watch } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
 
 import { isManager } from '@/js/AuthFunctions';
@@ -134,6 +134,7 @@ import ModalConfirmation from "@/components/ModalConfirmation.vue";
 import ErrorNotification from "@/components/ErrorNotification.vue";
 import TextEditor from "@/components/TextEditor.vue";
 import SpinnerMain from "@/components/SpinnerMain.vue";
+import SaveIcon from '@/assets/icons/save-black.svg?component';
 
 const route = useRoute();
 const router = useRouter();
@@ -190,6 +191,11 @@ onMounted(() => {
     errorMessage.value = err;
   }
 });
+
+// Скрытие сообщения о удачном сохранении, при изменении данных
+watch(formData, () => {
+  successMessage.value = '';
+}, {deep: true});
 
 // Обновление текста вопроса
 const updateQuestionText = (index, value) => {
@@ -424,7 +430,7 @@ const saveChanges = (callback) => {
 }
 
 .vacancy-edit__icon-button {
-  filter: invert(100%) sepia(0%) saturate(0%) hue-rotate(0deg) brightness(100%) contrast(100%);
+  fill: var(--white);
 }
 
 .vacancy-edit__add-btn:hover {

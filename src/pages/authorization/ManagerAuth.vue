@@ -25,7 +25,6 @@ import { ApiRootClass } from "@/js/RootClasses.js"
 import { configData } from "@/js/configData.js";
 import { useRouter } from "vue-router"
 import { isManager } from "@/js/AuthFunctions";
-import ErrorNotification from "@/components/ErrorNotification.vue";
 
 //Переменные для кастомизации кнопки
 const buttonColor = 'var(--VKColor)'
@@ -77,7 +76,6 @@ function getNasotkuTokenFromServer(vkToken, vkUserId) {
         },
         function (err) {
             console.log(err)
-
         }
     )
 }
