@@ -35,7 +35,6 @@
 </template>
 
 <script setup>
-import InputSimple from '@/components/InputSimple.vue';
 import SelectMain from '@/components/SelectMain.vue';
 import ModalConfirmation from '@/components/ModalConfirmation.vue';
 import { ref } from 'vue';
@@ -127,7 +126,6 @@ const handleCancelRemove = () => {
   margin-top: 5px;
 }
 .question__remove-btn {
-  /* background-image: url('@/assets/icons/delete.svg'); */
   background-size: 100% 100%;
   background-color: transparent;
   width: 20px;
