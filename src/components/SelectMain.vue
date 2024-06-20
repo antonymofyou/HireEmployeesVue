@@ -34,7 +34,6 @@
 
 <script setup>
 import { ref, computed, onMounted, watch } from 'vue';
-import ArrowIcon from '@/assets/icons/arrow-down.svg?component';
 
 // Модель для обновления, опции селекта
 // опции - массив объектов с полями: name, id, color (color опционален)
