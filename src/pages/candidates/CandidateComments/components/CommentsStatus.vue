@@ -14,7 +14,9 @@
         <span><b>Изменить статус: </b></span>
         <SelectMain v-model="newStatus" :options="statuses" />
       </label>
-      <ButtonMain @click="changeStatus"><template v-slot:text>Изменить</template></ButtonMain>
+      <ButtonMain @click="changeStatus"
+        ><template v-slot:text>Изменить</template>
+      </ButtonMain>
     </template>
   </div>
 </template>
@@ -35,7 +37,6 @@ const props = defineProps({
     required: true,
   },
 });
-
 
 // Флаг загрузки данных
 const dataFetched = ref(false);
