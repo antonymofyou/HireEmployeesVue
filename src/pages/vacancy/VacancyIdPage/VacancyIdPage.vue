@@ -98,7 +98,13 @@
   <div v-else-if="!isLoaded" class="spinner">
     <SpinnerMain/>
   </div>
-  <Notification v-if="errorMessage" :message="errorMessage"/>
+
+  <!-- Встраивание элемента в DOM дерево -->
+  <Teleport to="body">
+    <!-- Вывод сообщения о ошибке -->
+    <ErrorNotification v-if="errorMessage" :message="errorMessage" />
+  </Teleport>
+
 </template>
 
 <script setup>
@@ -119,6 +125,7 @@ import InputSimple from '@/components/InputSimple.vue';
 import ModalConfirmation from '@/components/ModalConfirmation.vue';
 import Notification from '@/components/ErrorNotification.vue';
 import SpinnerMain from '@/components/SpinnerMain.vue';
+import ErrorNotification from "@/components/ErrorNotification.vue";
 
 // Индикатор загрузки компонента
 const isLoaded = ref(false);
@@ -197,8 +204,7 @@ const fetchCandidateData = (callback) => {
       (err) => {
         // Загрузка завершена неуспешно
         isLoaded.value = true;
-        console.error('Произошла ошибка при загрузке данных: ', err);
-        showErrorNotification(`Произошла ошибка при загрузке данных вакансии`);
+        errorMessage.value = err;
       }
     );
   },
@@ -206,8 +212,7 @@ const fetchCandidateData = (callback) => {
   (err) => {
     // Загрузка завершена неуспешно
     isLoaded.value = true;
-    console.error('Произошла ошибка при загрузке данных: ', err);
-    showErrorNotification(`Произошла ошибка при загрузке данных вакансии`);
+    errorMessage.value = err;
   });
 };
 

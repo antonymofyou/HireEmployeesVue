@@ -1,5 +1,9 @@
 <template>
-  <div class="content vacancy-edit" v-if="isLoaded">
+  <!-- Отображение прелоадера  -->
+   <div v-if="!isLoaded" style="text-align: center; margin-top: 100px;">
+    <SpinnerMain style="width: 50px" />
+   </div>
+  <main class="content vacancy-edit" v-if="isLoaded">
     <TopSquareButton
       class="vacancy-edit__back-btn"
       :icon="iconBack"
@@ -7,8 +11,9 @@
     >
 
     </TopSquareButton>
+    
     <section class="container">
-      <h2 class="vacancy-edit__title">{{ staticText.title }}</h2>
+      <h2 class="vacancy-edit__title">Редактирование вакансии</h2>
 
       <div class="vacancy-edit__main">
         <InputSimple
@@ -20,33 +25,30 @@
           :isTextBold=true
         />
 
-        <SelectSimple
-          v-model="formData.published"
-          id="isPublished"
-          :options="options"
-          labelName="Опубликована"
-          class="vacancy-edit__is-published-select"
-        />
+        <div class="vacancy-edit__select">
+          <span class="vacancy-edit__select-label">Опубликована:</span>
+          <SelectMain
+            v-model="formData.published"
+            :options="options"
+          />
+        </div>
       </div>
 
       <div class="vacancy-edit__description">
-        <InputSimple
+        <TextEditor
           v-model="formData.description"
-          id="description"
-          labelName="Описание вакансии"
-          inputType="textarea"
-          :isLabelBold=true
           size="big"
+          label="Описание вакансии:"
+          id="0"
         />
       </div>
 
-
       <div class="vacancy-edit__questions-block">
-        <h2 class="vacancy-edit__questions-title">{{ staticText.questionsTitle }}</h2>
+        <h2 class="vacancy-edit__questions-title">Вопросы вакансии</h2>
         <transition-group name="list" tag="div" class="vacancy-edit__questions-list">
           <VacancyQuestion
             v-for="(question, index) in formData.questions"
-            :labelName="`Вопрос №${index + 1} (id${question.id})`"
+            :labelName="`Вопрос №${index + 1}`"
             :key="question.id"
             :id="question.id"
             :text="question.question"
@@ -58,54 +60,99 @@
             class="list-item"
           />
         </transition-group>
-        <button
-          class="vacancy-edit__add-btn"
-          type="button"
-          title="Добавить вопрос"
-          @click="addQuestion()"
-        ></button>
+        <div class="vacancy-edit__questions-footer">
+          <button
+            class="vacancy-edit__add-btn"
+            type="button"
+            title="Добавить вопрос"
+            @click="addQuestion"
+          >
+            <img src='@/assets/icons/add.svg' class="vacancy-edit__add-btn-icon">
+          </button>
+
+          <ButtonMain
+            buttonColor="var(--cinnabar)"
+            type="button"
+            @click="showModalOnRemoveVacancy = true"
+          >
+            <template v-slot:text>Удалить вакансию</template>
+          </ButtonMain>
+
+          <Teleport to="body">
+            <ModalConfirmation
+              :show="showModalOnRemoveVacancy"
+              confirmText="Удалить"
+              text="Вы уверены, что хотите удалить вакансию? Это действие нельзя отменить"
+              confirmButtonColor="var(--cinnabar)"
+              @confirm="handleConfirmRemoveVacancy"
+              @cancel="handleCancelRemoveVacancy"
+            />
+          </Teleport>
+        </div>
       </div>
 
-      <SubmitButton class="vacancy-edit__save-btn" :submit-function="saveChanges">
-        {{ staticText.save }}
-      </SubmitButton>
+      <ButtonMain
+        class="vacancy-edit__save-btn"
+        @click="saveChanges"
+        :success="successSave"
+        :message="successMessage"
+        :align="'end'"
+      >
+        <template v-slot:text>Сохранить</template>
+        <template v-slot:icon><SaveIcon class="vacancy-edit__icon-button"/></template>
+      </ButtonMain>
 
     </section>
-  </div>
+  </main>
+
+  <Teleport to="body">
+    <!-- Вывод сообщения о ошибке -->
+    <ErrorNotification v-if="errorMessage" :message="errorMessage" />
+  </Teleport>
+
 </template>
 
 <script setup>
+
 import InputSimple from '@/components/InputSimple.vue';
-import SelectSimple from '@/components/SelectSimple.vue';
-import SubmitButton from '@/components/SubmitButton.vue';
+import SelectMain from '@/components/SelectMain.vue';
 import TopSquareButton from '@/components/TopSquareButton.vue';
 import iconBack from '@/assets/icons/back.svg';
 import VacancyQuestion from './components/VacancyQuestion.vue';
-import { ref, computed, onMounted } from 'vue';
-import { useRoute } from 'vue-router';
+import { ref, computed, onMounted, watch } from 'vue';
+import { useRoute, useRouter } from 'vue-router';
 
-import { getUserType } from '@/js/getUserType';
+import { isManager } from '@/js/AuthFunctions';
 import { VacanciesGetAllVacancyById, 
   VacanciesQuestionsCreateVacancyQuestion,
   VacanciesQuestionsDeleteVacancyQuestion,
   VacanciesUpdateVacancy
 } from './js/ApiClassesVacancyEdit.js';
+import { MainRequestClass } from "@/js/RootClasses";
+import ButtonMain from "@/components/ButtonMain.vue";
+import ModalConfirmation from "@/components/ModalConfirmation.vue";
+import ErrorNotification from "@/components/ErrorNotification.vue";
+import TextEditor from "@/components/TextEditor.vue";
+import SpinnerMain from "@/components/SpinnerMain.vue";
+import SaveIcon from '@/assets/icons/save-black.svg?component';
+
+const route = useRoute();
+const router = useRouter();
+
+// Получение из роута id текущей вакансии
+const vacancyId = ref(route.params.id);
+
+//Проверка авторизации пользователя
+if (!isManager()) router.push({ name: 'home' });
 
 // Индикатор загрузки компонента
 const isLoaded = ref(false);
 
 // Опции для селектов
 const options = [
-  { text: 'Нет', value: '0' },
-  { text: 'Да', value: '1' },
+  { name: 'Нет', id: '0', color: 'var(--cinnabar)' },
+  { name: 'Да', id: '1', color: 'var(--apple)' },
 ];
-
-// Статичный текст страницы
-const staticText = {
-  title: 'Редактирование вакансии',
-  questionsTitle: 'Вопросы вакансии',
-  save: 'Сохранить',
-};
 
 // Данные вакансии: название, описание, статус публикации, массив вопросов
 const formData = ref({
@@ -115,16 +162,18 @@ const formData = ref({
   questions: [],
 });
 
+// Показ модального окна при удалении вакансии
+const showModalOnRemoveVacancy = ref(false);
+
+// Отображение ошибки
+const errorMessage = ref('');
+
+const successSave = ref('');
+const successMessage = ref('');
+
 //Заполняем formData данными с сервера
 onMounted(() => {
   try {
-    const userType = getUserType();
-
-    if (userType !== 'manager') {
-      alert("Вы не менеджер");
-      throw new Error('Ошибка авторизации!');
-    }
-
     getVacancyDataManager((vacResp) => {
       const { vacancy, questions } = vacResp;
 
@@ -139,23 +188,30 @@ onMounted(() => {
       isLoaded.value = true;
     });
   } catch (err) {
-    console.error('Произошла ошибка: ', err);
+    errorMessage.value = err;
   }
 });
+
+// Скрытие сообщения о удачном сохранении, при изменении данных
+watch(formData, () => {
+  successMessage.value = '';
+}, {deep: true});
 
 // Обновление текста вопроса
 const updateQuestionText = (index, value) => {
   formData.value.questions[index].question = value;
 };
 
+
 // Обновление статуса публикации вопроса
 const updateIsPublished = (index, value) => {
   formData.value.questions[index].published = value;
 };
 
-// Получение из роута id текущей вакансии
-const route = useRoute();
-const vacancyId = ref(route.params.id);
+// Отмена удаления вакансии
+const handleCancelRemoveVacancy = () => {
+  showModalOnRemoveVacancy.value = false;
+};
 
 // Работа с API
 
@@ -171,7 +227,7 @@ const getVacancyDataManager = (callback) => {
       callback(response); 
     },
     function (err) { // неуспешный результат
-      alert(err);
+      errorMessage.value = err;
     }
   );
 };
@@ -188,7 +244,7 @@ const addQuestionToServer = (callback) => {
       callback(response);
     },
     function (err) { // неуспешный результат
-      alert(err);
+      errorMessage.value = err;
     }
   );
 };
@@ -213,7 +269,7 @@ const removeQuestionFromServer = (callback, id) => {
       callback(response);
     },
     function (err) { // неуспешный результат
-      alert(err);
+      errorMessage.value = err;
     }
   );
 };
@@ -223,6 +279,22 @@ const removeQuestion = (id) => {
   removeQuestionFromServer(() => {
     formData.value.questions = formData.value.questions.filter((question) => question.id !== id);
   }, id);
+};
+
+// Удаление вакансии
+function handleConfirmRemoveVacancy(callback)  {
+  let removeVacancy = new MainRequestClass();
+  removeVacancy.vacancyId = vacancyId.value;
+  removeVacancy.request(
+    '/vacancies/delete_vacancy.php',
+    'manager',
+    function (response) {
+      router.go(-1);
+    },
+    function (err) {
+      errorMessage.value = err;
+    }
+  );
 };
 
 // Формирование объекта с вопросами для отправки изменений на сервер
@@ -258,10 +330,13 @@ const saveChanges = (callback) => {
     '/vacancies/update_vacancy.php',
     'manager', 
     function (response) {
-      callback(response); // успешный результат
+      //callback(response);// успешный результат
+      successMessage.value = 'Данные успешно сохранены!';
+      successSave.value = '1';
+
     },
-    function (err) { // неуспешный результат
-      alert(err);
+    function (err) {// неуспешный результат
+      errorMessage.value = err;
     }
   );
 };
@@ -277,20 +352,32 @@ const saveChanges = (callback) => {
 
 .vacancy-edit__title {
   text-align: center;
-  margin-bottom: 20px;
 }
 
 .vacancy-edit__main {
   width: 100%;
 }
 
-.vacancy-edit__is-published-select {
+.vacancy-edit__select {
+  display: flex;
+  align-items: baseline;
+  gap: 10px;
+
   margin-top: 15px;
+}
+
+.vacancy-edit__select-label {
+  font-weight: 600;
 }
 
 .vacancy-edit__description {
   margin-top: 50px;
   width: 100%;
+}
+
+.vacancy-edit__description-label {
+  margin-bottom: 10px;
+  font-weight: 600;
 }
 
 .vacancy-edit__questions-block {
@@ -313,20 +400,37 @@ const saveChanges = (callback) => {
 .vacancy-edit__questions-list {
   display: flex;
   flex-direction: column;
-  gap: 35px;
+  gap: 50px;
   width: 100%;
 }
 
+.vacancy-edit__questions-footer {
+  margin-top: 20px;
+  display: flex;
+  width: 100%;
+  justify-content: space-between;
+  align-items: center;
+}
+
 .vacancy-edit__add-btn {
-  background-image: url('@/assets/icons/add.svg');
-  background-size: 100% 100%;
-  background-color: transparent;
-  border: 0;
+  padding: 0;
+
   cursor: pointer;
-  width: 40px;
-  height: 40px;
-  border-radius: 50%;
+
   transition: 0.2s ease transform;
+  border: 0;
+  background-color: transparent;
+  margin-left: 45%;
+}
+
+
+.vacancy-edit__add-btn-icon {
+  width: 60px;
+  height: 60px;
+}
+
+.vacancy-edit__icon-button {
+  fill: var(--white);
 }
 
 .vacancy-edit__add-btn:hover {
@@ -357,6 +461,7 @@ const saveChanges = (callback) => {
 .vacancy-edit__back-btn {
   position: fixed;
   top: 20px;
+  left: 30px;
 }
 
 @media screen and (max-width: 1200px) {

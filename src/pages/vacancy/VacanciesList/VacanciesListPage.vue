@@ -45,25 +45,6 @@
           :isLabelBold="true"
           :isTextBold="true"
         />
-
-        <div class="modal__is-published">
-          <span>Опубликовано:</span>
-          <SelectMain
-            v-model="formData.published"
-            :options="options"
-            :model-value="options[0].id"
-
-          />
-        </div>
-
-        <InputSimple
-          v-model="formData.description"
-          id="description"
-          labelName="Описание вакансии"
-          inputType="textarea"
-          :isLabelBold="true"
-          size="big"
-        />
       </template>
       <template #footer-control-buttons>
         <div class="modal__submit">
@@ -130,7 +111,6 @@ import ButtonMain from "@/components/ButtonMain.vue";
 import TopSquareButton from "@/components/TopSquareButton.vue";
 import ErrorNotification from "@/components/ErrorNotification.vue";
 import SpinnerMain from "@/components/SpinnerMain.vue";
-import SelectMain from "@/components/SelectMain.vue";
 
 const router = useRouter();
 
@@ -157,14 +137,8 @@ const modalSuccess = ref(false);
 const formData = ref({
   name: "",
   description: "",
-  published: "",
+  published: "0",
 });
-
-// Опции для селекта
-const options = ref([
-  { name: "Нет", id: "0" },
-  { name: "Да", id: "1" },
-]);
 
 // получение всех вакансий
 function getAllVacanciesManager() {
