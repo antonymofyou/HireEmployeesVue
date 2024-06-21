@@ -234,8 +234,9 @@ watch(
       // Добавляем небольшой задержку, чтобы обновление высоты произошло после изменения контента
       setTimeout(() => {
         commentsBlock.value.scrollTo({
-          top: commentsBlock.value.scrollHeight - commentsBlock.value.clientHeight,
-          behavior: 'smooth'
+          top:
+            commentsBlock.value.scrollHeight - commentsBlock.value.clientHeight,
+          behavior: 'smooth',
         });
       }, 0);
     }
@@ -260,6 +261,13 @@ onMounted(requestComments);
   transition: all 0.3s ease;
   width: 40px;
   height: 40px;
+}
+
+@media screen and (max-width: 425px) {
+  .comments__header-arrowicon {
+    width: 30px;
+    height: 30px;
+  }
 }
 
 .comments__header-arrowicon--active {

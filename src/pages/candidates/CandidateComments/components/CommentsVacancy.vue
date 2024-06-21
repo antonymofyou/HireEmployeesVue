@@ -95,7 +95,18 @@ onMounted(requestVacancyInfo);
   height: 40px;
 }
 
+@media screen and (max-width: 425px) {
+  .vacancy__header-arrowicon {
+    width: 30px;
+    height: 30px;
+  }
+}
+
 .vacancy__header-arrowicon--active {
   transform: rotateX(180deg);
+}
+
+.vacancy__description {
+  word-break: break-all;
 }
 </style>

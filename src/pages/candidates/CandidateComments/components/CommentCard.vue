@@ -112,11 +112,15 @@ watch(
   () => {
     if (editingTextareaRef.value) {
       editingTextareaRef.value.focus();
+    }
   }
-});
+);
 
 // Перевычисление высоты поля для редактирования комментария
-const setHeight = (e) => (height.value = e.target.scrollHeight);
+const setHeight = (e) => {
+  const element = e.target;
+  element.style.height = element.scrollHeight + 'px';
+};
 
 // Отключение режима редактирования, возвращение к начальному значению
 const offEditMode = () => (isEditMode.value = false);
@@ -168,7 +172,7 @@ const formattedDate = computed(() => {
 watch(
   () => isModalOpened.value,
   () => {
-    document.body.style.overflow = isModalOpened.value ? 'hidden' : 'unset';
+    document.body.style.overflow = isModalOpened.value ? 'hidden' : '';
   }
 );
 </script>

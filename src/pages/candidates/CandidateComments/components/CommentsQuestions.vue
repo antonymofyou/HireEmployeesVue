@@ -13,15 +13,6 @@
             ]"
           /> </template
       ></EmptyButton>
-
-      <SelectMain
-        v-if="props.type === 'candidate' && dataFetched"
-        v-model="newStatus"
-        :options="options"
-        :model-value="status[0].id"
-        class="questions-universal__header-select"
-        @update:modelValue="updateStatus"
-      />
     </div>
 
     <div v-if="props.type === 'candidate'" class="questions-universal__info">
@@ -74,13 +65,9 @@
 
 <script setup>
 import { onMounted, ref } from 'vue';
-import {
-  CandidatesGetOtklikAnswers,
-  CandidatesSetOtklikStatus,
-} from '../js/CommentsClasses';
+import { CandidatesGetOtklikAnswers } from '../js/CommentsClasses';
 import ArrowIcon from '@/assets/icons/arrow-down.svg?component';
 import EmptyButton from '@/components/EmptyButton.vue';
-import SelectMain from '@/components/SelectMain.vue';
 
 const props = defineProps({
   // ID отклика
@@ -95,22 +82,8 @@ const props = defineProps({
   },
 });
 
-const options = [
-  {
-    name: 'Анкета',
-    id: 'Анкета',
-  },
-  {
-    name: 'Created',
-    id: 'Created',
-  },
-];
 // Массив данных к отклику
 const respondInfo = ref([]);
-// Статус кандидата
-const status = ref([]);
-// Новый статус кандидата
-const newStatus = ref('');
 // Флаг загрузки данных
 const dataFetched = ref(false);
 // Сообщение об ошибке
@@ -132,34 +105,11 @@ const requestCandidateInfo = () => {
       respondInfo.value = {
         answers: response.answers,
         info: response.info,
-        statusTransfers: response.statusTransfers,
       };
-      status.value = [{ name: response.info.status, id: response.info.status }];
       dataFetched.value = true;
     },
     (err) => (errorMessage.value = err)
   );
-};
-
-// Изменение статуса кандидата
-const changeRespondStatus = () => {
-  const requestInstance = new CandidatesSetOtklikStatus();
-  requestInstance.otklikId = props.respondId;
-  requestInstance.toStatusName = newStatus.value;
-  errorMessage.value = '';
-
-  requestInstance.request(
-    '/candidates/set_otklik_status.php',
-    'manager',
-    (response) => {},
-    (err) => (errorMessage.value = err)
-  );
-};
-
-// Обработчик статуса кандидата
-const updateStatus = (value) => {
-  newStatus.value = value;
-  changeRespondStatus();
 };
 
 // Показать/скрыть вопросы
@@ -175,10 +125,6 @@ onMounted(requestCandidateInfo);
   display: flex;
   justify-content: space-between;
   align-items: center;
-}
-
-.questions-universal__header-select {
-  margin-right: 15px;
 }
 
 .questions-universal__info {
@@ -209,6 +155,13 @@ onMounted(requestCandidateInfo);
   transition: all 0.3s ease;
   width: 40px;
   height: 40px;
+}
+
+@media screen and (max-width: 425px) {
+  .questions-universal__header-arrowicon {
+    width: 30px;
+    height: 30px;
+  }
 }
 
 .questions-universal__header-arrowicon--active {

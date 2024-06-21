@@ -16,6 +16,11 @@
     </div>
 
     <template v-if="candidateId || respondId">
+      <CommentsStatus
+        v-if="respondId"
+        :respond-id="respondId"
+        class="comments__status-block"
+      />
       <CommentsVacancy
         v-if="vacancyId"
         :vacancy-id
@@ -56,6 +61,7 @@ import backIcon from '@/assets/icons/back.svg';
 import TopSquareButton from '@/components/TopSquareButton.vue';
 import CommentsQuestions from './components/CommentsQuestions.vue';
 import CommentsVacancy from './components/CommentsVacancy.vue';
+import CommentsStatus from './components/CommentsStatus.vue';
 
 const route = useRoute();
 // ID отклика
@@ -71,7 +77,7 @@ const status = route.query.status;
 <style scoped>
 .comments__comments-block,
 .comments__questions-block,
-.comments__vacancy-block {
+.comments__vacancy-block, .comments__status-block {
   margin-bottom: 25px;
   border: 1px solid var(--cornflower-blue);
   border-radius: 15px;
