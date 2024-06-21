@@ -425,8 +425,8 @@ const saveChanges = (callback) => {
 
 
 .vacancy-edit__add-btn-icon {
-  width: 60px;
-  height: 60px;
+  width: 45px;
+  height: 45px;
 }
 
 .vacancy-edit__icon-button {
