@@ -247,6 +247,14 @@ onMounted(requestComments);
 </script>
 
 <style scoped>
+h2 {
+  margin: 5px 0;
+}
+
+p {
+  margin: 2px 0;
+}
+
 .comments__comment:not(:last-child) {
   margin-bottom: 10px;
 }
@@ -259,14 +267,14 @@ onMounted(requestComments);
 
 .comments__header-arrowicon {
   transition: all 0.3s ease;
-  width: 40px;
-  height: 40px;
+  width: 30px;
+  height: 30px;
 }
 
 @media screen and (max-width: 425px) {
   .comments__header-arrowicon {
-    width: 30px;
-    height: 30px;
+    width: 25px;
+    height: 25px;
   }
 }
 

@@ -18,10 +18,8 @@
     <!-- Открытие/сокрытие вакансии -->
     <Transition v-if="show">
       <div class="vacancy__info">
-        <div>
-          <p><b>Описание: </b></p>
-          <p class="vacancy__description" v-html="vacancyInfo.description"></p>
-        </div>
+        <p><b>Описание: </b></p>
+        <p class="vacancy__description" v-html="vacancyInfo.description"></p>
       </div>
     </Transition>
   </div>
@@ -73,6 +71,14 @@ onMounted(requestVacancyInfo);
 </script>
 
 <style scoped>
+h2 {
+  margin: 5px 0;
+}
+
+p {
+  margin: 10px 0;
+}
+
 .vacancy__header {
   display: flex;
   justify-content: space-between;
@@ -80,8 +86,11 @@ onMounted(requestVacancyInfo);
 }
 
 .vacancy__info {
-  * {
-    margin: 10px 0;
+  :nth-child(1) {
+    margin-bottom: 0px;
+  }
+  :nth-child(2) {
+    margin-top: 5px;
   }
 }
 
@@ -91,14 +100,14 @@ onMounted(requestVacancyInfo);
 
 .vacancy__header-arrowicon {
   transition: all 0.3s ease;
-  width: 40px;
-  height: 40px;
+  width: 30px;
+  height: 30px;
 }
 
 @media screen and (max-width: 425px) {
   .vacancy__header-arrowicon {
-    width: 30px;
-    height: 30px;
+    width: 25px;
+    height: 25px;
   }
 }
 

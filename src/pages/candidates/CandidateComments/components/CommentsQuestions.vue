@@ -121,6 +121,10 @@ onMounted(requestCandidateInfo);
 </script>
 
 <style scoped>
+h2 {
+  margin: 5px 0;
+}
+
 .questions-universal__header {
   display: flex;
   justify-content: space-between;
@@ -153,14 +157,14 @@ onMounted(requestCandidateInfo);
 
 .questions-universal__header-arrowicon {
   transition: all 0.3s ease;
-  width: 40px;
-  height: 40px;
+  width: 30px;
+  height: 30px;
 }
 
 @media screen and (max-width: 425px) {
   .questions-universal__header-arrowicon {
-    width: 30px;
-    height: 30px;
+    width: 25px;
+    height: 25px;
   }
 }
 

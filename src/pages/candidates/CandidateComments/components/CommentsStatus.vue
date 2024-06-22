@@ -9,26 +9,39 @@
       >
     </div>
 
+    <template v-else-if="statusChanged">
+      <span class="status__success"> Статус отклика изменен </span>
+    </template>
+
     <template v-else>
-      <label class="status__select">
-        <span><b>Изменить статус: </b></span>
-        <SelectMain v-model="newStatus" :options="statuses" />
-      </label>
-      <ButtonMain @click="changeStatus"
-        ><template v-slot:text>Изменить</template>
-      </ButtonMain>
+      <div class="status__info">
+        <label class="status__select">
+          <h2>Статус отклика</h2>
+          <SelectMain v-model="newStatus" :options="options" />
+        </label>
+        <ButtonMain @click="changeStatus" :isActive="sendRequest"
+          ><template v-slot:text>Изменить</template>
+        </ButtonMain>
+      </div>
     </template>
   </div>
 </template>
 
 <script setup>
-import { onMounted, ref } from 'vue';
+import { onMounted, ref, watch } from 'vue';
 import {
   CandidatesGetOtklikAnswers,
   CandidatesSetOtklikStatus,
 } from '../js/CommentsClasses';
 import SelectMain from '@/components/SelectMain.vue';
 import ButtonMain from '@/components/ButtonMain.vue';
+
+const options = [
+  {
+    name: 'Новый',
+    id: 'Новый',
+  },
+];
 
 const props = defineProps({
   // ID отклика
@@ -40,6 +53,10 @@ const props = defineProps({
 
 // Флаг загрузки данных
 const dataFetched = ref(false);
+// Флаг отправки запроса
+const sendRequest = ref(false);
+// Флаг успешной смены
+const statusChanged = ref(false);
 // Сообщение об ошибке
 const errorMessage = ref('');
 // Массив статусов кандидата
@@ -71,12 +88,20 @@ const changeRespondStatus = () => {
   requestInstance.otklikId = props.respondId;
   requestInstance.toStatusName = newStatus.value;
   errorMessage.value = '';
+  statusChanged.value = false;
+  sendRequest.value = true;
 
   requestInstance.request(
     '/candidates/set_otklik_status.php',
     'manager',
-    (response) => {},
-    (err) => (errorMessage.value = err)
+    () => {
+      sendRequest.value = false;
+      statusChanged.value = true;
+    },
+    (err) => {
+      errorMessage.value = err;
+      sendRequest.value = false;
+    }
   );
 };
 
@@ -86,26 +111,52 @@ const changeStatus = () => {
 };
 
 onMounted(requestCandidateInfo);
+
+watch(
+  () => statusChanged.value,
+  () => {
+    setTimeout(() => {
+      statusChanged.value = false;
+    }, 2000);
+  }
+);
 </script>
 
 <style scoped>
+h2 {
+  margin: 5px 0;
+}
+
 .status {
   display: flex;
   justify-content: space-between;
   align-items: center;
 }
 
-.status__select {
+.status__info {
   width: 100%;
   display: flex;
   justify-content: space-between;
   align-items: center;
-  margin-right: 10px;
+}
+
+.status__select {
+  display: flex;
+  align-items: center;
+  gap: 10px;
 }
 
 @media screen and (max-width: 420px) {
-  .status__select {
+  .status__info {
     flex-direction: column;
+    gap: 10px;
+    align-items: flex-start;
+  }
+  .status__select {
+    gap: 0;
+    width: 100%;
+    justify-content: space-between;
+    padding-right: 8px;
   }
 }
 
@@ -116,6 +167,12 @@ onMounted(requestCandidateInfo);
   align-items: center;
   gap: 10px;
 }
+
+.status__success {
+  margin: 10px 0;
+  color: var(--success-color);
+}
+
 .status__error-text {
   color: var(--error-color);
 }
