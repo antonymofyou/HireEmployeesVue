@@ -12,7 +12,7 @@
 
     <template v-slot:footer-control-buttons>
       <div class="modal-confirmation__controls">
-        <ButtonSimple
+        <ButtonMain
           @click="$emit('cancel')"
           :textColor="cancelTextColor"
           :buttonColor="cancelButtonColor"
@@ -21,17 +21,18 @@
           <template v-slot:text>
             {{ cancelText }}
           </template>
-        </ButtonSimple>
-        <ButtonSimple
+        </ButtonMain>
+        <ButtonMain
           @click="$emit('confirm')"
           :textColor="confirmTextColor"
           :buttonColor="confirmButtonColor"
           :isBold=true
+          :is-active="props.loading"
         >
           <template v-slot:text>
             {{ confirmText }}
           </template>
-        </ButtonSimple>
+        </ButtonMain>
       </div>
     </template>
   </Modal>
@@ -39,7 +40,7 @@
 
 <script setup>
 import Modal from '@/components/Modal.vue';
-import ButtonSimple from '@/components/ButtonSimple.vue';
+import ButtonMain from "@/components/ButtonMain.vue";
 
 // Показ модального окна, заголовок, текст, текст подтверждения, текст отмены,
 // цвет текста подтверждения, цвет текста отмены, цвет кнопки подтверждения, цвет кнопки отмены
@@ -89,6 +90,10 @@ const props = defineProps({
     default: defaultCancelBtnColor,
     required: false,
   },
+  loading: {
+    type: Boolean,
+    default: false,
+  }
 });
 
 //Значения по умолчанию для кастомизации кнопок управления

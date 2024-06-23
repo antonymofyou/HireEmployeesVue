@@ -16,18 +16,19 @@
           :options="options"
         />
       </div>
-      <button type="button" class="question__remove-btn" title="Удалить вопрос" @click="showModalOnRemove = true">
+      <button type="button" class="question__remove-btn" title="Удалить вопрос" @click="$emit('updateShowModal')">
         <DeleteIcon class="icon"/>
       </button>
 
       <Teleport to="body">
         <ModalConfirmation
-          :show="showModalOnRemove"
+          :show="props.showModal"
           confirmText="Удалить"
           text="Вы уверены, что хотите удалить вопрос? Это действие нельзя отменить"
           confirmButtonColor="var(--cinnabar)"
           @confirm="handleConfirmRemove"
           @cancel="handleCancelRemove"
+          :loading="props.loadingRemove"
         />
       </Teleport>
     </div>
@@ -71,6 +72,14 @@ const props = defineProps({
     type: Function,
     required: true,
   },
+  loadingRemove: {
+    type: Boolean,
+    default: false,
+  },
+  showModal: {
+    type: Boolean,
+    default: false,
+  }
 });
 
 // Значения вопроса (текст и статус публикации)
@@ -78,7 +87,7 @@ const text = ref(props.text);
 const isPublished = ref(props.isPublished);
 
 // Обновление данных в родителе
-const emit = defineEmits(['updateText', 'updateIsPublished']);
+const emit = defineEmits(['updateText', 'updateIsPublished', 'updateShowModal']);
 
 // Обновление текста
 const updateText = (newValue) => {
@@ -92,20 +101,16 @@ const updateIsPublished = (newValue) => {
   emit('updateIsPublished', newValue);
 };
 
-// Показ модального окна при удалении
-const showModalOnRemove = ref(false);
 
 // Обработчик подтверждения удаления
 const handleConfirmRemove = () => {
   // удаляем вопрос при подтверждении
   props.remove(props.id);
-
-  showModalOnRemove.value = false;
 }
 
 // Обработчик отмены удаления
 const handleCancelRemove = () => {
-  showModalOnRemove.value = false;
+  emit('updateShowModal');
 }
 </script>
 
