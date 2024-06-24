@@ -1,8 +1,8 @@
 <template>
-  <section class="comments">
+  <section class="comments-page">
     <div class="heading">
       <TopSquareButton
-        class="comments__back-btn"
+        class="comments-page__back-btn"
         @click="
           $router.push({
             name: 'candidates',
@@ -19,35 +19,35 @@
       <CommentsStatus
         v-if="respondId"
         :respondId
-        class="comments__status-block"
+        class="comments-page__status-block"
       />
       <CommentsVacancy
         v-if="vacancyId"
         :vacancyId
-        class="comments__vacancy-block"
+        class="comments-page__vacancy-block"
       />
       <CommentsQuestions
         v-if="respondId"
         :respondId
         type="candidate"
-        class="comments__questions-block"
+        class="comments-page__questions-block"
       />
       <CommentsQuestions
         v-if="respondId"
         :respondId
         type="questions"
-        class="comments__questions-block"
+        class="comments-page__questions-block"
       />
       <CommentsBlock
         v-if="respondId && candidateId"
         :respondId
         :candidateId
-        class="comments__comments-block"
+        class="comments-page__comments-block"
       />
       <CommentsBlock
         v-if="candidateId"
         :candidateId
-        class="comments__comments-block"
+        class="comments-page__comments-block"
       />
     </template>
     <p v-else>Неверно переданы параметры</p>
@@ -75,23 +75,23 @@ const status = route.query.status;
 </script>
 
 <style scoped>
-section {
+.comments-page {
   max-width: 925px;
   margin: 0 auto;
   margin-top: 55px;
 }
 
-.comments__comments-block,
-.comments__questions-block,
-.comments__vacancy-block,
-.comments__status-block {
+.comments-page__comments-block,
+.comments-page__questions-block,
+.comments-page__vacancy-block,
+.comments-page__status-block {
   margin-bottom: 18px;
   border: 1px solid var(--cornflower-blue);
   border-radius: 15px;
   padding: 8px 15px;
 }
 
-.comments__comments-block[data-candidate] {
+.comments-page__comments-block[data-candidate] {
   margin-bottom: 0;
 }
 
@@ -99,7 +99,7 @@ section {
   text-align: center;
 }
 
-.comments__back-btn {
+.comments-page__back-btn {
   position: absolute;
   top: 20px;
   left: 20px;
