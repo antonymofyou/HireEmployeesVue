@@ -1,9 +1,9 @@
 <template>
   <div class="questions-universal">
     <div class="questions-universal__header">
-      <h2>
+      <div class="questions-universal__header-title">
         {{ props.type === 'questions' ? 'Ответы кандидата' : 'Кандидат' }}
-      </h2>
+      </div>
       <ButtonIcon v-if="props.type === 'questions'" @click="showQuestions"
         ><template #icon>
           <ArrowIcon
@@ -16,12 +16,12 @@
     </div>
 
     <div v-if="props.type === 'candidate'" class="questions-universal__info">
-      <p v-if="errorMessage" class="questions-universal__error">
+      <div v-if="errorMessage" class="questions-universal__error">
         {{ errorMessage }}
-      </p>
+      </div>
       <template v-else>
-        <p><b>ФИО: </b>{{ respondInfo.info?.fio }}</p>
-        <p>
+        <div><b>ФИО: </b>{{ respondInfo.info?.fio }}</div>
+        <div>
           <b>Телеграм: </b>
           <a
             target="_blank"
@@ -29,17 +29,16 @@
           >
             {{ respondInfo.info?.tgNickname }}
           </a>
-        </p>
-        <p><b>Статус: </b> {{ respondInfo.info?.status }}</p></template
-      >
+        </div>
+      </template>
     </div>
 
     <!-- Вопросы вакансии и ответы кандидата -->
     <Transition v-if="props.type === 'questions'">
       <div class="questions-universal__list" v-if="show">
-        <p v-if="errorMessage" class="questions-universal__error">
+        <div v-if="errorMessage" class="questions-universal__error">
           {{ errorMessage }}
-        </p>
+        </div>
         <template v-else="respondInfo.answers.length">
           <div
             class="questions-universal__question"
@@ -47,12 +46,12 @@
             :key="question.questionId"
           >
             <div class="questions-universal__question-text">
-              <p><b>Вопрос:</b></p>
-              <p v-html="question.question"></p>
+              <div><b>Вопрос:</b></div>
+              <div v-html="question.question"></div>
             </div>
             <div class="questions-universal__question-text">
-              <p><b>Ответ:</b></p>
-              <p>{{ question.answer }}</p>
+              <div><b>Ответ:</b></div>
+              <div>{{ question.answer }}</div>
             </div>
             <hr />
           </div>
@@ -121,20 +120,19 @@ onMounted(requestCandidateInfo);
 </script>
 
 <style scoped>
-h2 {
-  margin: 5px 0;
+* {
+  font-size: 15px;
 }
-
 .questions-universal__header {
   display: flex;
   justify-content: space-between;
   align-items: center;
+  height: 32px;
 }
 
-.questions-universal__info {
-  * {
-    margin: 10px 0;
-  }
+.questions-universal__header-title {
+  font-size: 16px;
+  font-weight: 600;
 }
 
 .questions-universal__question {
@@ -143,12 +141,13 @@ h2 {
 
 .questions-universal__question-text {
   word-break: break-all;
-  :nth-child(1) {
-    margin-bottom: 0;
-  }
-  :nth-child(2) {
-    margin-top: 8px;
-  }
+}
+
+.questions-universal__info {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+  margin: 5px 0;
 }
 
 .questions-universal__error {

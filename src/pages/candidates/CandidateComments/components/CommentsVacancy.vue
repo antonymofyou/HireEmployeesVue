@@ -1,7 +1,11 @@
 <template>
   <div class="vacancy">
     <div class="vacancy__header">
-      <h2>Вакансия {{ vacancyInfo.name }} (id:{{ vacancyInfo.id }})</h2>
+      <div class="vacancy__header-title">
+        Вакансия&nbsp;
+        <span class="vacancy__header-title-name"> {{ vacancyInfo.name }}</span>
+        (id:{{ vacancyInfo.id }})
+      </div>
       <ButtonIcon @click="showVacancy"
         ><template #icon>
           <ArrowIcon
@@ -12,14 +16,17 @@
           /> </template
       ></ButtonIcon>
     </div>
-    <p v-if="errorMessage" class="vacancy__error">
+    <div v-if="errorMessage" class="vacancy__error">
       {{ errorMessage }}
-    </p>
+    </div>
     <!-- Открытие/сокрытие вакансии -->
     <Transition v-if="show">
       <div class="vacancy__info">
-        <p><b>Описание: </b></p>
-        <p class="vacancy__description" v-html="vacancyInfo.description"></p>
+        <div><b>Описание: </b></div>
+        <div
+          class="vacancy__description"
+          v-html="vacancyInfo.description"
+        ></div>
       </div>
     </Transition>
   </div>
@@ -71,27 +78,29 @@ onMounted(requestVacancyInfo);
 </script>
 
 <style scoped>
-h2 {
-  margin: 5px 0;
+* {
+  font-size: 15px;
 }
-
-p {
-  margin: 10px 0;
-}
-
 .vacancy__header {
   display: flex;
   justify-content: space-between;
   align-items: center;
 }
 
-.vacancy__info {
-  :nth-child(1) {
-    margin-bottom: 0px;
-  }
-  :nth-child(2) {
-    margin-top: 5px;
-  }
+.vacancy__header-title {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  font-size: 16px;
+  font-weight: 600;
+  overflow: hidden;
+}
+
+.vacancy__header-title-name {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 250px;
+  white-space: nowrap;
 }
 
 .vacancy__error {

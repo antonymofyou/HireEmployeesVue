@@ -1,7 +1,7 @@
 <template>
   <div class="comment">
     <div class="comment__controls">
-      <p class="comment__manager">{{ props.comment.managerName }}</p>
+      <div class="comment__manager">{{ props.comment.managerName }}</div>
       <div v-if="userCanEdit || userCanDelete" class="comment__buttons">
         <template v-if="userCanEdit">
           <button
@@ -55,12 +55,12 @@
         class="comment__textarea"
       >
       </textarea>
-      <p v-else class="comment__text" ref="commentParagraphRef">
+      <div v-else class="comment__text" ref="commentParagraphRef">
         {{ props.comment.comment }}
-      </p>
+      </div>
     </div>
 
-    <p class="comment__date">{{ formattedDate }}</p>
+    <div class="comment__date">{{ formattedDate }}</div>
 
     <ModalConfirmation
       :show="isModalOpened"
@@ -178,6 +178,9 @@ watch(
 </script>
 
 <style scoped>
+* {
+  font-size: 15px;
+}
 .comment {
   display: flex;
   flex-direction: column;

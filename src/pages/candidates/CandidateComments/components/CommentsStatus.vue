@@ -1,23 +1,23 @@
 <template>
   <div class="status">
     <div v-if="errorMessage" class="status__error">
-      <span class="status__error-text">
+      <div class="status__error-text">
         {{ errorMessage }}
-      </span>
+      </div>
       <ButtonMain @click="errorMessage = ''"
         ><template v-slot:text>Повторить</template></ButtonMain
       >
     </div>
 
     <template v-else-if="statusChanged">
-      <span class="status__success"> Статус отклика изменен </span>
+      <div class="status__success">Статус отклика изменен</div>
     </template>
 
     <template v-else>
       <div class="status__info">
         <label class="status__select">
-          <h2>Статус отклика</h2>
-          <SelectMain v-model="newStatus" :options="statuses" />
+          <div class="status__select-label">Статус отклика</div>
+          <SelectMain v-model="status" :options="statuses" />
         </label>
         <ButtonMain @click="changeStatus" :isActive="sendRequest"
           ><template v-slot:text>Изменить</template>
@@ -54,8 +54,8 @@ const statusChanged = ref(false);
 const errorMessage = ref('');
 // Массив статусов кандидата
 const statuses = ref([]);
-// Новый статус
-const newStatus = ref('');
+// Статус кандидата
+const status = ref('');
 
 // Запрос данных по ответам кандидата
 const requestCandidateInfo = () => {
@@ -68,8 +68,17 @@ const requestCandidateInfo = () => {
     '/candidates/get_otklik_info.php',
     'manager',
     (response) => {
-      statuses.value = response.statusTransfers;
       dataFetched.value = true;
+
+      // Инициализируем массив статусов на основе полученных данных
+      if (!response.info.status) {
+        // Если статус неизвестный
+        status.value = 'Неизвестный';
+        statuses.value = response.statusTransfers.length ? response.statusTransfers : [{ name: 'Неизвестный', id: 'Неизвестный' }];
+      } else {
+        status.value = response.info.status;
+        statuses.value = response.statusTransfers.length ? response.statusTransfers : [{ name: response.info.status, id: response.info.status }];
+      }
     },
     (err) => (errorMessage.value = err)
   );
@@ -79,7 +88,7 @@ const requestCandidateInfo = () => {
 const changeRespondStatus = () => {
   const requestInstance = new CandidatesSetOtklikStatus();
   requestInstance.otklikId = props.respondId;
-  requestInstance.toStatusName = newStatus.value;
+  requestInstance.toStatusName = status.value;
   errorMessage.value = '';
   statusChanged.value = false;
   sendRequest.value = true;
@@ -116,8 +125,8 @@ watch(
 </script>
 
 <style scoped>
-h2 {
-  margin: 5px 0;
+* {
+  font-size: 15px;
 }
 
 .status {
@@ -139,7 +148,12 @@ h2 {
   gap: 10px;
 }
 
-@media screen and (max-width: 420px) {
+.status__select-label {
+  font-size: 16px;
+  font-weight: 600;
+}
+
+@media screen and (max-width: 460px) {
   .status__info {
     flex-direction: column;
     gap: 10px;

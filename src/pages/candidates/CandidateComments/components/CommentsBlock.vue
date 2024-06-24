@@ -1,7 +1,7 @@
 <template>
   <div class="comments">
     <div class="comments__header">
-      <h2>{{ headingText }}</h2>
+      <div class="comments__header-title">{{ headingText }}</div>
       <ButtonIcon v-if="!respondId" @click="showComments"
         ><template #icon>
           <ArrowIcon
@@ -13,13 +13,9 @@
       ></ButtonIcon>
     </div>
 
-    <div v-if="isLoading" class="comments__spinner-wrapper">
-      <SpinnerMain class="comments__spinner" />
-    </div>
-
-    <p v-if="mainErrorMessage && !isLoading" class="comments__error">
+    <div v-if="mainErrorMessage && !isLoading" class="comments__error">
       {{ mainErrorMessage }}
-    </p>
+    </div>
 
     <template v-else>
       <template v-if="!respondId">
@@ -27,6 +23,9 @@
         <Transition v-if="show">
           <div>
             <div class="comments__list" ref="commentsBlock">
+              <div v-if="show &&isLoading" class="comments__spinner-wrapper">
+                <SpinnerMain class="comments__spinner" />
+              </div>
               <template v-if="comments.length">
                 <CommentCard
                   v-for="comment in comments"
@@ -50,6 +49,9 @@
 
       <template v-else>
         <div class="comments__list" ref="commentsBlock">
+          <div v-if="isLoading" class="comments__spinner-wrapper">
+                <SpinnerMain class="comments__spinner" />
+              </div>
           <template v-if="comments.length">
             <CommentCard
               v-for="comment in comments"
@@ -60,7 +62,7 @@
               @update-comment="updateComment"
             />
           </template>
-          <p v-if="!isLoading && !comments.length">Нет комментариев</p>
+          <div v-if="!isLoading && !comments.length">Нет комментариев</div>
         </div>
 
         <CommentAddition
@@ -247,14 +249,9 @@ onMounted(requestComments);
 </script>
 
 <style scoped>
-h2 {
-  margin: 5px 0;
+* {
+  font-size: 15px;
 }
-
-p {
-  margin: 2px 0;
-}
-
 .comments__comment:not(:last-child) {
   margin-bottom: 10px;
 }
@@ -263,6 +260,12 @@ p {
   display: flex;
   justify-content: space-between;
   align-items: center;
+  height: 32px;
+}
+
+.comments__header-title {
+  font-size: 16px;
+  font-weight: 600;
 }
 
 .comments__header-arrowicon {
@@ -289,7 +292,7 @@ p {
 }
 
 .comments__spinner {
-  height: 70px;
+  height: 40px;
 }
 
 .comments__error {
@@ -297,7 +300,7 @@ p {
 }
 
 .comments__list {
-  margin-bottom: 10px;
+  margin: 10px 0;
   padding: 10px;
   max-height: 260px;
   overflow-y: auto;

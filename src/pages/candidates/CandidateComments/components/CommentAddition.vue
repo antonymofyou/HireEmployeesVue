@@ -1,7 +1,7 @@
 <template>
   <div class="comment-creation">
     <label class="comment-creation__label">
-      <span>Создать комментарий</span>
+      <div>Создать комментарий</div>
       <textarea
         :value="modelValue"
         class="comment-creation__textarea"
@@ -72,6 +72,9 @@ const sendComment = () => {
 </script>
 
 <style scoped>
+* {
+  font-size: 15px;
+}
 .comment-creation,
 .comment-creation__label {
   display: flex;
