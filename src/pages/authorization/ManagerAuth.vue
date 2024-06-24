@@ -128,6 +128,7 @@ if (checkCodeParam()) {
 }
 
 .errorMessage{
+    text-align: center;
     margin-top:20px;
     color: var(--error-color);
 }
