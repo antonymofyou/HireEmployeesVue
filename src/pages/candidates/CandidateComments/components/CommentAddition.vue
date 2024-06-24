@@ -1,18 +1,16 @@
 <template>
   <div class="comment-creation">
     <label class="comment-creation__label">
-      <span>Создать комментарий</span>
+      <div>Создать комментарий</div>
       <textarea
         :value="modelValue"
         class="comment-creation__textarea"
-        rows="5"
-        @input="emit('update:modelValue', $event.target.value)"
+        ref="textarea"
+        :rows="calculateRows"
+        @input="onInput"
       ></textarea>
     </label>
-    <ButtonMain
-      class="comment-creation__button"
-      @click="emit('createComment')"
-    >
+    <ButtonMain class="comment-creation__button" @click="sendComment">
       <template #text>Добавить комментарий</template>
     </ButtonMain>
   </div>
@@ -20,7 +18,9 @@
 
 <script setup>
 import ButtonMain from '@/components/ButtonMain.vue';
+import { computed, ref } from 'vue';
 
+//Пропс комментария
 const props = defineProps({
   modelValue: {
     type: String,
@@ -28,10 +28,54 @@ const props = defineProps({
   },
 });
 
+//События изменения значения в текстовом поле и создания комментария
 const emit = defineEmits(['createComment', 'update:modelValue']);
+
+//Нода текстового поля
+const textarea = ref(null);
+
+//Высота текстового поля в строках. По умолчанию 1(36px). При переносе курсора rows увеличивается только после ввода символа на новой строке
+const calculateRows = computed(() => {
+  const rows = props.modelValue.split('\n').length;
+  return Math.max(1, rows);
+});
+
+//Перевычисление высоты текстового поля при заполнении
+const setHeight = () => {
+  textarea.value.style.height = 'auto';
+  textarea.value.style.height = `${textarea.value.scrollHeight}px`;
+};
+
+//Событие изменения значения в текстовом поле
+const onInput = (event) => {
+  //Если поле не пустое - перевычисляем высоту при заполнении и переносе
+  setHeight();
+
+  //Если поле пустое - устанавливаем высоту в 36px
+  if (event.target.value === '') {
+    textarea.value.style.height = '36px';
+  }
+
+  //Вызов события изменения пропса комментария
+  emit('update:modelValue', event.target.value);
+};
+
+//Вызов события создания комментария
+const sendComment = () => {
+  emit('createComment');
+
+  //Сброс высоты текстового поля
+  setTimeout(() => {
+    textarea.value.style.height = '36px';
+  });
+};
 </script>
 
 <style scoped>
+.comment-creation {
+  font-size: 15px;
+}
+
 .comment-creation,
 .comment-creation__label {
   display: flex;
@@ -44,6 +88,7 @@ const emit = defineEmits(['createComment', 'update:modelValue']);
 }
 
 .comment-creation__textarea {
+  overflow: hidden;
   resize: none;
   padding: 10px;
   border: none;

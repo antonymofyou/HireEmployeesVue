@@ -1,7 +1,7 @@
 <template>
   <div class="comment">
     <div class="comment__controls">
-      <p class="comment__manager">{{ props.comment.managerName }}</p>
+      <div class="comment__manager">{{ props.comment.managerName }}</div>
       <div v-if="userCanEdit || userCanDelete" class="comment__buttons">
         <template v-if="userCanEdit">
           <button
@@ -55,12 +55,12 @@
         class="comment__textarea"
       >
       </textarea>
-      <p v-else class="comment__text" ref="commentParagraphRef">
+      <div v-else class="comment__text" ref="commentParagraphRef">
         {{ props.comment.comment }}
-      </p>
+      </div>
     </div>
 
-    <p class="comment__date">{{ formattedDate }}</p>
+    <div class="comment__date">{{ formattedDate }}</div>
 
     <ModalConfirmation
       :show="isModalOpened"
@@ -112,11 +112,15 @@ watch(
   () => {
     if (editingTextareaRef.value) {
       editingTextareaRef.value.focus();
+    }
   }
-});
+);
 
 // Перевычисление высоты поля для редактирования комментария
-const setHeight = (e) => (height.value = e.target.scrollHeight);
+const setHeight = (e) => {
+  const element = e.target;
+  element.style.height = element.scrollHeight + 'px';
+};
 
 // Отключение режима редактирования, возвращение к начальному значению
 const offEditMode = () => (isEditMode.value = false);
@@ -168,7 +172,7 @@ const formattedDate = computed(() => {
 watch(
   () => isModalOpened.value,
   () => {
-    document.body.style.overflow = isModalOpened.value ? 'hidden' : 'unset';
+    document.body.style.overflow = isModalOpened.value ? 'hidden' : '';
   }
 );
 </script>
@@ -181,6 +185,7 @@ watch(
   border-radius: 10px;
   box-shadow: 0 1px 10px rgba(0, 0, 0, 0.3);
   background-color: var(--white);
+  font-size: 15px;
 }
 
 .icon {

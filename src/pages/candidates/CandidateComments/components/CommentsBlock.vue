@@ -1,35 +1,77 @@
 <template>
   <div class="comments">
-    <h2>{{ headingText }}</h2>
-
-    <div v-if="isLoading" class="comments__spinner-wrapper">
-      <SpinnerMain class="comments__spinner" />
+    <div class="comments__header">
+      <div class="comments__header-title">{{ headingText }}</div>
+      <ButtonIcon v-if="!respondId" @click="showComments"
+        ><template #icon>
+          <ArrowIcon
+            :class="[
+              'comments__header-arrowicon',
+              { 'comments__header-arrowicon--active': show },
+            ]"
+          /> </template
+      ></ButtonIcon>
     </div>
 
-    <p v-if="mainErrorMessage && !isLoading" class="comments__error">
+    <div v-if="mainErrorMessage && !isLoading" class="comments__error">
       {{ mainErrorMessage }}
-    </p>
+    </div>
 
     <template v-else>
-      <div class="comments__list">
-        <template v-if="comments.length">
-          <CommentCard
-            v-for="comment in comments"
-            :comment
-            :key="comment.id"
-            class="comments__comment"
-            @delete="deleteComment"
-            @update-comment="updateComment"
-          />
-        </template>
-        <p v-if="!isLoading && !comments.length">Нет комментариев</p>
-      </div>
+      <template v-if="!respondId">
+        <!-- Открытие/сокрытие комментариев -->
+        <Transition v-if="show">
+          <div>
+            <div class="comments__list" ref="commentsBlock">
+              <div v-if="show &&isLoading" class="comments__spinner-wrapper">
+                <SpinnerMain class="comments__spinner" />
+              </div>
+              <template v-if="comments.length">
+                <CommentCard
+                  v-for="comment in comments"
+                  :comment
+                  :key="comment.id"
+                  class="comments__comment"
+                  @delete="deleteComment"
+                  @update-comment="updateComment"
+                />
+              </template>
+              <p v-if="!isLoading && !comments.length">Нет комментариев</p>
+            </div>
 
-      <CommentAddition
-        v-model.trim="newComment"
-        @create-comment="createComment({ comment: newComment })"
-      />
+            <CommentAddition
+              v-model.trim="newComment"
+              @create-comment="createComment({ comment: newComment })"
+            />
+          </div>
+        </Transition>
+      </template>
+
+      <template v-else>
+        <div class="comments__list" ref="commentsBlock">
+          <div v-if="isLoading" class="comments__spinner-wrapper">
+                <SpinnerMain class="comments__spinner" />
+              </div>
+          <template v-if="comments.length">
+            <CommentCard
+              v-for="comment in comments"
+              :comment
+              :key="comment.id"
+              class="comments__comment"
+              @delete="deleteComment"
+              @update-comment="updateComment"
+            />
+          </template>
+          <div v-if="!isLoading && !comments.length">Нет комментариев</div>
+        </div>
+
+        <CommentAddition
+          v-model.trim="newComment"
+          @create-comment="createComment({ comment: newComment })"
+        />
+      </template>
     </template>
+    <!-- Модальное окно сообщения об ошибке -->
     <Teleport to="body">
       <ErrorNotification v-if="errorMessage" :message="errorMessage" />
     </Teleport>
@@ -37,7 +79,7 @@
 </template>
 
 <script setup>
-import { ref, computed, onMounted } from 'vue';
+import { ref, computed, onMounted, watch } from 'vue';
 import CommentCard from '@/pages/candidates/CandidateComments/components/CommentCard.vue';
 import SpinnerMain from '@/components/SpinnerMain.vue';
 import CommentAddition from './CommentAddition.vue';
@@ -46,6 +88,8 @@ import {
   CandidateGetCandidateComments,
 } from '../js/CommentsClasses.js';
 import ErrorNotification from '@/components/ErrorNotification.vue';
+import ButtonIcon from '@/components/ButtonIcon.vue';
+import ArrowIcon from '@/assets/icons/arrow-down.svg?component';
 
 const props = defineProps({
   // ID вакансии, если передано - получаем комментарии для кандидата по отношению к отклику, иначе общие комментарии для кандидата
@@ -69,6 +113,12 @@ const mainErrorMessage = ref('');
 const errorMessage = ref('');
 // Значение нового комментария
 const newComment = ref('');
+// Флаг показа комментариев
+const show = ref(false);
+// Ref для блока с комментариями
+const commentsBlock = ref(null);
+// ID созданного комментария
+const createdCommentId = ref(null);
 
 // Формируем строку вида "for_otklik:id" или "for_candidate"
 const commentFor = computed(
@@ -139,6 +189,7 @@ const createComment = (payload) => {
   if (payload.comment) {
     // Перезапрос комментариев, очистка поля для нового комментария
     const onCreateSuccess = (res) => {
+      createdCommentId.value = res.comment.id;
       comments.value.push(res.comment);
       newComment.value = '';
     };
@@ -172,12 +223,67 @@ const requestComments = () => {
   );
 };
 
+// Показ комментариев
+const showComments = () => {
+  show.value = !show.value;
+};
+
+// При изменении значения свойства "createdCommentId" обновляем положение скролла в конце блока
+watch(
+  () => createdCommentId.value,
+  () => {
+    if (commentsBlock.value) {
+      // Добавляем небольшой задержку, чтобы обновление высоты произошло после изменения контента
+      setTimeout(() => {
+        commentsBlock.value.scrollTo({
+          top:
+            commentsBlock.value.scrollHeight - commentsBlock.value.clientHeight,
+          behavior: 'smooth',
+        });
+      }, 0);
+    }
+  }
+);
+
 onMounted(requestComments);
 </script>
 
 <style scoped>
+.comments {
+  font-size: 15px;
+}
+
 .comments__comment:not(:last-child) {
   margin-bottom: 10px;
+}
+
+.comments__header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  height: 32px;
+}
+
+.comments__header-title {
+  font-size: 16px;
+  font-weight: 600;
+}
+
+.comments__header-arrowicon {
+  transition: all 0.3s ease;
+  width: 30px;
+  height: 30px;
+}
+
+@media screen and (max-width: 425px) {
+  .comments__header-arrowicon {
+    width: 25px;
+    height: 25px;
+  }
+}
+
+.comments__header-arrowicon--active {
+  transform: rotateX(180deg);
 }
 
 .comments__spinner-wrapper {
@@ -187,7 +293,7 @@ onMounted(requestComments);
 }
 
 .comments__spinner {
-  height: 70px;
+  height: 40px;
 }
 
 .comments__error {
@@ -195,7 +301,7 @@ onMounted(requestComments);
 }
 
 .comments__list {
-  margin-bottom: 10px;
+  margin: 10px 0;
   padding: 10px;
   max-height: 260px;
   overflow-y: auto;
