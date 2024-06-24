@@ -80,6 +80,7 @@ const status = route.query.status;
   max-width: 925px;
   margin: 0 auto;
   margin-top: 55px;
+  padding-bottom: 20px ;
 }
 
 .comments-page__comments-block,
