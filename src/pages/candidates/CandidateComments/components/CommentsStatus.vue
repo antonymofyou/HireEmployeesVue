@@ -17,7 +17,7 @@
       <div class="status__info">
         <label class="status__select">
           <h2>Статус отклика</h2>
-          <SelectMain v-model="newStatus" :options="options" />
+          <SelectMain v-model="newStatus" :options="statuses" />
         </label>
         <ButtonMain @click="changeStatus" :isActive="sendRequest"
           ><template v-slot:text>Изменить</template>
@@ -35,13 +35,6 @@ import {
 } from '../js/CommentsClasses';
 import SelectMain from '@/components/SelectMain.vue';
 import ButtonMain from '@/components/ButtonMain.vue';
-
-const options = [
-  {
-    name: 'Новый',
-    id: 'Новый',
-  },
-];
 
 const props = defineProps({
   // ID отклика
