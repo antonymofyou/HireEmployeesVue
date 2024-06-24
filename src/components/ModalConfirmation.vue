@@ -27,7 +27,7 @@
           :textColor="confirmTextColor"
           :buttonColor="confirmButtonColor"
           :isBold=true
-          :is-active="props.loading"
+          :isActive="props.loading"
         >
           <template v-slot:text>
             {{ confirmText }}
@@ -43,7 +43,7 @@ import Modal from '@/components/Modal.vue';
 import ButtonMain from "@/components/ButtonMain.vue";
 
 // Показ модального окна, заголовок, текст, текст подтверждения, текст отмены,
-// цвет текста подтверждения, цвет текста отмены, цвет кнопки подтверждения, цвет кнопки отмены
+// цвет текста подтверждения, цвет текста отмены, цвет кнопки подтверждения, цвет кнопки отмены, статус модального окна
 const props = defineProps({
   show: {
     type: Boolean,

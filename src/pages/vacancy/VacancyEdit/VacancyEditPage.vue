@@ -56,13 +56,21 @@
             :isPublished="question.published"
             @updateText="updateQuestionText(index, $event)"
             @updateIsPublished="updateIsPublished(index, $event)"
-            :remove="removeQuestion"
             class="list-item"
-            :loadingRemove="removeQuestionLoad"
-            :show-modal="showModalOnRemoveQuestion"
-            @updateShowModal="showModalOnRemoveQuestion = !showModalOnRemoveQuestion"
+            @updateShowModal="updateShowQuestionModal"
           />
         </transition-group>
+        <Teleport to="body">
+          <ModalConfirmation
+            :show="showModalOnRemoveQuestion"
+            confirmText="Удалить"
+            text="Вы уверены, что хотите удалить вопрос? Это действие нельзя отменить"
+            confirmButtonColor="var(--cinnabar)"
+            @confirm="removeQuestion(idCardQuestion)"
+            @cancel="showModalOnRemoveQuestion = !showModalOnRemoveQuestion"
+            :loading="removeQuestionLoad"
+          />
+       </Teleport>
         <div class="vacancy-edit__questions-footer">
           <button
             class="vacancy-edit__add-btn"
@@ -71,7 +79,7 @@
             @click="addQuestion"
             v-if="!questionLoad"
           >
-             <Plus class="vacancy-edit__add-btn-icon"/>
+             <PlusIcon class="vacancy-edit__add-btn-icon"/>
           </button>
           <div v-if="questionLoad" style="text-align: center;" class="vacancy-edit__add-btn">
             <SpinnerMain style="width: 50px" />
@@ -104,7 +112,7 @@
         :success="successSave"
         :message="successMessage"
         :align="'end'"
-        :is-active="saveLoad"
+        :isActive="saveLoad"
       >
         <template v-slot:text>Сохранить</template>
         <template v-slot:icon><SaveIcon class="vacancy-edit__icon-button"/></template>
@@ -143,7 +151,7 @@ import ErrorNotification from "@/components/ErrorNotification.vue";
 import TextEditor from "@/components/TextEditor.vue";
 import SpinnerMain from "@/components/SpinnerMain.vue";
 import SaveIcon from '@/assets/icons/save-black.svg?component';
-import Plus from '@/assets/icons/add.svg?component';
+import PlusIcon from '@/assets/icons/add.svg?component';
 
 const route = useRoute();
 const router = useRouter();
@@ -186,6 +194,8 @@ const saveLoad = ref(false);
 const removeLoad = ref(false);
 const removeQuestionLoad = ref(false);
 const showModalOnRemoveQuestion = ref(false);
+// ID последней карточки с вопросом, у которой была нажата мусорка
+const idCardQuestion = ref(0);
 //Заполняем formData данными с сервера
 onMounted(() => {
   try {
@@ -227,6 +237,11 @@ const updateIsPublished = (index, value) => {
 const handleCancelRemoveVacancy = () => {
   showModalOnRemoveVacancy.value = false;
 };
+
+const updateShowQuestionModal = (id) => {
+  idCardQuestion.value = id;
+  showModalOnRemoveQuestion.value = !showModalOnRemoveQuestion.value;
+}
 
 // Работа с API
 

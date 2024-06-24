@@ -16,34 +16,21 @@
           :options="options"
         />
       </div>
-      <button type="button" class="question__remove-btn" title="Удалить вопрос" @click="$emit('updateShowModal')">
+      <button type="button" class="question__remove-btn" title="Удалить вопрос" @click="emit('updateShowModal', props.id)">
         <DeleteIcon class="icon"/>
       </button>
-
-      <Teleport to="body">
-        <ModalConfirmation
-          :show="props.showModal"
-          confirmText="Удалить"
-          text="Вы уверены, что хотите удалить вопрос? Это действие нельзя отменить"
-          confirmButtonColor="var(--cinnabar)"
-          @confirm="handleConfirmRemove"
-          @cancel="handleCancelRemove"
-          :loading="props.loadingRemove"
-        />
-      </Teleport>
     </div>
   </div>
 </template>
 
 <script setup>
 import SelectMain from '@/components/SelectMain.vue';
-import ModalConfirmation from '@/components/ModalConfirmation.vue';
 import { ref } from 'vue';
 import TextEditor from "@/components/TextEditor.vue";
 import DeleteIcon from '@/assets/icons/delete.svg?component';
 
 /* id вопроса, текст вопроса, опции для измнения статуса публикации, статус публикации вопроса, 
-имя лейбла, функция для удаления вопроса */
+имя лейбла */
 const props = defineProps({
   id: {
     type: String,
@@ -68,18 +55,6 @@ const props = defineProps({
     required: false,
     default: 'Вопрос',
   },
-  remove: {
-    type: Function,
-    required: true,
-  },
-  loadingRemove: {
-    type: Boolean,
-    default: false,
-  },
-  showModal: {
-    type: Boolean,
-    default: false,
-  }
 });
 
 // Значения вопроса (текст и статус публикации)
@@ -102,16 +77,6 @@ const updateIsPublished = (newValue) => {
 };
 
 
-// Обработчик подтверждения удаления
-const handleConfirmRemove = () => {
-  // удаляем вопрос при подтверждении
-  props.remove(props.id);
-}
-
-// Обработчик отмены удаления
-const handleCancelRemove = () => {
-  emit('updateShowModal');
-}
 </script>
 
 <style scoped>
