@@ -249,9 +249,10 @@ onMounted(requestComments);
 </script>
 
 <style scoped>
-* {
+.comments {
   font-size: 15px;
 }
+
 .comments__comment:not(:last-child) {
   margin-bottom: 10px;
 }

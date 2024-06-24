@@ -72,9 +72,10 @@ const sendComment = () => {
 </script>
 
 <style scoped>
-* {
+.comment-creation {
   font-size: 15px;
 }
+
 .comment-creation,
 .comment-creation__label {
   display: flex;

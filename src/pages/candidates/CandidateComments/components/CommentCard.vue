@@ -178,9 +178,6 @@ watch(
 </script>
 
 <style scoped>
-* {
-  font-size: 15px;
-}
 .comment {
   display: flex;
   flex-direction: column;
@@ -188,6 +185,7 @@ watch(
   border-radius: 10px;
   box-shadow: 0 1px 10px rgba(0, 0, 0, 0.3);
   background-color: var(--white);
+  font-size: 15px;
 }
 
 .icon {

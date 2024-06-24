@@ -120,9 +120,10 @@ onMounted(requestCandidateInfo);
 </script>
 
 <style scoped>
-* {
+.questions-universal {
   font-size: 15px;
 }
+
 .questions-universal__header {
   display: flex;
   justify-content: space-between;

@@ -125,14 +125,11 @@ watch(
 </script>
 
 <style scoped>
-* {
-  font-size: 15px;
-}
-
 .status {
   display: flex;
   justify-content: space-between;
   align-items: center;
+  font-size: 15px;
 }
 
 .status__info {

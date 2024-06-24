@@ -78,20 +78,21 @@ onMounted(requestVacancyInfo);
 </script>
 
 <style scoped>
-* {
+.vacancy {
   font-size: 15px;
 }
+
 .vacancy__header {
   display: flex;
   justify-content: space-between;
   align-items: center;
+  font-size: 16px;
 }
 
 .vacancy__header-title {
   display: flex;
   flex-wrap: wrap;
   align-items: center;
-  font-size: 16px;
   font-weight: 600;
   overflow: hidden;
 }
