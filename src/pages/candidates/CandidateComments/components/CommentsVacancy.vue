@@ -2,7 +2,7 @@
   <div class="vacancy">
     <div class="vacancy__header">
       <h2>Вакансия {{ vacancyInfo.name }} (id:{{ vacancyInfo.id }})</h2>
-      <EmptyButton @click="showVacancy"
+      <ButtonIcon @click="showVacancy"
         ><template #icon>
           <ArrowIcon
             :class="[
@@ -10,7 +10,7 @@
               { 'vacancy__header-arrowicon--active': show },
             ]"
           /> </template
-      ></EmptyButton>
+      ></ButtonIcon>
     </div>
     <p v-if="errorMessage" class="vacancy__error">
       {{ errorMessage }}
@@ -29,7 +29,7 @@
 import { onMounted, ref } from 'vue';
 import { VacanciesGetAllVacancyById } from '../js/CommentsClasses';
 import ArrowIcon from '@/assets/icons/arrow-down.svg?component';
-import EmptyButton from '@/components/EmptyButton.vue';
+import ButtonIcon from '@/components/ButtonIcon.vue';
 
 const props = defineProps({
   // ID вакансии

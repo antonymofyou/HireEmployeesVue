@@ -18,37 +18,36 @@
     <template v-if="candidateId || respondId">
       <CommentsStatus
         v-if="respondId"
-        :respond-id="respondId"
+        :respondId
         class="comments__status-block"
       />
       <CommentsVacancy
         v-if="vacancyId"
-        :vacancy-id
+        :vacancyId
         class="comments__vacancy-block"
       />
       <CommentsQuestions
         v-if="respondId"
-        :respond-id
+        :respondId
         type="candidate"
         class="comments__questions-block"
       />
       <CommentsQuestions
         v-if="respondId"
-        :respond-id
+        :respondId
         type="questions"
         class="comments__questions-block"
       />
       <CommentsBlock
         v-if="respondId && candidateId"
-        :respond-id
-        :candidate-id
+        :respondId
+        :candidateId
         class="comments__comments-block"
       />
       <CommentsBlock
         v-if="candidateId"
-        :candidate-id
+        :candidateId
         class="comments__comments-block"
-        data-candidate
       />
     </template>
     <p v-else>Неверно переданы параметры</p>

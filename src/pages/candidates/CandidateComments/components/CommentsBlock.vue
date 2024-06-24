@@ -2,7 +2,7 @@
   <div class="comments">
     <div class="comments__header">
       <h2>{{ headingText }}</h2>
-      <EmptyButton v-if="!respondId" @click="showComments"
+      <ButtonIcon v-if="!respondId" @click="showComments"
         ><template #icon>
           <ArrowIcon
             :class="[
@@ -10,7 +10,7 @@
               { 'comments__header-arrowicon--active': show },
             ]"
           /> </template
-      ></EmptyButton>
+      ></ButtonIcon>
     </div>
 
     <div v-if="isLoading" class="comments__spinner-wrapper">
@@ -86,7 +86,7 @@ import {
   CandidateGetCandidateComments,
 } from '../js/CommentsClasses.js';
 import ErrorNotification from '@/components/ErrorNotification.vue';
-import EmptyButton from '@/components/EmptyButton.vue';
+import ButtonIcon from '@/components/ButtonIcon.vue';
 import ArrowIcon from '@/assets/icons/arrow-down.svg?component';
 
 const props = defineProps({

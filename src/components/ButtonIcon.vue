@@ -1,6 +1,6 @@
 <template>
-  <button class="empty-button__control">
-    <slot name="icon" class="empty-button__control-arrowicon"> </slot>
+  <button class="button-icon__control">
+    <slot name="icon" class="button-icon__control-arrowicon"> </slot>
   </button>
 </template>
 
@@ -9,7 +9,7 @@
 </script>
 
 <style scoped> 
-.empty-button__control {
+.button-icon__control {
   display: flex;
   align-items: center;
   border: none;

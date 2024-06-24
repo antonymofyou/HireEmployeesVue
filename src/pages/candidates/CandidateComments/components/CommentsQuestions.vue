@@ -4,7 +4,7 @@
       <h2>
         {{ props.type === 'questions' ? 'Ответы кандидата' : 'Кандидат' }}
       </h2>
-      <EmptyButton v-if="props.type === 'questions'" @click="showQuestions"
+      <ButtonIcon v-if="props.type === 'questions'" @click="showQuestions"
         ><template #icon>
           <ArrowIcon
             :class="[
@@ -12,7 +12,7 @@
               { 'questions-universal__header-arrowicon--active': show },
             ]"
           /> </template
-      ></EmptyButton>
+      ></ButtonIcon>
     </div>
 
     <div v-if="props.type === 'candidate'" class="questions-universal__info">
@@ -67,7 +67,7 @@
 import { onMounted, ref } from 'vue';
 import { CandidatesGetOtklikAnswers } from '../js/CommentsClasses';
 import ArrowIcon from '@/assets/icons/arrow-down.svg?component';
-import EmptyButton from '@/components/EmptyButton.vue';
+import ButtonIcon from '@/components/ButtonIcon.vue';
 
 const props = defineProps({
   // ID отклика
