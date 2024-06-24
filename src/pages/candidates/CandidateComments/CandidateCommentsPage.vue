@@ -48,6 +48,7 @@
         v-if="candidateId"
         :candidateId
         class="comments-page__comments-block"
+        data-candidate
       />
     </template>
     <p v-else>Неверно переданы параметры</p>
