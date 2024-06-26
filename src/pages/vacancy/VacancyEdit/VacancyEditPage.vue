@@ -56,20 +56,34 @@
             :isPublished="question.published"
             @updateText="updateQuestionText(index, $event)"
             @updateIsPublished="updateIsPublished(index, $event)"
-            :remove="removeQuestion"
             class="list-item"
+            @updateShowModal="updateShowQuestionModal"
           />
         </transition-group>
+        <Teleport to="body">
+          <ModalConfirmation
+            :show="showModalOnRemoveQuestion"
+            confirmText="Удалить"
+            text="Вы уверены, что хотите удалить вопрос? Это действие нельзя отменить"
+            confirmButtonColor="var(--cinnabar)"
+            @confirm="removeQuestion(idCardQuestion)"
+            @cancel="showModalOnRemoveQuestion = !showModalOnRemoveQuestion"
+            :loading="removeQuestionLoad"
+          />
+       </Teleport>
         <div class="vacancy-edit__questions-footer">
           <button
             class="vacancy-edit__add-btn"
             type="button"
             title="Добавить вопрос"
             @click="addQuestion"
+            v-if="!questionLoad"
           >
-            <img src='@/assets/icons/add.svg' class="vacancy-edit__add-btn-icon">
+             <PlusIcon class="vacancy-edit__add-btn-icon"/>
           </button>
-
+          <div v-if="questionLoad" style="text-align: center;" class="vacancy-edit__add-btn">
+            <SpinnerMain style="width: 50px" />
+          </div>
           <ButtonMain
             buttonColor="var(--cinnabar)"
             type="button"
@@ -84,6 +98,7 @@
               confirmText="Удалить"
               text="Вы уверены, что хотите удалить вакансию? Это действие нельзя отменить"
               confirmButtonColor="var(--cinnabar)"
+              :loading="removeLoad"
               @confirm="handleConfirmRemoveVacancy"
               @cancel="handleCancelRemoveVacancy"
             />
@@ -97,6 +112,7 @@
         :success="successSave"
         :message="successMessage"
         :align="'end'"
+        :isActive="saveLoad"
       >
         <template v-slot:text>Сохранить</template>
         <template v-slot:icon><SaveIcon class="vacancy-edit__icon-button"/></template>
@@ -135,6 +151,7 @@ import ErrorNotification from "@/components/ErrorNotification.vue";
 import TextEditor from "@/components/TextEditor.vue";
 import SpinnerMain from "@/components/SpinnerMain.vue";
 import SaveIcon from '@/assets/icons/save-black.svg?component';
+import PlusIcon from '@/assets/icons/add.svg?component';
 
 const route = useRoute();
 const router = useRouter();
@@ -171,6 +188,14 @@ const errorMessage = ref('');
 const successSave = ref('');
 const successMessage = ref('');
 
+// индикаторы загрузок для кнопок
+const questionLoad = ref(false);
+const saveLoad = ref(false);
+const removeLoad = ref(false);
+const removeQuestionLoad = ref(false);
+const showModalOnRemoveQuestion = ref(false);
+// ID последней карточки с вопросом, у которой была нажата мусорка
+const idCardQuestion = ref(0);
 //Заполняем formData данными с сервера
 onMounted(() => {
   try {
@@ -213,6 +238,11 @@ const handleCancelRemoveVacancy = () => {
   showModalOnRemoveVacancy.value = false;
 };
 
+const updateShowQuestionModal = (id) => {
+  idCardQuestion.value = id;
+  showModalOnRemoveQuestion.value = !showModalOnRemoveQuestion.value;
+}
+
 // Работа с API
 
 // Получение данных по текущей вакансии с сервера
@@ -234,6 +264,7 @@ const getVacancyDataManager = (callback) => {
 
 // Добавление нового вопроса на сервер
 const addQuestionToServer = (callback) => {
+  questionLoad.value = true;
   let requestClass = new VacanciesQuestionsCreateVacancyQuestion();
   requestClass.vacancyId = vacancyId.value;
 
@@ -242,11 +273,13 @@ const addQuestionToServer = (callback) => {
     'manager', 
     function (response) { // успешный результат
       callback(response);
+      questionLoad.value = false;
     },
     function (err) { // неуспешный результат
       errorMessage.value = err;
     }
   );
+  
 };
 
 // Вызов добавления вопроса и обновление formData
@@ -258,6 +291,7 @@ const addQuestion = () => {
 
 // Удаление вопроса с сервера (по передаваемому id)
 const removeQuestionFromServer = (callback, id) => {
+  removeQuestionLoad.value = true;
   let requestClass = new VacanciesQuestionsDeleteVacancyQuestion();
   requestClass.vacancyId = vacancyId.value;
   requestClass.questionId = id;
@@ -267,6 +301,8 @@ const removeQuestionFromServer = (callback, id) => {
     'manager', 
     function (response) { // успешный результат
       callback(response);
+      removeQuestionLoad.value = false;
+      showModalOnRemoveQuestion.value = false;
     },
     function (err) { // неуспешный результат
       errorMessage.value = err;
@@ -283,12 +319,14 @@ const removeQuestion = (id) => {
 
 // Удаление вакансии
 function handleConfirmRemoveVacancy(callback)  {
+  removeLoad.value = true;
   let removeVacancy = new MainRequestClass();
   removeVacancy.vacancyId = vacancyId.value;
   removeVacancy.request(
     '/vacancies/delete_vacancy.php',
     'manager',
     function (response) {
+      removeLoad.value = false;
       router.go(-1);
     },
     function (err) {
@@ -313,6 +351,7 @@ const questionsById = computed(() => {
 
 // Сохранение изменений в вакансии
 const saveChanges = (callback) => {
+  saveLoad.value = true;
   let requestClass = new VacanciesUpdateVacancy();
 
   // данные вакансии: название, описание и статус публикации
@@ -333,7 +372,7 @@ const saveChanges = (callback) => {
       //callback(response);// успешный результат
       successMessage.value = 'Данные успешно сохранены!';
       successSave.value = '1';
-
+      saveLoad.value = false;
     },
     function (err) {// неуспешный результат
       errorMessage.value = err;
@@ -425,8 +464,8 @@ const saveChanges = (callback) => {
 
 
 .vacancy-edit__add-btn-icon {
-  width: 60px;
-  height: 60px;
+  width: 45px;
+  height: 45px;
 }
 
 .vacancy-edit__icon-button {

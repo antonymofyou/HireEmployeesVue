@@ -177,10 +177,9 @@ document.addEventListener('click', function(event) {
           <RedoIcon title="Redo" />
         </button>
       </section>
-
-    <EditorContent
-      :editor="editor"
-    />
+      <EditorContent
+        :editor="editor"
+      />
   </div>
 </template>
 
@@ -261,6 +260,10 @@ document.addEventListener('click', function(event) {
 
 .text-editor-content-inside hr {
   opacity: 0.5;
+}
+
+.text-editor-content-inside p {
+  white-space: pre-line;
 }
 
 </style>
