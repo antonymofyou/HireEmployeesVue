@@ -15,14 +15,10 @@
         <ButtonMain class="vacancy__btn" :align="'start'" @click="goToVacancy()"
           ><template v-slot:text>Отклики</template>
         </ButtonMain>
-        <ButtonMain
-          class="vacancy__btn"
-          :align="'start'"
-          @click="goToEditVacancy()"
-          ><template v-slot:icon
-            ><EditIcon class="vacancy__btn-edit"
-          /></template>
-        </ButtonMain>
+
+        <ButtonIcon class="vacancy__btn-edit" @click="goToEditVacancy()">
+          <template v-slot:icon><EditIcon class="vacancy__btn-edit-icon" /></template>
+        </ButtonIcon>
       </div>
     </div>
   </div>
@@ -32,6 +28,7 @@
 import { useRouter } from 'vue-router';
 import ButtonMain from '@/components/ButtonMain.vue';
 import EditIcon from '@/assets/icons/edit.svg?component';
+import ButtonIcon from '@/components/ButtonIcon.vue';
 
 const router = useRouter();
 const props = defineProps(['vacancy']);
@@ -103,12 +100,14 @@ function goToVacancy() {
 
 .vacancy__buttons {
   display: flex;
+  justify-content: space-between;
   gap: 10px;
 }
 
 .vacancy__btn-edit {
-  fill: white;
-  margin-left: 2px;
-  width: 100%;
+  display: flex;
+  padding: 0px;
+  margin-right: -5%;
 }
+
 </style>
