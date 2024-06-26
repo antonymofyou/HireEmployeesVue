@@ -10,7 +10,7 @@
         @input="onInput"
       ></textarea>
     </label>
-    <ButtonMain class="comment-creation__button" @click="sendComment">
+    <ButtonMain class="comment-creation__button" :message="errorMessage" @click="sendComment">
       <template #text>Добавить комментарий</template>
     </ButtonMain>
   </div>
@@ -26,6 +26,12 @@ const props = defineProps({
     type: String,
     required: true,
   },
+  // Сообщение об ошибке
+  errorMessage: {
+    type: String,
+    default: '',
+    required: false,
+  }
 });
 
 //События изменения значения в текстовом поле и создания комментария
@@ -84,7 +90,18 @@ const sendComment = () => {
 }
 
 .comment-creation__button {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  gap: 10px;
   align-self: flex-start;
+}
+
+@media screen and (max-width: 700px) {
+  .comment-creation__button {
+    align-items: flex-start;
+    flex-direction: column;
+  }
 }
 
 .comment-creation__textarea {

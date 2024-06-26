@@ -3,45 +3,48 @@
     <div class="comment__controls">
       <div class="comment__manager">{{ props.comment.managerName }}</div>
       <div v-if="userCanEdit || userCanDelete" class="comment__buttons">
-        <template v-if="userCanEdit">
-          <button
-            v-if="!isEditMode"
-            class="button button--edit"
-            aria-label="Редактировать"
-            title="Редактировать"
-            @click="onEditMode"
-          >
-            <img class="icon" src="@/assets/icons/edit.svg" />
-          </button>
-          <template v-else>
+        <div class="comment__buttons-box">
+          <template v-if="userCanEdit">
             <button
-              class="button button--save"
-              aria-label="Сохранить"
-              title="Сохранить"
-              @click="updateComment"
+              v-if="!isEditMode"
+              class="button button--edit"
+              aria-label="Редактировать"
+              title="Редактировать"
+              @click="onEditMode"
             >
-              <img class="icon" src="@/assets/icons/save-black.svg" />
+              <img class="icon" src="@/assets/icons/edit.svg" />
             </button>
-            <button
-              class="button button--close"
-              aria-label="Отменить"
-              title="Отменить"
-              @click="cancelUpdate"
-            >
-              <img class="icon" src="@/assets/icons/close.svg" />
-            </button>
+            <template v-else>
+              <button
+                class="button button--save"
+                aria-label="Сохранить"
+                title="Сохранить"
+                @click="updateComment"
+              >
+                <img class="icon" src="@/assets/icons/save.svg" />
+              </button>
+              <button
+                class="button button--close"
+                aria-label="Отменить"
+                title="Отменить"
+                @click="cancelUpdate"
+              >
+                <img class="icon" src="@/assets/icons/close.svg" />
+              </button>
+            </template>
           </template>
-        </template>
 
-        <button
-          v-if="userCanDelete"
-          class="button button--delete"
-          aria-label="Удалить"
-          title="Удалить"
-          @click="isModalOpened = true"
-        >
-          <img class="icon" src="@/assets/icons/delete.svg" />
-        </button>
+          <button
+            v-if="userCanDelete"
+            class="button button--delete"
+            aria-label="Удалить"
+            title="Удалить"
+            @click="isModalOpened = true"
+          >
+            <img class="icon" src="@/assets/icons/delete.svg" />
+          </button>
+        </div>
+        <div class="comment__error">{{ errorMessage }}</div>
       </div>
     </div>
 
@@ -86,6 +89,13 @@ const props = defineProps({
   comment: {
     type: Object,
     required: true,
+  },
+
+  // Сообщение об ошибке
+  errorMessage: {
+    type: String,
+    default: '',
+    required: false,
   },
 });
 
@@ -247,6 +257,13 @@ watch(
 
 .comment__buttons {
   display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 5px;
+}
+
+.comment__buttons-box {
+  display: flex;
   flex-wrap: wrap;
   gap: 10px;
 }
@@ -276,5 +293,11 @@ watch(
 .comment__date {
   font-size: 10px;
   text-align: right;
+}
+
+.comment__error {
+  text-align: end;
+  color: var(--error-color);
+  font-size: 12px;
 }
 </style>

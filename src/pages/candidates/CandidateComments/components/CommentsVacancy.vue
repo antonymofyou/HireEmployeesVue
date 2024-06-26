@@ -35,7 +35,7 @@
 <script setup>
 import { onMounted, ref } from 'vue';
 import { VacanciesGetAllVacancyById } from '../js/CommentsClasses';
-import ArrowIcon from '@/assets/icons/arrow-down.svg?component';
+import ArrowIcon from '@/assets/icons/arrow.svg?component';
 import ButtonIcon from '@/components/ButtonIcon.vue';
 
 const props = defineProps({
