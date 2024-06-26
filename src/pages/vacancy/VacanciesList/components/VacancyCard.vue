@@ -17,7 +17,9 @@
         </ButtonMain>
 
         <ButtonIcon class="vacancy__btn-edit" @click="goToEditVacancy()">
-          <template v-slot:icon><EditIcon class="vacancy__btn-edit-icon" /></template>
+          <template v-slot:icon
+            ><EditIcon class="vacancy__btn-edit-icon"
+          /></template>
         </ButtonIcon>
       </div>
     </div>
@@ -109,5 +111,4 @@ function goToVacancy() {
   padding: 0px;
   margin-right: -5%;
 }
-
 </style>
