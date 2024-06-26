@@ -23,7 +23,7 @@
         <Transition v-if="show">
           <div>
             <div class="comments__list" ref="commentsBlock">
-              <div v-if="show &&isLoading" class="comments__spinner-wrapper">
+              <div v-if="show && isLoading" class="comments__spinner-wrapper">
                 <SpinnerMain class="comments__spinner" />
               </div>
               <template v-if="comments.length">
@@ -34,6 +34,7 @@
                   class="comments__comment"
                   @delete="deleteComment"
                   @update-comment="updateComment"
+                  :errorMessage="errorMessageControls"
                 />
               </template>
               <p v-if="!isLoading && !comments.length">Нет комментариев</p>
@@ -41,6 +42,7 @@
 
             <CommentAddition
               v-model.trim="newComment"
+              :errorMessage="errorMessageCreate"
               @create-comment="createComment({ comment: newComment })"
             />
           </div>
@@ -50,8 +52,8 @@
       <template v-else>
         <div class="comments__list" ref="commentsBlock">
           <div v-if="isLoading" class="comments__spinner-wrapper">
-                <SpinnerMain class="comments__spinner" />
-              </div>
+            <SpinnerMain class="comments__spinner" />
+          </div>
           <template v-if="comments.length">
             <CommentCard
               v-for="comment in comments"
@@ -60,6 +62,7 @@
               class="comments__comment"
               @delete="deleteComment"
               @update-comment="updateComment"
+              :errorMessage="errorMessageControls"
             />
           </template>
           <div v-if="!isLoading && !comments.length">Нет комментариев</div>
@@ -67,14 +70,11 @@
 
         <CommentAddition
           v-model.trim="newComment"
+          :errorMessage="errorMessageCreate"
           @create-comment="createComment({ comment: newComment })"
         />
       </template>
     </template>
-    <!-- Модальное окно сообщения об ошибке -->
-    <Teleport to="body">
-      <ErrorNotification v-if="errorMessage" :message="errorMessage" />
-    </Teleport>
   </div>
 </template>
 
@@ -87,9 +87,8 @@ import {
   CandidatesSetCandidateComment,
   CandidateGetCandidateComments,
 } from '../js/CommentsClasses.js';
-import ErrorNotification from '@/components/ErrorNotification.vue';
 import ButtonIcon from '@/components/ButtonIcon.vue';
-import ArrowIcon from '@/assets/icons/arrow-down.svg?component';
+import ArrowIcon from '@/assets/icons/arrow.svg?component';
 
 const props = defineProps({
   // ID вакансии, если передано - получаем комментарии для кандидата по отношению к отклику, иначе общие комментарии для кандидата
@@ -110,7 +109,8 @@ const comments = ref([]);
 const isLoading = ref(false);
 // Сообщение об ошибках
 const mainErrorMessage = ref('');
-const errorMessage = ref('');
+const errorMessageCreate = ref('');
+const errorMessageControls = ref('');
 // Значение нового комментария
 const newComment = ref('');
 // Флаг показа комментариев
@@ -141,7 +141,8 @@ const dispatchComments = (action, payload) => {
   requestInstance.commentText = payload.comment || '';
   requestInstance.commentId = payload.id || '';
 
-  errorMessage.value = '';
+  errorMessageCreate.value = '';
+  errorMessageControls.value = '';
 
   return (onSuccess) =>
     requestInstance.request(
@@ -149,7 +150,9 @@ const dispatchComments = (action, payload) => {
       'manager',
       onSuccess,
       (err) => {
-        errorMessage.value = err;
+        if (action === 'create') {
+          errorMessageCreate.value = err;
+        } else errorMessageControls.value = err;
       }
     );
 };
@@ -294,10 +297,6 @@ onMounted(requestComments);
 
 .comments__spinner {
   height: 40px;
-}
-
-.comments__error {
-  color: var(--error-color);
 }
 
 .comments__list {

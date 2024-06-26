@@ -1,29 +1,24 @@
 <template>
   <div class="status">
-    <div v-if="errorMessage" class="status__error">
-      <div class="status__error-text">
-        {{ errorMessage }}
-      </div>
-      <ButtonMain @click="errorMessage = ''"
-        ><template v-slot:text>Повторить</template></ButtonMain
-      >
-    </div>
+    <div class="status__info">
+      <label class="status__select">
+        <div class="status__select-label">Статус отклика</div>
+        <SelectMain v-model="status" :options="statuses" />
+      </label>
 
-    <template v-else-if="statusChanged">
-      <div class="status__success">Статус отклика изменен</div>
-    </template>
-
-    <template v-else>
-      <div class="status__info">
-        <label class="status__select">
-          <div class="status__select-label">Статус отклика</div>
-          <SelectMain v-model="status" :options="statuses" />
-        </label>
-        <ButtonMain @click="changeStatus" :isActive="sendRequest"
+      <div class="status__btn">
+        <div v-if="statusChanged" class="status__btn-success">
+          Статус отклика изменен
+        </div>
+        <ButtonMain
+          class="status__btn-btn"
+          @click="changeStatus"
+          :isActive="sendRequest"
+          :message="errorMessage"
           ><template v-slot:text>Изменить</template>
         </ButtonMain>
       </div>
-    </template>
+    </div>
   </div>
 </template>
 
@@ -44,8 +39,6 @@ const props = defineProps({
   },
 });
 
-// Флаг загрузки данных
-const dataFetched = ref(false);
 // Флаг отправки запроса
 const sendRequest = ref(false);
 // Флаг успешной смены
@@ -62,22 +55,23 @@ const requestCandidateInfo = () => {
   const requestInstance = new CandidatesGetOtklikAnswers();
   requestInstance.otklikId = props.respondId;
   errorMessage.value = '';
-  dataFetched.value = false;
 
   requestInstance.request(
     '/candidates/get_otklik_info.php',
     'manager',
     (response) => {
-      dataFetched.value = true;
-
       // Инициализируем массив статусов на основе полученных данных
       if (!response.info.status) {
         // Если статус неизвестный
         status.value = 'Неизвестный';
-        statuses.value = response.statusTransfers.length ? response.statusTransfers : [{ name: 'Неизвестный', id: 'Неизвестный' }];
+        statuses.value = response.statusTransfers.length
+          ? response.statusTransfers
+          : [{ name: 'Неизвестный', id: 'Неизвестный' }];
       } else {
         status.value = response.info.status;
-        statuses.value = response.statusTransfers.length ? response.statusTransfers : [{ name: response.info.status, id: response.info.status }];
+        statuses.value = response.statusTransfers.length
+          ? response.statusTransfers
+          : [{ name: response.info.status, id: response.info.status }];
       }
     },
     (err) => (errorMessage.value = err)
@@ -119,7 +113,7 @@ watch(
   () => {
     setTimeout(() => {
       statusChanged.value = false;
-    }, 2000);
+    }, 3000);
   }
 );
 </script>
@@ -150,6 +144,34 @@ watch(
   font-weight: 600;
 }
 
+.status__btn {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 10px;
+  width: 50%;
+}
+
+.status__btn-btn {
+  display: flex;
+  justify-content: flex-start;
+  align-items: center;
+  flex-direction: row-reverse;
+  gap: 5px;
+}
+
+@media screen and (max-width: 460px) {
+  .status__btn {
+    flex-direction: column;
+    width: 100%;
+  }
+  .status__btn-btn {
+    flex-direction: column;
+    align-items: flex-start;
+    width: 100%;
+  }
+}
+
 @media screen and (max-width: 460px) {
   .status__info {
     flex-direction: column;
@@ -164,20 +186,10 @@ watch(
   }
 }
 
-.status__error {
+.status__btn-success {
   width: 100%;
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  gap: 10px;
-}
-
-.status__success {
-  margin: 10px 0;
+  font-size: 13px;
   color: var(--success-color);
 }
 
-.status__error-text {
-  color: var(--error-color);
-}
 </style>
