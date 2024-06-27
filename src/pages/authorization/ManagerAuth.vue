@@ -3,14 +3,17 @@
         <h1>CRM для найма сотрудников</h1>
         <div class="auth">
             <h2 class="auth__header">Войдите как менеджер</h2>
-            <CustomButton @click="authorizeVK()" :button-color="buttonColor" :text-color="textColor">
+            <AuthButton @click="authorizeVK()" 
+                :button-color="buttonColor" 
+                :text-color="textColor"
+            >
                 <template v-slot:icon>
                     <img src="./assets/icons/VKIcon.svg">
                 </template>
                 <template v-slot:text>
                     Войти через VK ID
                 </template>
-            </CustomButton>
+            </AuthButton>
             <div v-if="errorMessage!=undefined" class="errorMessage">
                 {{errorMessage}}
             </div>
@@ -20,6 +23,7 @@
 
 <script setup>
 import CustomButton from "@/components/CustomButton.vue"
+import AuthButton from '@/pages/authorization/components/AuthButton.vue'
 import { ref } from "vue"
 import { ApiRootClass } from "@/js/RootClasses.js"
 import { configData } from "@/js/configData.js";
@@ -105,8 +109,8 @@ function getVkTokenFromServer() {
 
 }
 
-if (isManager())
-        router.push({name:'home'})
+// if (isManager())
+//         router.push({name:'home'})
 
 if (checkCodeParam()) {
     getVkTokenFromServer()

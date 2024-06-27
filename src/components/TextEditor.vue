@@ -12,7 +12,6 @@ import H2Icon from 'vue-material-design-icons/FormatHeader2.vue'
 import ListIcon from 'vue-material-design-icons/FormatListBulleted.vue'
 import OrderedListIcon from 'vue-material-design-icons/FormatListNumbered.vue'
 import BlockquoteIcon from 'vue-material-design-icons/FormatQuoteClose.vue'
-import CodeIcon from 'vue-material-design-icons/CodeTags.vue'
 import HorizontalRuleIcon from 'vue-material-design-icons/Minus.vue'
 import UndoIcon from 'vue-material-design-icons/Undo.vue'
 import RedoIcon from 'vue-material-design-icons/Redo.vue'
@@ -68,7 +67,7 @@ function showToolbar (editor)  {
 }
 
 // если клик вне блока, убираем панель инструментов
-document.addEventListener('click', function(event) {
+document.addEventListener('mousedown', function(event) {
   let parentElement = props.id !== '' ? document.getElementById(props.id) : false;
   if (parentElement && (!parentElement.contains(event.target))) {
     toolbar.value = false;

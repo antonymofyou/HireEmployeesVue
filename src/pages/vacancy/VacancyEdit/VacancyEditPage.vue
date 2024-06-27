@@ -3,7 +3,7 @@
    <div v-if="!isLoaded" style="text-align: center; margin-top: 100px;">
     <SpinnerMain style="width: 50px" />
    </div>
-  <main class="content vacancy-edit" v-if="isLoaded">
+  <div class="content vacancy-edit" v-if="isLoaded">
     <TopSquareButton
       class="vacancy-edit__back-btn"
       :icon="iconBack"
@@ -101,6 +101,8 @@
               :loading="removeLoad"
               @confirm="handleConfirmRemoveVacancy"
               @cancel="handleCancelRemoveVacancy"
+              :message="removeMessageErr"
+              :success="removeErr"
             />
           </Teleport>
         </div>
@@ -119,7 +121,7 @@
       </ButtonMain>
 
     </section>
-  </main>
+  </div>
 
   <Teleport to="body">
     <!-- Вывод сообщения о ошибке -->
@@ -188,6 +190,8 @@ const errorMessage = ref('');
 const successSave = ref('');
 const successMessage = ref('');
 
+const removeMessageErr = ref('');
+const removeErr = ref('');
 // индикаторы загрузок для кнопок
 const questionLoad = ref(false);
 const saveLoad = ref(false);
@@ -236,6 +240,7 @@ const updateIsPublished = (index, value) => {
 // Отмена удаления вакансии
 const handleCancelRemoveVacancy = () => {
   showModalOnRemoveVacancy.value = false;
+  removeMessageErr.value = '';
 };
 
 const updateShowQuestionModal = (id) => {
@@ -326,11 +331,13 @@ function handleConfirmRemoveVacancy(callback)  {
     '/vacancies/delete_vacancy.php',
     'manager',
     function (response) {
+      callback(response);
       removeLoad.value = false;
       router.go(-1);
     },
     function (err) {
-      errorMessage.value = err;
+      removeMessageErr.value = err;
+      removeLoad.value = false;
     }
   );
 };
@@ -375,7 +382,9 @@ const saveChanges = (callback) => {
       saveLoad.value = false;
     },
     function (err) {// неуспешный результат
-      errorMessage.value = err;
+      successSave.value = '0';
+      successMessage.value = err;
+      saveLoad.value = false;
     }
   );
 };
@@ -449,6 +458,7 @@ const saveChanges = (callback) => {
   width: 100%;
   justify-content: space-between;
   align-items: center;
+  padding: 0 10px;
 }
 
 .vacancy-edit__add-btn {

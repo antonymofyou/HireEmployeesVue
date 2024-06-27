@@ -28,6 +28,7 @@
           :buttonColor="confirmButtonColor"
           :isBold=true
           :isActive="props.loading"
+          :message="props.message"
         >
           <template v-slot:text>
             {{ confirmText }}
@@ -93,7 +94,17 @@ const props = defineProps({
   loading: {
     type: Boolean,
     default: false,
-  }
+  }, 
+  success: {
+    type: String,
+    default: '',
+    required: false,
+  },
+  message: {
+    type: String,
+    default: '',
+    required: false,
+  },
 });
 
 //Значения по умолчанию для кастомизации кнопок управления
