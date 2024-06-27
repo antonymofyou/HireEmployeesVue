@@ -34,7 +34,7 @@ const router = useRouter();
 const errorMessage = ref()
 
 function authorizeVK(){
-    location.assign("https://oauth.vk.com/authorize?client_id=51873425&display=page&redirect_uri=http://localhost/auth&response_type=code")
+    location.assign("https://oauth.vk.com/authorize?client_id=51816166&display=page&redirect_uri=http://localhost/auth&response_type=code")
 }
 //Получаем значение параметра code из адресной строки
 function getCodeParam() {
