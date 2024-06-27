@@ -22,7 +22,6 @@
 </template>
 
 <script setup>
-import CustomButton from "@/components/CustomButton.vue"
 import AuthButton from '@/pages/authorization/components/AuthButton.vue'
 import { ref } from "vue"
 import { ApiRootClass } from "@/js/RootClasses.js"
@@ -35,10 +34,10 @@ const buttonColor = 'var(--VKColor)'
 const textColor = 'var(--white)'
 
 const router = useRouter();
-let errorMessage = ref()
+const errorMessage = ref()
 
 function authorizeVK(){
-    location.assign("https://oauth.vk.com/authorize?client_id=51873425&display=page&redirect_uri=http://localhost/auth&response_type=code")
+    location.assign("https://oauth.vk.com/authorize?client_id=51816166&display=page&redirect_uri=http://localhost/auth&response_type=code")
 }
 //Получаем значение параметра code из адресной строки
 function getCodeParam() {
@@ -74,12 +73,12 @@ function getNasotkuTokenFromServer(vkToken, vkUserId) {
             }
             else {
                 setAuth(response.nasotkuToken, response.device)
-                router.push({name:'home'})
+                router.push({name:'vacanciesList'})
             }
             
         },
         function (err) {
-            console.log(err)
+            errorMessage.value = err
         }
     )
 }
@@ -103,14 +102,14 @@ function getVkTokenFromServer() {
             
         },
         function (err) {
-            console.log(err)
+            errorMessage.value = err
         }
     )
 
 }
 
-// if (isManager())
-//         router.push({name:'home'})
+if (isManager())
+        router.push({name:'vacanciesList'})
 
 if (checkCodeParam()) {
     getVkTokenFromServer()
@@ -132,6 +131,7 @@ if (checkCodeParam()) {
 }
 
 .errorMessage{
+    text-align: center;
     margin-top:20px;
     color: var(--error-color);
 }

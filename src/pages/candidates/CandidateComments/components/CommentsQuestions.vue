@@ -1,54 +1,57 @@
 <template>
-  <div class="universal">
-    <div class="universal__header">
-      <h2>
+  <div class="questions-universal">
+    <div class="questions-universal__header">
+      <div class="questions-universal__header-title">
         {{ props.type === 'questions' ? 'Ответы кандидата' : 'Кандидат' }}
-      </h2>
-
-      <button
-        v-if="props.type === 'questions'"
-        class="universal__header-btn"
-        @click="showQuestions"
-      >
-        <ArrowIcon
-          :class="[
-            'universal__header-arrowicon',
-            { 'universal__header-arrowicon--active': show },
-          ]"
-        />
-      </button>
+      </div>
+      <ButtonIcon v-if="props.type === 'questions'" @click="showQuestions"
+        ><template #icon>
+          <ArrowIcon
+            :class="[
+              'questions-universal__header-arrowicon',
+              { 'questions-universal__header-arrowicon--active': show },
+            ]"
+          /> </template
+      ></ButtonIcon>
     </div>
 
-    <div v-if="props.type === 'candidate'" class="universal__info">
-      <p v-if="errorMessage" class="universal__error">
+    <div v-if="props.type === 'candidate'" class="questions-universal__info">
+      <div v-if="errorMessage" class="questions-universal__error">
         {{ errorMessage }}
-      </p>
+      </div>
       <template v-else>
-        <p><b>ФИО: </b>{{ respondInfo.info?.fio }}</p>
-        <p><b>Телеграм: </b> {{ respondInfo.info?.tgNickname }}</p>
-        <p><b>Статус: </b> {{ respondInfo.info?.status }}</p></template
-      >
+        <div><b>ФИО: </b>{{ respondInfo.info?.fio }}</div>
+        <div>
+          <b>Телеграм: </b>
+          <a
+            target="_blank"
+            :href="`https://t.me/${respondInfo.info?.tgNickname}`"
+          >
+            {{ respondInfo.info?.tgNickname }}
+          </a>
+        </div>
+      </template>
     </div>
 
     <!-- Вопросы вакансии и ответы кандидата -->
     <Transition v-if="props.type === 'questions'">
-      <div class="universal__list" v-if="show">
-        <p v-if="errorMessage" class="universal__error">
+      <div class="questions-universal__list" v-if="show">
+        <div v-if="errorMessage" class="questions-universal__error">
           {{ errorMessage }}
-        </p>
+        </div>
         <template v-else="respondInfo.answers.length">
           <div
-            class="universal__question"
+            class="questions-universal__question"
             v-for="question in respondInfo.answers"
             :key="question.questionId"
           >
-            <div class="universal__question-text">
-              <p><b>Вопрос:</b></p>
-              <p v-html="question.question"></p>
+            <div class="questions-universal__question-text">
+              <div><b>Вопрос:</b></div>
+              <div v-html="question.question"></div>
             </div>
-            <div class="universal__question-text">
-              <p><b>Ответ:</b></p>
-              <p>{{ question.answer }}</p>
+            <div class="questions-universal__question-text">
+              <div><b>Ответ:</b></div>
+              <div>{{ question.answer }}</div>
             </div>
             <hr />
           </div>
@@ -62,7 +65,8 @@
 <script setup>
 import { onMounted, ref } from 'vue';
 import { CandidatesGetOtklikAnswers } from '../js/CommentsClasses';
-import ArrowIcon from '@/assets/icons/arrow-down.svg?component';
+import ArrowIcon from '@/assets/icons/arrow.svg?component';
+import ButtonIcon from '@/components/ButtonIcon.vue';
 
 const props = defineProps({
   // ID отклика
@@ -79,6 +83,8 @@ const props = defineProps({
 
 // Массив данных к отклику
 const respondInfo = ref([]);
+// Флаг загрузки данных
+const dataFetched = ref(false);
 // Сообщение об ошибке
 const errorMessage = ref('');
 // Флаг показа вопросов
@@ -89,12 +95,17 @@ const requestCandidateInfo = () => {
   const requestInstance = new CandidatesGetOtklikAnswers();
   requestInstance.otklikId = props.respondId;
   errorMessage.value = '';
+  dataFetched.value = false;
 
   requestInstance.request(
-    '/candidates/get_otklik_answers.php',
+    '/candidates/get_otklik_info.php',
     'manager',
     (response) => {
-      respondInfo.value = { answers: response.answers, info: response.info };
+      respondInfo.value = {
+        answers: response.answers,
+        info: response.info,
+      };
+      dataFetched.value = true;
     },
     (err) => (errorMessage.value = err)
   );
@@ -109,45 +120,55 @@ onMounted(requestCandidateInfo);
 </script>
 
 <style scoped>
-.universal__header {
+.questions-universal {
+  font-size: 15px;
+}
+
+.questions-universal__header {
   display: flex;
   justify-content: space-between;
   align-items: center;
+  height: 32px;
 }
 
-.universal__question {
+.questions-universal__header-title {
+  font-size: 16px;
+  font-weight: 600;
+}
+
+.questions-universal__question {
   margin-bottom: 20px;
 }
 
-.universal__question-text {
+.questions-universal__question-text {
   word-break: break-all;
-  :nth-child(1) {
-    margin-bottom: 0;
-  }
-  :nth-child(2) {
-    margin-top: 8px;
-  }
 }
 
-.universal__error {
+.questions-universal__info {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+  margin: 5px 0;
+}
+
+.questions-universal__error {
   color: var(--error-color);
 }
 
-.universal__header-btn {
-  display: flex;
-  align-items: center;
-  border: none;
-  background-color: transparent;
-  cursor: pointer;
-}
-
-.universal__header-arrowicon {
+.questions-universal__header-arrowicon {
   transition: all 0.3s ease;
-  width: 40px;
-  height: 40px;
+  width: 30px;
+  height: 30px;
 }
 
-.universal__header-arrowicon--active {
+@media screen and (max-width: 425px) {
+  .questions-universal__header-arrowicon {
+    width: 25px;
+    height: 25px;
+  }
+}
+
+.questions-universal__header-arrowicon--active {
   transform: rotateX(180deg);
 }
 

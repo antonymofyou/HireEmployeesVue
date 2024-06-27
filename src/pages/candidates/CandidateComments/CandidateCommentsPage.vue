@@ -1,8 +1,8 @@
 <template>
-  <section class="comments">
+  <section class="comments-page">
     <div class="heading">
       <TopSquareButton
-        class="comments__back-btn"
+        class="comments-page__back-btn"
         @click="
           $router.push({
             name: 'candidates',
@@ -16,33 +16,39 @@
     </div>
 
     <template v-if="candidateId || respondId">
+      <CommentsStatus
+        v-if="respondId"
+        :respondId
+        class="comments-page__status-block"
+      />
       <CommentsVacancy
         v-if="vacancyId"
-        :vacancy-id
-        class="comments__vacancy-block"
+        :vacancyId
+        class="comments-page__vacancy-block"
       />
       <CommentsQuestions
         v-if="respondId"
-        :respond-id
+        :respondId
         type="candidate"
-        class="comments__questions-block"
+        class="comments-page__questions-block"
       />
       <CommentsQuestions
         v-if="respondId"
-        :respond-id
+        :respondId
         type="questions"
-        class="comments__questions-block"
-      />
-      <CommentsBlock
-        v-if="candidateId"
-        :candidate-id
-        class="comments__comments-block"
+        class="comments-page__questions-block"
       />
       <CommentsBlock
         v-if="respondId && candidateId"
-        :respond-id
-        :candidate-id
-        class="comments__comments-block"
+        :respondId
+        :candidateId
+        class="comments-page__comments-block"
+      />
+      <CommentsBlock
+        v-if="candidateId"
+        :candidateId
+        class="comments-page__comments-block"
+        data-candidate
       />
     </template>
     <p v-else>Неверно переданы параметры</p>
@@ -56,6 +62,7 @@ import backIcon from '@/assets/icons/back.svg';
 import TopSquareButton from '@/components/TopSquareButton.vue';
 import CommentsQuestions from './components/CommentsQuestions.vue';
 import CommentsVacancy from './components/CommentsVacancy.vue';
+import CommentsStatus from './components/CommentsStatus.vue';
 
 const route = useRoute();
 // ID отклика
@@ -69,30 +76,40 @@ const status = route.query.status;
 </script>
 
 <style scoped>
-.comments__comments-block,
-.comments__questions-block,
-.comments__vacancy-block {
-  margin-bottom: 38px;
+.comments-page {
+  max-width: 925px;
+  margin: 0 auto;
+  margin-top: 55px;
+  padding-bottom: 20px ;
+}
+
+.comments-page__comments-block,
+.comments-page__questions-block,
+.comments-page__vacancy-block,
+.comments-page__status-block {
+  margin-bottom: 18px;
   border: 1px solid var(--cornflower-blue);
   border-radius: 15px;
-  padding: 10px 15px;
+  padding: 8px 15px;
+}
+
+.comments-page__comments-block[data-candidate] {
+  margin-bottom: 0;
 }
 
 .heading {
   text-align: center;
-  margin-bottom: 20px;
 }
 
-.comments__back-btn {
-  position: relative;
+.comments-page__back-btn {
+  position: absolute;
   top: 20px;
+  left: 20px;
 }
 
 @media screen and (max-width: 350px) {
   .heading {
-    h1 {
-      margin-top: 30px;
-    }
+    margin-top: 70px;
   }
 }
 </style>

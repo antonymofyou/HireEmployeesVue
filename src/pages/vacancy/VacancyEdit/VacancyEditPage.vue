@@ -282,6 +282,7 @@ const addQuestionToServer = (callback) => {
     },
     function (err) { // неуспешный результат
       errorMessage.value = err;
+      questionLoad.value = false;
     }
   );
   
@@ -331,7 +332,6 @@ function handleConfirmRemoveVacancy(callback)  {
     '/vacancies/delete_vacancy.php',
     'manager',
     function (response) {
-      callback(response);
       removeLoad.value = false;
       router.go(-1);
     },

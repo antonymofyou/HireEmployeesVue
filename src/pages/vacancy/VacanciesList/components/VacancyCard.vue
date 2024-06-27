@@ -15,31 +15,32 @@
         <ButtonMain class="vacancy__btn" :align="'start'" @click="goToVacancy()"
           ><template v-slot:text>Отклики</template>
         </ButtonMain>
-        <ButtonMain
-          class="vacancy__btn"
-          :align="'start'"
-          @click="goToEditVacancy()"
-          ><template v-slot:text>Редактировать</template>
-        </ButtonMain>
+
+        <ButtonIcon class="vacancy__btn-edit" @click="goToEditVacancy()">
+          <template v-slot:icon
+            ><EditIcon class="vacancy__btn-edit-icon"
+          /></template>
+        </ButtonIcon>
       </div>
     </div>
   </div>
 </template>
 
 <script setup>
-import { useRouter } from "vue-router";
-import ButtonMain from "@/components/ButtonMain.vue";
-
+import { useRouter } from 'vue-router';
+import ButtonMain from '@/components/ButtonMain.vue';
+import EditIcon from '@/assets/icons/edit.svg?component';
+import ButtonIcon from '@/components/ButtonIcon.vue';
 
 const router = useRouter();
-const props = defineProps(["vacancy"]);
+const props = defineProps(['vacancy']);
 
 function goToEditVacancy() {
-  router.push({ name: "vacancy_edit", params: { id: props.vacancy.id } });
+  router.push({ name: 'vacancy_edit', params: { id: props.vacancy.id } });
 }
 
 function goToVacancy() {
-  router.push({ name: "candidates", query: { vacancyId: props.vacancy.id } });
+  router.push({ name: 'candidates', query: { vacancyId: props.vacancy.id } });
 }
 </script>
 
@@ -101,6 +102,13 @@ function goToVacancy() {
 
 .vacancy__buttons {
   display: flex;
+  justify-content: space-between;
   gap: 10px;
+}
+
+.vacancy__btn-edit {
+  display: flex;
+  padding: 0px;
+  margin-right: -5%;
 }
 </style>

@@ -44,16 +44,16 @@ main {
 
 h1 {
   font-weight: 400;
-  font-size: 30px;
+  font-size: 22px;
 }
 
 h2 {
-  font-size: 22px;
+  font-size: 18px;
 }
 
 @media screen and (max-width: 425px) {
   h1 {
-    font-size: 21px;
+    font-size: 20px;
   }
   h2 {
     font-size: 16px;
