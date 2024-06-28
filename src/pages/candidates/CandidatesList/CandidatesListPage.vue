@@ -1,12 +1,12 @@
 <template>
   <section class="candidates">
     <div class="candidates__title">
-      <TopSquareButton
-        class="candidates__back-btn"
-        :icon="iconBack"
-        @click="$router.push({ name: 'vacanciesList' })"
-      >
-      </TopSquareButton>
+      <RouterLink :to="{ name: 'vacanciesList' }">
+        <TopSquareButton
+          class="candidates__back-btn"
+          :icon="iconBack"
+        />
+      </RouterLink>
       <h1>Кандидаты вакансии</h1>
     </div>
 
@@ -78,7 +78,7 @@ const router = useRouter();
 const route = useRoute();
 
 //Проверка авторизации пользователя
-if (!isManager()) router.push({ name: 'home' });
+if (!isManager()) router.push({ name: 'managerAuth' });
 
 //Ref-переменные
 const vacanciesIds = ref([]); // список id вакансий

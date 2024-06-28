@@ -4,9 +4,12 @@
     <p>это домашняя страница</p>
   </div>
 </template>
+<script setup>
+import { useRouter } from 'vue-router';
 
-<script>
-export default {};
+const router = useRouter();
+router.push({ name: 'vacanciesList' });
+
 </script>
 
 <style lang="scss" scoped></style>

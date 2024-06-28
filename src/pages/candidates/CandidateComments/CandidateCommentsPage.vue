@@ -1,17 +1,14 @@
 <template>
   <section class="comments-page">
     <div class="heading">
-      <TopSquareButton
-        class="comments-page__back-btn"
-        @click="
-          $router.push({
-            name: 'candidates',
-            query: { vacancyId: vacancyId, status: status },
-          })
-        "
-        :icon="backIcon"
+      <RouterLink
+        :to="{
+          name: 'candidates',
+          query: { vacancyId: vacancyId, status: status },
+        }"
       >
-      </TopSquareButton>
+        <TopSquareButton class="comments-page__back-btn" :icon="backIcon" />
+      </RouterLink>
       <h1>Отклик на вакансию</h1>
     </div>
 
@@ -80,7 +77,7 @@ const status = route.query.status;
   max-width: 925px;
   margin: 0 auto;
   margin-top: 55px;
-  padding-bottom: 20px ;
+  padding-bottom: 20px;
 }
 
 .comments-page__comments-block,

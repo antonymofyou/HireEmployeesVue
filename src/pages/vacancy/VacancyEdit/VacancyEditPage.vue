@@ -4,14 +4,10 @@
     <SpinnerMain style="width: 50px" />
    </div>
   <main class="content vacancy-edit" v-if="isLoaded">
-    <TopSquareButton
-      class="vacancy-edit__back-btn"
-      :icon="iconBack"
-      @click="$router.push({ name: 'vacanciesList' })"
-    >
+    <RouterLink :to="{ name: 'vacanciesList' }">
+      <TopSquareButton class="vacancy-edit__back-btn" :icon="iconBack" />
+    </RouterLink>
 
-    </TopSquareButton>
-    
     <section class="container">
       <h2 class="vacancy-edit__title">Редактирование вакансии</h2>
 
@@ -42,6 +38,9 @@
           id="0"
         />
       </div>
+
+      
+      <VacancyStatus class="vacancy-edit__status" :vacancyId />
 
       <div class="vacancy-edit__questions-block">
         <h2 class="vacancy-edit__questions-title">Вопросы вакансии</h2>
@@ -152,6 +151,7 @@ import TextEditor from "@/components/TextEditor.vue";
 import SpinnerMain from "@/components/SpinnerMain.vue";
 import SaveIcon from '@/assets/icons/save-black.svg?component';
 import PlusIcon from '@/assets/icons/add.svg?component';
+import VacancyStatus from './components/VacancyStatus.vue';
 
 const route = useRoute();
 const router = useRouter();
@@ -414,6 +414,11 @@ const saveChanges = (callback) => {
   width: 100%;
 }
 
+.vacancy-edit__status {
+  margin-top: 50px;
+  width: 100%;
+}
+
 .vacancy-edit__description-label {
   margin-bottom: 10px;
   font-weight: 600;
@@ -500,7 +505,7 @@ const saveChanges = (callback) => {
 .vacancy-edit__back-btn {
   position: fixed;
   top: 20px;
-  left: 30px;
+  left: 20px;
 }
 
 @media screen and (max-width: 1200px) {

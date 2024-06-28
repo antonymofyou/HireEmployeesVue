@@ -5,8 +5,8 @@
       class="vacancies__add-vacancy-btn"
       @click="showModal = true"
       :icon="plusIcon"
-    >
-    </TopSquareButton>
+    />
+
     <div class="vacancies__box-vacancies">
       <VacancyCard
         v-for="vacancy in vacancies"
@@ -25,7 +25,11 @@
   <!-- Встраивание компонента Modal в DOM -->
   <Teleport to="body">
     <!-- Открытие модального окна добавления вакансии -->
-    <Modal :show="showModal" v-if="!modalSuccess" @click.self="showModal = false">
+    <Modal
+      :show="showModal"
+      v-if="!modalSuccess"
+      @click.self="showModal = false"
+    >
       <template #header>
         <div class="modal__close">
           <button class="modal__close-btn" @click="showModal = false">
@@ -48,17 +52,14 @@
       </template>
       <template #footer-control-buttons>
         <div class="modal__submit">
-          <ButtonMain
-            class="vacancy__add-create-btn"
-            @click="createVacancy"
-          >
+          <ButtonMain class="vacancy__add-create-btn" @click="createVacancy">
             <template v-slot:text>Создать</template>
           </ButtonMain>
         </div>
       </template>
     </Modal>
     <!-- Открытие модального окна успешного создания вакансии -->
-    <Modal :show="modalSuccess"  @click.self="modalSuccess = false">
+    <Modal :show="modalSuccess" @click.self="modalSuccess = false">
       <template #header v-if="!isLoading">
         <h3>Вакансия создана!</h3>
       </template>
@@ -79,17 +80,13 @@
           </ButtonMain>
 
           <!-- Кнопка перехода к редактированию созданной вакансии -->
-          <ButtonMain
-            @click="
-              modalSuccess = false;
-              $router.push({
-                name: 'vacancy_edit',
-                params: { id: createdVacancyId },
-              });
-            "
+          <RouterLink
+            :to="{ name: 'vacancy_edit', params: { id: createdVacancyId } }"
           >
-            <template v-slot:text>Редактировать</template>
-          </ButtonMain>
+            <ButtonMain @click="modalSuccess = false">
+              <template v-slot:text>Редактировать</template>
+            </ButtonMain>
+          </RouterLink>
         </div>
       </template>
     </Modal>
@@ -99,23 +96,23 @@
 </template>
 
 <script setup>
-import { onMounted, ref, watch } from "vue";
-import { useRouter } from "vue-router";
-import { MainRequestClass } from "@/js/RootClasses";
-import { isManager } from "@/js/AuthFunctions";
-import VacancyCard from "./components/VacancyCard.vue";
-import plusIcon from "@/assets/icons/plus.svg";
-import Modal from "@/components/Modal.vue";
-import InputSimple from "@/components/InputSimple.vue";
-import ButtonMain from "@/components/ButtonMain.vue";
-import TopSquareButton from "@/components/TopSquareButton.vue";
-import ErrorNotification from "@/components/ErrorNotification.vue";
-import SpinnerMain from "@/components/SpinnerMain.vue";
+import { onMounted, ref, watch } from 'vue';
+import { useRouter } from 'vue-router';
+import { MainRequestClass } from '@/js/RootClasses';
+import { isManager } from '@/js/AuthFunctions';
+import VacancyCard from './components/VacancyCard.vue';
+import plusIcon from '@/assets/icons/plus.svg';
+import Modal from '@/components/Modal.vue';
+import InputSimple from '@/components/InputSimple.vue';
+import ButtonMain from '@/components/ButtonMain.vue';
+import TopSquareButton from '@/components/TopSquareButton.vue';
+import ErrorNotification from '@/components/ErrorNotification.vue';
+import SpinnerMain from '@/components/SpinnerMain.vue';
 
 const router = useRouter();
 
 //Проверка авторизации пользователя
-if (!isManager()) router.push({ name: "home" });
+if (!isManager()) router.push({ name: 'managerAuth' });
 
 // Отображение ошибки
 const errorMessage = ref('');
@@ -135,9 +132,9 @@ const modalSuccess = ref(false);
 
 // Данные вакансии: название, описание, статус публикации
 const formData = ref({
-  name: "",
-  description: "",
-  published: "0",
+  name: '',
+  description: '',
+  published: '0',
 });
 
 // получение всех вакансий
@@ -146,8 +143,8 @@ function getAllVacanciesManager() {
 
   isLoading.value = true;
   requestClass.request(
-    "/vacancies/get_all_vacancies.php",
-    "manager",
+    '/vacancies/get_all_vacancies.php',
+    'manager',
     function (response) {
       //успешный результат
       vacancies.value = response.vacancies;
@@ -174,8 +171,8 @@ function createVacancy() {
 
   isLoading.value = true;
   requestClass.request(
-    "/vacancies/create_vacancy.php",
-    "manager",
+    '/vacancies/create_vacancy.php',
+    'manager',
     function (response) {
       //успешный результат
 
@@ -183,9 +180,9 @@ function createVacancy() {
       createdVacancyId.value = response.vacancy.id;
 
       //сброс формы
-      formData.value.name = "";
-      formData.value.description = "";
-      formData.value.published = "";
+      formData.value.name = '';
+      formData.value.description = '';
+      formData.value.published = '';
 
       //закрытие модального окна создания и открытие модального окна успешного создания"
       showModal.value = false;
@@ -212,11 +209,12 @@ onMounted(() => {
 
 //Отслеживание флагов модальных окон для сокрытия скролла
 watch(
-  ()=> [showModal.value, modalSuccess.value],
-  ()=> {
-    document.body.style.overflow = showModal.value || modalSuccess.value ? "hidden" : "unset"
+  () => [showModal.value, modalSuccess.value],
+  () => {
+    document.body.style.overflow =
+      showModal.value || modalSuccess.value ? 'hidden' : '';
   }
-)
+);
 </script>
 
 <style scoped>
@@ -292,6 +290,9 @@ watch(
   display: flex;
   align-items: center;
   gap: 10px;
+  a {
+    text-decoration: none;
+  }
 }
 .vacancy__add-create-btn {
   display: flex;

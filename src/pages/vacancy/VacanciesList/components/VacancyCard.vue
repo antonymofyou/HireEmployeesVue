@@ -12,36 +12,35 @@
       </div>
 
       <div class="vacancy__buttons">
-        <ButtonMain class="vacancy__btn" :align="'start'" @click="goToVacancy()"
-          ><template v-slot:text>Отклики</template>
-        </ButtonMain>
+        <RouterLink
+          :to="{ name: 'candidates', query: { vacancyId: vacancy.id } }"
+        >
+          <ButtonMain class="vacancy__btn-responses" :align="'start'"
+            ><template v-slot:text> Отклики </template>
+          </ButtonMain>
+        </RouterLink>
 
-        <ButtonIcon class="vacancy__btn-edit" @click="goToEditVacancy()">
-          <template v-slot:icon
-            ><EditIcon class="vacancy__btn-edit-icon"
-          /></template>
-        </ButtonIcon>
+        <RouterLink
+          :to="{ name: 'vacancy_edit', params: { id: vacancy.id } }"
+          class="vacancy__btn-edit"
+        >
+          <ButtonIcon class="vacancy__btn-edit-btn">
+            <template v-slot:icon>
+              <EditIcon class="vacancy__btn-edit-icon" />
+            </template>
+          </ButtonIcon>
+        </RouterLink>
       </div>
     </div>
   </div>
 </template>
 
 <script setup>
-import { useRouter } from 'vue-router';
 import ButtonMain from '@/components/ButtonMain.vue';
 import EditIcon from '@/assets/icons/edit.svg?component';
 import ButtonIcon from '@/components/ButtonIcon.vue';
 
-const router = useRouter();
 const props = defineProps(['vacancy']);
-
-function goToEditVacancy() {
-  router.push({ name: 'vacancy_edit', params: { id: props.vacancy.id } });
-}
-
-function goToVacancy() {
-  router.push({ name: 'candidates', query: { vacancyId: props.vacancy.id } });
-}
 </script>
 
 <style scoped>
@@ -60,9 +59,14 @@ function goToVacancy() {
 }
 
 .vacancy__name {
+  max-height: 40px;
+  display: block;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
   overflow: hidden;
-  word-wrap: break-word;
-  margin: 0;
+  word-break: break-all;
+  text-overflow: ellipsis;
   font-size: 15px;
   line-height: 20px;
   font-weight: 600;
@@ -104,11 +108,19 @@ function goToVacancy() {
   display: flex;
   justify-content: space-between;
   gap: 10px;
+
+  a {
+    color: white;
+    text-decoration: none;
+  }
 }
 
 .vacancy__btn-edit {
   display: flex;
-  padding: 0px;
   margin-right: -5%;
+}
+
+.vacancy__btn-edit-btn {
+  padding: 0;
 }
 </style>
