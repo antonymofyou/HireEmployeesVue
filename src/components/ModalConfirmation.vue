@@ -95,11 +95,6 @@ const props = defineProps({
     type: Boolean,
     default: false,
   }, 
-  success: {
-    type: String,
-    default: '',
-    required: false,
-  },
   message: {
     type: String,
     default: '',
