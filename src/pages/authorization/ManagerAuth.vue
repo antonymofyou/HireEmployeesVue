@@ -3,14 +3,7 @@
         <h1>CRM для найма сотрудников</h1>
         <div class="auth">
             <h2 class="auth__header">Войдите как менеджер</h2>
-            <CustomButton @click="authorizeVK()" :button-color="buttonColor" :text-color="textColor">
-                <template v-slot:icon>
-                    <img src="./assets/icons/VKIcon.svg">
-                </template>
-                <template v-slot:text>
-                    Войти через VK ID
-                </template>
-            </CustomButton>
+            <AuthButton @click="authorizeVK()"/>
             <div v-if="errorMessage!=undefined" class="errorMessage">
                 {{errorMessage}}
             </div>
@@ -19,16 +12,12 @@
 </template>
 
 <script setup>
-import CustomButton from "@/components/CustomButton.vue"
+import AuthButton from './components/AuthButton.vue'
 import { ref } from "vue"
 import { ApiRootClass } from "@/js/RootClasses.js"
 import { configData } from "@/js/configData.js";
 import { useRouter } from "vue-router"
 import { isManager } from "@/js/AuthFunctions";
-
-//Переменные для кастомизации кнопки
-const buttonColor = 'var(--VKColor)'
-const textColor = 'var(--white)'
 
 const router = useRouter();
 const errorMessage = ref()

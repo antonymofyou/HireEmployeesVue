@@ -3,7 +3,7 @@
    <div v-if="!isLoaded" style="text-align: center; margin-top: 100px;">
     <SpinnerMain style="width: 50px" />
    </div>
-  <main class="content vacancy-edit" v-if="isLoaded">
+  <div class="content vacancy-edit" v-if="isLoaded">
     <TopSquareButton
       class="vacancy-edit__back-btn"
       :icon="iconBack"
@@ -67,8 +67,9 @@
             text="Вы уверены, что хотите удалить вопрос? Это действие нельзя отменить"
             confirmButtonColor="var(--cinnabar)"
             @confirm="removeQuestion(idCardQuestion)"
-            @cancel="showModalOnRemoveQuestion = !showModalOnRemoveQuestion"
+            @cancel="cancelRemoveQuestion"
             :loading="removeQuestionLoad"
+            :message="removeMessageErr"
           />
        </Teleport>
         <div class="vacancy-edit__questions-footer">
@@ -101,8 +102,12 @@
               :loading="removeLoad"
               @confirm="handleConfirmRemoveVacancy"
               @cancel="handleCancelRemoveVacancy"
+              :message="removeMessageErr"
             />
           </Teleport>
+        </div>
+        <div class="vacancy-edit__error-add-questions">
+          {{ errorMessageQuestion }}
         </div>
       </div>
 
@@ -119,7 +124,7 @@
       </ButtonMain>
 
     </section>
-  </main>
+  </div>
 
   <Teleport to="body">
     <!-- Вывод сообщения о ошибке -->
@@ -184,16 +189,19 @@ const showModalOnRemoveVacancy = ref(false);
 
 // Отображение ошибки
 const errorMessage = ref('');
+const errorMessageQuestion = ref(''); // текст ошибки при добавлении вопроса
 
-const successSave = ref('');
-const successMessage = ref('');
+const successSave = ref(''); // при значении 1 делает текст успешного сохранения зеленым
+const successMessage = ref(''); // текст успешного сохранения
+
+const removeMessageErr = ref(''); // текст ошибки при удалении вакансии и при удаление вопроса
 
 // индикаторы загрузок для кнопок
-const questionLoad = ref(false);
-const saveLoad = ref(false);
-const removeLoad = ref(false);
-const removeQuestionLoad = ref(false);
-const showModalOnRemoveQuestion = ref(false);
+const questionLoad = ref(false); // true когда идет добавление вопроса
+const saveLoad = ref(false); // true когда идет сохранение
+const removeLoad = ref(false); // true когда идет удаление вакансии
+const removeQuestionLoad = ref(false); // true когда идет удаление вопроса
+const showModalOnRemoveQuestion = ref(false); // true когда показывается модалка удаления вопроса
 // ID последней карточки с вопросом, у которой была нажата мусорка
 const idCardQuestion = ref(0);
 //Заполняем formData данными с сервера
@@ -236,11 +244,18 @@ const updateIsPublished = (index, value) => {
 // Отмена удаления вакансии
 const handleCancelRemoveVacancy = () => {
   showModalOnRemoveVacancy.value = false;
+  removeMessageErr.value = '';
 };
 
 const updateShowQuestionModal = (id) => {
   idCardQuestion.value = id;
   showModalOnRemoveQuestion.value = !showModalOnRemoveQuestion.value;
+}
+
+// отмена удаления вопроса
+const cancelRemoveQuestion = () => {
+  showModalOnRemoveQuestion.value = !showModalOnRemoveQuestion.value;
+  removeMessageErr.value = '';
 }
 
 // Работа с API
@@ -274,9 +289,11 @@ const addQuestionToServer = (callback) => {
     function (response) { // успешный результат
       callback(response);
       questionLoad.value = false;
+      errorMessageQuestion.value = '';
     },
     function (err) { // неуспешный результат
-      errorMessage.value = err;
+      errorMessageQuestion.value = err;
+      questionLoad.value = false;
     }
   );
   
@@ -303,9 +320,11 @@ const removeQuestionFromServer = (callback, id) => {
       callback(response);
       removeQuestionLoad.value = false;
       showModalOnRemoveQuestion.value = false;
+      removeMessageErr.value = '';
     },
     function (err) { // неуспешный результат
-      errorMessage.value = err;
+      removeQuestionLoad.value = false;
+      removeMessageErr.value = err;
     }
   );
 };
@@ -330,7 +349,8 @@ function handleConfirmRemoveVacancy(callback)  {
       router.go(-1);
     },
     function (err) {
-      errorMessage.value = err;
+      removeMessageErr.value = err;
+      removeLoad.value = false;
     }
   );
 };
@@ -375,7 +395,9 @@ const saveChanges = (callback) => {
       saveLoad.value = false;
     },
     function (err) {// неуспешный результат
-      errorMessage.value = err;
+      successSave.value = '0';
+      successMessage.value = err;
+      saveLoad.value = false;
     }
   );
 };
@@ -449,6 +471,11 @@ const saveChanges = (callback) => {
   width: 100%;
   justify-content: space-between;
   align-items: center;
+  padding: 0 10px;
+}
+
+.vacancy-edit__error-add-questions {
+  color: var(--error-color);
 }
 
 .vacancy-edit__add-btn {
