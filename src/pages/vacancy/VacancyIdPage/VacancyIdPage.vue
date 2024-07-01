@@ -30,7 +30,7 @@
       </ButtonMain>
 
       <Teleport to="body">
-        <ModalConfirmation
+        <ModalConfirmationWithStatus
           :show="showModalOnSave"
           confirmText="Сохранить"
           text="Вы уже сохранили ответы на другом устройстве. При повторном сохранении, предыдущие данные будут утеряны."
@@ -86,7 +86,7 @@
         <template v-slot:icon><img src="@/assets/icons/send.svg"></template>
       </ButtonMain>
 
-      <ModalConfirmation
+      <ModalConfirmationWithStatus
         :show="showModalOnSend"
         confirmText="Отправить"
         text="Вы точно хотите отправить ответы? Веденные данные нельзя будет изменить."
@@ -122,7 +122,7 @@ import { VacanciesGetVacancyById,
 import VacancyIdQuestion from './components/VacancyIdQuestion.vue';
 import ButtonMain from '@/components/ButtonMain.vue';
 import InputSimple from '@/components/InputSimple.vue';
-import ModalConfirmation from '@/components/ModalConfirmation.vue';
+import ModalConfirmationWithStatus from '@/components/ModalConfirmationWithStatus.vue';
 import Notification from '@/components/ErrorNotification.vue';
 import SpinnerMain from '@/components/SpinnerMain.vue';
 import ErrorNotification from "@/components/ErrorNotification.vue";

@@ -1,37 +1,43 @@
 <template>
-  <Modal :show="show" @close="handleClose">
+  <!-- Компонент Modal с пробросом слотов и обработкой события закрытия -->
+  <Modal :show="props.show" @close="handleClose">
+    <!-- Слот для заголовка модального окна -->
     <template v-slot:header>
-      <h3 class="modal-confirmation__title">{{ title }}</h3>
+      <h3 class="modal-confirmation__title">{{ props.title }}</h3>
     </template>
 
+    <!-- Слот для основного содержимого модального окна -->
     <template v-slot:body>
       <div class="modal-confirmation__body">
-        <p>{{ text }}</p>
+        <p>{{ props.text }}</p>
       </div>
     </template>
 
+    <!-- Слот для кнопок управления в нижней части модального окна -->
     <template v-slot:footer-control-buttons>
       <div class="modal-confirmation__controls">
+        <!-- Кнопка отмены -->
         <ButtonMain
           @click="handleCancel"
-          :textColor="cancelTextColor"
-          :buttonColor="cancelButtonColor"
+          :textColor="props.cancelTextColor"
+          :buttonColor="props.cancelButtonColor"
           :isBold="true"
         >
           <template v-slot:text>
-            {{ cancelText }}
+            {{ props.cancelText }}
           </template>
         </ButtonMain>
+        <!-- Кнопка подтверждения -->
         <ButtonMain
           @click="handleConfirm"
-          :textColor="confirmTextColor"
-          :buttonColor="confirmButtonColor"
+          :textColor="props.confirmTextColor"
+          :buttonColor="props.confirmButtonColor"
           :isBold="true"
           :isActive="isLoading"
           :message="message"
         >
           <template v-slot:text>
-            {{ confirmText }}
+            {{ props.confirmText }}
           </template>
         </ButtonMain>
       </div>
@@ -44,7 +50,7 @@ import { ref } from 'vue';
 import Modal from '@/components/Modal.vue';
 import ButtonMain from '@/components/ButtonMain.vue';
 
-// Define props
+// Определение входных параметров компонента
 const props = defineProps({
   show: {
     type: Boolean,
@@ -97,12 +103,13 @@ const props = defineProps({
   },
 });
 
-// Define reactive states
-const isLoading = ref(false);
-const success = ref('');
-const message = ref('');
+// Определение событий, которые компонент может выбрасывать
+const emit = defineEmits(['confirm', 'cancel', 'close']);
+const isLoading = ref(false); // Состояние загрузки
+const success = ref(''); // Состояние успеха операции
+const message = ref(''); // Сообщение о результате операции
 
-// Handlers for button actions
+// Обработчик нажатия на кнопку подтверждения
 const handleConfirm = () => {
   if (props.submitFunction) {
     isLoading.value = true;
@@ -111,16 +118,19 @@ const handleConfirm = () => {
       success.value = resSuccess;
       message.value = resSuccess === '1' ? resMessage || 'Успех!' : resMessage || 'Ошибка!';
       isLoading.value = false;
+      emit('confirm');
     });
   } else {
     emit('confirm');
   }
 };
 
+// Обработчик нажатия на кнопку отмены
 const handleCancel = () => {
   emit('cancel');
 };
 
+// Обработчик события закрытия модального окна
 const handleClose = () => {
   emit('close');
 };
