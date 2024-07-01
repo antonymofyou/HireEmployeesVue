@@ -61,7 +61,7 @@
           />
         </transition-group>
         <Teleport to="body">
-          <ModalConfirmation
+          <ModalConfirmationWithStatus
             :show="showModalOnRemoveQuestion"
             confirmText="Удалить"
             text="Вы уверены, что хотите удалить вопрос? Это действие нельзя отменить"
@@ -93,7 +93,7 @@
           </ButtonMain>
 
           <Teleport to="body">
-            <ModalConfirmation
+            <ModalConfirmationWithStatus
               :show="showModalOnRemoveVacancy"
               confirmText="Удалить"
               text="Вы уверены, что хотите удалить вакансию? Это действие нельзя отменить"
@@ -148,7 +148,7 @@ import { VacanciesGetAllVacancyById,
 } from './js/ApiClassesVacancyEdit.js';
 import { MainRequestClass } from "@/js/RootClasses";
 import ButtonMain from "@/components/ButtonMain.vue";
-import ModalConfirmation from "@/components/ModalConfirmation.vue";
+import ModalConfirmationWithStatus from "@/components/ModalConfirmationWithStatus.vue";
 import ErrorNotification from "@/components/ErrorNotification.vue";
 import TextEditor from "@/components/TextEditor.vue";
 import SpinnerMain from "@/components/SpinnerMain.vue";
