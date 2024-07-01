@@ -2,24 +2,16 @@
     <button @click="$emit('click')" id="VKIDSDKAuthButton" class="auth__vk-login VkIdWebSdk__button VkIdWebSdk__button_reset">
         <div class="VkIdWebSdk__button_container">
             <div class="VkIdWebSdk__button_icon">
-                <slot name="icon"></slot>
+                 <img src="../assets/icons/VKIcon.svg"/>
             </div>
             <div class="VkIdWebSdk__button_text">
-                <slot name="text"></slot>
+                Войти через VK ID
             </div>
         </div>
     </button>
 </template>
 
 <script setup>
-import { useSlots } from 'vue';
-
-const props = defineProps(['buttonColor','textColor']);
-//Используем слоты для проверки, что иконка добавлена
-const slots = useSlots()
-let marginLeft='';
-//Меняем отступ, если иконка отсуствует
-slots.icon==undefined?marginLeft='0px':marginLeft='-28px'
 </script>
 
 <style scoped>
@@ -39,7 +31,7 @@ slots.icon==undefined?marginLeft='0px':marginLeft='-28px'
 }
 
 .VkIdWebSdk__button {
-    background: v-bind(buttonColor);
+    background: var(--VKColor);
     cursor: pointer;
     transition: all .1s ease-out;
 }
@@ -65,8 +57,8 @@ slots.icon==undefined?marginLeft='0px':marginLeft='-28px'
     padding: 8px 10px;
 }
 
-.VkIdWebSdk__button_icon+.VkIdWebSdk__button_text {
-    margin-left: v-bind(marginLeft);
+.VkIdWebSdk__button_icon {
+    margin-top: 4px;
 }
 
 .VkIdWebSdk__button_text {
@@ -74,7 +66,7 @@ slots.icon==undefined?marginLeft='0px':marginLeft='-28px'
     font-family: -apple-system, system-ui, "Helvetica Neue", Roboto, sans-serif;
     flex: 1;
     justify-content: center;
-    color: v-bind(textColor);
+    color: var(--white);
 }
 
 .auth__vk-login {

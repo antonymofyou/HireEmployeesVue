@@ -15,7 +15,6 @@ import BlockquoteIcon from 'vue-material-design-icons/FormatQuoteClose.vue'
 import HorizontalRuleIcon from 'vue-material-design-icons/Minus.vue'
 import UndoIcon from 'vue-material-design-icons/Undo.vue'
 import RedoIcon from 'vue-material-design-icons/Redo.vue'
-import {ref} from "vue";
 
 
 const props = defineProps({
@@ -56,25 +55,6 @@ const editor = useEditor({
 
   },
 });
-
-
-const toolbar = ref(props.staticToolbar);
-
-//достаём панель инструментов по первому клику только
-function showToolbar (editor)  {
-  toolbar.value = true;
-  editor.chain().focus().run()
-}
-
-// если клик вне блока, убираем панель инструментов
-document.addEventListener('mousedown', function(event) {
-  let parentElement = props.id !== '' ? document.getElementById(props.id) : false;
-  if (parentElement && (!parentElement.contains(event.target))) {
-    toolbar.value = false;
-  }
-});
-
-
 </script>
 
 <template>
@@ -87,11 +67,10 @@ document.addEventListener('mousedown', function(event) {
     :class="{'text-editor-size-big': props.size === 'big',
     'text-editor-size-medium': props.size === 'medium',
     }"
-    @click="showToolbar(editor)"
+    @click="editor.chain().focus().run()"
   >
 
       <section
-        v-if="toolbar"
         class="text-editor__button-group"
       >
         <button
