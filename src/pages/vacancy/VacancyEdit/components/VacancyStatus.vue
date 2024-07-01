@@ -8,17 +8,37 @@
           v-for="status in statuses"
           :key="status.statusName"
         >
-          <div
+          <!-- <div
             v-if="status.statusColor"
             class="vacancy-edit__status-list-color"
             :style="{ backgroundColor: status.statusColor }"
-          ></div>
+          ></div> -->
           <div class="vacancy-edit__status-list-status">
-            <div class="vacancy-edit__status-list-comment">
+            <div
+              class="vacancy-edit__status-list-comment"
+              :style="{ backgroundColor: status.statusColor }"
+              @click="console.log(status)"
+            >
               {{ status.statusName }}
-              <div class="vacancy-edit__status-list-comment-tooltip">
+              <div
+                v-if="status.statusComment"
+                class="vacancy-edit__status-list-comment-tooltip"
+              >
                 {{ status.statusComment || 'Нет комментария' }}
               </div>
+              <ButtonIcon
+                class="vacancy-edit__status-list-btn"
+                @click="
+                  (isEdit = true),
+                    (statusMod.name = status.statusName),
+                    (statusMod.comment = status.statusComment),
+                    (statusMod.color = status.statusColor)
+                "
+              >
+                <template v-slot:icon
+                  ><IconEdit class="vacancy-edit__status-list-icon-edit"
+                /></template>
+              </ButtonIcon>
               <ButtonIcon
                 class="vacancy-edit__status-list-btn"
                 @click="handleModification(status.statusName, 'delete')"
@@ -29,7 +49,7 @@
               </ButtonIcon>
             </div>
           </div>
-          <div v-if="transferStatuses[status.statusName].length">-</div>
+          <div v-if="transferStatuses[status.statusName].length">&rarr;</div>
           <div
             v-if="transferStatuses[status.statusName].length"
             class="vacancy-edit__status-list-transfers"
@@ -38,7 +58,14 @@
               class="vacancy-edit__status-list-transfers-box"
               v-for="transfer in transferStatuses[status.statusName]"
             >
-              <div class="vacancy-edit__status-list-transfers-item">
+              <div
+                class="vacancy-edit__status-list-transfers-item"
+                :style="{
+                  backgroundColor: statuses.find(
+                    (s) => s.statusName === transfer
+                  ).statusColor,
+                }"
+              >
                 {{ transfer || '' }}
                 <ButtonIcon
                   class="vacancy-edit__status-list-btn"
@@ -72,14 +99,18 @@
               ><IconAdd class="vacancy-edit__status-list-icon"
             /></template>
           </ButtonIcon>
-          <InputSimple
+          <SelectMain
             v-if="isTransfer && statusMod.name === status.statusName"
-            :style="{ height: '20px', width: '200px', fontSize: '13px' }"
+            :style="{ height: '20px', fontSize: '13px' }"
             v-model="statusMod.toName"
-            id="statusEdit"
-            inputType="input"
-            placeholder="Добавить трансфер"
-            @keydown.enter="
+            :options="
+              statusesSelect.filter(
+                (el) =>
+                  el.id !== status.statusName &&
+                  transferStatuses[status.statusName].indexOf(el.id) === -1
+              )
+            "
+            @update:model-value="
               handleModification(status.statusName, 'create', true)
             "
           />
@@ -88,22 +119,49 @@
     </div>
 
     <div class="vacancy-edit__status-add">
-      <ButtonIcon class="vacancy-edit__status-add-btn" @click="isAdd = !isAdd">
+      <ButtonIcon
+        class="vacancy-edit__status-add-btn"
+        @click="
+          (isAdd = true),
+            (statusMod = {
+              name: '',
+              toName: '',
+              comment: '',
+              color: '',
+            })
+        "
+      >
         <template v-slot:icon
-          ><IconAdd v-if="!isAdd" class="vacancy-edit__status-add-icon" />
-          <IconArrow v-else class="vacancy-edit__status-add-icon"
-        /></template>
+          ><IconAdd class="vacancy-edit__status-add-icon" />
+        </template>
       </ButtonIcon>
-      <template v-if="isAdd">
+    </div>
+  </div>
+
+  <Teleport to="body">
+    <!-- Вывод модалки -->
+    <Modal
+      :show="isAdd || isEdit"
+      @click.self="
+        isAdd = false;
+        isEdit = false;
+      "
+    >
+      <template v-slot:header>
+        <div class="modal-confirmation__title">
+          {{ isAdd ? 'Добавление статуса' : 'Изменение статуса' }}
+        </div>
+      </template>
+
+      <template v-slot:body>
         <InputSimple
-          :style="{ height: '20px', width: '150px', fontSize: '13px' }"
+          v-if="isAdd"
           v-model="statusMod.name"
           id="statusEdit"
           inputType="input"
           placeholder="Название статуса"
         />
         <InputSimple
-          :style="{ height: '50px', width: '150px', fontSize: '13px' }"
           v-model="statusMod.comment"
           id="statusEdit"
           inputType="textarea"
@@ -130,10 +188,11 @@
         </div>
 
         <ButtonMain
-          class="vacancy-edit__status-add"
+          class="vacancy-edit__status-add-modal-btn"
           @click="
-            isAdd = false;
-            handleModification(statusMod.name, 'create');
+            isAdd
+              ? handleModification(statusMod.name, 'create')
+              : handleModification(statusMod.name, 'update')
           "
           :isActive="request"
           :message="errorMessage"
@@ -141,8 +200,8 @@
           <template v-slot:text>Создать</template>
         </ButtonMain>
       </template>
-    </div>
-  </div>
+    </Modal>
+  </Teleport>
 </template>
 
 <script setup>
@@ -152,12 +211,14 @@ import {
   VacanciesModifyVacancyStatus,
   VacanciesSetVacancyStatusTransfer,
 } from '../js/ApiClassesVacancyEdit';
-import { onMounted, ref } from 'vue';
+import { onMounted, ref, watch } from 'vue';
 import InputSimple from '@/components/InputSimple.vue';
 import ButtonIcon from '@/components/ButtonIcon.vue';
 import IconAdd from '@/assets/icons/add.svg?component';
+import IconEdit from '@/assets/icons/edit.svg?component';
 import IconDelete from '@/assets/icons/close.svg?component';
-import IconArrow from '@/assets/icons/arrow.svg?component';
+import SelectMain from '@/components/SelectMain.vue';
+import Modal from '@/components/Modal.vue';
 
 const props = defineProps({
   // Id вакансии
@@ -183,7 +244,10 @@ const actions = [
 ];
 
 const colors = [
-  { name: 'Зеленый', value: '#48ed00' },
+  {
+    name: 'Зеленый',
+    value: '#48ed00',
+  },
   {
     name: 'Желтый',
     value: '#f6ff00',
@@ -210,11 +274,15 @@ const tab = ref(0);
 
 // Индикатор добавления
 const isAdd = ref(false);
+// Индикатор изменения
+const isEdit = ref(false);
 // Индикатор трансфера
 const isTransfer = ref(false);
 
 // Доступные статусы
 const statuses = ref([]);
+// Статусы для селекта
+const statusesSelect = ref([]);
 // Доступные трансферные статусы
 const transferStatuses = ref({});
 // Создаваемый/изменяемый статус
@@ -242,6 +310,9 @@ const requestVacancyStatuses = () => {
     'manager',
     (response) => {
       statuses.value = response.statuses;
+      statusesSelect.value = response.statuses.map((status) => {
+        return { name: status.statusName, id: status.statusName };
+      });
       transferStatuses.value = response.transfers;
     },
     (err) => {
@@ -257,7 +328,7 @@ const requestStatusModification = () => {
   requestInstance.action = action.value;
   requestInstance.statusName = statusMod.value.name;
   requestInstance.statusComment = statusMod.value.comment;
-  requestInstance.statusColor = statusMod.value.color;
+  requestInstance.statusColor = statusMod.value.color || '#a3a3a2';
 
   if (!statusMod.value.name) {
     errorMessage.value = 'Необходимо ввести название статуса';
@@ -278,6 +349,9 @@ const requestStatusModification = () => {
         comment: '',
         color: '',
       };
+      action.value = 'create';
+      isAdd.value = false;
+      isEdit.value = false;
     },
     (err) => {
       request.value = false;
@@ -335,6 +409,13 @@ const handleModification = (statusName, method, transfer, toStatus) => {
 onMounted(() => {
   requestVacancyStatuses();
 });
+
+watch(
+  () => [isAdd.value, isEdit.value],
+  () => {
+    document.body.style.overflow = isAdd.value || isEdit.value ? 'hidden' : '';
+  }
+);
 </script>
 
 <style scoped>
@@ -343,6 +424,7 @@ onMounted(() => {
   display: flex;
   flex-direction: column;
   gap: 15px;
+  margin-top: 50px;
 }
 
 .input {
@@ -391,6 +473,7 @@ onMounted(() => {
 
 .vacancy-edit__status-list-transfers-box {
   display: flex;
+  align-items: end;
   &::after {
     content: ',';
   }
@@ -402,6 +485,10 @@ onMounted(() => {
 
 .vacancy-edit__status-list-transfers-item {
   display: flex;
+  padding: 5px;
+  border-radius: 10px;
+  color: white;
+  padding: 5px 12px;
 }
 
 .vacancy-edit__status-list-comment-tooltip {
@@ -432,14 +519,14 @@ onMounted(() => {
   min-height: 25px;
   display: flex;
   align-items: center;
+  color: white;
+  border-radius: 10px;
+  padding: 5px 12px;
 }
 
 .vacancy-edit__status-list-comment:hover,
 .vacancy-edit__status-list-transfers-item:hover {
   .vacancy-edit__status-list-comment-tooltip {
-    visibility: visible;
-  }
-  .vacancy-edit__status-list-icon-delete {
     visibility: visible;
   }
 }
@@ -464,6 +551,8 @@ onMounted(() => {
   display: flex;
   flex-direction: column;
   gap: 10px;
+  width: fit-content;
+  max-width: fit-content;
 }
 
 .vacancy-edit__status-add-btn,
@@ -484,14 +573,34 @@ onMounted(() => {
   }
 }
 
-.vacancy-edit__status-list-icon-delete {
+.vacancy-edit__status-list-icon-edit {
   visibility: hidden;
-  position: absolute;
+  display: none;
+  position: relative;
   margin: 0;
   margin-top: -15px;
-  margin-left: -3px;
+  margin-left: 5px;
   height: 12px;
   width: 12px;
-  fill: var(--error-color);
+  fill: white;
+}
+
+.vacancy-edit__status-list-icon-delete {
+  visibility: hidden;
+  display: none;
+  position: relative;
+  margin: 0;
+  margin-top: -15px;
+  height: 12px;
+  width: 12px;
+  fill: white;
+}
+
+.vacancy-edit__status-add-modal-btn {
+  display: flex;
+  align-items: center;
+  align-self: center;
+  width: fit-content;
+  gap: 5px;
 }
 </style>
