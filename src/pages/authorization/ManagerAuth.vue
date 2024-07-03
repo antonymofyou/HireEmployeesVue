@@ -20,24 +20,24 @@ import { useRouter } from "vue-router"
 import { isManager } from "@/js/AuthFunctions";
 
 const router = useRouter();
-const errorMessage = ref()
+const errorMessage = ref();
 
 function authorizeVK(){
-    location.assign("https://oauth.vk.com/authorize?client_id=51816166&display=page&redirect_uri=http://localhost/auth&response_type=code")
+    location.assign(`https://oauth.vk.com/authorize?client_id=51816166&display=page&redirect_uri=${location.protocol}//${location.hostname}/auth&response_type=code`);
 }
 //Получаем значение параметра code из адресной строки
 function getCodeParam() {
-    let params = new URLSearchParams(window.location.search)
-    return params.get('code')
+    let params = new URLSearchParams(window.location.search);
+    return params.get('code');
 }
 //Проверяем, что параметр есть в адресной строке
 function checkCodeParam() {
-    return !!getCodeParam()
+    return !!getCodeParam();
 }
 //Устанавливаем авторизацию в localstorage
 function setAuth(nasotkuToken, device) {
-    localStorage.setItem(configData.MANAGER_TOK_NAME, nasotkuToken)
-    localStorage.setItem(configData.MANAGER_DEVICE_NAME, device)
+    localStorage.setItem(configData.MANAGER_TOK_NAME, nasotkuToken);
+    localStorage.setItem(configData.MANAGER_DEVICE_NAME, device);
 }
 //Получаем токен nasotku //:(токенВК, идентификатор пользователя)
 function getNasotkuTokenFromServer(vkToken, vkUserId) {
@@ -47,9 +47,9 @@ function getNasotkuTokenFromServer(vkToken, vkUserId) {
         vkUserId = "";
     }
     //Создаем экземпляр класса
-    let requestClass = new AttachVkAccountReq()
-    requestClass.vkToken = vkToken
-    requestClass.vkUserId = vkUserId
+    let requestClass = new AttachVkAccountReq();
+    requestClass.vkToken = vkToken;
+    requestClass.vkUserId = vkUserId;
     requestClass.request(
         '/auth/get_nasotku_token.php',
         'first',
@@ -66,7 +66,7 @@ function getNasotkuTokenFromServer(vkToken, vkUserId) {
         function (err) {
             errorMessage.value = err
         }
-    )
+    );
 }
 
 function getVkTokenFromServer() {
