@@ -36,7 +36,7 @@
         />
       </div>
 
-      <VacancyStatus class="vacancy-edit__status" :vacancyId />
+      <VacancyStatus :vacancyId />
 
       <div class="vacancy-edit__questions-block">
         <h2 class="vacancy-edit__questions-title">Вопросы вакансии</h2>

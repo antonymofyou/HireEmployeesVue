@@ -13,11 +13,18 @@
             class="vacancy-edit__status-list-color"
             :style="{ backgroundColor: status.statusColor }"
           ></div> -->
-          <div class="vacancy-edit__status-list-status">
+          <div
+            class="vacancy-edit__status-list-status"
+            @click="
+              activeHandlers =
+                !activeHandlers || statusMod.name !== status.statusName;
+              statusMod.name = status.statusName;
+
+            "
+          >
             <div
               class="vacancy-edit__status-list-comment"
               :style="{ backgroundColor: status.statusColor }"
-              @click="console.log(status)"
             >
               {{ status.statusName }}
               <div
@@ -36,7 +43,14 @@
                 "
               >
                 <template v-slot:icon
-                  ><IconEdit class="vacancy-edit__status-list-icon-edit"
+                  ><IconEdit
+                    :class="'vacancy-edit__status-list-icon-edit'"
+                    :style="{
+                      display:
+                        activeHandlers && statusMod.name === status.statusName
+                          ? 'block'
+                          : 'none',
+                    }"
                 /></template>
               </ButtonIcon>
               <ButtonIcon
@@ -44,7 +58,14 @@
                 @click="handleModification(status.statusName, 'delete')"
               >
                 <template v-slot:icon
-                  ><IconDelete class="vacancy-edit__status-list-icon-delete"
+                  ><IconDelete
+                    :class="'vacancy-edit__status-list-icon-delete'"
+                    :style="{
+                      display:
+                        activeHandlers && statusMod.name === status.statusName
+                          ? 'block'
+                          : 'none',
+                    }"
                 /></template>
               </ButtonIcon>
             </div>
@@ -65,6 +86,11 @@
                     (s) => s.statusName === transfer
                   ).statusColor,
                 }"
+                @click="
+                  activeTransfer =
+                    !activeTransfer || statusMod.name !== status.statusName;
+                  statusMod.name = status.statusName;
+                "
               >
                 {{ transfer || '' }}
                 <ButtonIcon
@@ -79,7 +105,14 @@
                   "
                 >
                   <template v-slot:icon
-                    ><IconDelete class="vacancy-edit__status-list-icon-delete"
+                    ><IconDelete
+                      class="vacancy-edit__status-list-icon-delete"
+                      :style="{
+                        display:
+                          activeTransfer && statusMod.name === status.statusName
+                            ? 'block'
+                            : 'none',
+                      }"
                   /></template>
                 </ButtonIcon>
               </div>
@@ -183,7 +216,9 @@
               :key="color.value"
               :value="color.value"
               :style="{ backgroundColor: color.value }"
-            ></option>
+            >
+              {{ color.value }}
+            </option>
           </select>
         </div>
 
@@ -270,14 +305,15 @@ const colors = [
   },
 ];
 
-const tab = ref(0);
-
 // Индикатор добавления
 const isAdd = ref(false);
 // Индикатор изменения
 const isEdit = ref(false);
 // Индикатор трансфера
 const isTransfer = ref(false);
+// Индикатор показа кнопок
+const activeHandlers = ref(false);
+const activeTransfer = ref(false);
 
 // Доступные статусы
 const statuses = ref([]);
@@ -416,6 +452,15 @@ watch(
     document.body.style.overflow = isAdd.value || isEdit.value ? 'hidden' : '';
   }
 );
+
+watch (
+  () => statusMod.value.name,
+  () => {
+    activeHandlers.value = false;
+    activeTransfer.value = false;
+    isTransfer.value = false;
+  }
+)
 </script>
 
 <style scoped>
@@ -464,6 +509,7 @@ watch(
 
 .vacancy-edit__status-list-status {
   display: flex;
+  cursor: pointer;
 }
 
 .vacancy-edit__status-list-transfers {
@@ -541,10 +587,11 @@ watch(
 .vacancy-edit__status-select-color-select {
   -webkit-appearance: none;
   appearance: none;
-  width: 20px;
+  width: 90px;
   height: 20px;
   cursor: pointer;
-  border-radius: 100%;
+  border-radius: 10px;
+  text-align: center;
 }
 
 .vacancy-edit__status-add {
@@ -573,27 +620,22 @@ watch(
   }
 }
 
-.vacancy-edit__status-list-icon-edit {
-  visibility: hidden;
+.vacancy-edit__status-list-icon-edit,
+.vacancy-edit__status-list-icon-delete {
   display: none;
   position: relative;
   margin: 0;
   margin-top: -15px;
-  margin-left: 5px;
   height: 12px;
   width: 12px;
   fill: white;
+  &.active {
+    display: block;
+  }
 }
 
-.vacancy-edit__status-list-icon-delete {
-  visibility: hidden;
-  display: none;
-  position: relative;
-  margin: 0;
-  margin-top: -15px;
-  height: 12px;
-  width: 12px;
-  fill: white;
+.vacancy-edit__status-list-icon-edit {
+  margin-left: 5px;
 }
 
 .vacancy-edit__status-add-modal-btn {
