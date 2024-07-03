@@ -7,6 +7,7 @@ export let configData = {
   FIRST_TOKEN: "aTTtrQwvxPxGO6FOP5dd",
 
   VK_APP_ID: "51816166", //ID приложения ВК ID для авторизации
+  TELEGRAM_AUTH_BOT: "bt21hirebot", //ID бота для авторизации через телеграм
 
   MANAGER_DEVICE_NAME:
     "263a4dbe41488fb87214b0032339dbb9f0c8da14c16dfcf13084bf3c2552eca0",
