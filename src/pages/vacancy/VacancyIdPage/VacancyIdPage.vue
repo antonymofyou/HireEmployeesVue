@@ -40,7 +40,7 @@
       </Teleport>
     </header>
     <section class="container">
-      <h2 class="vacancy__title">Заполнение вакансии</h2>
+      <h2 class="vacancy__title">Заполните вопросы вакансии</h2>
 
       <div class="vacancy__info-block">
         <h3>Вакансия: <span class="vacancy__name">{{ candidateData.vacancy.name }}</span></h3> 
