@@ -13,7 +13,7 @@
           @click="logOutSeeker"
         >
           <template v-slot:text>Выйти</template>
-          <template v-slot:icon><img src="./assets/icons/logOut.svg"></template>
+          <template v-slot:icon><LogOutIcon  width="20px" height="20px"/></template>
         </ButtonMain>
       </div>
 
@@ -26,7 +26,7 @@
         @click="handleSave"
       >
         <template v-slot:text>Сохранить</template>
-        <template v-slot:icon><img src="@/assets/icons/save.svg"></template>
+        <template v-slot:icon><SaveIcon width="20px" height="20px"/></template>
       </ButtonMain>
 
       <Teleport to="body">
@@ -83,7 +83,7 @@
         @click="handleSend"
       >
         <template v-slot:text>Отправить</template>
-        <template v-slot:icon><img src="@/assets/icons/send.svg"></template>
+        <template v-slot:icon><SendIcon width="20px" height="20px"/></template>
       </ButtonMain>
 
       <ModalConfirmation
@@ -123,9 +123,11 @@ import VacancyIdQuestion from './components/VacancyIdQuestion.vue';
 import ButtonMain from '@/components/ButtonMain.vue';
 import InputSimple from '@/components/InputSimple.vue';
 import ModalConfirmation from '@/components/ModalConfirmation.vue';
-import Notification from '@/components/ErrorNotification.vue';
 import SpinnerMain from '@/components/SpinnerMain.vue';
 import ErrorNotification from "@/components/ErrorNotification.vue";
+import SaveIcon from '@/assets/icons/save.svg?component';
+import SendIcon from '@/assets/icons/send.svg?component';
+import LogOutIcon from './assets/icons/logOut.svg?component';
 
 // Индикатор загрузки компонента
 const isLoaded = ref(false);
@@ -148,11 +150,6 @@ const vacancyId = ref(route.params.id);
 
 // Уведомление об ошибке
 const errorMessage = ref('');
-
-// Показ уведомления об ошибке
-const showErrorNotification = (message) => {
-  errorMessage.value = message;
-};
 
 // Данные кандидата: пользователь (ник, фио) и вакансия (название, опиание, статус, вопросы)
 const candidateData = ref({
@@ -204,6 +201,7 @@ const fetchCandidateData = (callback) => {
       (err) => {
         // Загрузка завершена неуспешно
         isLoaded.value = true;
+        isSuccessfulLoad.value = false;
         errorMessage.value = err;
       }
     );
@@ -212,6 +210,7 @@ const fetchCandidateData = (callback) => {
   (err) => {
     // Загрузка завершена неуспешно
     isLoaded.value = true;
+    isSuccessfulLoad.value = false;
     errorMessage.value = err;
   });
 };
@@ -225,6 +224,14 @@ const updateCandidateData = (dataFromServer) => {
 watch(isLoggedIn, (newValue) => {
   if (newValue) {
     fetchCandidateData((dataFromServer) => updateCandidateData(dataFromServer));
+
+    // Проверка на успешную загрузку
+    if (newValue === true) {
+      isLoaded.value = true;
+      if (!errorMessage.value) {
+        isSuccessfulLoad.value = true;
+      }
+    }
   }
 });
 
@@ -238,7 +245,10 @@ onMounted(() => {
 
       // Загрузка завершена успешно
       isLoaded.value = true;
-      isSuccessfulLoad.value = true;
+      if (!errorMessage.value) {
+        console.log(errorMessage.value);
+        isSuccessfulLoad.value = true;
+      }
     });
   }
 });
@@ -486,7 +496,7 @@ const handleCancelSend = () => {
 }
 
 .spinner {
-  max-width: 25vh;
+  max-width: 15vh;
   height: 100vh;
   
   display: flex;
