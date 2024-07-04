@@ -4,7 +4,7 @@
     <p class="tg-auth__message">Войдите через Telegram, чтобы заполнить анкету</p>
     <telegram-login-temp
       mode="callback"
-      telegram-login="bt21hirebot"
+      :telegram-login="configData.TELEGRAM_AUTH_BOT"
       @callback="getCandidateToken"
       class="tg-auth__button"
     />
