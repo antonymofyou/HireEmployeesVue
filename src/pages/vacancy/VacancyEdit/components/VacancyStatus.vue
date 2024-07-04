@@ -1,166 +1,34 @@
 <template>
   <div class="vacancy-edit__status">
-    <div class="vacancy-edit__status-list">
-      <div>Статусы: {{ statuses.length || 'Статусы не заданы' }}</div>
-      <div class="vacancy-edit__status-list-box">
-        <div
-          class="vacancy-edit__status-list-items"
-          v-for="status in statuses"
-          :key="status.statusName"
-        >
-          <!-- <div
-            v-if="status.statusColor"
-            class="vacancy-edit__status-list-color"
-            :style="{ backgroundColor: status.statusColor }"
-          ></div> -->
-          <div
-            class="vacancy-edit__status-list-status"
-            @click="
-              activeHandlers =
-                !activeHandlers || statusMod.name !== status.statusName;
-              statusMod.name = status.statusName;
+    <SpinnerMain v-if="request" style="width: 50px" />
+    <p
+      class="vacancy-edit__status-error"
+      v-if="errorMessage && !isAdd && !isEdit"
+    >
+      {{ errorMessage }}
+    </p>
 
-            "
-          >
-            <div
-              class="vacancy-edit__status-list-comment"
-              :style="{ backgroundColor: status.statusColor }"
-            >
-              {{ status.statusName }}
-              <div
-                v-if="status.statusComment"
-                class="vacancy-edit__status-list-comment-tooltip"
-              >
-                {{ status.statusComment || 'Нет комментария' }}
-              </div>
-              <ButtonIcon
-                class="vacancy-edit__status-list-btn"
-                @click="
-                  (isEdit = true),
-                    (statusMod.name = status.statusName),
-                    (statusMod.comment = status.statusComment),
-                    (statusMod.color = status.statusColor)
-                "
-              >
-                <template v-slot:icon
-                  ><IconEdit
-                    :class="'vacancy-edit__status-list-icon-edit'"
-                    :style="{
-                      display:
-                        activeHandlers && statusMod.name === status.statusName
-                          ? 'block'
-                          : 'none',
-                    }"
-                /></template>
-              </ButtonIcon>
-              <ButtonIcon
-                class="vacancy-edit__status-list-btn"
-                @click="handleModification(status.statusName, 'delete')"
-              >
-                <template v-slot:icon
-                  ><IconDelete
-                    :class="'vacancy-edit__status-list-icon-delete'"
-                    :style="{
-                      display:
-                        activeHandlers && statusMod.name === status.statusName
-                          ? 'block'
-                          : 'none',
-                    }"
-                /></template>
-              </ButtonIcon>
-            </div>
-          </div>
-          <div v-if="transferStatuses[status.statusName].length">&rarr;</div>
-          <div
-            v-if="transferStatuses[status.statusName].length"
-            class="vacancy-edit__status-list-transfers"
-          >
-            <div
-              class="vacancy-edit__status-list-transfers-box"
-              v-for="transfer in transferStatuses[status.statusName]"
-            >
-              <div
-                class="vacancy-edit__status-list-transfers-item"
-                :style="{
-                  backgroundColor: statuses.find(
-                    (s) => s.statusName === transfer
-                  ).statusColor,
-                }"
-                @click="
-                  activeTransfer =
-                    !activeTransfer || statusMod.name !== status.statusName;
-                  statusMod.name = status.statusName;
-                "
-              >
-                {{ transfer || '' }}
-                <ButtonIcon
-                  class="vacancy-edit__status-list-btn"
-                  @click="
-                    handleModification(
-                      status.statusName,
-                      'delete',
-                      true,
-                      transfer
-                    )
-                  "
-                >
-                  <template v-slot:icon
-                    ><IconDelete
-                      class="vacancy-edit__status-list-icon-delete"
-                      :style="{
-                        display:
-                          activeTransfer && statusMod.name === status.statusName
-                            ? 'block'
-                            : 'none',
-                      }"
-                  /></template>
-                </ButtonIcon>
-              </div>
-            </div>
-          </div>
-          <ButtonIcon
-            class="vacancy-edit__status-list-btn"
-            @click="
-              if (isTransfer && statusMod.name !== status.statusName) {
-                statusMod.name = status.statusName;
-              } else
-                (isTransfer = !isTransfer),
-                  (statusMod.name = status.statusName);
-            "
-          >
-            <template v-slot:icon
-              ><IconAdd class="vacancy-edit__status-list-icon"
-            /></template>
-          </ButtonIcon>
-          <SelectMain
-            v-if="isTransfer && statusMod.name === status.statusName"
-            :style="{ height: '20px', fontSize: '13px' }"
-            v-model="statusMod.toName"
-            :options="
-              statusesSelect.filter(
-                (el) =>
-                  el.id !== status.statusName &&
-                  transferStatuses[status.statusName].indexOf(el.id) === -1
-              )
-            "
-            @update:model-value="
-              handleModification(status.statusName, 'create', true)
-            "
-          />
-        </div>
-      </div>
-    </div>
+    <!-- Список статусов -->
+    <VacancyStatuslist
+      v-if="!request"
+      :statusList
+      :statusMod
+      :indicators
+      :handleModification
+    />
 
+    <!-- Кнопка добавления статуса -->
     <div class="vacancy-edit__status-add">
       <ButtonIcon
         class="vacancy-edit__status-add-btn"
         @click="
-          (isAdd = true),
+          (indicators.isAdd = true),
             (statusMod = {
+              action: 'create',
               name: '',
               toName: '',
               comment: '',
-              color: '',
+              color: statusMod.color,
             })
         "
       >
@@ -172,23 +40,24 @@
   </div>
 
   <Teleport to="body">
-    <!-- Вывод модалки -->
+    <!-- Вывод модалки для добавления и изменения статуса -->
     <Modal
-      :show="isAdd || isEdit"
+      class="vacancy-edit__modal"
+      :show="indicators.isAdd || indicators.isEdit"
       @click.self="
-        isAdd = false;
-        isEdit = false;
+        indicators.isAdd = false;
+        indicators.isEdit = false;
       "
     >
       <template v-slot:header>
-        <div class="modal-confirmation__title">
-          {{ isAdd ? 'Добавление статуса' : 'Изменение статуса' }}
+        <div class="vacancy-edit__modal__title">
+          {{ indicators.isAdd ? 'Добавление статуса' : 'Изменение статуса' }}
         </div>
       </template>
 
       <template v-slot:body>
         <InputSimple
-          v-if="isAdd"
+          v-if="indicators.isAdd"
           v-model="statusMod.name"
           id="statusEdit"
           inputType="input"
@@ -202,13 +71,13 @@
         />
 
         <div
-          v-if="action !== 'delete'"
-          class="vacancy-edit__status-select-color"
+          v-if="statusMod.action !== 'delete'"
+          class="vacancy-edit__modal-select"
         >
           <div>Цвет:</div>
           <select
-            class="vacancy-edit__status-select-color-select"
             v-model="statusMod.color"
+            class="vacancy-edit__modal-select-color"
             :style="{ backgroundColor: statusMod.color }"
           >
             <option
@@ -223,16 +92,18 @@
         </div>
 
         <ButtonMain
-          class="vacancy-edit__status-add-modal-btn"
+          class="vacancy-edit__modal-btn-add"
           @click="
-            isAdd
+            indicators.isAdd
               ? handleModification(statusMod.name, 'create')
               : handleModification(statusMod.name, 'update')
           "
           :isActive="request"
           :message="errorMessage"
         >
-          <template v-slot:text>Создать</template>
+          <template v-slot:text>{{
+            indicators.isAdd ? 'Добавить' : 'Изменить'
+          }}</template>
         </ButtonMain>
       </template>
     </Modal>
@@ -250,10 +121,10 @@ import { onMounted, ref, watch } from 'vue';
 import InputSimple from '@/components/InputSimple.vue';
 import ButtonIcon from '@/components/ButtonIcon.vue';
 import IconAdd from '@/assets/icons/add.svg?component';
-import IconEdit from '@/assets/icons/edit.svg?component';
-import IconDelete from '@/assets/icons/close.svg?component';
-import SelectMain from '@/components/SelectMain.vue';
 import Modal from '@/components/Modal.vue';
+import { colors } from '../js/constants';
+import VacancyStatuslist from './VacancyStatuslist.vue';
+import SpinnerMain from '@/components/SpinnerMain.vue';
 
 const props = defineProps({
   // Id вакансии
@@ -263,95 +134,73 @@ const props = defineProps({
   },
 });
 
-const actions = [
-  {
-    id: 'create',
-    name: 'Создать',
-  },
-  {
-    id: 'update',
-    name: 'Изменить',
-  },
-  {
-    id: 'delete',
-    name: 'Удалить',
-  },
-];
+// Индикаторы
+const indicators = ref({
+  isAdd: false,
+  isEdit: false,
+  isTransfer: false,
+  activeHandlers: false,
+  activeTransfer: false,
+});
 
-const colors = [
-  {
-    name: 'Зеленый',
-    value: '#48ed00',
-  },
-  {
-    name: 'Желтый',
-    value: '#f6ff00',
-  },
-  {
-    name: 'Красный',
-    value: '#ff0000',
-  },
-  {
-    name: 'Синий',
-    value: '#0000ff',
-  },
-  {
-    name: 'Фиолетовый',
-    value: '#800080',
-  },
-  {
-    name: 'Оранжевый',
-    value: '#ffa500',
-  },
-];
+// Доступные статусы - общие, трансферные, для селекта
+const statusList = ref({
+  statuses: [],
+  transferStatuses: {},
+  statusesSelect: [],
+});
 
-// Индикатор добавления
-const isAdd = ref(false);
-// Индикатор изменения
-const isEdit = ref(false);
-// Индикатор трансфера
-const isTransfer = ref(false);
-// Индикатор показа кнопок
-const activeHandlers = ref(false);
-const activeTransfer = ref(false);
-
-// Доступные статусы
-const statuses = ref([]);
-// Статусы для селекта
-const statusesSelect = ref([]);
-// Доступные трансферные статусы
-const transferStatuses = ref({});
 // Создаваемый/изменяемый статус
 const statusMod = ref({
+  action: 'create',
   name: '',
   toName: '',
   comment: '',
-  color: '',
+  color: '#a3a3a2',
 });
-// Тип действия
-const action = ref('');
+
 // Флаг запроса
 const request = ref(false);
 // Сообщение об ошибке
 const errorMessage = ref('');
 
+// Запрос статусов по id
 const requestVacancyStatuses = () => {
   const requestInstance = new VacanciesGetVacancyStatuses();
   requestInstance.vacancyId = props.vacancyId;
 
+  request.value = true;
   errorMessage.value = '';
 
   requestInstance.request(
     '/vacancies/get_vacancy_statuses.php',
     'manager',
     (response) => {
-      statuses.value = response.statuses;
-      statusesSelect.value = response.statuses.map((status) => {
+      // Обновляем списки статусов
+      statusList.value.statuses = response.statuses;
+      statusList.value.statusesSelect = response.statuses.map((status) => {
         return { name: status.statusName, id: status.statusName };
       });
-      transferStatuses.value = response.transfers;
+      statusList.value.transferStatuses = response.transfers;
+
+      // Если статусов нет - создаем шаблонный
+      if (!statusList.value.statuses.length) {
+        request.value = false;
+
+        statusMod.value = {
+          action: 'create',
+          name: 'New',
+          toName: '',
+          comment: 'Новый статус',
+          color: '#a3a3a2',
+        };
+        requestStatusModification();
+      }
+
+      request.value = false;
     },
     (err) => {
+      request.value = false;
       errorMessage.value = err;
     }
   );
@@ -361,15 +210,17 @@ const requestVacancyStatuses = () => {
 const requestStatusModification = () => {
   const requestInstance = new VacanciesModifyVacancyStatus();
   requestInstance.vacancyId = props.vacancyId;
-  requestInstance.action = action.value;
+  requestInstance.action = statusMod.value.action;
   requestInstance.statusName = statusMod.value.name;
   requestInstance.statusComment = statusMod.value.comment;
-  requestInstance.statusColor = statusMod.value.color || '#a3a3a2';
+  requestInstance.statusColor = statusMod.value.color;
 
+  // Если не введено название статуса - выдаем ошибку
   if (!statusMod.value.name) {
     errorMessage.value = 'Необходимо ввести название статуса';
     return;
   }
+
   request.value = true;
   errorMessage.value = '';
 
@@ -377,17 +228,21 @@ const requestStatusModification = () => {
     '/vacancies/modify_vacancy_status.php',
     'manager',
     (response) => {
+      // Обновляем данные статусов
       requestVacancyStatuses();
-      request.value = false;
+
+      // Сбрасываем данные статуса
       statusMod.value = {
+        action: 'create',
         name: '',
         toName: '',
         comment: '',
-        color: '',
+        color: '#a3a3a2',
       };
-      action.value = 'create';
-      isAdd.value = false;
-      isEdit.value = false;
+
+      request.value = false;
+      indicators.value.isEdit = false;
+      indicators.value.isAdd = false;
     },
     (err) => {
       request.value = false;
@@ -399,14 +254,10 @@ const requestStatusModification = () => {
 const requestStatusTransfer = () => {
   const requestInstance = new VacanciesSetVacancyStatusTransfer();
   requestInstance.vacancyId = props.vacancyId;
-  requestInstance.action = action.value;
+  requestInstance.action = statusMod.value.action;
   requestInstance.statusName = statusMod.value.name;
   requestInstance.toStatusName = statusMod.value.toName;
 
-  if (!statusMod.value.name) {
-    errorMessage.value = 'Необходимо ввести название статуса';
-    return;
-  }
   request.value = true;
   errorMessage.value = '';
 
@@ -414,15 +265,20 @@ const requestStatusTransfer = () => {
     '/vacancies/set_vacancy_status_transfer.php',
     'manager',
     (response) => {
+      // Обновляем данные статусов
       requestVacancyStatuses();
-      request.value = false;
-      isTransfer.value = false;
+
+      // Сбрасываем данные статуса
       statusMod.value = {
+        action: 'create',
         name: '',
         toName: '',
         comment: '',
-        color: '',
+        color: '#a3a3a2',
       };
+
+      request.value = false;
+      indicators.value.isTransfer = false;
     },
     (err) => {
       request.value = false;
@@ -431,9 +287,18 @@ const requestStatusTransfer = () => {
   );
 };
 
+/**  Обработчик модификации статуса
+ * @param {string} statusName - название статуса
+ * @param {'create'|'update'|'delete'} method - тип запроса
+ * @param {boolean} transfer - флаг трансфера
+ * @param {string} toStatus - название статуса для переноса
+ */
 const handleModification = (statusName, method, transfer, toStatus) => {
-  action.value = method;
+  //Присваиваем данные модификации
+  statusMod.value.action = method;
   statusMod.value.name = statusName;
+
+  // Если нужно перенести статус - присваиваем название статуса для переноса
   if (transfer) {
     if (toStatus) {
       statusMod.value.toName = toStatus;
@@ -446,21 +311,14 @@ onMounted(() => {
   requestVacancyStatuses();
 });
 
+// Запрещаем скролл страницы при открытии модалки
 watch(
-  () => [isAdd.value, isEdit.value],
+  () => [indicators.value.isAdd, indicators.value.isEdit],
   () => {
-    document.body.style.overflow = isAdd.value || isEdit.value ? 'hidden' : '';
+    document.body.style.overflow =
+      indicators.value.isAdd || indicators.value.isEdit ? 'hidden' : '';
   }
 );
-
-watch (
-  () => statusMod.value.name,
-  () => {
-    activeHandlers.value = false;
-    activeTransfer.value = false;
-    isTransfer.value = false;
-  }
-)
 </script>
 
 <style scoped>
@@ -472,126 +330,12 @@ watch (
   margin-top: 50px;
 }
 
-.input {
-  width: 100%;
+.spinner__svg {
+  align-self: center;
 }
 
-.vacancy-edit__status-select-action {
-  display: flex;
-  flex-direction: row;
-  align-items: center;
-  gap: 5px;
-}
-
-.vacancy-edit__status-list {
-  display: flex;
-  flex-direction: column;
-  gap: 5px;
-}
-
-.vacancy-edit__status-list-box {
-  display: flex;
-  flex-direction: column;
-  gap: 5px;
-}
-
-.vacancy-edit__status-list-items {
-  display: flex;
-  gap: 10px;
-  align-items: center;
-}
-
-.vacancy-edit__status-list-color {
-  width: 10px;
-  height: 10px;
-  border-radius: 100%;
-}
-
-.vacancy-edit__status-list-status {
-  display: flex;
-  cursor: pointer;
-}
-
-.vacancy-edit__status-list-transfers {
-  display: flex;
-  gap: 5px;
-}
-
-.vacancy-edit__status-list-transfers-box {
-  display: flex;
-  align-items: end;
-  &::after {
-    content: ',';
-  }
-
-  &:last-child::after {
-    content: '';
-  }
-}
-
-.vacancy-edit__status-list-transfers-item {
-  display: flex;
-  padding: 5px;
-  border-radius: 10px;
-  color: white;
-  padding: 5px 12px;
-}
-
-.vacancy-edit__status-list-comment-tooltip {
-  visibility: hidden;
-  position: absolute;
-  z-index: 1;
-  margin: 0;
-  margin-bottom: -80px;
-  margin-left: -3px;
-  max-width: 200px;
-  max-height: 100px;
-  display: block;
-  display: -webkit-box;
-  -webkit-line-clamp: 3;
-  -webkit-box-orient: vertical;
-  overflow: hidden;
-  word-break: break-all;
-  text-overflow: ellipsis;
-  background-color: var(--cornflower-blue);
-  color: var(--white);
-  text-align: center;
-  border-radius: 6px;
-  padding: 5px 10px;
-  font-size: 12px;
-}
-
-.vacancy-edit__status-list-comment {
-  min-height: 25px;
-  display: flex;
-  align-items: center;
-  color: white;
-  border-radius: 10px;
-  padding: 5px 12px;
-}
-
-.vacancy-edit__status-list-comment:hover,
-.vacancy-edit__status-list-transfers-item:hover {
-  .vacancy-edit__status-list-comment-tooltip {
-    visibility: visible;
-  }
-}
-
-.vacancy-edit__status-select-color {
-  display: flex;
-  flex-direction: row;
-  align-items: center;
-  gap: 5px;
-}
-
-.vacancy-edit__status-select-color-select {
-  -webkit-appearance: none;
-  appearance: none;
-  width: 90px;
-  height: 20px;
-  cursor: pointer;
-  border-radius: 10px;
-  text-align: center;
+.vacancy-edit__status-error {
+  color: var(--error-color);
 }
 
 .vacancy-edit__status-add {
@@ -602,15 +346,13 @@ watch (
   max-width: fit-content;
 }
 
-.vacancy-edit__status-add-btn,
-.vacancy-edit__status-list-btn {
+.vacancy-edit__status-add-btn {
   display: flex;
   padding: 0;
   width: fit-content;
 }
 
-.vacancy-edit__status-add-icon,
-.vacancy-edit__status-list-icon {
+.vacancy-edit__status-add-icon {
   align-self: center;
   transition: all 0.3s ease;
   width: 20px;
@@ -620,29 +362,28 @@ watch (
   }
 }
 
-.vacancy-edit__status-list-icon-edit,
-.vacancy-edit__status-list-icon-delete {
-  display: none;
-  position: relative;
-  margin: 0;
-  margin-top: -15px;
-  height: 12px;
-  width: 12px;
-  fill: white;
-  &.active {
-    display: block;
-  }
-}
-
-.vacancy-edit__status-list-icon-edit {
-  margin-left: 5px;
-}
-
-.vacancy-edit__status-add-modal-btn {
+.vacancy-edit__modal-btn-add {
   display: flex;
   align-items: center;
   align-self: center;
   width: fit-content;
   gap: 5px;
+}
+
+.vacancy-edit__modal-select {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  gap: 5px;
+}
+
+.vacancy-edit__modal-select-color {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 90px;
+  height: 20px;
+  cursor: pointer;
+  border-radius: 10px;
+  text-align: center;
 }
 </style>
