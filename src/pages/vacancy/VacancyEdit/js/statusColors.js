@@ -9,7 +9,7 @@ export const colors = [
   },
   {
     name: 'Желтый',
-    value: '#f0d75b',
+    value: '#FFD700',
   },
   {
     name: 'Красный',
