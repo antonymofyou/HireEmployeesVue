@@ -6,11 +6,15 @@
 </template>
 
 <script setup>
+
 import { useRouter } from "vue-router";
+import { isManager } from "@/js/AuthFunctions";
 
 const router = useRouter();
 
-router.push({ name: 'vacanciesList' });
+if (isManager()) router.push({ name: "vacanciesList" });
+else router.push({ name: "managerAuth" });
+
 </script>
 
-<style scoped></style>
+<style lang="scss" scoped></style>
