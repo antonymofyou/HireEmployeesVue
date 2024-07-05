@@ -1,17 +1,14 @@
 <template>
   <section class="comments-page">
     <div class="heading">
-      <TopSquareButton
-        class="comments-page__back-btn"
-        @click="
-          $router.push({
-            name: 'candidates',
-            query: { vacancyId: vacancyId, status: status },
-          })
-        "
-        :icon="backIcon"
+      <RouterLink
+        :to="{
+          name: 'candidates',
+          query: { vacancyId: vacancyId, status: status },
+        }"
       >
-      </TopSquareButton>
+        <TopSquareButton class="comments-page__back-btn" :icon="backIcon" />
+      </RouterLink>
       <h1>Отклик на вакансию</h1>
     </div>
 
