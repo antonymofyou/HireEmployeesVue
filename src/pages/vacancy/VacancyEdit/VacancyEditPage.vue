@@ -1,16 +1,12 @@
 <template>
   <!-- Отображение прелоадера  -->
-   <div v-if="!isLoaded" style="text-align: center; margin-top: 100px;">
-    <SpinnerMain style="width: 50px" />
+   <div v-if="!isLoaded" class="vacancy-edit__loader">
+    <SpinnerMain class="vacancy-edit__loader-spinner" />
    </div>
   <div class="content vacancy-edit" v-if="isLoaded">
-    <TopSquareButton
-      class="vacancy-edit__back-btn"
-      :icon="iconBack"
-      @click="$router.push({ name: 'vacanciesList' })"
-    >
-
-    </TopSquareButton>
+    <RouterLink :to="{ name: 'vacanciesList' }">
+      <TopSquareButton class="vacancy-edit__back-btn" :icon="iconBack" />
+    </RouterLink>
     
     <section class="container">
       <h2 class="vacancy-edit__title">Редактирование вакансии</h2>
@@ -42,6 +38,8 @@
           id="0"
         />
       </div>
+
+      <VacancyStatus :vacancyId />
 
       <div class="vacancy-edit__questions-block">
         <h2 class="vacancy-edit__questions-title">Вопросы вакансии</h2>
@@ -82,8 +80,8 @@
           >
              <PlusIcon class="vacancy-edit__add-btn-icon"/>
           </button>
-          <div v-if="questionLoad" style="text-align: center;" class="vacancy-edit__add-btn">
-            <SpinnerMain style="width: 50px" />
+          <div v-if="questionLoad" class="vacancy-edit__add-btn">
+            <SpinnerMain class="vacancy-edit__loader-spinner"/>
           </div>
           <ButtonMain
             buttonColor="var(--cinnabar)"
@@ -120,7 +118,7 @@
         :isActive="saveLoad"
       >
         <template v-slot:text>Сохранить</template>
-        <template v-slot:icon><SaveIcon class="vacancy-edit__icon-button"/></template>
+        <template v-slot:icon><SaveIcon width="20px" height="20px"class="vacancy-edit__icon-button"/></template>
       </ButtonMain>
 
     </section>
@@ -157,6 +155,7 @@ import TextEditor from "@/components/TextEditor.vue";
 import SpinnerMain from "@/components/SpinnerMain.vue";
 import SaveIcon from '@/assets/icons/save-black.svg?component';
 import PlusIcon from '@/assets/icons/add.svg?component';
+import VacancyStatus from './components/VacancyStatus.vue';
 
 const route = useRoute();
 const router = useRouter();
@@ -404,14 +403,18 @@ const saveChanges = (callback) => {
 </script>
 
 <style scoped>
+.content {
+  margin-top: 60px;
+}
+
 .container {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  padding: 40px 250px 0;
+  margin: 0 auto;
+  width: 100%;
+  max-width: 925px;
 }
 
 .vacancy-edit__title {
+  margin-bottom: 40px;
   text-align: center;
 }
 
@@ -451,11 +454,8 @@ const saveChanges = (callback) => {
 }
 
 .vacancy-edit__questions-title {
-  font-size: 25px;
-  line-height: 32px;
-  font-weight: 600;
-
-  margin: 0;
+  margin-bottom: 40px;
+  text-align: center;
 }
 
 .vacancy-edit__questions-list {
@@ -482,6 +482,8 @@ const saveChanges = (callback) => {
   padding: 0;
 
   cursor: pointer;
+
+  text-align: center;
 
   transition: 0.2s ease transform;
   border: 0;
@@ -527,18 +529,15 @@ const saveChanges = (callback) => {
 .vacancy-edit__back-btn {
   position: fixed;
   top: 20px;
-  left: 30px;
+  left: 20px;
 }
 
-@media screen and (max-width: 1200px) {
-  .container {
-    padding: 60px 60px;
-  }
+.vacancy-edit__loader {
+  margin-top: 100px;
+  text-align: center;
 }
 
-@media screen and (max-width: 800px) {
-  .container {
-    padding: 30px 30px;
-  }
+.vacancy-edit__loader-spinner {
+  width: 50px;
 }
 </style>
