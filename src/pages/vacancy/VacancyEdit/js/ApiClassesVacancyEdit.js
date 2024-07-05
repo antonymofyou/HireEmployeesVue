@@ -84,3 +84,31 @@ export class VacanciesUpdateVacancy extends MainRequestClass {
 export class VacanciesQuestionsDeleteVacancyQuestion extends MainRequestClass {
     questionId = ''; // ID вопроса, который необходимо удалить
 }
+
+export class VacanciesGetVacancyStatuses extends MainRequestClass {
+    vacancyId = ''; // ID вакансии, для которой нужно получить доступные статусы
+}
+
+export class VacanciesModifyVacancyStatus extends MainRequestClass {
+    vacancyId = ''; // ID вакансии, для которой нужно создать/обновить/удалить статус
+  
+    action = ''; // действие, которое нужно выполнить (доступные значения: 'create': создать статус; 'update': обновить статус; 'delete': удалить статус)
+  
+    statusName = ''; // название статуса, который нужно создать/обновить/удалить
+  
+    statusComment = ''; // комментарий к статусу, который нужно задать при создании статуса/обновить при обновлении статуса
+  
+    statusColor = ''; // цвет статуса (hex), который нужно задать при создании статуса/обновить при обновлении статуса
+  
+    // при каждом запросе на обновление статуса учитывается и $statusComment, и $statusColor. Если они будут равны пустой строке - для статуса они будут заданы как пустые строки
+  }
+
+  export class VacanciesSetVacancyStatusTransfer extends MainRequestClass {
+    vacancyId = ''; // ID вакансии, для которой нужно создать/удалить возможный перевод для статуса отклика
+  
+    action = ''; // действие, которое нужно выполнить (доступные значения: 'create': создать перевод статуса; 'delete': удалить перевод статуса)
+  
+    statusName = ''; // название статуса, для которого нужно создать/удалить возможный перевод
+  
+    toStatusName = ''; // название статуса, перевод в который нужно создать/удалить
+  }

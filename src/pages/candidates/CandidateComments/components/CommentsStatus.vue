@@ -3,7 +3,11 @@
     <div class="status__info">
       <label class="status__select">
         <div class="status__select-label">Статус отклика</div>
-        <SelectMain v-model="status" :options="statuses" />
+        <div v-if="!statuses.find((status) => status.id === status)">
+          {{ status }}
+        </div>
+        <div v-if="newStatus">&#9658;</div>
+        <SelectMain v-model="newStatus" :options="statuses" />
       </label>
 
       <div class="status__btn">
@@ -49,12 +53,15 @@ const errorMessage = ref('');
 const statuses = ref([]);
 // Статус кандидата
 const status = ref('');
+// Новый статус
+const newStatus = ref('');
 
 // Запрос данных по ответам кандидата
 const requestCandidateInfo = () => {
   const requestInstance = new CandidatesGetOtklikAnswers();
   requestInstance.otklikId = props.respondId;
   errorMessage.value = '';
+  status.value = '';
 
   requestInstance.request(
     '/candidates/get_otklik_info.php',
@@ -69,9 +76,10 @@ const requestCandidateInfo = () => {
           : [{ name: 'Неизвестный', id: 'Неизвестный' }];
       } else {
         status.value = response.info.status;
-        statuses.value = response.statusTransfers.length
-          ? response.statusTransfers
-          : [{ name: response.info.status, id: response.info.status }];
+        statuses.value = response.statusTransfers.map((status) => ({
+          name: status,
+          id: status,
+        }));
       }
     },
     (err) => (errorMessage.value = err)
@@ -82,7 +90,7 @@ const requestCandidateInfo = () => {
 const changeRespondStatus = () => {
   const requestInstance = new CandidatesSetOtklikStatus();
   requestInstance.otklikId = props.respondId;
-  requestInstance.toStatusName = status.value;
+  requestInstance.toStatusName = newStatus.value;
   errorMessage.value = '';
   statusChanged.value = false;
   sendRequest.value = true;
@@ -93,6 +101,8 @@ const changeRespondStatus = () => {
     () => {
       sendRequest.value = false;
       statusChanged.value = true;
+      newStatus.value = '';
+      requestCandidateInfo();
     },
     (err) => {
       errorMessage.value = err;
@@ -135,7 +145,7 @@ watch(
 
 .status__select {
   display: flex;
-  align-items: center;
+  align-items: baseline;
   gap: 10px;
 }
 
