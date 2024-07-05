@@ -9,12 +9,23 @@
       </div>
       <span class="candidate__status">{{ candidate.status }}</span>
       <div class="candidate__btn">
-        <span class="candidate__id"
-          ><b>ID:</b> {{ candidate.candidateId }}</span
+        <span class="candidate__id"><b>ID:</b> {{ candidate.candidateId }}</span>
+        <RouterLink
+          class="candidate__link"
+          :to="{
+            name: 'candidate',
+            query: {
+              candidateId: candidate.candidateId,
+              respondId: candidate.otklikId,
+              vacancyId: vacancyId,
+              status: status,
+            },
+          }"
         >
-        <ButtonMain @click="goToCandidate()">
-          <template v-slot:text>&#9658;</template>
-        </ButtonMain>
+          <ButtonMain>
+            <template v-slot:text> &#9658; </template>
+          </ButtonMain>
+        </RouterLink>
       </div>
     </div>
   </div>
@@ -41,19 +52,6 @@ const props = defineProps({
     required: true,
   },
 });
-
-//Переход на карточку комментариев кандидата
-function goToCandidate() {
-  router.push({
-    name: 'candidate',
-    query: {
-      candidateId: props.candidate.candidateId,
-      respondId: props.candidate.otklikId,
-      vacancyId: props.vacancyId,
-      status: props.status,
-    },
-  });
-}
 </script>
 
 <style scoped>
@@ -99,6 +97,10 @@ function goToCandidate() {
   display: flex;
   flex-direction: column;
   justify-content: space-between;
+}
+
+.candidate__link {
+  text-decoration: none;
 }
 
 @media screen and (max-width: 560px) {
