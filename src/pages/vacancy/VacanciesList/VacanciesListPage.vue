@@ -68,6 +68,7 @@
         <div class="modal__success" v-if="!isLoading">
           <!-- Кнопка перехода к созданной вакансии и закрытия модального окна. Происходит обращение к глобальному объекту refs, который содержит ссылки на ref карточек vacancy_id. через $el(ключ DOM элемента).scrollIntoView происходит переход к созданной вакансии -->
           <ButtonMain
+            buttonColor = "var(--cinnabar)"
             @click="
               modalSuccess = false;
               $refs[`vacancy_${createdVacancyId}`][0].$el.scrollIntoView({
@@ -79,17 +80,14 @@
           </ButtonMain>
 
           <!-- Кнопка перехода к редактированию созданной вакансии -->
-          <ButtonMain
-            @click="
-              modalSuccess = false;
-              $router.push({
-                name: 'vacancy_edit',
-                params: { id: createdVacancyId },
-              });
-            "
+          <RouterLink
+            class="vacancies__new-vacancy-link"
+            :to="{ name: 'vacancy_edit', params: { id: createdVacancyId } }"
           >
-            <template v-slot:text>Редактировать</template>
-          </ButtonMain>
+            <ButtonMain @click="modalSuccess = false">
+              <template v-slot:text>Редактировать</template>
+            </ButtonMain>
+          </RouterLink>
         </div>
       </template>
     </Modal>
@@ -115,7 +113,7 @@ import SpinnerMain from "@/components/SpinnerMain.vue";
 const router = useRouter();
 
 //Проверка авторизации пользователя
-if (!isManager()) router.push({ name: "home" });
+if (!isManager()) router.push({ name: "managerAuth" });
 
 // Отображение ошибки
 const errorMessage = ref('');
@@ -297,5 +295,9 @@ watch(
   display: flex;
   align-items: center;
   gap: 10px;
+}
+
+.vacancies__new-vacancy-link {
+  text-decoration: none;
 }
 </style>
