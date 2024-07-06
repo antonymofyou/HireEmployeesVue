@@ -30,6 +30,22 @@
         </div>
       </div>
 
+
+    <div class="vacancy-edit__link">
+      <b>Ссылка на вакансию:</b>
+      <div class="vacancy-edit__link-content">
+        <a class="vacancy-edit__link-text" :href="vacancyLink" target="_blank">{{ vacancyLink }}</a>
+        <ButtonIcon class="vacancy-edit__link-copy-btn" @click="copyToClipboard">
+          <template #icon>
+            <CopyIcon width="20px" height="20px" class="vacancy-edit__link-copy-icon" />
+          </template>
+        </ButtonIcon>
+      </div>
+      <p class="vacancy-edit__link-copy-message vacancy-edit__link-copy-message--success" v-if="isCopied">Ссылка скопирована!</p>
+      <p class="vacancy-edit__link-copy-message vacancy-edit__link-copy-message--error" v-else-if="isCopiedError">Не удалось скопировать текст!</p>
+    </div>
+
+
       <div class="vacancy-edit__description">
         <TextEditor
           v-model="formData.description"
@@ -156,6 +172,8 @@ import SpinnerMain from "@/components/SpinnerMain.vue";
 import SaveIcon from '@/assets/icons/save-black.svg?component';
 import PlusIcon from '@/assets/icons/add.svg?component';
 import VacancyStatus from './components/VacancyStatus.vue';
+import ButtonIcon from '@/components/ButtonIcon.vue';
+import CopyIcon from '@/assets/icons/copy.svg?component';
 
 const route = useRoute();
 const router = useRouter();
@@ -400,6 +418,31 @@ const saveChanges = (callback) => {
     }
   );
 };
+
+// Ссылка на вакансию
+const vacancyLink = computed(() => {
+  const baseUrl = window.location.origin;
+  return `${baseUrl}/vacancy/${vacancyId.value}`;
+});
+
+// Состояние копирования
+const isCopied = ref(false);
+// Состояние ошибки при копировании
+const isCopiedError = ref(false);
+
+// Копирование ссылки в буфер обмена
+const copyToClipboard = async () => {
+  try {
+    await navigator.clipboard.writeText(vacancyLink.value);
+    isCopied.value = true;
+    // Скрытие сообщения через 2 секунды
+    setTimeout(() => {
+      isCopied.value = false;
+    }, 2000);
+  } catch (err) {
+    isCopiedError.value = true;
+  }
+}
 </script>
 
 <style scoped>
@@ -435,7 +478,7 @@ const saveChanges = (callback) => {
 }
 
 .vacancy-edit__description {
-  margin-top: 50px;
+  margin-top: 40px;
   width: 100%;
 }
 
@@ -539,5 +582,63 @@ const saveChanges = (callback) => {
 
 .vacancy-edit__loader-spinner {
   width: 50px;
+}
+
+.vacancy-edit__link {
+  width: max-content;
+
+  margin-top: 40px;
+}
+
+.vacancy-edit__link-content {
+  display: flex;
+  align-items: center;
+
+  margin-top: 10px;
+}
+
+.vacancy-edit__link-text {
+  font-weight: 500;
+
+  color: var(--cornflower-blue);
+  text-decoration: none;
+
+  transition: all 0.2s ease;
+}
+
+.vacancy-edit__link-text:hover {
+  opacity: 0.65;
+}
+
+.vacancy-edit__link-copy-btn {
+  padding: 0;
+  padding-left: 10px;
+}
+
+.vacancy-edit__link-copy-icon {
+  color: var(--tundora);
+
+  transition: all 0.2s ease;
+}
+
+.vacancy-edit__link-copy-icon:hover {
+  opacity: 0.6;
+}
+
+.vacancy-edit__link-copy-message {
+  font-size: 12px;
+
+  margin: 0;
+  margin-top: 5px;
+
+  text-align: right;
+}
+
+.vacancy-edit__link-copy-message--success {
+  color: var(--apple);
+}
+
+.vacancy-edit__link-copy-message--error {
+  color: var(--cinnabar);
 }
 </style>
