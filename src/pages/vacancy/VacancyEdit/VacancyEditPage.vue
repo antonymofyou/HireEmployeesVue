@@ -61,8 +61,8 @@
           />
         </transition-group>
         <Teleport to="body">
-          <ModalConfirmation
-            :show="showModalOnRemoveQuestion"
+          <ModalConfirmationNew
+            v-model:show="showModalOnRemoveQuestion"
             confirmText="Удалить"
             text="Вы уверены, что хотите удалить вопрос? Это действие нельзя отменить"
             confirmButtonColor="var(--cinnabar)"
@@ -70,6 +70,7 @@
             @cancel="cancelRemoveQuestion"
             :loading="removeQuestionLoad"
             :message="removeMessageErr"
+            :data="dataProps"
           />
        </Teleport>
         <div class="vacancy-edit__questions-footer">
@@ -94,7 +95,7 @@
           </ButtonMain>
 
           <Teleport to="body">
-            <ModalConfirmation
+            <ModalConfirmationNew
               :show="showModalOnRemoveVacancy"
               confirmText="Удалить"
               text="Вы уверены, что хотите удалить вакансию? Это действие нельзя отменить"
@@ -103,6 +104,7 @@
               @confirm="handleConfirmRemoveVacancy"
               @cancel="handleCancelRemoveVacancy"
               :message="removeMessageErr"
+              :modal-function="removeQuestionFromServer"
             />
           </Teleport>
         </div>
@@ -140,7 +142,7 @@ import SelectMain from '@/components/SelectMain.vue';
 import TopSquareButton from '@/components/TopSquareButton.vue';
 import iconBack from '@/assets/icons/back.svg';
 import VacancyQuestion from './components/VacancyQuestion.vue';
-import { ref, computed, onMounted, watch } from 'vue';
+import {ref, computed, onMounted, watch, reactive} from 'vue';
 import { useRoute, useRouter } from 'vue-router';
 
 import { isManager } from '@/js/AuthFunctions';
@@ -152,6 +154,7 @@ import { VacanciesGetAllVacancyById,
 import { MainRequestClass } from "@/js/RootClasses";
 import ButtonMain from "@/components/ButtonMain.vue";
 import ModalConfirmation from "@/components/ModalConfirmation.vue";
+import ModalConfirmationNew from "@/components/ModalConfirmationNew.vue";
 import ErrorNotification from "@/components/ErrorNotification.vue";
 import TextEditor from "@/components/TextEditor.vue";
 import SpinnerMain from "@/components/SpinnerMain.vue";
@@ -249,6 +252,7 @@ const handleCancelRemoveVacancy = () => {
 
 const updateShowQuestionModal = (id) => {
   idCardQuestion.value = id;
+  dataProps.idQuestion = id;
   showModalOnRemoveQuestion.value = !showModalOnRemoveQuestion.value;
 }
 
@@ -315,20 +319,25 @@ const removeQuestionFromServer = (callback, id) => {
 
   requestClass.request(
     '/vacancies/questions/delete_vacancy_question.php',
-    'manager', 
+    'manager',
     function (response) { // успешный результат
       callback(response);
-      removeQuestionLoad.value = false;
-      showModalOnRemoveQuestion.value = false;
-      removeMessageErr.value = '';
+      // removeQuestionLoad.value = false;
+      // showModalOnRemoveQuestion.value = false;
+      // removeMessageErr.value = '';
     },
     function (err) { // неуспешный результат
-      removeQuestionLoad.value = false;
-      removeMessageErr.value = err;
+      // removeQuestionLoad.value = false;
+      // removeMessageErr.value = err;
     }
   );
 };
-
+const dataProps = reactive({
+  func: removeQuestionFromServer,
+  callback: function () {
+    formData.value.questions = formData.value.questions.filter((question) => question.id != idCardQuestion.value);
+  }
+});
 // Вызов удаления вопроса и обновление formData
 const removeQuestion = (id) => {
   removeQuestionFromServer(() => {
