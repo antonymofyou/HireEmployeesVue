@@ -9,7 +9,7 @@
       </div>
       <div class="candidate__status"><StatusColored :status-text="candidate.status.split('::')[0]" :status-color="candidate.status.split(':')[1] ?? 'gray'"></StatusColored></div>
       <div class="candidate__btn">
-        <span class="candidate__id"><b>ID:</b> {{ candidate.candidateId }}</span>
+        <span class="candidate__id"><b>ID:</b> {{ candidate.otklikId }}</span>
         <RouterLink
           class="candidate__link"
           :to="{
@@ -81,10 +81,9 @@ const props = defineProps({
 }
 
 .candidate__id {
-  text-align: end;
-  font-size: 13px;
-  line-height: 22px;
-  font-weight: 400;
+  text-align: center;
+  font-size: 10px;
+  line-height: 18px;
 }
 
 .candidate__status {

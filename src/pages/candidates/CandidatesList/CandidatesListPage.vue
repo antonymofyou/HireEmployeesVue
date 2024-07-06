@@ -178,7 +178,7 @@ function getVacancyStatuses() {
         response.statuses.map((status) => {
           candidateStatus.value.push({
             name: status.statusName,
-            id: status.statusComment,
+            id: status.statusName,
             color: status.statusColor
           });
         });
@@ -200,7 +200,9 @@ const updateVacancyId = () => {
 
 //Обработчик смены query параметра при смене id
 const updateStatus = () => {
-  router.push({ query: { ...route.query, status: status.value } });
+  router.push({ 
+    query: { ...route.query, vacancyId: vacancyId.value, status: status.value } 
+  });
 };
 
 //Получение списка кандидатов при загрузке страницы
