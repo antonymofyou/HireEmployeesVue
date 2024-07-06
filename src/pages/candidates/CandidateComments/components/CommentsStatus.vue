@@ -4,7 +4,7 @@
       <label class="status__select">
         <div class="status__select-label">Статус отклика</div>
         <div v-if="!statuses.find((status) => status.id === status)">
-          {{ status }}
+          <StatusColored :status-text="status.split('::')[0]" :status-color="status.split(':')[1] ?? 'gray'"></StatusColored>
         </div>
         <div v-if="newStatus">&#9658;</div>
         <SelectMain v-model="newStatus" :options="statuses" />
@@ -34,6 +34,7 @@ import {
 } from '../js/CommentsClasses';
 import SelectMain from '@/components/SelectMain.vue';
 import ButtonMain from '@/components/ButtonMain.vue';
+import StatusColored from '@/components/StatusColored.vue';
 
 const props = defineProps({
   // ID отклика
@@ -70,15 +71,16 @@ const requestCandidateInfo = () => {
       // Инициализируем массив статусов на основе полученных данных
       if (!response.info.status) {
         // Если статус неизвестный
-        status.value = 'Неизвестный';
+        status.value = 'Отсутствует';
         statuses.value = response.statusTransfers.length
           ? response.statusTransfers
-          : [{ name: 'Неизвестный', id: 'Неизвестный' }];
+          : [{ name: 'Отсутствует', id: 'Отсутствует', color: 'red'}];
       } else {
         status.value = response.info.status;
         statuses.value = response.statusTransfers.map((status) => ({
           name: status,
           id: status,
+          color: 'gray'
         }));
       }
     },

@@ -85,7 +85,7 @@ const vacanciesIds = ref([]); // список id вакансий
 const candidates = ref([]); // список кандидатов
 const vacancyId = ref(''); // ID вакансии
 const status = ref('Все'); // Статус кандидата
-const candidateStatus = ref([{ name: 'Все', id: 'Все' }]); // Статусы кандидатов
+const candidateStatus = ref([{ name: 'Все', id: 'Все', color: 'gray' }]); // Статусы кандидатов
 
 //Флаги загрузки данных
 const dataFetched = ref(false);
@@ -174,11 +174,12 @@ function getVacancyStatuses() {
       'manager',
       function (response) {
         //успешный результат
-        candidateStatus.value = [{ name: 'Все', id: 'Все' }];
+        candidateStatus.value = [{ name: 'Все', id: 'Все', color: 'gray'}];
         response.statuses.map((status) => {
           candidateStatus.value.push({
             name: status.statusName,
             id: status.statusComment,
+            color: status.statusColor
           });
         });
       },

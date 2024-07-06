@@ -35,17 +35,15 @@
 <script setup>
 import { ref, computed, onMounted, watch } from 'vue';
 
-// Модель для обновления, опции селекта
-// опции - массив объектов с полями: name, id, color (color опционален)
 const props = defineProps({
+  // Модель для обновления, опции селекта
   modelValue: {
     type: [String, Number],
-    default: null,
     required: true,
   },
+  // опции - массив объектов с полями: name, id, color (color опционален)
   options: {
     type: Array,
-    default: null,
     required: true,
   },
 });

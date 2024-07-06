@@ -7,7 +7,7 @@
           <b>Дата отклика: </b>{{ candidate.createdAt }}
         </span>
       </div>
-      <span class="candidate__status">{{ candidate.status }}</span>
+      <div class="candidate__status"><StatusColored :status-text="candidate.status.split('::')[0]" :status-color="candidate.status.split(':')[1] ?? 'gray'"></StatusColored></div>
       <div class="candidate__btn">
         <span class="candidate__id"><b>ID:</b> {{ candidate.candidateId }}</span>
         <RouterLink
@@ -34,6 +34,7 @@
 <script setup>
 import { useRouter } from 'vue-router';
 import ButtonMain from '@/components/ButtonMain.vue';
+import StatusColored from '@/components/StatusColored.vue';
 
 const router = useRouter();
 
@@ -90,7 +91,6 @@ const props = defineProps({
   display: flex;
   flex-direction: column;
   justify-content: center;
-  color: var(--cornflower-blue);
 }
 
 .candidate__btn {
