@@ -122,7 +122,7 @@ import InputSimple from '@/components/InputSimple.vue';
 import ButtonIcon from '@/components/ButtonIcon.vue';
 import IconAdd from '@/assets/icons/add.svg?component';
 import Modal from '@/components/Modal.vue';
-import { colors } from '../js/statusColors.js';
+import { colors } from '../js/statusColors';
 import VacancyStatusList from './VacancyStatusList.vue';
 import SpinnerMain from '@/components/SpinnerMain.vue';
 const props = defineProps({
