@@ -36,14 +36,20 @@ import { ref } from 'vue';
 const files = ref([]);
 const isDragging = ref(false);
 
+// Методы перетаскивания файлов
+
+// перетаскивание файла при наведении
 const dragover = (e) => {
     e.preventDefault();
     isDragging.value = true;
 };
 
+// если перетаскивание файла отменяется
 const dragleave = () => {
     isDragging.value = false;
 };
+
+// если перетаскивание файла завершено
 
 const addFileToFileList = (file) => {
     if (file.type.startsWith('image/')) {
@@ -53,6 +59,7 @@ const addFileToFileList = (file) => {
     }
 };
 
+// функция отображающая картинку файла если это изображение
 const addImageToFileList = (file) => {
     const reader = new FileReader();
     reader.onload = (event) => {
@@ -62,6 +69,7 @@ const addImageToFileList = (file) => {
     reader.readAsDataURL(file);
 };
 
+// завершение перетаскивания
 const drop = (e) => {
     e.preventDefault();
     isDragging.value = false;
@@ -74,6 +82,7 @@ const drop = (e) => {
     }
 };
 
+// загрузка файла через input
 const handleFiles = (fileList) => {
     for (let i = 0; i < fileList.length; i++) {
         const file = fileList[i];
@@ -81,6 +90,7 @@ const handleFiles = (fileList) => {
     }
 };
 
+// удаление файла
 const removeFile = (index) => {
     files.value.splice(index, 1);
 };
