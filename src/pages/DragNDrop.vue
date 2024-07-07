@@ -1,15 +1,11 @@
 <template>
   <div class="page">
-    <DragAndDrop  />
-    <Statuses />
+    <DragAndDrop />
   </div>
 </template>
 
 <script setup>
- import DragAndDrop from "@/components/DragAndDrop.vue";
- import Statuses from "@/components/Statuses.vue";
- import { ref } from "vue";
- const files = ref([]);
+import DragAndDrop from "@/components/DragAndDrop.vue";
 </script>
 
 <style scoped>
