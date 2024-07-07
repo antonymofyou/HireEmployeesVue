@@ -6,20 +6,24 @@
             <div>
                 <span>или</span>
             </div>
+            <!-- кнопка имитирующая input type="file" -->
             <label class="dropzone-container__label" for="input-file">Выберите файлы</label>
         </div>
 
         <input type="file" id="input-file" class="dropzone-container__input" multiple
             @change="handleFiles($event.target.files)">
-
+        <!-- цикл вывода всех загруженных файлов -->
         <div v-for="(file, index) in files" class="dropzone-container__files" :key="index">
+            <!-- если файл изображение задает высоту и ширину -->
             <img v-if="file.type === 'image'" class="dropzone-container__image" :src="file.url"
                 style="max-width: 100px; max-height: 100px;">
             <div class="dropzone-container__file-text-container">
                 <article class="dropzone-container__file-info">
+                    <!-- информация о файле -->
                     <span class="dropzone-container__file-name">{{ file.name }}</span>
                     <span class="dropzone-container__file-size">{{ Math.round(file.size / 1000) + "kb" }}</span>
                 </article>
+                <!-- кнопка для удаления файла -->
                 <div class="dropzone-container__file-remove" @click="removeFile(index)">x</div>
             </div>
         </div>
