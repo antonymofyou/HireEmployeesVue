@@ -2,30 +2,30 @@
   <div class="candidate">
     <div class="candidate__box">
       <div class="candidate__description">
-        <span class="candidate__name"><b>ФИО:</b> {{ candidate.fio }}</span>
-        <span class="candidate__date">
-          <b>Дата отклика: </b>{{ candidate.createdAt }}
-        </span>
+        <div class="candidate__name"><b>ФИО:</b> {{ candidate.fio }}</div>
+        <div class="candidate__date"><b>Дата: </b><span class="candidate__date-text">{{ candidate.createdAt }}</span></div>
+        <div class="candidate__id"><b>ID откл.:</b> {{ candidate.otklikId }}</div>
       </div>
-      <div class="candidate__status"><StatusColored :status-text="candidate.status.split('::')[0]" :status-color="candidate.status.split(':')[1] ?? 'gray'"></StatusColored></div>
+      <div class="candidate__status"><StatusColored :status-text="candidate.status ?? ''" :status-color="candidate.statusColor ?? 'none'"></StatusColored></div>
       <div class="candidate__btn">
-        <span class="candidate__id"><b>ID:</b> {{ candidate.otklikId }}</span>
-        <RouterLink
-          class="candidate__link"
-          :to="{
-            name: 'candidate',
-            query: {
-              candidateId: candidate.candidateId,
-              respondId: candidate.otklikId,
-              vacancyId: vacancyId,
-              status: status,
-            },
-          }"
-        >
-          <ButtonMain>
-            <template v-slot:text> &#9658; </template>
-          </ButtonMain>
-        </RouterLink>
+        <div>
+          <RouterLink
+            class="candidate__link"
+            :to="{
+              name: 'candidate',
+              query: {
+                candidateId: candidate.candidateId,
+                respondId: candidate.otklikId,
+                vacancyId: vacancyId,
+                status: status,
+              },
+            }"
+          >
+            <ButtonMain>
+              <template v-slot:text> &#9658; </template>
+            </ButtonMain>
+          </RouterLink>
+        </div>
       </div>
     </div>
   </div>
@@ -69,9 +69,14 @@ const props = defineProps({
   word-wrap: break-word;
 }
 
+.candidate__date-text{
+  font-size: 13px;
+}
+
 .candidate__box {
   display: flex;
   justify-content: space-between;
+  position: relative;
 }
 
 .candidate__description {
@@ -81,9 +86,8 @@ const props = defineProps({
 }
 
 .candidate__id {
-  text-align: center;
   font-size: 10px;
-  line-height: 18px;
+  margin-top: 5px;
 }
 
 .candidate__status {
@@ -95,7 +99,7 @@ const props = defineProps({
 .candidate__btn {
   display: flex;
   flex-direction: column;
-  justify-content: space-between;
+  justify-content: center;
 }
 
 .candidate__link {

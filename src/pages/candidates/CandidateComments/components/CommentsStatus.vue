@@ -4,7 +4,7 @@
       <label class="status__select">
         <div class="status__select-label">Статус отклика</div>
         <div v-if="!statuses.find((status) => status.id === status)">
-          <StatusColored :status-text="status.split('::')[0]" :status-color="status.split(':')[1] ?? 'gray'"></StatusColored>
+          <StatusColored :status-text="statusCurrent.status" :status-color="statusCurrent.color"></StatusColored>
         </div>
         <div v-if="newStatus">&#9658;</div>
         <SelectMain v-model="newStatus" :options="statuses" />
@@ -53,7 +53,7 @@ const errorMessage = ref('');
 // Массив статусов кандидата
 const statuses = ref([]);
 // Статус кандидата
-const status = ref('');
+const statusCurrent = ref({status: '', color: 'none', comment: ''});
 // Новый статус
 const newStatus = ref('');
 
@@ -62,7 +62,7 @@ const requestCandidateInfo = () => {
   const requestInstance = new CandidatesGetOtklikAnswers();
   requestInstance.otklikId = props.respondId;
   errorMessage.value = '';
-  status.value = '';
+  statusCurrent.value = {status: '', color: 'none', comment: ''};
 
   requestInstance.request(
     '/candidates/get_otklik_info.php',
@@ -71,16 +71,16 @@ const requestCandidateInfo = () => {
       // Инициализируем массив статусов на основе полученных данных
       if (!response.info.status) {
         // Если статус неизвестный
-        status.value = 'Отсутствует';
-        statuses.value = response.statusTransfers.length
-          ? response.statusTransfers
-          : [{ name: 'Отсутствует', id: 'Отсутствует', color: 'red'}];
+        statusCurrent.status.value = {status: '', color: 'none', comment: ''};
+        statuses.value = response.statusTransfers.length ? response.statusTransfers : [];
       } else {
-        status.value = response.info.status;
+        statusCurrent.value.status = response.info.status;
+        statusCurrent.value.color = response.info.statusColor;
+        statusCurrent.value.comment = response.info.statusComment;
         statuses.value = response.statusTransfers.map((status) => ({
-          name: status,
-          id: status,
-          color: 'gray'
+          name: status.status,
+          id: status.status,
+          color: status.color
         }));
       }
     },
