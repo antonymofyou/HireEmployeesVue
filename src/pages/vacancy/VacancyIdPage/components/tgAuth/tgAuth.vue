@@ -1,7 +1,8 @@
 <template>
   <div class="tg-auth">
-    <h1 class="tg-auth__title">Авторизация</h1>
-    <p class="tg-auth__message">Войдите через Telegram, чтобы заполнить анкету</p>
+    <!--<h1 class="tg-auth__title">Авторизация</h1>-->
+    <div class="tg-auth__message">Войдите через Telegram, чтобы заполнить анкету</div>
+    <div class="tg-auth__message2">*необходимо, чтобы с вами связаться</div>
     <telegram-login-temp
       mode="callback"
       :telegram-login="configData.TELEGRAM_AUTH_BOT"
@@ -66,32 +67,37 @@ const getCandidateToken = (user) => {
   display: flex;
   align-items: center;
   flex-direction: column;
-  padding: 70px 50px;
+  padding: 40px 40px;
 
   color: rgb(72, 72, 75);
 
   transform: translateX(-50%) translateY(-50%);
 
-  border-radius: 40px;
+  border-radius: 30px;
   box-shadow: 0 19px 38px rgba(0,0,0,0.30), 0 15px 12px rgba(0,0,0,0.22);
 }
 
 .tg-auth__title {
   font-size: 28px;
-
   margin: 0;
 }
 
 .tg-auth__message {
   font-size: 18px;
-  line-break: normal;
+  text-align: center;
+  margin: 5px;
+}
+
+.tg-auth__message2 {
+  font-size: 12px;
+  text-align: center;
+  margin-top: 5px;
+  margin-bottom: 10px;
 }
 
 .tg-auth__warning {
   font-size: 14px;
-
   margin: 0;
-
   color: var(--cinnabar);
 }
 
