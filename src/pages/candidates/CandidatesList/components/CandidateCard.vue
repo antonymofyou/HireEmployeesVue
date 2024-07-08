@@ -75,11 +75,12 @@ const props = defineProps({
 
 .candidate__box {
   display: flex;
-  justify-content: space-between;
+  justify-content: flex-start;
   position: relative;
 }
 
 .candidate__description {
+  flex: 1;
   display: flex;
   flex-direction: column;
   justify-content: space-evenly;
@@ -90,17 +91,13 @@ const props = defineProps({
   margin-top: 5px;
 }
 
-.candidate__status {
+.candidate__status, .candidate__btn{
   display: flex;
   flex-direction: column;
   justify-content: center;
+  margin: 0 10px;
 }
 
-.candidate__btn {
-  display: flex;
-  flex-direction: column;
-  justify-content: center;
-}
 
 .candidate__link {
   text-decoration: none;
@@ -111,7 +108,7 @@ const props = defineProps({
     flex-direction: column;
     gap: 5px;
   }
-  .candidate__btn {
+  .candidate__status, .candidate__btn {
     flex-direction: row;
   }
 }
