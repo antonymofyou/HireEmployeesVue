@@ -27,7 +27,7 @@ const router = createRouter({
       component: VacanciesListPage,
     },
     {
-      path: "/vacancy/:id",
+      path: "/vac/:id",
       name: "Idvacancy",
       component: VacancyIdPage,
     },

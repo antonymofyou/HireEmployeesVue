@@ -422,7 +422,7 @@ const saveChanges = (callback) => {
 // Ссылка на вакансию
 const vacancyLink = computed(() => {
   const baseUrl = window.location.origin;
-  return `${baseUrl}/vacancy/${vacancyId.value}`;
+  return `${baseUrl}/vac/${vacancyId.value}`;
 });
 
 // Состояние копирования
