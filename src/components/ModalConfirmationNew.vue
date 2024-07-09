@@ -110,23 +110,51 @@
   const errMessage = ref('');
 
   // функция при подтверждении действия
-  const confirmFunction = async () => {
-    try {
-      loading.value = true;
-      await props.data.func(props.data?.idQuestion);
-      props.data.callback();
-      emit('update:show');
-    } catch (error) {
-      errMessage.value = error;
-    } finally {
-      loading.value = false;
-    }
-  };
+  // const confirmFunction = async () => {
+  //   try {
+  //     loading.value = true;
+  //     await props.data.func(props.data?.idQuestion);
+  //     props.data.callback();
+  //     emit('update:show');
+  //   } catch (error) {
+  //     errMessage.value = error;
+  //   } finally {
+  //     loading.value = false;
+  //   }
+  // };
   
   const cancelFunction = () => {
-    emit('cancel');
-    errMessage.value = '';
+    if (loading.value === false) {
+      emit('update:show');
+      errMessage.value = '';
+    }
   };
+
+async function confirmFunction() {
+  loading.value = true;
+
+  // Преобразуем функцию в Promise
+  const asyncOperation = () => {
+    return new Promise((resolve, reject) => {
+      try {
+        let response = props.data.fetch(resolve, reject, props.data?.idQuestion);
+        
+      } catch (error) {
+        
+      }
+    });
+  };
+
+  try {
+    await asyncOperation();
+    props.data.callback();
+    emit('update:show');
+  } catch (error) {
+    errMessage.value = error;
+  } finally {
+    loading.value = false;
+  }
+}
   
   
   </script>

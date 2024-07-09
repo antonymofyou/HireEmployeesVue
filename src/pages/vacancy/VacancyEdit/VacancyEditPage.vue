@@ -80,7 +80,6 @@
             confirmText="Удалить"
             text="Вы уверены, что хотите удалить вопрос? Это действие нельзя отменить"
             confirmButtonColor="var(--cinnabar)"
-            @cancel="cancelRemoveQuestion"
             :data="dataProps"
           />
        </Teleport>
@@ -264,18 +263,10 @@ const handleCancelRemoveVacancy = () => {
 
 const updateShowQuestionModal = (id) => {
   dataProps.idQuestion = id;
-  console.log(id);
   idCardQuestion.value = id;
-  console.log(idCardQuestion.value)
-  // dataProps.idQuestion = id;
   showModalOnRemoveQuestion.value = !showModalOnRemoveQuestion.value;
 }
 
-// отмена удаления вопроса
-const cancelRemoveQuestion = () => {
-  showModalOnRemoveQuestion.value = !showModalOnRemoveQuestion.value;
-  removeMessageErr.value = '';
-}
 
 // Работа с API
 
@@ -326,8 +317,26 @@ const addQuestion = () => {
 };
 
 // Удаление вопроса с сервера (по передаваемому id)
-const removeQuestionFromServer = (id) => {
-  return new Promise((resolve, reject) => {
+// const removeQuestionFromServer = (id) => {
+//   return new Promise((resolve, reject) => {
+//     let requestClass = new VacanciesQuestionsDeleteVacancyQuestion();
+//     requestClass.vacancyId = vacancyId.value;
+//     requestClass.questionId = id;
+
+//     requestClass.request(
+//       '/vacancies/questions/delete_vacancy_question.php',
+//       'manager',
+//       function (response) { // успешный результат
+//         resolve(); // Возвращаем результат операции через resolve
+//       },
+//       function (err) { // неуспешный результат
+//         reject(err); // Возвращаем ошибку через reject
+//       }
+//     );
+//   });
+// };
+
+const removeQuestionFromServer = (success, reject, id) => {
     let requestClass = new VacanciesQuestionsDeleteVacancyQuestion();
     requestClass.vacancyId = vacancyId.value;
     requestClass.questionId = id;
@@ -336,17 +345,16 @@ const removeQuestionFromServer = (id) => {
       '/vacancies/questions/delete_vacancy_question.php',
       'manager',
       function (response) { // успешный результат
-        resolve(); // Возвращаем результат операции через resolve
+         success();
       },
       function (err) { // неуспешный результат
-        reject(err); // Возвращаем ошибку через reject
+         reject(err);
       }
     );
-  });
 };
 // объект передающийся в модальное окно, функция удаления, id вопроса, коллбэк
 const dataProps = reactive({
-  func: removeQuestionFromServer,
+  fetch: removeQuestionFromServer,
   idQuestion: '',
   callback: function() {
     formData.value.questions = formData.value.questions.filter((question) => question.id !== dataProps.idQuestion);
