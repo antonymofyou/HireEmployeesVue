@@ -113,7 +113,7 @@
   const confirmFunction = async () => {
     try {
       loading.value = true;
-      const response = await props.data.func();
+      await props.data.func();
       props.data.callback();
       emit('update:show');
     } catch (error) {

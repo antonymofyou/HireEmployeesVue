@@ -154,7 +154,6 @@ import TopSquareButton from '@/components/TopSquareButton.vue';
 import iconBack from '@/assets/icons/back.svg';
 import VacancyQuestion from './components/VacancyQuestion.vue';
 import {ref, computed, onMounted, watch, reactive} from 'vue';
-import {ref, computed, onMounted, watch, reactive} from 'vue';
 import { useRoute, useRouter } from 'vue-router';
 
 import { isManager } from '@/js/AuthFunctions';
@@ -165,8 +164,6 @@ import { VacanciesGetAllVacancyById,
 } from './js/ApiClassesVacancyEdit.js';
 import { MainRequestClass } from "@/js/RootClasses";
 import ButtonMain from "@/components/ButtonMain.vue";
-import ModalConfirmation from "@/components/ModalConfirmation.vue";
-import ModalConfirmationNew from "@/components/ModalConfirmationNew.vue";
 import ModalConfirmationNew from "@/components/ModalConfirmationNew.vue";
 import ErrorNotification from "@/components/ErrorNotification.vue";
 import TextEditor from "@/components/TextEditor.vue";
@@ -353,12 +350,6 @@ const dataProps = reactive({
   },
 });
 
-// Вызов удаления вопроса и обновление formData
-// const removeQuestion = (id) => {
-//   removeQuestionFromServer(() => {
-//     formData.value.questions = formData.value.questions.filter((question) => question.id !== id);
-//   }, id);
-// };
 
 // Удаление вакансии
 function handleConfirmRemoveVacancy(callback)  {
