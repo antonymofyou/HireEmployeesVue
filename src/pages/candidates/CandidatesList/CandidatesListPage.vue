@@ -84,8 +84,8 @@ if (!isManager()) router.push({ name: 'managerAuth' });
 const vacanciesIds = ref([]); // список id вакансий
 const candidates = ref([]); // список кандидатов
 const vacancyId = ref(''); // ID вакансии
-const status = ref('Все'); // Статус кандидата
-const candidateStatus = ref([{ name: 'Все', id: 'Все', color: 'gray' }]); // Статусы кандидатов
+const status = ref('New'); // Статус кандидата
+const candidateStatus = ref([{ name: 'Все', id: 'Все', color: 'gray' }, {nama:'New', id: 'New', color: 'gray'}]); // Статусы кандидатов
 
 //Флаги загрузки данных
 const dataFetched = ref(false);

@@ -15,9 +15,8 @@
               name: 'candidate',
               query: {
                 candidateId: candidate.candidateId,
-                respondId: candidate.otklikId,
+                otklikId: candidate.otklikId,
                 vacancyId: vacancyId,
-                status: status,
               },
             }"
           >
