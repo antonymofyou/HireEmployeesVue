@@ -7,7 +7,7 @@
     <RouterLink :to="{ name: 'vacanciesList' }">
       <TopSquareButton class="vacancy-edit__back-btn" :icon="iconBack" />
     </RouterLink>
-    
+
     <section class="container">
       <h2 class="vacancy-edit__title">Редактирование вакансии</h2>
 
@@ -75,15 +75,13 @@
           />
         </transition-group>
         <Teleport to="body">
-          <ModalConfirmation
-            :show="showModalOnRemoveQuestion"
+          <ModalConfirmationNew
+            v-model:show="showModalOnRemoveQuestion"
             confirmText="Удалить"
             text="Вы уверены, что хотите удалить вопрос? Это действие нельзя отменить"
             confirmButtonColor="var(--cinnabar)"
-            @confirm="removeQuestion(idCardQuestion)"
             @cancel="cancelRemoveQuestion"
-            :loading="removeQuestionLoad"
-            :message="removeMessageErr"
+            :data="dataProps"
           />
        </Teleport>
         <div class="vacancy-edit__questions-footer">
@@ -108,7 +106,7 @@
           </ButtonMain>
 
           <Teleport to="body">
-            <ModalConfirmation
+            <ModalConfirmationNew
               :show="showModalOnRemoveVacancy"
               confirmText="Удалить"
               text="Вы уверены, что хотите удалить вакансию? Это действие нельзя отменить"
@@ -154,11 +152,11 @@ import SelectMain from '@/components/SelectMain.vue';
 import TopSquareButton from '@/components/TopSquareButton.vue';
 import iconBack from '@/assets/icons/back.svg';
 import VacancyQuestion from './components/VacancyQuestion.vue';
-import { ref, computed, onMounted, watch } from 'vue';
+import {ref, computed, onMounted, watch, reactive} from 'vue';
 import { useRoute, useRouter } from 'vue-router';
 
 import { isManager } from '@/js/AuthFunctions';
-import { VacanciesGetAllVacancyById, 
+import { VacanciesGetAllVacancyById,
   VacanciesQuestionsCreateVacancyQuestion,
   VacanciesQuestionsDeleteVacancyQuestion,
   VacanciesUpdateVacancy
@@ -166,6 +164,7 @@ import { VacanciesGetAllVacancyById,
 import { MainRequestClass } from "@/js/RootClasses";
 import ButtonMain from "@/components/ButtonMain.vue";
 import ModalConfirmation from "@/components/ModalConfirmation.vue";
+import ModalConfirmationNew from "@/components/ModalConfirmationNew.vue";
 import ErrorNotification from "@/components/ErrorNotification.vue";
 import TextEditor from "@/components/TextEditor.vue";
 import SpinnerMain from "@/components/SpinnerMain.vue";
@@ -217,7 +216,6 @@ const removeMessageErr = ref(''); // текст ошибки при удален
 const questionLoad = ref(false); // true когда идет добавление вопроса
 const saveLoad = ref(false); // true когда идет сохранение
 const removeLoad = ref(false); // true когда идет удаление вакансии
-const removeQuestionLoad = ref(false); // true когда идет удаление вопроса
 const showModalOnRemoveQuestion = ref(false); // true когда показывается модалка удаления вопроса
 // ID последней карточки с вопросом, у которой была нажата мусорка
 const idCardQuestion = ref(0);
@@ -266,7 +264,9 @@ const handleCancelRemoveVacancy = () => {
 
 const updateShowQuestionModal = (id) => {
   idCardQuestion.value = id;
+  // dataProps.idQuestion = id;
   showModalOnRemoveQuestion.value = !showModalOnRemoveQuestion.value;
+  console.log(showModalOnRemoveQuestion.value);
 }
 
 // отмена удаления вопроса
@@ -284,9 +284,9 @@ const getVacancyDataManager = (callback) => {
 
   requestClass.request(
     '/vacancies/get_all_vacancy_by_id.php',
-    'manager', 
+    'manager',
     function (response) { // успешный результат
-      callback(response); 
+      callback(response);
     },
     function (err) { // неуспешный результат
       errorMessage.value = err;
@@ -302,7 +302,7 @@ const addQuestionToServer = (callback) => {
 
   requestClass.request(
     '/vacancies/questions/create_vacancy_question.php',
-    'manager', 
+    'manager',
     function (response) { // успешный результат
       callback(response);
       questionLoad.value = false;
@@ -313,7 +313,7 @@ const addQuestionToServer = (callback) => {
       questionLoad.value = false;
     }
   );
-  
+
 };
 
 // Вызов добавления вопроса и обновление formData
@@ -324,34 +324,39 @@ const addQuestion = () => {
 };
 
 // Удаление вопроса с сервера (по передаваемому id)
-const removeQuestionFromServer = (callback, id) => {
-  removeQuestionLoad.value = true;
-  let requestClass = new VacanciesQuestionsDeleteVacancyQuestion();
-  requestClass.vacancyId = vacancyId.value;
-  requestClass.questionId = id;
+const removeQuestionFromServer = (id) => {
+  return new Promise((resolve, reject) => {
+    let requestClass = new VacanciesQuestionsDeleteVacancyQuestion();
+    requestClass.vacancyId = vacancyId.value;
+    requestClass.questionId = idCardQuestion.value;
 
-  requestClass.request(
-    '/vacancies/questions/delete_vacancy_question.php',
-    'manager', 
-    function (response) { // успешный результат
-      callback(response);
-      removeQuestionLoad.value = false;
-      showModalOnRemoveQuestion.value = false;
-      removeMessageErr.value = '';
-    },
-    function (err) { // неуспешный результат
-      removeQuestionLoad.value = false;
-      removeMessageErr.value = err;
-    }
-  );
+    requestClass.request(
+      '/vacancies/questions/delete_vacancy_question.php',
+      'manager',
+      function (response) { // успешный результат
+        resolve(response); // Возвращаем результат операции через resolve
+      },
+      function (err) { // неуспешный результат
+        reject(err); // Возвращаем ошибку через reject
+      }
+    );
+  });
 };
+// объект передающийся в модальное окно, функция удаления, id вопроса, коллбэк
+const dataProps = reactive({
+  func: removeQuestionFromServer,
+  idQuestion: idCardQuestion,
+  callback: function() {
+    formData.value.questions = formData.value.questions.filter((question) => question.id !== this.idQuestion);
+  },
+});
 
 // Вызов удаления вопроса и обновление formData
-const removeQuestion = (id) => {
-  removeQuestionFromServer(() => {
-    formData.value.questions = formData.value.questions.filter((question) => question.id !== id);
-  }, id);
-};
+// const removeQuestion = (id) => {
+//   removeQuestionFromServer(() => {
+//     formData.value.questions = formData.value.questions.filter((question) => question.id !== id);
+//   }, id);
+// };
 
 // Удаление вакансии
 function handleConfirmRemoveVacancy(callback)  {
@@ -381,7 +386,7 @@ const questionsById = computed(() => {
       question: item.question,
       published: item.published,
     };
-    
+
     return acc;
   }, {})
 });
@@ -404,7 +409,7 @@ const saveChanges = (callback) => {
 
   requestClass.request(
     '/vacancies/update_vacancy.php',
-    'manager', 
+    'manager',
     function (response) {
       //callback(response);// успешный результат
       successMessage.value = 'Данные успешно сохранены!';
@@ -422,7 +427,7 @@ const saveChanges = (callback) => {
 // Ссылка на вакансию
 const vacancyLink = computed(() => {
   const baseUrl = window.location.origin;
-  return `${baseUrl}/vac/${vacancyId.value}`;
+  return `${baseUrl}/vacancy/${vacancyId.value}`;
 });
 
 // Состояние копирования

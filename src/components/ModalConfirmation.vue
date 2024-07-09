@@ -1,5 +1,5 @@
 <template>
-  <Modal :show="show">
+  <Modal :show="show" @close="cancelFunction">
     <template v-slot:header>
       <h3 class="modal-confirmation__title">{{ title }}</h3>
     </template>
@@ -13,7 +13,7 @@
     <template v-slot:footer-control-buttons>
       <div class="modal-confirmation__controls">
         <ButtonMain
-          @click="$emit('cancel')"
+          @click="cancelFunction"
           :textColor="cancelTextColor"
           :buttonColor="cancelButtonColor"
           :isBold=true
@@ -23,12 +23,12 @@
           </template>
         </ButtonMain>
         <ButtonMain
-          @click="$emit('confirm')"
+          @click="confirmFunction"
           :textColor="confirmTextColor"
           :buttonColor="confirmButtonColor"
           :isBold=true
-          :isActive="props.loading"
-          :message="props.message"
+          :isActive="loading"
+          :message="errMessage"
         >
           <template v-slot:text>
             {{ confirmText }}
@@ -42,6 +42,7 @@
 <script setup>
 import Modal from '@/components/Modal.vue';
 import ButtonMain from "@/components/ButtonMain.vue";
+import {ref} from "vue";
 
 // Показ модального окна, заголовок, текст, текст подтверждения, текст отмены,
 // цвет текста подтверждения, цвет текста отмены, цвет кнопки подтверждения, цвет кнопки отмены, статус модального окна
@@ -91,22 +92,41 @@ const props = defineProps({
     default: defaultCancelBtnColor,
     required: false,
   },
-  loading: {
-    type: Boolean,
-    default: false,
-  }, 
-  message: {
-    type: String,
-    default: '',
-    required: false,
-  },
+  data: {
+    type: Object,
+  }
 });
+
+const emit = defineEmits(['confirm', 'update:show', 'cancel']);
+// const show = ref(props.show);
 
 //Значения по умолчанию для кастомизации кнопок управления
 const defaultConfirmBtnColor = 'var(--cornflower-blue)';
 const defaultConfirmTextColor = 'var(--white)';
 const defaultCancelBtnColor = 'var(--link-water)';
 const defaultCancelTextColor = 'var(--cornflower-blue)';
+
+const loading = ref(false);
+const errMessage = ref('');
+const confirmFunction = async () => {
+  try {
+    loading.value = true;
+    const response = await props.data.func(props.data.callback, props.data.idQuestion);
+    props.data.callback(response);
+    emit('update:show');
+  } catch (error) {
+    errMessage.value = error;
+  } finally {
+    loading.value = false;
+  }
+};
+
+const cancelFunction = () => {
+  emit('cancel');
+  errMessage.value = '';
+};
+
+
 </script>
 
 <style scoped>
@@ -127,7 +147,7 @@ const defaultCancelTextColor = 'var(--cornflower-blue)';
 .modal-confirmation__controls {
   display: flex;
   gap: 10px;
-  
+
   margin-left: auto;
 }
 </style>

@@ -1,7 +1,7 @@
 <template>
   <Transition name="modal">
-    <div v-if="show" class="modal-mask">
-      <div class="modal-container">
+    <div v-if="show" class="modal-mask" @click="$emit('close')">
+      <div class="modal-container" @click.stop>
         <div class="modal-header">
           <slot name="header"></slot>
         </div>
@@ -11,7 +11,7 @@
         </div>
 
         <div class="modal-footer">
-          <slot name="footer-control-buttons"> </slot>
+          <slot name="footer-control-buttons"></slot>
         </div>
       </div>
     </div>
