@@ -115,6 +115,7 @@
               @confirm="handleConfirmRemoveVacancy"
               @cancel="handleCancelRemoveVacancy"
               :message="removeMessageErr"
+              :modal-function="removeQuestionFromServer"
             />
           </Teleport>
         </div>
@@ -153,6 +154,7 @@ import TopSquareButton from '@/components/TopSquareButton.vue';
 import iconBack from '@/assets/icons/back.svg';
 import VacancyQuestion from './components/VacancyQuestion.vue';
 import {ref, computed, onMounted, watch, reactive} from 'vue';
+import {ref, computed, onMounted, watch, reactive} from 'vue';
 import { useRoute, useRouter } from 'vue-router';
 
 import { isManager } from '@/js/AuthFunctions';
@@ -164,6 +166,7 @@ import { VacanciesGetAllVacancyById,
 import { MainRequestClass } from "@/js/RootClasses";
 import ButtonMain from "@/components/ButtonMain.vue";
 import ModalConfirmation from "@/components/ModalConfirmation.vue";
+import ModalConfirmationNew from "@/components/ModalConfirmationNew.vue";
 import ModalConfirmationNew from "@/components/ModalConfirmationNew.vue";
 import ErrorNotification from "@/components/ErrorNotification.vue";
 import TextEditor from "@/components/TextEditor.vue";
@@ -345,9 +348,8 @@ const removeQuestionFromServer = (id) => {
 // объект передающийся в модальное окно, функция удаления, id вопроса, коллбэк
 const dataProps = reactive({
   func: removeQuestionFromServer,
-  idQuestion: idCardQuestion,
   callback: function() {
-    formData.value.questions = formData.value.questions.filter((question) => question.id !== this.idQuestion);
+    formData.value.questions = formData.value.questions.filter((question) => question.id !== idCardQuestion.value);
   },
 });
 
