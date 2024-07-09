@@ -218,7 +218,7 @@ const saveLoad = ref(false); // true когда идет сохранение
 const removeLoad = ref(false); // true когда идет удаление вакансии
 const showModalOnRemoveQuestion = ref(false); // true когда показывается модалка удаления вопроса
 // ID последней карточки с вопросом, у которой была нажата мусорка
-const idCardQuestion = ref(0);
+const idCardQuestion = ref('');
 //Заполняем formData данными с сервера
 onMounted(() => {
   try {
@@ -263,10 +263,12 @@ const handleCancelRemoveVacancy = () => {
 };
 
 const updateShowQuestionModal = (id) => {
+  dataProps.idQuestion = id;
+  console.log(id);
   idCardQuestion.value = id;
+  console.log(idCardQuestion.value)
   // dataProps.idQuestion = id;
   showModalOnRemoveQuestion.value = !showModalOnRemoveQuestion.value;
-  console.log(showModalOnRemoveQuestion.value);
 }
 
 // отмена удаления вопроса
@@ -328,13 +330,13 @@ const removeQuestionFromServer = (id) => {
   return new Promise((resolve, reject) => {
     let requestClass = new VacanciesQuestionsDeleteVacancyQuestion();
     requestClass.vacancyId = vacancyId.value;
-    requestClass.questionId = idCardQuestion.value;
+    requestClass.questionId = id;
 
     requestClass.request(
       '/vacancies/questions/delete_vacancy_question.php',
       'manager',
       function (response) { // успешный результат
-        resolve(response); // Возвращаем результат операции через resolve
+        resolve(); // Возвращаем результат операции через resolve
       },
       function (err) { // неуспешный результат
         reject(err); // Возвращаем ошибку через reject
@@ -345,8 +347,9 @@ const removeQuestionFromServer = (id) => {
 // объект передающийся в модальное окно, функция удаления, id вопроса, коллбэк
 const dataProps = reactive({
   func: removeQuestionFromServer,
+  idQuestion: '',
   callback: function() {
-    formData.value.questions = formData.value.questions.filter((question) => question.id !== idCardQuestion.value);
+    formData.value.questions = formData.value.questions.filter((question) => question.id !== dataProps.idQuestion);
   },
 });
 
