@@ -109,19 +109,6 @@
   const loading = ref(false);
   const errMessage = ref('');
 
-  // функция при подтверждении действия
-  // const confirmFunction = async () => {
-  //   try {
-  //     loading.value = true;
-  //     await props.data.func(props.data?.idQuestion);
-  //     props.data.callback();
-  //     emit('update:show');
-  //   } catch (error) {
-  //     errMessage.value = error;
-  //   } finally {
-  //     loading.value = false;
-  //   }
-  // };
   
   const cancelFunction = () => {
     if (loading.value === false) {

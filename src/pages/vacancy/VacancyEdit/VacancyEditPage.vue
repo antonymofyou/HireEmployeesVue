@@ -148,11 +148,11 @@ import SelectMain from '@/components/SelectMain.vue';
 import TopSquareButton from '@/components/TopSquareButton.vue';
 import iconBack from '@/assets/icons/back.svg';
 import VacancyQuestion from './components/VacancyQuestion.vue';
-import {ref, computed, onMounted, watch, reactive} from 'vue';
+import { ref, computed, onMounted, watch, reactive } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
 
 import { isManager } from '@/js/AuthFunctions';
-import { VacanciesGetAllVacancyById,
+import { VacanciesGetAllVacancyById, 
   VacanciesQuestionsCreateVacancyQuestion,
   VacanciesQuestionsDeleteVacancyQuestion,
   VacanciesUpdateVacancy
@@ -268,9 +268,9 @@ const getVacancyDataManager = (callback) => {
 
   requestClass.request(
     '/vacancies/get_all_vacancy_by_id.php',
-    'manager',
+    'manager', 
     function (response) { // успешный результат
-      callback(response);
+      callback(response); 
     },
     function (err) { // неуспешный результат
       errorMessage.value = err;
@@ -286,7 +286,7 @@ const addQuestionToServer = (callback) => {
 
   requestClass.request(
     '/vacancies/questions/create_vacancy_question.php',
-    'manager',
+    'manager', 
     function (response) { // успешный результат
       callback(response);
       questionLoad.value = false;
@@ -297,7 +297,7 @@ const addQuestionToServer = (callback) => {
       questionLoad.value = false;
     }
   );
-
+  
 };
 
 // Вызов добавления вопроса и обновление formData
@@ -392,7 +392,7 @@ const saveChanges = (callback) => {
 
   requestClass.request(
     '/vacancies/update_vacancy.php',
-    'manager',
+    'manager', 
     function (response) {
       //callback(response);// успешный результат
       successMessage.value = 'Данные успешно сохранены!';

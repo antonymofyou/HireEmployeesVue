@@ -11,7 +11,7 @@
         </div>
 
         <div class="modal-footer">
-          <slot name="footer-control-buttons"></slot>
+          <slot name="footer-control-buttons"> </slot>
         </div>
       </div>
     </div>
