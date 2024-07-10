@@ -369,7 +369,7 @@ const questionsById = computed(() => {
       question: item.question,
       published: item.published,
     };
-
+    
     return acc;
   }, {})
 });
