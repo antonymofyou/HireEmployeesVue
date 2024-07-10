@@ -16,14 +16,14 @@ export default defineConfig({
       '@': fileURLToPath(new URL('./src', import.meta.url)),
     },
   },
-  // server: {
-  //   host: 'example.com',
-  //   port: 3000,
-  //   open: true,
-  //   cors: true,
-  //   hmr: {
-  //     host: 'example.com',
-  //     port: 3000
-  //   },
-  // },
+  server: {
+    host: 'example.com',
+    port: 3000,
+    open: true,
+    cors: true,
+    hmr: {
+      host: 'example.com',
+      port: 3000
+    },
+  },
 });

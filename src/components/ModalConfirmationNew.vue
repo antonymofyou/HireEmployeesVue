@@ -137,7 +137,7 @@ async function confirmFunction() {
   const asyncOperation = () => {
     return new Promise((resolve, reject) => {
       try {
-        let response = props.data.fetch(resolve, reject, props.data?.idQuestion);
+        let response = props.data.fetch(resolve, reject, props.data?.id);
         
       } catch (error) {
         
