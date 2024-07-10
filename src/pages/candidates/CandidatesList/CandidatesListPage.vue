@@ -85,7 +85,7 @@ const vacanciesIds = ref([]); // список id вакансий
 const candidates = ref([]); // список кандидатов
 const vacancyId = ref(''); // ID вакансии
 const status = ref('New'); // Статус кандидата
-const candidateStatus = ref([{ name: 'Все', id: 'Все', color: 'gray' }, {nama:'New', id: 'New', color: 'gray'}]); // Статусы кандидатов
+const candidateStatus = ref([{ name: 'Все', id: 'Все', color: 'gray' }, {name:'New', id: 'New', color: 'gray'}]); // Статусы кандидатов
 
 //Флаги загрузки данных
 const dataFetched = ref(false);
