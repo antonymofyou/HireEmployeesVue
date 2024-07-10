@@ -7,7 +7,7 @@
     <RouterLink :to="{ name: 'vacanciesList' }">
       <TopSquareButton class="vacancy-edit__back-btn" :icon="iconBack" />
     </RouterLink>
-
+    
     <section class="container">
       <h2 class="vacancy-edit__title">Редактирование вакансии</h2>
 
