@@ -136,7 +136,7 @@ const isLoaded = ref(false);
 const isSuccessfulLoad = ref(false);
 
 // Состояние авторизации
-const isLoggedIn = ref(true);
+const isLoggedIn = ref(false);
 
 // Разлогин пользователя
 const logOutSeeker = () => {
@@ -223,15 +223,14 @@ const updateCandidateData = (dataFromServer) => {
 // Наблюдение за изменением isLoggedIn и загрузка данных при необходимости
 watch(isLoggedIn, (newValue) => {
   if (newValue) {
+    isLoaded.value = false;
+    isSuccessfulLoad.value = false;
+    errorMessage.value = '';
+
     fetchCandidateData((dataFromServer) => updateCandidateData(dataFromServer));
 
-    // Проверка на успешную загрузку
-    if (newValue === true) {
-      isLoaded.value = true;
-      if (!errorMessage.value) {
-        isSuccessfulLoad.value = true;
-      }
-    }
+    isLoaded.value = true;
+    isSuccessfulLoad.value = !errorMessage.value;
   }
 });
 
