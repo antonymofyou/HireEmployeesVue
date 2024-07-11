@@ -16,6 +16,8 @@
       <CommentsStatus
         v-if="respondId"
         :respondId
+        status="New"
+        statusColor="#cf4c4c"
         class="comments-page__status-block"
       />
       <CommentsVacancy
@@ -59,11 +61,11 @@ import backIcon from '@/assets/icons/back.svg';
 import TopSquareButton from '@/components/TopSquareButton.vue';
 import CommentsQuestions from './components/CommentsQuestions.vue';
 import CommentsVacancy from './components/CommentsVacancy.vue';
-import CommentsStatus from './components/CommentsStatus.vue';
+import CommentsStatus from './components/CommentsStatus.vue'; 
 
 const route = useRoute();
 // ID отклика
-const respondId = route.query.respondId;
+const respondId = route.query.otklikId;
 // ID кандидата
 const candidateId = route.query.candidateId;
 // ID вакансии

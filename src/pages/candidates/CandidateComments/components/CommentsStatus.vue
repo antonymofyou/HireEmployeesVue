@@ -42,6 +42,14 @@ const props = defineProps({
     type: String,
     required: true,
   },
+  status: {
+    type: String,
+    required: true,
+  },
+  statusColor: {
+    type: String,
+    required: true,
+  }
 });
 
 // Флаг отправки запроса
@@ -53,40 +61,43 @@ const errorMessage = ref('');
 // Массив статусов кандидата
 const statuses = ref([]);
 // Статус кандидата
-const statusCurrent = ref({status: '', color: 'none', comment: ''});
+const statusCurrent = ref({
+  status: props.status,
+  color: props.statusColor
+});
 // Новый статус
 const newStatus = ref('');
 
 // Запрос данных по ответам кандидата
-const requestCandidateInfo = () => {
-  const requestInstance = new CandidatesGetOtklikAnswers();
-  requestInstance.otklikId = props.respondId;
-  errorMessage.value = '';
-  statusCurrent.value = {status: '', color: 'none', comment: ''};
+// const requestCandidateInfo = () => {
+//   const requestInstance = new CandidatesGetOtklikAnswers();
+//   requestInstance.otklikId = props.respondId;
+//   errorMessage.value = '';
+//   statusCurrent.value = {status: '', color: 'none', comment: ''};
 
-  requestInstance.request(
-    '/candidates/get_otklik_info.php',
-    'manager',
-    (response) => {
-      // Инициализируем массив статусов на основе полученных данных
-      if (!response.info.status) {
-        // Если статус неизвестный
-        statusCurrent.status.value = {status: '', color: 'none', comment: ''};
-        statuses.value = response.statusTransfers.length ? response.statusTransfers : [];
-      } else {
-        statusCurrent.value.status = response.info.status;
-        statusCurrent.value.color = response.info.statusColor;
-        statusCurrent.value.comment = response.info.statusComment;
-        statuses.value = response.statusTransfers.map((status) => ({
-          name: status.status,
-          id: status.status,
-          color: status.color
-        }));
-      }
-    },
-    (err) => (errorMessage.value = err)
-  );
-};
+//   requestInstance.request(
+//     '/candidates/get_otklik_info.php',
+//     'manager',
+//     (response) => {
+//       // Инициализируем массив статусов на основе полученных данных
+//       if (!response.info.status) {
+//         // Если статус неизвестный
+//         statusCurrent.status.value = {status: '', color: 'none', comment: ''};
+//         statuses.value = response.statusTransfers.length ? response.statusTransfers : [];
+//       } else {
+//         statusCurrent.value.status = response.info.status;
+//         statusCurrent.value.color = response.info.statusColor;
+//         statusCurrent.value.comment = response.info.statusComment;
+//         statuses.value = response.statusTransfers.map((status) => ({
+//           name: status.status,
+//           id: status.status,
+//           color: status.color
+//         }));
+//       }
+//     },
+//     (err) => (errorMessage.value = err)
+//   );
+// };
 
 // Изменение статуса
 const changeRespondStatus = () => {
@@ -118,7 +129,7 @@ const changeStatus = () => {
   changeRespondStatus();
 };
 
-onMounted(requestCandidateInfo);
+// onMounted(requestCandidateInfo);
 
 watch(
   () => statusChanged.value,
