@@ -73,7 +73,7 @@ const router = useRouter();
 // ID отклика
 const respondId = route.query.otklikId;
 // ID кандидата
-const candidateId = route.query.candidateId;
+const candidateId = ref('');
 // ID вакансии
 const vacancyId = ref('');
 // Статус отклика
@@ -101,6 +101,7 @@ const requestCandidateInfo = () => {
         statusCurrent.value = response.info.status;
         statusCurrentColor.value = response.info.statusColor;
         vacancyId.value = response.info.vacancyId;
+        candidateId.value = response.info.candidateId;
         statuses.value = response.statusTransfers.map((status) => ({
           name: status.status,
           id: status.status,
@@ -114,7 +115,7 @@ const requestCandidateInfo = () => {
 
 // Очистка query параметров, кроме Id кандидата и Id отклика
 const clearQueryParams = () => {
-  const query = { candidateId: route.query.candidateId, otklikId: route.query.otklikId };
+  const query = { otklikId: route.query.otklikId };
   router.replace({ path: route.path, query });
 };
 // Отправка запроса при монтировании
