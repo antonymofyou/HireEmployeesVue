@@ -27,11 +27,8 @@
 </template>
 
 <script setup>
-import { onMounted, ref, watch } from 'vue';
-import {
-  CandidatesGetOtklikAnswers,
-  CandidatesSetOtklikStatus,
-} from '../js/CommentsClasses';
+import { ref, watch } from 'vue';
+import {CandidatesSetOtklikStatus } from '../js/CommentsClasses';
 import SelectMain from '@/components/SelectMain.vue';
 import ButtonMain from '@/components/ButtonMain.vue';
 import StatusColored from '@/components/StatusColored.vue';
@@ -42,12 +39,19 @@ const props = defineProps({
     type: String,
     required: true,
   },
+  // Статус
   status: {
     type: String,
     required: true,
   },
+  // Цвет статуса
   statusColor: {
     type: String,
+    required: true,
+  },
+  // Массив статусов
+  statuses: {
+    type: Array,
     required: true,
   }
 });
@@ -59,7 +63,7 @@ const statusChanged = ref(false);
 // Сообщение об ошибке
 const errorMessage = ref('');
 // Массив статусов кандидата
-const statuses = ref([]);
+const statuses = ref(props.statuses);
 // Статус кандидата
 const statusCurrent = ref({
   status: props.status,
@@ -67,37 +71,6 @@ const statusCurrent = ref({
 });
 // Новый статус
 const newStatus = ref('');
-
-// Запрос данных по ответам кандидата
-// const requestCandidateInfo = () => {
-//   const requestInstance = new CandidatesGetOtklikAnswers();
-//   requestInstance.otklikId = props.respondId;
-//   errorMessage.value = '';
-//   statusCurrent.value = {status: '', color: 'none', comment: ''};
-
-//   requestInstance.request(
-//     '/candidates/get_otklik_info.php',
-//     'manager',
-//     (response) => {
-//       // Инициализируем массив статусов на основе полученных данных
-//       if (!response.info.status) {
-//         // Если статус неизвестный
-//         statusCurrent.status.value = {status: '', color: 'none', comment: ''};
-//         statuses.value = response.statusTransfers.length ? response.statusTransfers : [];
-//       } else {
-//         statusCurrent.value.status = response.info.status;
-//         statusCurrent.value.color = response.info.statusColor;
-//         statusCurrent.value.comment = response.info.statusComment;
-//         statuses.value = response.statusTransfers.map((status) => ({
-//           name: status.status,
-//           id: status.status,
-//           color: status.color
-//         }));
-//       }
-//     },
-//     (err) => (errorMessage.value = err)
-//   );
-// };
 
 // Изменение статуса
 const changeRespondStatus = () => {
@@ -128,8 +101,6 @@ const changeRespondStatus = () => {
 const changeStatus = () => {
   changeRespondStatus();
 };
-
-// onMounted(requestCandidateInfo);
 
 watch(
   () => statusChanged.value,

@@ -4,7 +4,7 @@
       <RouterLink
         :to="{
           name: 'candidates',
-          query: { vacancyId: vacancyId, status: status },
+          query: { vacancyId: vacancyId, status: statusCurrent },
         }"
       >
         <TopSquareButton class="comments-page__back-btn" :icon="backIcon" />
@@ -14,10 +14,11 @@
 
     <template v-if="candidateId || respondId">
       <CommentsStatus
-        v-if="respondId"
+        v-if="respondId && statusCurrent"
         :respondId
-        status="New"
-        statusColor="#cf4c4c"
+        :status="statusCurrent"
+        :statusColor="statusCurrentColor"
+        :statuses="statuses"
         class="comments-page__status-block"
       />
       <CommentsVacancy
@@ -55,7 +56,9 @@
 </template>
 
 <script setup>
-import { useRoute } from 'vue-router';
+import { useRoute, useRouter} from 'vue-router';
+import { ref, onMounted } from 'vue';
+import { CandidatesGetOtklikAnswers } from './js/CommentsClasses';
 import CommentsBlock from './components/CommentsBlock.vue';
 import backIcon from '@/assets/icons/back.svg';
 import TopSquareButton from '@/components/TopSquareButton.vue';
@@ -63,15 +66,62 @@ import CommentsQuestions from './components/CommentsQuestions.vue';
 import CommentsVacancy from './components/CommentsVacancy.vue';
 import CommentsStatus from './components/CommentsStatus.vue'; 
 
+// Переменные Vue-router
 const route = useRoute();
+const router = useRouter();
+
 // ID отклика
 const respondId = route.query.otklikId;
 // ID кандидата
 const candidateId = route.query.candidateId;
 // ID вакансии
-const vacancyId = route.query.vacancyId;
+const vacancyId = ref('');
 // Статус отклика
-const status = route.query.status;
+const statusCurrent = ref('');
+const statusCurrentColor = ref('');
+// Массив статусов для передачи в компонент CommentsStatus
+const statuses = ref([]);
+
+const  errorMessage = ref('')
+// Запрос данных по ответам кандидата
+const requestCandidateInfo = () => {
+  const requestInstance = new CandidatesGetOtklikAnswers();
+  requestInstance.otklikId = respondId;
+
+  requestInstance.request(
+    '/candidates/get_otklik_info.php',
+    'manager',
+    (response) => {
+      // Инициализируем массив статусов на основе полученных данных
+      if (!response.info.status) {
+        // Если статус неизвестный
+        statuses.value = response.statusTransfers.length ? response.statusTransfers : [];
+      } else {
+        // Записываем данные с сервера
+        statusCurrent.value = response.info.status;
+        statusCurrentColor.value = response.info.statusColor;
+        vacancyId.value = response.info.vacancyId;
+        statuses.value = response.statusTransfers.map((status) => ({
+          name: status.status,
+          id: status.status,
+          color: status.color
+        }));
+      }
+    },
+    (err) => (errorMessage.value = err)
+  );
+};
+
+// Очистка query параметров, кроме Id кандидата и Id отклика
+const clearQueryParams = () => {
+  const query = { candidateId: route.query.candidateId, otklikId: route.query.otklikId };
+  router.replace({ path: route.path, query });
+};
+// Отправка запроса при монтировании
+onMounted(() => {
+  requestCandidateInfo();
+  clearQueryParams();
+});
 </script>
 
 <style scoped>
