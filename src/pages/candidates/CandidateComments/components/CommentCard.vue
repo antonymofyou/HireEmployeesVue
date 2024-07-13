@@ -44,7 +44,6 @@
             <img class="icon" src="@/assets/icons/delete.svg" />
           </button>
         </div>
-        <div class="comment__error">{{ errorMessage }}</div>
       </div>
     </div>
 
@@ -65,24 +64,20 @@
 
     <div class="comment__date">{{ formattedDate }}</div>
 
-    <ModalConfirmation
-      :show="isModalOpened"
+    <ModalConfirmationNew
+      v-model:show="isModalOpened"
       :confirm-button-color="'var(--cinnabar)'"
       text="Вы уверены, что хотите удалить комментарий?"
       cancel-text="Отмена"
       confirm-text="Удалить"
-      @confirm="
-        emit('delete', { id: props.comment.id }), (isModalOpened = false)
-      "
-      @cancel="isModalOpened = false"
-      @click.self="isModalOpened = false"
+      :data="dataPropsDelete"
     />
   </div>
 </template>
 
 <script setup>
-import { computed, ref, watch } from 'vue';
-import ModalConfirmation from '@/components/ModalConfirmation.vue';
+import { computed, onMounted, reactive, ref, watch } from 'vue';
+import ModalConfirmationNew from '@/components/ModalConfirmationNew.vue';
 
 const props = defineProps({
   // Объект комментария
@@ -97,6 +92,9 @@ const props = defineProps({
     default: '',
     required: false,
   },
+  forModal: {
+    type: Object,
+  }
 });
 
 const emit = defineEmits(['delete', 'updateComment']);
@@ -177,6 +175,12 @@ const formattedDate = computed(() => {
     ? created
     : `${updated} (изменено)`;
 });
+
+const dataPropsDelete = reactive({
+  fetch: props.forModal.fetch('delete', { id: props.comment.id }),
+  dataArg: '',
+  callback: props.forModal.callback(props.comment.id),
+})
 
 //Отслеживание флага модального окна для сокрытия скролла
 watch(

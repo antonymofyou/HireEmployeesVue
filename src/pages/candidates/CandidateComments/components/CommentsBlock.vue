@@ -60,9 +60,9 @@
               :comment
               :key="comment.id"
               class="comments__comment"
-              @delete="deleteComment"
               @update-comment="updateComment"
               :errorMessage="errorMessageControls"
+              :for-modal="dataPropsDelete"
             />
           </template>
           <div v-if="!isLoading && !comments.length">Нет комментариев</div>
@@ -79,7 +79,7 @@
 </template>
 
 <script setup>
-import { ref, computed, onMounted, watch } from 'vue';
+import { ref, computed, onMounted, watch, reactive } from 'vue';
 import CommentCard from '@/pages/candidates/CandidateComments/components/CommentCard.vue';
 import SpinnerMain from '@/components/SpinnerMain.vue';
 import CommentAddition from './CommentAddition.vue';
@@ -144,7 +144,7 @@ const dispatchComments = (action, payload) => {
   errorMessageCreate.value = '';
   errorMessageControls.value = '';
 
-  return (onSuccess) =>
+  return (onSuccess, errCallback) =>
     requestInstance.request(
       '/candidates/set_candidate_comment.php',
       'manager',
@@ -153,6 +153,7 @@ const dispatchComments = (action, payload) => {
         if (action === 'create') {
           errorMessageCreate.value = err;
         } else errorMessageControls.value = err;
+        errCallback(err);
       }
     );
 };
@@ -186,6 +187,18 @@ const deleteComment = (payload) => {
   const requestFn = dispatchComments('delete', payload);
   requestFn(onDeleteSuccess);
 };
+
+const dataPropsDelete = reactive({
+  fetch: dispatchComments,
+  dataArg: '',
+  callback: (id) => {
+    return () => {
+      comments.value = comments.value.filter(
+      (comment) => comment.id !== id
+    );
+    }
+  },
+})
 
 // Создание комментария
 const createComment = (payload) => {

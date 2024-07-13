@@ -123,18 +123,13 @@ async function confirmFunction() {
   // Преобразуем функцию в Promise
   const asyncOperation = () => {
     return new Promise((resolve, reject) => {
-      try {
-        let response = props.data.fetch(resolve, reject, props.data?.id);
-        
-      } catch (error) {
-        
-      }
+      props.data.fetch(resolve, reject, props.data.dataArg);
     });
   };
 
   try {
-    await asyncOperation();
-    props.data.callback();
+    const response = await asyncOperation();
+    props.data.callback(response);
     emit('update:show');
   } catch (error) {
     errMessage.value = error;

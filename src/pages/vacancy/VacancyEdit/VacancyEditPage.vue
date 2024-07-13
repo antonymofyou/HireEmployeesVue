@@ -253,7 +253,7 @@ const updateIsPublished = (index, value) => {
 
 
 const updateShowQuestionModal = (id) => {
-  dataPropsQuestions.id = id;
+  dataPropsQuestions.dataArg = id;
   idCardQuestion.value = id;
   showModalOnRemoveQuestion.value = !showModalOnRemoveQuestion.value;
 }
@@ -317,7 +317,7 @@ const removeQuestionFromServer = (success, reject, id) => {
       '/vacancies/questions/delete_vacancy_question.php',
       'manager',
       function (response) { // успешный результат
-         success();
+         success(response);
       },
       function (err) { // неуспешный результат
          reject(err);
@@ -327,9 +327,9 @@ const removeQuestionFromServer = (success, reject, id) => {
 // объект для удаления вопроса передающийся в модальное окно, функция удаления, id вопроса, коллбэк
 const dataPropsQuestions = reactive({
   fetch: removeQuestionFromServer,
-  id: '',
+  dataArg: '',
   callback: function() {
-    formData.value.questions = formData.value.questions.filter((question) => question.id !== this.id);
+    formData.value.questions = formData.value.questions.filter((question) => question.id !== this.dataArg);
   },
 });
 
@@ -352,7 +352,7 @@ function handleConfirmRemoveVacancy(success, reject, id)  {
 // объект для удаления вакансии
 const dataPropsVacancy = reactive({
   fetch: handleConfirmRemoveVacancy,
-  id: vacancyId.value,
+  dataArg: vacancyId.value,
   callback: function() {
     router.go(-1);
   },

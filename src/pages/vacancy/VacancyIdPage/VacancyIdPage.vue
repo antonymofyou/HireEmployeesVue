@@ -30,12 +30,11 @@
       </ButtonMain>
 
       <Teleport to="body">
-        <ModalConfirmation
-          :show="showModalOnSave"
+        <ModalConfirmationNew
+          v-model:show="showModalOnSave"
           confirmText="Сохранить"
           text="Вы уже сохранили ответы на другом устройстве. При повторном сохранении, предыдущие данные будут утеряны."
-          @confirm="handleConfirmSave"
-          @cancel="handleCancelSave"
+          :data="dataPropsSave"
         />
       </Teleport>
     </header>
@@ -86,12 +85,11 @@
         <template v-slot:icon><SendIcon width="20px" height="20px"/></template>
       </ButtonMain>
 
-      <ModalConfirmation
-        :show="showModalOnSend"
+      <ModalConfirmationNew
+        v-model:show="showModalOnSend"
         confirmText="Отправить"
         text="Вы точно хотите отправить ответы? Веденные данные нельзя будет изменить."
-        @confirm="handleConfirmSend"
-        @cancel="handleCancelSend"
+        :data="dataPropsSend"
       />
     </section>
   </div>
@@ -108,7 +106,7 @@
 </template>
 
 <script setup>
-import { ref, computed, watch, onMounted } from 'vue';
+import { ref, computed, watch, onMounted, reactive } from 'vue';
 import { useRoute } from 'vue-router';
 
 import tgAuth from './components/tgAuth/tgAuth.vue';
@@ -122,12 +120,12 @@ import { VacanciesGetVacancyById,
 import VacancyIdQuestion from './components/VacancyIdQuestion.vue';
 import ButtonMain from '@/components/ButtonMain.vue';
 import InputSimple from '@/components/InputSimple.vue';
-import ModalConfirmation from '@/components/ModalConfirmation.vue';
 import SpinnerMain from '@/components/SpinnerMain.vue';
 import ErrorNotification from "@/components/ErrorNotification.vue";
 import SaveIcon from '@/assets/icons/save.svg?component';
 import SendIcon from '@/assets/icons/send.svg?component';
 import LogOutIcon from './assets/icons/logOut.svg?component';
+import ModalConfirmationNew from '@/components/ModalConfirmationNew.vue';
 
 // Индикатор загрузки компонента
 const isLoaded = ref(false);
@@ -308,7 +306,7 @@ const getCandidateFromServer = (successCallback, errorCallback) => {
 };
 
 // Функция для сохранения и отправки ответов
-const submitAnswers = ({ force = 0, finish = 0 } = {}, successCallback, errorCallback) => {
+const submitAnswers = (successCallback, errorCallback, { force = 0, finish = 0 } = {}) => {
   // Формирование объекта с ответами для отправки изменений на сервер
   const formattedAnswers = candidateData.value.vacancy.questions.reduce((acc, item) => {
     // Ключ - id вопроса, значение - ответ
@@ -338,6 +336,22 @@ const submitAnswers = ({ force = 0, finish = 0 } = {}, successCallback, errorCal
 
 };
 
+// объект для модального окна при отправке данных
+const dataPropsSend = reactive({
+  fetch: submitAnswers,
+  dataArg: { finish: 1 },
+  callback: (response) => {
+      // получаем данные о статусе и сообщении
+      const { message: resMessage, success: resSuccess } = response;
+      // Если данные успешно отправились, обновляем данные кандидата
+      if (resSuccess === '1') {
+        fetchCandidateData((dataFromServer) => updateCandidateData(dataFromServer));
+      } else {
+        errorHandleSend(resMessage);
+      }
+    },
+});
+
 /*  Логика сохранения ответов  */
 // Показ модального окна при сохранении
 const showModalOnSave = ref(false);
@@ -366,7 +380,7 @@ const errorHandleSave = (errMessage) => {
 // Обработчик нажатия кнопки сохранения
 const handleSave = () => {
   isActiveSave.value = true;
-  submitAnswers({ force: 0, finish: 0 }, (response) => {
+  submitAnswers((response) => {
     // получаем данные о статусе и сообщении
     const { message: resMessage, success: resSuccess } = response;
 
@@ -390,17 +404,14 @@ const handleSave = () => {
   // Возникла ошибка
   (err) => {
     errorHandleSave(err);
-  });
+  }, { force: 0, finish: 0 }, );
 };
 
-// Обработчик подтверждения сохранения в модальном окне
-const handleConfirmSave = () => {
-  isActiveSave.value = true;
-  showModalOnSave.value = false;
-  // Вызов принудительного сохранения
-  submitAnswers({ force: 1, finish: 0 },
-    // успешный резльутат
-    (response) => {
+// объект сохранения для модального окна
+const dataPropsSave = reactive({
+  fetch: submitAnswers,
+  dataArg: { force: 1, finish: 0 },
+  callback: (response) => {
       // получаем данные о статусе и сообщении
       const { message: resMessage, success: resSuccess } = response;
 
@@ -411,23 +422,9 @@ const handleConfirmSave = () => {
       } else {
         messageSave.value = resMessage;
       }
-
-      // Кнопка переводится в неактивное состояние
-      isActiveSave.value = false;
     },
-    // Возникла ошибка
-    (err) => {
-      errorHandleSave(err);
-  });
-};
+});
 
-// Обработчик отмены сохранения в модальном окне
-const handleCancelSave = () => {
-  showModalOnSave.value = false;
-  
-  // Закрытие модального окна подтвреждения отправки, если отменено сохранение
-  showModalOnSend.value = false;
-};
 
 /*  Логика отправки ответов  */
 // Показ модального окна при отправке
@@ -452,38 +449,6 @@ const handleSend = () => {
   handleSave();
 
   showModalOnSend.value = true;
-};
-
-// Обработчик подтверждения отправки в модальном окне
-const handleConfirmSend = () => {
-  isActiveSend.value = true;
-  showModalOnSend.value = false;
-
-  //Отправка ответов на сервер и изменение статуса вакансии на SENT
-  submitAnswers({ finish: 1 },
-    // успешный резльутат
-    (response) => {
-      // получаем данные о статусе и сообщении
-      const { message: resMessage, success: resSuccess } = response;
-      // Если данные успешно отправились, обновляем данные кандидата
-      if (resSuccess === '1') {
-        fetchCandidateData((dataFromServer) => updateCandidateData(dataFromServer));
-      } else {
-        errorHandleSend(resMessage)
-      }
-
-      // Кнопка переводится в неактивное состояние
-      isActiveSend.value = false;
-    },
-    // если возникла ошибка
-    (err) => {
-      errorHandleSend(err);
-    });
-};
-
-// Обработчик отмены отправки в модальном окне
-const handleCancelSend = () => {
-  showModalOnSend.value = false;
 };
 </script>
 
