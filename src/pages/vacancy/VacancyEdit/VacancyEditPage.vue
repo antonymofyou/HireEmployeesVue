@@ -75,12 +75,12 @@
           />
         </transition-group>
         <Teleport to="body">
-          <ModalConfirmationNew
+          <ModalConfirmation
             v-model:show="showModalOnRemoveQuestion"
             confirmText="Удалить"
             text="Вы уверены, что хотите удалить вопрос? Это действие нельзя отменить"
             confirmButtonColor="var(--cinnabar)"
-            :data="dataPropsQuestions"
+            :requestObject="removeQuestionRequestObject"
           />
        </Teleport>
         <div class="vacancy-edit__questions-footer">
@@ -99,18 +99,18 @@
           <ButtonMain
             buttonColor="var(--cinnabar)"
             type="button"
-            @click="showModalOnRemoveVacancy = !showModalOnRemoveVacancy"
+            @click="showModalOnRemoveVacancy = true"
           >
             <template v-slot:text>Удалить вакансию</template>
           </ButtonMain>
 
           <Teleport to="body">
-            <ModalConfirmationNew
+            <ModalConfirmation
               v-model:show="showModalOnRemoveVacancy"
               confirmText="Удалить"
               text="Вы уверены, что хотите удалить вакансию? Это действие нельзя отменить"
               confirmButtonColor="var(--cinnabar)"
-              :data="dataPropsVacancy"
+              :requestObject="removeVacancyRequestObject"
             />
           </Teleport>
         </div>
@@ -159,7 +159,7 @@ import { VacanciesGetAllVacancyById,
 } from './js/ApiClassesVacancyEdit.js';
 import { MainRequestClass } from "@/js/RootClasses";
 import ButtonMain from "@/components/ButtonMain.vue";
-import ModalConfirmationNew from "@/components/ModalConfirmationNew.vue";
+import ModalConfirmation from "@/components/ModalConfirmation.vue";
 import ErrorNotification from "@/components/ErrorNotification.vue";
 import TextEditor from "@/components/TextEditor.vue";
 import SpinnerMain from "@/components/SpinnerMain.vue";
@@ -211,9 +211,6 @@ const successMessage = ref(''); // текст успешного сохране�
 const questionLoad = ref(false); // true когда идет добавление вопроса
 const saveLoad = ref(false); // true когда идет сохранение
 
-// ID последней карточки с вопросом, у которой была нажата мусорка
-const idCardQuestion = ref('');
-
 //Заполняем formData данными с сервера
 onMounted(() => {
   try {
@@ -253,8 +250,7 @@ const updateIsPublished = (index, value) => {
 
 
 const updateShowQuestionModal = (id) => {
-  dataPropsQuestions.dataArg = id;
-  idCardQuestion.value = id;
+  removeQuestionRequestObject.dataArg = id;
   showModalOnRemoveQuestion.value = !showModalOnRemoveQuestion.value;
 }
 
@@ -307,7 +303,7 @@ const addQuestion = () => {
   });
 };
 
-
+// Удаление вопроса с сервера (по передаваемому id)
 const removeQuestionFromServer = (success, reject, id) => {
     let requestClass = new VacanciesQuestionsDeleteVacancyQuestion();
     requestClass.vacancyId = vacancyId.value;
@@ -324,8 +320,9 @@ const removeQuestionFromServer = (success, reject, id) => {
       }
     );
 };
-// объект для удаления вопроса передающийся в модальное окно, функция удаления, id вопроса, коллбэк
-const dataPropsQuestions = reactive({
+
+// Объект для удаления вопроса, передающийся в модальное окно: функция удаления, id вопроса, коллбэк, выполняющийся после запроса
+const removeQuestionRequestObject = reactive({
   fetch: removeQuestionFromServer,
   dataArg: '',
   callback: function() {
@@ -333,32 +330,29 @@ const dataPropsQuestions = reactive({
   },
 });
 
-
-function handleConfirmRemoveVacancy(success, reject, id)  {
+const removeVacancyFromServer = (success, reject, id) => {
   let removeVacancy = new MainRequestClass();
   removeVacancy.vacancyId = id;
   removeVacancy.request(
     '/vacancies/delete_vacancy.php',
     'manager',
-    function (response) {
-      success()
+    function (response) { // успешный результат
+      success(response);
     },
-    function (err) {
-      reject(err)
+    function (err) { // неуспешный результат
+      reject(err);
     }
   );
 };
 
-// объект для удаления вакансии
-const dataPropsVacancy = reactive({
-  fetch: handleConfirmRemoveVacancy,
+// Объект для удаления вакансии, передающийся в модальное окно: функция удаления, id вакансии, коллбэк, выполняющийся после запроса
+const removeVacancyRequestObject = reactive({
+  fetch: removeVacancyFromServer,
   dataArg: vacancyId.value,
   callback: function() {
     router.go(-1);
   },
 });
-
-
 
 // Формирование объекта с вопросами для отправки изменений на сервер
 const questionsById = computed(() => {
@@ -410,7 +404,7 @@ const saveChanges = (callback) => {
 // Ссылка на вакансию
 const vacancyLink = computed(() => {
   const baseUrl = window.location.origin;
-  return `${baseUrl}/vacancy/${vacancyId.value}`;
+  return `${baseUrl}/vac/${vacancyId.value}`;
 });
 
 // Состояние копирования

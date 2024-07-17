@@ -32,9 +32,8 @@
                   :comment
                   :key="comment.id"
                   class="comments__comment"
-                  @delete="deleteComment"
                   @update-comment="updateComment"
-                  :errorMessage="errorMessageControls"
+                  :removeRequestObject="dataPropsDelete"
                 />
               </template>
               <p v-if="!isLoading && !comments.length">Нет комментариев</p>
@@ -62,7 +61,7 @@
               class="comments__comment"
               @update-comment="updateComment"
               :errorMessage="errorMessageControls"
-              :for-modal="dataPropsDelete"
+              :removeRequestObject="removeCommentObject"
             />
           </template>
           <div v-if="!isLoading && !comments.length">Нет комментариев</div>
@@ -176,19 +175,7 @@ const updateComment = (payload) => {
 };
 
 // Удаление комментария
-const deleteComment = (payload) => {
-  // Удаление комментария из массива без перезапроса на сервер
-  const onDeleteSuccess = () => {
-    comments.value = comments.value.filter(
-      (comment) => comment.id !== payload.id
-    );
-  };
-  // Функция для запроса на удаление комментария
-  const requestFn = dispatchComments('delete', payload);
-  requestFn(onDeleteSuccess);
-};
-
-const dataPropsDelete = reactive({
+const removeCommentObject = reactive({
   fetch: dispatchComments,
   dataArg: '',
   callback: (id) => {

@@ -30,11 +30,11 @@
       </ButtonMain>
 
       <Teleport to="body">
-        <ModalConfirmationNew
+        <ModalConfirmation
           v-model:show="showModalOnSave"
           confirmText="Сохранить"
           text="Вы уже сохранили ответы на другом устройстве. При повторном сохранении, предыдущие данные будут утеряны."
-          :data="dataPropsSave"
+          :requestObject="forceSaveAnswersRequestObject"
         />
       </Teleport>
     </header>
@@ -85,11 +85,11 @@
         <template v-slot:icon><SendIcon width="20px" height="20px"/></template>
       </ButtonMain>
 
-      <ModalConfirmationNew
+      <ModalConfirmation
         v-model:show="showModalOnSend"
         confirmText="Отправить"
         text="Вы точно хотите отправить ответы? Веденные данные нельзя будет изменить."
-        :data="dataPropsSend"
+        :requestObject="submitAnswersRequestObject"
       />
     </section>
   </div>
@@ -120,12 +120,12 @@ import { VacanciesGetVacancyById,
 import VacancyIdQuestion from './components/VacancyIdQuestion.vue';
 import ButtonMain from '@/components/ButtonMain.vue';
 import InputSimple from '@/components/InputSimple.vue';
+import ModalConfirmation from '@/components/ModalConfirmation.vue';
 import SpinnerMain from '@/components/SpinnerMain.vue';
 import ErrorNotification from "@/components/ErrorNotification.vue";
 import SaveIcon from '@/assets/icons/save.svg?component';
 import SendIcon from '@/assets/icons/send.svg?component';
 import LogOutIcon from './assets/icons/logOut.svg?component';
-import ModalConfirmationNew from '@/components/ModalConfirmationNew.vue';
 
 // Индикатор загрузки компонента
 const isLoaded = ref(false);
@@ -336,8 +336,8 @@ const submitAnswers = (successCallback, errorCallback, { force = 0, finish = 0 }
 
 };
 
-// объект для модального окна при отправке данных
-const dataPropsSend = reactive({
+// Объект для отправки отклика, передающийся в модальное окно: функция отправки, флаг, указывающий на завершение заполнения вакансии, коллбэк, выполняющийся после запроса
+const submitAnswersRequestObject = reactive({
   fetch: submitAnswers,
   dataArg: { finish: 1 },
   callback: (response) => {
@@ -407,8 +407,8 @@ const handleSave = () => {
   }, { force: 0, finish: 0 }, );
 };
 
-// объект сохранения для модального окна
-const dataPropsSave = reactive({
+// Объект для отправки отклика, передающийся в модальное окно: функция отправки, флаг, указывающий на принудительное сохранение, коллбэк, выполняющийся после запроса
+const forceSaveAnswersRequestObject = reactive({
   fetch: submitAnswers,
   dataArg: { force: 1, finish: 0 },
   callback: (response) => {

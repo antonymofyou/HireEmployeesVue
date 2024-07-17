@@ -64,36 +64,30 @@
 
     <div class="comment__date">{{ formattedDate }}</div>
 
-    <ModalConfirmationNew
+    <ModalConfirmation
       v-model:show="isModalOpened"
       :confirm-button-color="'var(--cinnabar)'"
       text="Вы уверены, что хотите удалить комментарий?"
       cancel-text="Отмена"
       confirm-text="Удалить"
-      :data="dataPropsDelete"
+      :requestObject="removeCommentRequestObject"
     />
   </div>
 </template>
 
 <script setup>
-import { computed, onMounted, reactive, ref, watch } from 'vue';
-import ModalConfirmationNew from '@/components/ModalConfirmationNew.vue';
+import { computed, reactive, ref, watch } from 'vue';
+import ModalConfirmation from '@/components/ModalConfirmation.vue';
 
+// Объект комментария, объект для запроса на удаления (для модального окна)
 const props = defineProps({
-  // Объект комментария
   comment: {
     type: Object,
     required: true,
   },
-
-  // Сообщение об ошибке
-  errorMessage: {
-    type: String,
-    default: '',
-    required: false,
-  },
-  forModal: {
+  removeRequestObject: {
     type: Object,
+    required: true,
   }
 });
 
@@ -176,10 +170,11 @@ const formattedDate = computed(() => {
     : `${updated} (изменено)`;
 });
 
-const dataPropsDelete = reactive({
-  fetch: props.forModal.fetch('delete', { id: props.comment.id }),
+// Объект для удаления комментария, передающийся в модальное окно: функция удаления комментария, дополнительные данные, коллбэк, выполняющийся после запроса
+const removeCommentRequestObject = reactive({
+  fetch: props.removeRequestObject.fetch('delete', { id: props.comment.id }),
   dataArg: '',
-  callback: props.forModal.callback(props.comment.id),
+  callback: props.removeRequestObject.callback(props.comment.id),
 })
 
 //Отслеживание флага модального окна для сокрытия скролла
@@ -297,11 +292,5 @@ watch(
 .comment__date {
   font-size: 10px;
   text-align: right;
-}
-
-.comment__error {
-  text-align: end;
-  color: var(--error-color);
-  font-size: 12px;
 }
 </style>
