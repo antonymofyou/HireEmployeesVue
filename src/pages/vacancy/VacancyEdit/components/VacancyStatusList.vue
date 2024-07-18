@@ -3,79 +3,80 @@
     <div>Статусы: {{ statusList.statuses.length || 'Статусы не заданы' }}</div>
     <div class="statuslist__list-box">
       <div
-        class="statuslist__list-items"
-        v-for="status in statusList.statuses"
-        :key="status.statusName"
+          class="statuslist__list-items"
+          v-for="status in statusList.statuses"
+          :key="status.statusName"
       >
         <div
-          class="statuslist__list-status"
-          @click="
+            class="statuslist__list-status"
+            @click="
             indicators.activeHandlers =
               !indicators.activeHandlers ||
               statusMod.name !== status.statusName;
             statusMod.name = status.statusName;
           "
         >
-          <div
-            class="statuslist__list-comment"
-            :style="{ backgroundColor: status.statusColor }"
-          >
-            {{ status.statusName }}
-            <div
-              v-if="status.statusComment"
-              class="statuslist__list-comment-tooltip"
-            >
-              {{ status.statusComment || 'Нет комментария' }}
-            </div>
-            <ButtonIcon
-              class="statuslist__list-btn"
-              @click="
-                (indicators.isEdit = true),
+          <div class="status-container" :style="{ backgroundColor: status.statusColor }">
+            <StatusColored
+                :statusText="status.statusName"
+                :statusColor="status.statusColor"
+                class="status-colored-full-width"
+            />
+              <ButtonIcon
+                  class="statuslist__list-btn"
+                  @click="
+                  (indicators.isEdit = true),
                   (statusMod.name = status.statusName),
                   (statusMod.comment = status.statusComment),
                   (statusMod.color = status.statusColor)
-              "
-            >
-              <template v-slot:icon
+                "
+              >
+                <template v-slot:icon
                 ><IconEdit
-                  :class="'statuslist__list-icon-edit'"
-                  :style="{
+                    :class="'statuslist__list-icon-edit'"
+                    :style="{
                     display:
                       indicators.activeHandlers &&
                       statusMod.name === status.statusName
                         ? 'block'
                         : 'none',
                   }"
-              /></template>
-            </ButtonIcon>
-            <ButtonIcon
-              class="statuslist__list-btn"
-              @click="handleModification(status.statusName, 'delete')"
-            >
-              <template v-slot:icon
+                /></template>
+              </ButtonIcon>
+              <ButtonIcon
+                  class="statuslist__list-btn"
+                  @click="handleModification(status.statusName, 'delete')"
+              >
+                <template v-slot:icon
                 ><IconDelete
-                  :class="'statuslist__list-icon-delete'"
-                  :style="{
+                    :class="'statuslist__list-icon-delete'"
+                    :style="{
                     display:
                       indicators.activeHandlers &&
                       statusMod.name === status.statusName
                         ? 'block'
                         : 'none',
                   }"
-              /></template>
-            </ButtonIcon>
+                /></template>
+              </ButtonIcon>
+            <div
+                v-if="status.statusComment"
+                class="statuslist__list-comment-tooltip"
+            >
+              {{ status.statusComment || 'Нет комментария' }}
+            </div>
           </div>
         </div>
         <div v-if="statusList.transferStatuses[status.statusName].length">
           <IconArrowSharp class="statuslist__list-arrow" />
         </div>
         <div
-          v-if="statusList.transferStatuses[status.statusName].length"
-          class="statuslist__list-transfers"
+            v-if="statusList.transferStatuses[status.statusName].length"
+            class="statuslist__list-transfers"
         >
           <div
-            class="statuslist__list-transfers-box"
-            v-for="transfer in statusList.transferStatuses[status.statusName]"
+              class="statuslist__list-transfers-box"
+              v-for="transfer in statusList.transferStatuses[status.statusName]"
           >
             <div
               class="statuslist__list-transfers-item"
@@ -91,7 +92,11 @@
                 statusMod.name = status.statusName;
               "
             >
-              {{ transfer || '' }}
+              <StatusColored
+                  :statusText="transfer"
+                  :statusColor="statusList.statuses.find((s) => s.statusName === transfer).statusColor"
+                  class="status-colored-full-width"
+              />
               <ButtonIcon
                 class="statuslist__list-btn"
                 @click="
@@ -119,8 +124,8 @@
           </div>
         </div>
         <ButtonIcon
-          class="statuslist__list-btn"
-          @click="
+            class="statuslist__list-btn"
+            @click="
             if (indicators.isTransfer && statusMod.name !== status.statusName) {
               statusMod.name = status.statusName;
             } else
@@ -129,14 +134,14 @@
           "
         >
           <template v-slot:icon
-            ><IconAdd class="statuslist__list-icon"
+          ><IconAdd class="statuslist__list-icon"
           /></template>
         </ButtonIcon>
         <SelectMain
-          v-if="indicators.isTransfer && statusMod.name === status.statusName"
-          class="statuslist__list-select"
-          v-model="statusMod.toName"
-          :options="
+            v-if="indicators.isTransfer && statusMod.name === status.statusName"
+            class="statuslist__list-select"
+            v-model="statusMod.toName"
+            :options="
             statusList.statusesSelect.filter(
               (el) =>
                 el.id !== status.statusName &&
@@ -145,7 +150,7 @@
                 ) === -1
             )
           "
-          @update:model-value="
+            @update:model-value="
             handleModification(status.statusName, 'create', true)
           "
         />
@@ -161,6 +166,8 @@ import IconAdd from '@/assets/icons/add.svg?component';
 import IconEdit from '@/assets/icons/edit.svg?component';
 import IconDelete from '@/assets/icons/close.svg?component';
 import IconArrowSharp from '@/assets/icons/arrow-sharp.svg?component';
+import StatusColored from '@/components/StatusColored.vue';
+
 const props = defineProps({
   // Массив статусов
   statusList: {
@@ -211,12 +218,6 @@ const props = defineProps({
   gap: 10px;
   align-items: center;
   user-select: none;
-}
-
-.statuslist__list-color {
-  width: 10px;
-  height: 10px;
-  border-radius: 100%;
 }
 
 .statuslist__list-status {
@@ -274,20 +275,19 @@ const props = defineProps({
   font-size: 12px;
 }
 
-.statuslist__list-comment {
-  min-height: 25px;
+.status-container:hover .statuslist__list-comment-tooltip {
+  visibility: visible;
+}
+
+.status-container {
   display: flex;
   align-items: center;
+  justify-content: space-between;
+  width: 100%;
+  min-height: 25px;
   color: white;
   border-radius: 10px;
   padding: 5px 12px;
-}
-
-.statuslist__list-comment:hover,
-.statuslist__list-transfers-item:hover {
-  .statuslist__list-comment-tooltip {
-    visibility: visible;
-  }
 }
 
 .statuslist__list-btn {
@@ -327,5 +327,9 @@ const props = defineProps({
 
 .statuslist__list-icon-edit {
   margin-left: 5px;
+}
+
+.status-colored-full-width{
+  padding: 0;
 }
 </style>
