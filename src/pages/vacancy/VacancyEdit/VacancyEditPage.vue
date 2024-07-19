@@ -76,14 +76,11 @@
         </transition-group>
         <Teleport to="body">
           <ModalConfirmation
-            :show="showModalOnRemoveQuestion"
+            v-model:show="showModalOnRemoveQuestion"
             confirmText="Удалить"
             text="Вы уверены, что хотите удалить вопрос? Это действие нельзя отменить"
             confirmButtonColor="var(--cinnabar)"
-            @confirm="removeQuestion(idCardQuestion)"
-            @cancel="cancelRemoveQuestion"
-            :loading="removeQuestionLoad"
-            :message="removeMessageErr"
+            :requestObject="removeQuestionRequestObject"
           />
        </Teleport>
         <div class="vacancy-edit__questions-footer">
@@ -109,14 +106,11 @@
 
           <Teleport to="body">
             <ModalConfirmation
-              :show="showModalOnRemoveVacancy"
+              v-model:show="showModalOnRemoveVacancy"
               confirmText="Удалить"
               text="Вы уверены, что хотите удалить вакансию? Это действие нельзя отменить"
               confirmButtonColor="var(--cinnabar)"
-              :loading="removeLoad"
-              @confirm="handleConfirmRemoveVacancy"
-              @cancel="handleCancelRemoveVacancy"
-              :message="removeMessageErr"
+              :requestObject="removeVacancyRequestObject"
             />
           </Teleport>
         </div>
@@ -154,7 +148,7 @@ import SelectMain from '@/components/SelectMain.vue';
 import TopSquareButton from '@/components/TopSquareButton.vue';
 import iconBack from '@/assets/icons/back.svg';
 import VacancyQuestion from './components/VacancyQuestion.vue';
-import { ref, computed, onMounted, watch } from 'vue';
+import { ref, computed, onMounted, watch, reactive } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
 
 import { isManager } from '@/js/AuthFunctions';
@@ -203,6 +197,8 @@ const formData = ref({
 
 // Показ модального окна при удалении вакансии
 const showModalOnRemoveVacancy = ref(false);
+// Показ модального окна при удалении вопроса 
+const showModalOnRemoveQuestion = ref(false);
 
 // Отображение ошибки
 const errorMessage = ref('');
@@ -211,16 +207,10 @@ const errorMessageQuestion = ref(''); // текст ошибки при доба
 const successSave = ref(''); // при значении 1 делает текст успешного сохранения зеленым
 const successMessage = ref(''); // текст успешного сохранения
 
-const removeMessageErr = ref(''); // текст ошибки при удалении вакансии и при удаление вопроса
-
 // индикаторы загрузок для кнопок
 const questionLoad = ref(false); // true когда идет добавление вопроса
 const saveLoad = ref(false); // true когда идет сохранение
-const removeLoad = ref(false); // true когда идет удаление вакансии
-const removeQuestionLoad = ref(false); // true когда идет удаление вопроса
-const showModalOnRemoveQuestion = ref(false); // true когда показывается модалка удаления вопроса
-// ID последней карточки с вопросом, у которой была нажата мусорка
-const idCardQuestion = ref(0);
+
 //Заполняем formData данными с сервера
 onMounted(() => {
   try {
@@ -258,22 +248,12 @@ const updateIsPublished = (index, value) => {
   formData.value.questions[index].published = value;
 };
 
-// Отмена удаления вакансии
-const handleCancelRemoveVacancy = () => {
-  showModalOnRemoveVacancy.value = false;
-  removeMessageErr.value = '';
-};
 
 const updateShowQuestionModal = (id) => {
-  idCardQuestion.value = id;
+  removeQuestionRequestObject.dataArg = id;
   showModalOnRemoveQuestion.value = !showModalOnRemoveQuestion.value;
 }
 
-// отмена удаления вопроса
-const cancelRemoveQuestion = () => {
-  showModalOnRemoveQuestion.value = !showModalOnRemoveQuestion.value;
-  removeMessageErr.value = '';
-}
 
 // Работа с API
 
@@ -324,53 +304,55 @@ const addQuestion = () => {
 };
 
 // Удаление вопроса с сервера (по передаваемому id)
-const removeQuestionFromServer = (callback, id) => {
-  removeQuestionLoad.value = true;
-  let requestClass = new VacanciesQuestionsDeleteVacancyQuestion();
-  requestClass.vacancyId = vacancyId.value;
-  requestClass.questionId = id;
+const removeQuestionFromServer = (success, reject, id) => {
+    let requestClass = new VacanciesQuestionsDeleteVacancyQuestion();
+    requestClass.vacancyId = vacancyId.value;
+    requestClass.questionId = id;
 
-  requestClass.request(
-    '/vacancies/questions/delete_vacancy_question.php',
-    'manager', 
-    function (response) { // успешный результат
-      callback(response);
-      removeQuestionLoad.value = false;
-      showModalOnRemoveQuestion.value = false;
-      removeMessageErr.value = '';
-    },
-    function (err) { // неуспешный результат
-      removeQuestionLoad.value = false;
-      removeMessageErr.value = err;
-    }
-  );
+    requestClass.request(
+      '/vacancies/questions/delete_vacancy_question.php',
+      'manager',
+      function (response) { // успешный результат
+         success(response);
+      },
+      function (err) { // неуспешный результат
+         reject(err);
+      }
+    );
 };
 
-// Вызов удаления вопроса и обновление formData
-const removeQuestion = (id) => {
-  removeQuestionFromServer(() => {
-    formData.value.questions = formData.value.questions.filter((question) => question.id !== id);
-  }, id);
-};
+// Объект для удаления вопроса, передающийся в модальное окно: функция удаления, id вопроса, коллбэк, выполняющийся после запроса
+const removeQuestionRequestObject = reactive({
+  fetch: removeQuestionFromServer,
+  dataArg: '',
+  callback: function() {
+    formData.value.questions = formData.value.questions.filter((question) => question.id !== this.dataArg);
+  },
+});
 
-// Удаление вакансии
-function handleConfirmRemoveVacancy(callback)  {
-  removeLoad.value = true;
+const removeVacancyFromServer = (success, reject, id) => {
   let removeVacancy = new MainRequestClass();
-  removeVacancy.vacancyId = vacancyId.value;
+  removeVacancy.vacancyId = id;
   removeVacancy.request(
     '/vacancies/delete_vacancy.php',
     'manager',
-    function (response) {
-      removeLoad.value = false;
-      router.go(-1);
+    function (response) { // успешный результат
+      success(response);
     },
-    function (err) {
-      removeMessageErr.value = err;
-      removeLoad.value = false;
+    function (err) { // неуспешный результат
+      reject(err);
     }
   );
 };
+
+// Объект для удаления вакансии, передающийся в модальное окно: функция удаления, id вакансии, коллбэк, выполняющийся после запроса
+const removeVacancyRequestObject = reactive({
+  fetch: removeVacancyFromServer,
+  dataArg: vacancyId.value,
+  callback: function() {
+    router.go(-1);
+  },
+});
 
 // Формирование объекта с вопросами для отправки изменений на сервер
 const questionsById = computed(() => {

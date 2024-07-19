@@ -1,5 +1,5 @@
 <template>
-  <Modal :show="show">
+  <Modal :show="show" @close="handleCancel">
     <template v-slot:header>
       <h3 class="modal-confirmation__title">{{ title }}</h3>
     </template>
@@ -13,7 +13,7 @@
     <template v-slot:footer-control-buttons>
       <div class="modal-confirmation__controls">
         <ButtonMain
-          @click="$emit('cancel')"
+          @click="handleCancel"
           :textColor="cancelTextColor"
           :buttonColor="cancelButtonColor"
           :isBold=true
@@ -23,12 +23,12 @@
           </template>
         </ButtonMain>
         <ButtonMain
-          @click="$emit('confirm')"
+          @click="handleConfirm"
           :textColor="confirmTextColor"
           :buttonColor="confirmButtonColor"
           :isBold=true
-          :isActive="props.loading"
-          :message="props.message"
+          :isActive="isActive"
+          :message="errMessage"
         >
           <template v-slot:text>
             {{ confirmText }}
@@ -40,6 +40,7 @@
 </template>
 
 <script setup>
+import { ref } from 'vue';
 import Modal from '@/components/Modal.vue';
 import ButtonMain from "@/components/ButtonMain.vue";
 
@@ -91,13 +92,8 @@ const props = defineProps({
     default: defaultCancelBtnColor,
     required: false,
   },
-  loading: {
-    type: Boolean,
-    default: false,
-  }, 
-  message: {
-    type: String,
-    default: '',
+  requestObject: {
+    type: Object,
     required: false,
   },
 });
@@ -107,23 +103,51 @@ const defaultConfirmBtnColor = 'var(--cornflower-blue)';
 const defaultConfirmTextColor = 'var(--white)';
 const defaultCancelBtnColor = 'var(--link-water)';
 const defaultCancelTextColor = 'var(--cornflower-blue)';
+
+const emit = defineEmits(['confirm', 'update:show', 'cancel']);
+
+// Статус кнопки (отправка запроса)
+const isActive = ref(false);
+// Сообщение об ошибке
+const errMessage = ref('');
+
+// Обработка отмены
+const handleCancel = () => {
+  if (isActive.value === false) {
+    emit('update:show');
+    errMessage.value = '';
+  }
+}
+
+const handleConfirm = () => {
+  isActive.value = true;
+
+  props.requestObject.fetch(
+    (response) => {
+      props.requestObject.callback(response);
+      emit('update:show');
+      isActive.value = false;
+    },
+    (error) => {
+      errMessage.value = error;
+      isActive.value = false;
+    },
+    props.requestObject.dataArg,
+  );
+};
 </script>
 
 <style scoped>
 .modal-confirmation__title {
   font-size: 20px;
   font-weight: 600;
-
   margin: 0;
 }
-
 .modal-confirmation__body {
   max-width: 400px;
   min-height: 80px;
-
   text-align: center;
 }
-
 .modal-confirmation__controls {
   display: flex;
   gap: 10px;
