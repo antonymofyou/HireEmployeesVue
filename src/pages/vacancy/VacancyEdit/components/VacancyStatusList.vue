@@ -9,12 +9,7 @@
       >
         <div
             class="statuslist__list-status"
-            @click="
-            indicators.activeHandlers =
-              !indicators.activeHandlers ||
-              statusMod.name !== status.statusName;
-            statusMod.name = status.statusName;
-          "
+            @click="toggleStatus(status, 'handlers')"
         >
           <div class="status-container" :style="{ backgroundColor: status.statusColor }">
             <StatusColored
@@ -24,23 +19,11 @@
             />
               <ButtonIcon
                   class="statuslist__list-btn"
-                  @click="
-                  (indicators.isEdit = true),
-                  (statusMod.name = status.statusName),
-                  (statusMod.comment = status.statusComment),
-                  (statusMod.color = status.statusColor)
-                "
+                  @click="editStatus(status)"
               >
                 <template v-slot:icon
                 ><IconEdit
-                    :class="'statuslist__list-icon-edit'"
-                    :style="{
-                    display:
-                      indicators.activeHandlers &&
-                      statusMod.name === status.statusName
-                        ? 'block'
-                        : 'none',
-                  }"
+                    :class="getIconClass(status, 'edit')"
                 /></template>
               </ButtonIcon>
               <ButtonIcon
@@ -49,18 +32,10 @@
               >
                 <template v-slot:icon
                 ><IconDelete
-                    :class="'statuslist__list-icon-delete'"
-                    :style="{
-                    display:
-                      indicators.activeHandlers &&
-                      statusMod.name === status.statusName
-                        ? 'block'
-                        : 'none',
-                  }"
+                    :class="getIconClass(status, 'delete')"
                 /></template>
               </ButtonIcon>
             <div
-                v-if="status.statusComment"
                 class="statuslist__list-comment-tooltip"
             >
               {{ status.statusComment || 'Нет комментария' }}
@@ -85,12 +60,7 @@
                   (s) => s.statusName === transfer
                 ).statusColor,
               }"
-              @click="
-                indicators.activeTransfer =
-                  !indicators.activeTransfer ||
-                  statusMod.name !== status.statusName;
-                statusMod.name = status.statusName;
-              "
+                @click="toggleStatus(status, 'transfer')"
             >
               <StatusColored
                   :statusText="transfer"
@@ -110,14 +80,7 @@
               >
                 <template v-slot:icon
                   ><IconDelete
-                    class="statuslist__list-icon-delete"
-                    :style="{
-                      display:
-                        indicators.activeTransfer &&
-                        statusMod.name === status.statusName
-                          ? 'block'
-                          : 'none',
-                    }"
+                    :class="getIconClass(status, 'transfer')"
                 /></template>
               </ButtonIcon>
             </div>
@@ -126,11 +89,7 @@
         <ButtonIcon
             class="statuslist__list-btn"
             @click="
-            if (indicators.isTransfer && statusMod.name !== status.statusName) {
-              statusMod.name = status.statusName;
-            } else
-              (indicators.isTransfer = !indicators.isTransfer),
-                (statusMod.name = status.statusName);
+           handleStatusClick(status)
           "
         >
           <template v-slot:icon
@@ -160,6 +119,7 @@
 </template>
 
 <script setup>
+import { ref } from 'vue';
 import SelectMain from '@/components/SelectMain.vue';
 import ButtonIcon from '@/components/ButtonIcon.vue';
 import IconAdd from '@/assets/icons/add.svg?component';
@@ -190,6 +150,54 @@ const props = defineProps({
     required: true,
   },
 });
+// Индикаторы
+const indicators = ref(props.indicators);
+// Создаваемый/изменяемый статус
+const statusMod = ref(props.statusMod);
+// Функция для редактирования статуса
+const editStatus = (status) => {
+  indicators.value.isEdit = true;
+  statusMod.value.name = status.statusName;
+  statusMod.value.comment = status.statusComment;
+  statusMod.value.color = status.statusColor;
+};
+// Функция для получения класса иконки
+const getIconClass = (status, type) => {
+  const isActive = type === 'transfer'
+      ? indicators.value.activeTransfer
+      : indicators.value.activeHandlers;
+
+  return {
+    'statuslist__list-icon-edit': type === 'edit',
+    'statuslist__list-icon-delete': type === 'delete',
+    'statuslist__list-icon-transfer': type === 'transfer',
+    'active': isActive && statusMod.value.name === status.statusName,
+  };
+};
+// Универсальная функция переключения статусов
+const toggleStatus = (status, type) => {
+  if (type === 'handlers') {
+    indicators.value.activeHandlers = !indicators.value.activeHandlers || statusMod.value.name !== status.statusName;
+    if (indicators.value.activeHandlers) {
+      indicators.value.activeTransfer = false;
+    }
+  } else if (type === 'transfer') {
+    indicators.value.activeTransfer = !indicators.value.activeTransfer || statusMod.value.name !== status.statusName;
+    if (indicators.value.activeTransfer) {
+      indicators.value.activeHandlers = false;
+    }
+  }
+  statusMod.value.name = status.statusName;
+};
+// Функция для обработки клика трансфера
+const handleStatusClick = (status) => {
+  if (indicators.value.isTransfer && statusMod.value.name !== status.statusName) {
+    statusMod.value.name = status.statusName;
+  } else {
+    indicators.value.isTransfer = !indicators.value.isTransfer;
+    statusMod.value.name = status.statusName;
+  }
+};
 </script>
 
 <style scoped>
@@ -234,9 +242,11 @@ const props = defineProps({
 .statuslist__list-transfers-box {
   display: flex;
   align-items: end;
+
   &::after {
     content: ',';
   }
+
   &:last-child::after {
     content: '';
   }
@@ -301,6 +311,7 @@ const props = defineProps({
   transition: all 0.3s ease;
   width: 20px;
   height: 20px;
+
   &:hover {
     transform: scale(1.3);
   }
@@ -312,7 +323,8 @@ const props = defineProps({
 }
 
 .statuslist__list-icon-edit,
-.statuslist__list-icon-delete {
+.statuslist__list-icon-delete,
+.statuslist__list-icon-transfer {
   display: none;
   position: relative;
   margin: 0;
@@ -320,6 +332,7 @@ const props = defineProps({
   height: 12px;
   width: 12px;
   fill: white;
+
   &.active {
     display: block;
   }
