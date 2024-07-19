@@ -112,3 +112,27 @@ export class VacanciesModifyVacancyStatus extends MainRequestClass {
   
     toStatusName = ''; // название статуса, перевод в который нужно создать/удалить
   }
+
+  export class VacanciesAccessGetManagerAccessVacancy extends MainRequestClass {
+
+    vacancyId = ''; // ID вакансии
+
+    statusName = ''; // название статуса (только при permissionType == 'STATUS_PERMISSION')
+
+    permissionType = ''; // тип права, информацию о котором нужно получить (VACANCY_PERMISSION: право на всю вакансию; 'STATUS_PERMISSION': право на конкретный статус вакансии)
+
+}
+
+export class VacanciesAccessGetManagerAccessVacancyResponse extends MainResponseClass {
+
+   /*
+    * Массив словарей, где каждый словарь имеет следующие поля:
+    *     - managerId - ID менеджера
+    *     - managerName - имя менеджера
+    */
+
+    assignedManagers = []; // менеджеры, назначенные на это право
+
+    unassignedManagers = []; // менеджеры, НЕ назначенные на это право
+
+}
