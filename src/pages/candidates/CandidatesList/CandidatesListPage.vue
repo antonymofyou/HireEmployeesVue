@@ -66,7 +66,8 @@
 import { onMounted, ref, watch } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
 import { isManager } from '@/js/AuthFunctions';
-import { MainRequestClass } from '@/js/RootClasses';
+import { MainRequestClass } from '@/js/RootClasses.js';
+import { CandidatesGetCandidatesByVacancyId, VacanciesGetVacancyStatuses } from './js/CandidatesClasses.js';
 import CandidateCard from './components/CandidateCard.vue';
 import ErrorNotification from '@/components/ErrorNotification.vue';
 import SelectMain from '@/components/SelectMain.vue';
@@ -132,11 +133,9 @@ function getAllVacanciesManager() {
 
 //Получение списка кандидатов по id вакансии
 function getAllCandidatesManager() {
-  class CandidatesGetCandidatesByVacancyId extends MainRequestClass {
-    vacancyId = vacancyId.value; // ID вакансии, отклики для которой нужно получить
-    status = status.value === 'Все' ? '' : status.value; // статус отклика, по которому нужно получить отклики (если пустая строка, то этот фильтр не учитывается)
-  }
   let requestClass = new CandidatesGetCandidatesByVacancyId();
+  requestClass.vacancyId = vacancyId.value;
+  requestClass.status = status.value === 'Все' ? '' : status.value;
 
   // Установление флага прелоадера
   isLoading.value = true;
@@ -162,10 +161,9 @@ function getAllCandidatesManager() {
 
 // Получение статусов кандидатов к вакансии
 function getVacancyStatuses() {
-  class VacanciesGetVacanciesStatuses extends MainRequestClass {
-    vacancyId = vacancyId.value; // ID вакансии, для которой нужно получить доступные статусы
-  }
-  let requestClass = new VacanciesGetVacanciesStatuses();
+  let requestClass = new VacanciesGetVacancyStatuses();
+  requestClass.vacancyId = vacancyId.value;
+  requestClass.withTransfers = '0';
 
   //Получение статусов
   if (vacancyId.value) {
@@ -280,7 +278,7 @@ watch(
 }
 
 .candidates__back-btn {
-  position: relative;
+  position: fixed;
   top: 20px;
 }
 
