@@ -42,18 +42,18 @@
         <template v-else="respondInfo.answers.length">
           <div
             class="questions-universal__question"
-            v-for="question in respondInfo.answers"
+            v-for="(question, index) in respondInfo.answers"
             :key="question.questionId"
           >
             <div class="questions-universal__question-text">
-              <div><b>Вопрос:</b></div>
-              <div v-html="question.question"></div>
+              <div><b>Вопрос №{{index + 1}}:</b></div>
+              <div class="questions-universal__answer-text" v-html="question.question"></div>
             </div>
-            <div class="questions-universal__question-text">
+            <div class="questions-universal__question-text answer-block">
               <div><b>Ответ:</b></div>
-              <div>{{ question.answer }}</div>
+              <div class="questions-universal__answer-text">{{ question.answer }}</div>
             </div>
-            <hr />
+            <hr class="questions-universal__hr-divider"/>
           </div>
         </template>
         <p v-if="!errorMessage && !respondInfo.answers.length">Нет данных</p>
@@ -136,13 +136,15 @@ onMounted(requestCandidateInfo);
   font-weight: 600;
 }
 
+
 .questions-universal__question {
-  margin-bottom: 20px;
+  margin-top: 30px;
 }
 
-.questions-universal__question-text {
-  word-break: break-all;
+.questions-universal__hr-divider {
+  margin: 20px 0;
 }
+
 
 .questions-universal__info {
   display: flex;
@@ -161,6 +163,10 @@ onMounted(requestCandidateInfo);
   height: 30px;
 }
 
+.questions-universal__question-text.answer-block{
+  margin-top: 20px;
+}
+
 @media screen and (max-width: 425px) {
   .questions-universal__header-arrowicon {
     width: 25px;
@@ -170,6 +176,13 @@ onMounted(requestCandidateInfo);
 
 .questions-universal__header-arrowicon--active {
   transform: rotateX(180deg);
+}
+
+
+.questions-universal__answer-text{
+  white-space: pre-wrap;
+  font-size: 13px;
+  margin-top: 10px;
 }
 
 /* Transition */

@@ -28,5 +28,6 @@ const props = defineProps({
   padding: 7px 14px;
   cursor: default;
   user-select: none;
+  width: fit-content;
 }
 </style>
