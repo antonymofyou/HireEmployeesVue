@@ -14,10 +14,7 @@
             :to="{
               name: 'candidate',
               query: {
-                candidateId: candidate.candidateId,
-                respondId: candidate.otklikId,
-                vacancyId: vacancyId,
-                status: status,
+                otklikId: candidate.otklikId,
               },
             }"
           >

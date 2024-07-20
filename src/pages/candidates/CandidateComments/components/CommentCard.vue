@@ -248,6 +248,11 @@ watch(
   margin: 0;
 }
 
+.comment__date,
+.comment__manager {
+  color: var(--cornflower-blue);
+}
+
 .comment__manager {
   font-weight: bold;
   font-size: 12px;
@@ -287,6 +292,8 @@ watch(
 
 .comment__text {
   font-size: 12px;
+  white-space: pre-wrap;
+  word-break: break-word;
 }
 
 .comment__date {
