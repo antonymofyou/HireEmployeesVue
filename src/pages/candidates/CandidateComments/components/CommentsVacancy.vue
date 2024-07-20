@@ -118,5 +118,6 @@ const showVacancy = () => {
 
 .vacancy__description-text {
   word-break: break-all;
+  margin-top: 10px;
 }
 </style>

@@ -23,11 +23,11 @@
             :key="question.questionId"
           >
             <div class="questions-universal__question-text">
-              <div><b>Вопрос №{{index + 1}}:</b></div>
+              <div class="candidate-answers__question-header"><b>Вопрос №{{index + 1}}:</b></div>
               <div class="questions-universal__answer-text" v-html="question.question"></div>
             </div>
             <div class="questions-universal__question-text answer-block">
-              <div><b>Ответ:</b></div>
+              <div class="candidate-answers__question-header"><b>Ответ:</b></div>
               <div class="questions-universal__answer-text">{{ question.answer }}</div>
             </div>
             <hr class="questions-universal__hr-divider"/>
