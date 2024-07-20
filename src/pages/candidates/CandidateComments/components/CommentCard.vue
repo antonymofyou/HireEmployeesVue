@@ -293,6 +293,8 @@ watch(
 
 .comment__text {
   font-size: 12px;
+  white-space: pre-wrap;
+  word-break: break-word;
 }
 
 .comment__date {
