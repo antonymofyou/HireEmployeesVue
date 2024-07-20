@@ -44,7 +44,6 @@
             <img class="icon" src="@/assets/icons/delete.svg" />
           </button>
         </div>
-        <div class="comment__error">{{ errorMessage }}</div>
       </div>
     </div>
 
@@ -66,37 +65,30 @@
     <div class="comment__date">{{ formattedDate }}</div>
 
     <ModalConfirmation
-      :show="isModalOpened"
+      v-model:show="isModalOpened"
       :confirm-button-color="'var(--cinnabar)'"
       text="Вы уверены, что хотите удалить комментарий?"
       cancel-text="Отмена"
       confirm-text="Удалить"
-      @confirm="
-        emit('delete', { id: props.comment.id }), (isModalOpened = false)
-      "
-      @cancel="isModalOpened = false"
-      @click.self="isModalOpened = false"
+      :requestObject="removeCommentRequestObject"
     />
   </div>
 </template>
 
 <script setup>
-import { computed, ref, watch } from 'vue';
+import { computed, reactive, ref, watch } from 'vue';
 import ModalConfirmation from '@/components/ModalConfirmation.vue';
 
+// Объект комментария, объект для запроса на удаления (для модального окна)
 const props = defineProps({
-  // Объект комментария
   comment: {
     type: Object,
     required: true,
   },
-
-  // Сообщение об ошибке
-  errorMessage: {
-    type: String,
-    default: '',
-    required: false,
-  },
+  removeRequestObject: {
+    type: Object,
+    required: true,
+  }
 });
 
 const emit = defineEmits(['delete', 'updateComment']);
@@ -177,6 +169,13 @@ const formattedDate = computed(() => {
     ? created
     : `${updated} (изменено)`;
 });
+
+// Объект для удаления комментария, передающийся в модальное окно: функция удаления комментария, дополнительные данные, коллбэк, выполняющийся после запроса
+const removeCommentRequestObject = reactive({
+  fetch: props.removeRequestObject.fetch('delete', { id: props.comment.id }),
+  dataArg: '',
+  callback: props.removeRequestObject.callback(props.comment.id),
+})
 
 //Отслеживание флага модального окна для сокрытия скролла
 watch(
@@ -300,11 +299,5 @@ watch(
 .comment__date {
   font-size: 10px;
   text-align: right;
-}
-
-.comment__error {
-  text-align: end;
-  color: var(--error-color);
-  font-size: 12px;
 }
 </style>

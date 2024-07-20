@@ -18,19 +18,19 @@
       <div class="candidate-answers__list" v-if="show">
         <template v-if="answers.length">
           <div
-            class="candidate-answers__question"
-            v-for="(question, index) in answers"
+            class="questions-universal__question"
+            v-for="(question, index) in respondInfo.answers"
             :key="question.questionId"
           >
-            <div class="candidate-answers__question-block">
-              <p class="candidate-answers__question-header">Вопрос №{{ index + 1 }}:</p>
-              <div class="candidate-answers__question-text" v-html="question.question"></div>
+            <div class="questions-universal__question-text">
+              <div><b>Вопрос №{{index + 1}}:</b></div>
+              <div class="questions-universal__answer-text" v-html="question.question"></div>
             </div>
-            <div class="candidate-answers__question-block">
-              <p class="candidate-answers__question-header">Ответ:</p>
-              <div class="candidate-answers__question-text">{{ question.answer }}</div>
-              <hr />
+            <div class="questions-universal__question-text answer-block">
+              <div><b>Ответ:</b></div>
+              <div class="questions-universal__answer-text">{{ question.answer }}</div>
             </div>
+            <hr class="questions-universal__hr-divider"/>
           </div>
         </template>
         <p v-else>Нет данных</p>
@@ -84,23 +84,20 @@ const showQuestions = () => {
   margin-top: 15px;
 }
 
-.candidate-answers__question {
+
+.questions-universal__question {
+  margin-top: 30px;
+}
+
+.questions-universal__hr-divider {
+  margin: 20px 0;
+}
+
+.questions-universal__info {
   display: flex;
   flex-direction: column;
-  gap: 10px;
-
-  margin-bottom: 20px;
-}
-
-.candidate-answers__question-block {
-  word-break: break-all;
-}
-
-.candidate-answers__question-text {
-  font-size: 13px;
-  
-  margin-top: 10px;
-  margin-bottom: 10px;
+  gap: 5px;
+  margin: 5px 0;
 }
 
 .candidate-answers__question-header {
@@ -116,6 +113,10 @@ const showQuestions = () => {
   height: 30px;
 }
 
+.questions-universal__question-text.answer-block{
+  margin-top: 20px;
+}
+
 @media screen and (max-width: 425px) {
   .candidate-answers__header-arrowicon {
     width: 25px;
@@ -125,6 +126,13 @@ const showQuestions = () => {
 
 .candidate-answers__header-arrowicon--active {
   transform: rotateX(180deg);
+}
+
+
+.questions-universal__answer-text{
+  white-space: pre-wrap;
+  font-size: 13px;
+  margin-top: 10px;
 }
 
 /* Transition */
