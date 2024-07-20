@@ -19,7 +19,7 @@
         <template v-if="answers.length">
           <div
             class="questions-universal__question"
-            v-for="(question, index) in respondInfo.answers"
+            v-for="(question, index) in answers"
             :key="question.questionId"
           >
             <div class="questions-universal__question-text">
