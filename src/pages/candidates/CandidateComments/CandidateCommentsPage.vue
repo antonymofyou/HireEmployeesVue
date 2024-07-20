@@ -13,14 +13,6 @@
     </div>
 
     <template v-if="respondData.candidateId || respondId">
-      <CommentsStatus
-        v-if="respondId && respondData.statusCurrent"
-        :respondId
-        :status="respondData.statusCurrent"
-        :statusColor="respondData.statusCurrentColor"
-        :statuses="respondData.statuses"
-        class="comments-page__status-block"
-      />
       <CommentsVacancy
         v-if="respondData.vacancyId"
         :vacancyData="vacancyData"
@@ -37,6 +29,14 @@
         :answers="respondData.candidateAnswers"
         type="questions"
         class="comments-page__questions-block"
+      />
+      <CommentsStatus
+        v-if="respondId && respondData.statusCurrent"
+        :respondId
+        :status="respondData.statusCurrent"
+        :statusColor="respondData.statusCurrentColor"
+        :statuses="respondData.statuses"
+        class="comments-page__status-block"
       />
       <CommentsBlock
         v-if="respondId && respondData.candidateId"

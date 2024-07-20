@@ -106,7 +106,7 @@ const showQuestions = () => {
 .candidate-answers__question-header {
   font-size: 14px;
   font-weight: 600;
-
+  color: var(--cornflower-blue);
   margin: 0;
 }
 
