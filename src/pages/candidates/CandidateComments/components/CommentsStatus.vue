@@ -28,7 +28,7 @@
 
 <script setup>
 import { ref, watch } from 'vue';
-import {CandidatesSetOtklikStatus } from '../js/CommentsClasses';
+import {CandidatesSetOtklikStatus, CandidatesGetOtklikAnswers } from '../js/CommentsClasses';
 import SelectMain from '@/components/SelectMain.vue';
 import ButtonMain from '@/components/ButtonMain.vue';
 import StatusColored from '@/components/StatusColored.vue';
@@ -72,11 +72,38 @@ const statusCurrent = ref({
 // Новый статус
 const newStatus = ref('');
 
+// Обновление списка статусов
+const updateStatuses = () => {
+  getStatusesFromServer((response) => {
+    sendRequest.value = true;
+    if (response.success === '1') {
+      statusCurrent.value = {
+        status: response.info.status,
+        color: response.info.statusColor,
+      };
+      statuses.value = response.statusTransfers.map((status) => ({
+        name: status.status,
+        id: status.status,
+        color: status.color,
+      }));
+    } else {
+      errorMessage.value = err;
+    }
+    sendRequest.value = false;
+  },
+    (err) => {
+      errorMessage.value = err;
+      sendRequest.value = false;
+    }
+  )
+}
+
 // Изменение статуса
 const changeRespondStatus = () => {
   const requestInstance = new CandidatesSetOtklikStatus();
   requestInstance.otklikId = props.respondId;
   requestInstance.toStatusName = newStatus.value;
+
   errorMessage.value = '';
   statusChanged.value = false;
   sendRequest.value = true;
@@ -84,11 +111,15 @@ const changeRespondStatus = () => {
   requestInstance.request(
     '/candidates/set_otklik_status.php',
     'manager',
-    () => {
+    (response) => {
+      if (response.success === '1') {
+        statusChanged.value = true;
+        updateStatuses();
+        newStatus.value = ''; 
+      } else {
+        errorMessage.value = response.message;
+      }
       sendRequest.value = false;
-      statusChanged.value = true;
-      newStatus.value = '';
-      requestCandidateInfo();
     },
     (err) => {
       errorMessage.value = err;
@@ -96,6 +127,19 @@ const changeRespondStatus = () => {
     }
   );
 };
+
+// Запрос для получения списка статусов
+const getStatusesFromServer = (successCallback, errorCallback) => {
+  const requestInstance = new CandidatesGetOtklikAnswers();
+  requestInstance.otklikId = props.respondId;
+
+  requestInstance.request(
+    '/candidates/get_otklik_info.php',
+    'manager',
+    (response) => successCallback(response),
+    (err) => errorCallback(err),
+  );
+}
 
 // Вызов функции изменения статуса
 const changeStatus = () => {
