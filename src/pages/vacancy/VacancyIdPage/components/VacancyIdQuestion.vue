@@ -3,12 +3,12 @@
     <span class="question__title">{{ title }}</span>
     <div class="question__text" v-html="question"></div>
     <InputSimple
-      :modelValue="answer"
-      @update:modelValue="updateAnswer"
-      inputType="textarea"
+      :model-value="answer"
+      input-type="textarea"
       size="extra-medium"
       placeholder="Введите ваш ответ..."
       :disabled="disabled"
+      @update:model-value="updateAnswer"
     />
   </div>
 </template>
@@ -20,26 +20,26 @@ import { ref } from 'vue';
 
 // заголовок вопроса, текст вопроса, текст ответа, disabled
 const props = defineProps({
-    title: {
-      type: String,
-      default: '',
-      required: true,
-    },
-    question: {
-      type: String,
-      default: '',
-      required: true,
-    },
-    answer: {
-      type: String,
-      default: '',
-      required: true,
-    },
-    disabled: {
-      type: Boolean,
-      default: false,
-      required: true,
-    }
+  title: {
+    type: String,
+    default: '',
+    required: true,
+  },
+  question: {
+    type: String,
+    default: '',
+    required: true,
+  },
+  answer: {
+    type: String,
+    default: '',
+    required: true,
+  },
+  disabled: {
+    type: Boolean,
+    default: false,
+    required: true,
+  },
 });
 
 // Значение ответа
