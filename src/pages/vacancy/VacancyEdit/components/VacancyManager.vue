@@ -20,11 +20,11 @@
             class="vacancy-edit__status-add-btn"
             @click="
             (indicators.isAdd = true),
-                (managerMod = {
+              (managerMod = {
                 action: 'create',
                 name: '',
                 id: ''
-                })
+              })
             "
         >
             <template v-slot:icon
@@ -33,6 +33,48 @@
         </ButtonIcon>
         </div>
     </div>
+
+    <Teleport to="body">
+    <!-- Вывод модалки для добавления и изменения менеджера -->
+    <Modal
+      class="vacancy-edit__modal"
+      :show="indicators.isAdd || indicators.isEdit"
+      @click.self="
+        indicators.isAdd = false;
+        indicators.isEdit = false;
+      "
+    >
+      <template v-slot:header>
+        <div class="vacancy-edit__modal__title">
+          {{ indicators.isAdd ? 'Добавление менеджера' : 'Изменение менеджера' }}
+        </div>
+      </template>
+
+      <template v-slot:body>
+
+        <SelectMain
+          v-if="indicators.isAdd"
+          v-model="managerMod.name"
+          :options="managerList.managersUnassigned"
+        />
+
+        <ButtonMain
+          class="vacancy-edit__modal-btn-add"
+          @click="
+            indicators.isAdd
+              ? handleModification(managerMod.name, 'create')
+              : handleModification(managerMod.name, 'update')
+          "
+          :isActive="request"
+          :message="errorMessage"
+        >
+          <template v-slot:text>{{
+            indicators.isAdd ? 'Добавить' : 'Изменить'
+          }}</template>
+        </ButtonMain>
+      </template>
+    </Modal>
+  </Teleport>
 </template>
 
 <script setup>
@@ -42,6 +84,10 @@ import IconAdd from '@/assets/icons/add.svg?component';
 import SpinnerMain from '@/components/SpinnerMain.vue';
 import ButtonIcon from '@/components/ButtonIcon.vue';
 import VacancyManagerList from '../components/VacancyManagerList.vue'
+import ButtonMain from '@/components/ButtonMain.vue';
+import InputSimple from '@/components/InputSimple.vue';
+import Modal from '@/components/Modal.vue';
+import SelectMain from '@/components/SelectMain.vue';
 
 
 const props = defineProps({
@@ -62,7 +108,8 @@ const indicators = ref({
 // Список менеджеров
 const managerList = ref({
   managersAssigned: [],
-  managersUnassigned: []
+  managersUnassigned: [],
+  xyu: []
 });
 // Создаваемый/изменяемый менеджер
 const managerMod = ref({
@@ -75,6 +122,11 @@ const request = ref(false);
 // Сообщение об ошибке
 const errorMessage = ref('');
 
+const handleModification = (managerName, method) => {
+  //Присваиваем данные модификации
+  managerMod.value.action = method;
+  managerMod.value.name = managerName;
+}
 const requestVacancyManager = () => {
   const requestInstance = new VacanciesAccessGetManagerAccessVacancy();
   request.value = true;
@@ -86,14 +138,14 @@ const requestVacancyManager = () => {
     '/vacancies/access/get_managers_access_vacancy.php',
     'manager',
     (response) => {
-        console.log(response); 
+        console.log(response);
         // Получаем массив назначенных менеджеров вакансии.
         managerList.value.managersAssigned = response.assignedManagers.map((manager) => {
-         return { name: manager.name, id: manager.id };
+         return { id: manager.id, name: manager.name };
         });
         // Получаем массив неназначенных менеджеров вакансии.
         managerList.value.managersUnassigned = response.unassignedManagers.map((manager) => {
-         return { name: manager.name, id: manager.id };
+         return { id: manager.id, name: manager.name };
         });
         // Если менеджеров нет - создаем шаблонный.
         if (!managerList.value.managersAssigned.length) {
@@ -114,7 +166,7 @@ const requestVacancyManager = () => {
 
 
 onMounted(() => {
-    requestVacancyManager()
+    requestVacancyManager();
 });
 </script>
 
