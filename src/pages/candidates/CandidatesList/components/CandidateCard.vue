@@ -22,7 +22,9 @@
             }"
           >
             <ButtonMain>
-              <template v-slot:text> &#9658; </template>
+              <template v-slot:text> 
+                <div class="button__triangle"></div>
+              </template>
             </ButtonMain>
           </RouterLink>
         </div>
@@ -56,6 +58,13 @@ const props = defineProps({
 </script>
 
 <style scoped>
+.button__triangle {
+  width: 0;
+  height: 0;
+  border-top: 6px solid transparent;
+  border-bottom: 6px solid transparent;
+  border-left: 8px solid #fff;
+}
 .candidate {
   width: 100%;
   padding: 15px 30px 15px;
