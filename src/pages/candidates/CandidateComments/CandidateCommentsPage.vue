@@ -4,7 +4,7 @@
       <RouterLink
         :to="{
           name: 'candidates',
-          query: { vacancyId: respondData.vacancyId, status: respondData.statusCurrent },
+          query: { vacancyId: respondData.vacancyId },
         }"
       >
         <TopSquareButton class="comments-page__back-btn" :icon="backIcon" />

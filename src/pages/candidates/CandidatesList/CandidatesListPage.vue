@@ -68,7 +68,7 @@ import { useRoute, useRouter } from 'vue-router';
 import { isManager } from '@/js/AuthFunctions';
 import { MainRequestClass } from '@/js/RootClasses.js';
 import { CandidatesGetCandidatesByVacancyId, VacanciesGetVacancyStatuses } from './js/CandidatesClasses.js';
-import { StorageActions } from './js/StorageClasses.js';
+import { StorageVacanciesPageActions } from './js/StorageClasses.js';
 import CandidateCard from './components/CandidateCard.vue';
 import ErrorNotification from '@/components/ErrorNotification.vue';
 import SelectMain from '@/components/SelectMain.vue';
@@ -99,9 +99,6 @@ const errorMessage = ref('');
 // Получение из роута параметров, если есть query
 if (route.query.vacancyId) {
   vacancyId.value = route.query.vacancyId;
-  if (route.query.status) {
-    status.value = route.query.status;
-  }
 }
 
 //Получение списка id вакансий при загрузке страницы
@@ -192,20 +189,20 @@ function getVacancyStatuses() {
 
 // Получение текущего статуса из localStorage
 function getCurrentStatusFromLocalStorage() {
-  const currentVacancyStatus = StorageActions.getVacancyStatus(vacancyId.value);
+  const currentVacancyStatus = StorageVacanciesPageActions.getVacancyStatus(vacancyId.value);
   if (currentVacancyStatus) status.value = currentVacancyStatus;
 }
 
 //Обработчик смены query параметра при смене id
 const updateVacancyId = () => {
   router.push({
-    query: { ...route.query, vacancyId: vacancyId.value, status: status.value },
+    query: { ...route.query, vacancyId: vacancyId.value },
   });
 };
 
 //Обработчик смены query параметра при смене id
 const updateStatus = () => {
-  StorageActions.updateVacancyStatus(vacancyId.value, status.value);
+  StorageVacanciesPageActions.updateVacancyStatus(vacancyId.value, status.value);
 };
 
 //Получение списка кандидатов при загрузке страницы
