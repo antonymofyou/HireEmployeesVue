@@ -143,19 +143,19 @@ const vClickOutside = {
   overflow-x: hidden;
 }
 
-@media (max-width: 766px) {
+@media (max-width: 768px) {
   .options-container-main {
-    min-width: 60%; 
+    min-width: 30%; 
   }
 }
 
-@media (max-width: 468px) {
+@media (max-width: 536px) {
   .options-container-main {
-    min-width: 40%; 
+    min-width: 20%; 
   }
 }
 
-@media (max-width: 364px) {
+@media (max-width: 375px) {
   .options-container-main {
     min-width: 80%; 
   }
