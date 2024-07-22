@@ -34,7 +34,7 @@
 </template>
 
 <script setup>
-import { ref, computed, onMounted, watch } from 'vue';
+import { ref, computed, watchEffect } from 'vue';
 
 const props = defineProps({
   // Модель для обновления, опции селекта
@@ -84,14 +84,9 @@ const optionsContainerStyle = computed(() => {
   };
 });
 
-// Установка значения и орбаботчика при монтировании
-onMounted(() => {
+// Отслеживание изменений, отработает и при монтировании
+watchEffect(() => {
   selected.value = props.options.find(option => option.id == props.modelValue) || null;
-});
-
-// Отслеживание изменений
-watch(() => props.modelValue, (newValue) => {
-  selected.value = props.options.find(option => option.id == newValue) || null;
 });
 
 // Директива для закрытия селекта по клику снаружи
