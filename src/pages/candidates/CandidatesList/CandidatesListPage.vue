@@ -68,6 +68,7 @@ import { useRoute, useRouter } from 'vue-router';
 import { isManager } from '@/js/AuthFunctions';
 import { MainRequestClass } from '@/js/RootClasses.js';
 import { CandidatesGetCandidatesByVacancyId, VacanciesGetVacancyStatuses } from './js/CandidatesClasses.js';
+import { StorageActions } from './js/StorageClasses.js';
 import CandidateCard from './components/CandidateCard.vue';
 import ErrorNotification from '@/components/ErrorNotification.vue';
 import SelectMain from '@/components/SelectMain.vue';
@@ -189,6 +190,12 @@ function getVacancyStatuses() {
   }
 }
 
+// Получение текущего статуса из localStorage
+function getCurrentStatusFromLocalStorage() {
+  const currentVacancyStatus = StorageActions.getVacancyStatus(vacancyId.value);
+  if (currentVacancyStatus) status.value = currentVacancyStatus;
+}
+
 //Обработчик смены query параметра при смене id
 const updateVacancyId = () => {
   router.push({
@@ -198,14 +205,13 @@ const updateVacancyId = () => {
 
 //Обработчик смены query параметра при смене id
 const updateStatus = () => {
-  router.push({ 
-    query: { ...route.query, vacancyId: vacancyId.value, status: status.value } 
-  });
+  StorageActions.updateVacancyStatus(vacancyId.value, status.value);
 };
 
 //Получение списка кандидатов при загрузке страницы
 onMounted(() => {
   getAllVacanciesManager();
+  getCurrentStatusFromLocalStorage();
   if (route.query.vacancyId) {
     getAllCandidatesManager();
     getVacancyStatuses();
@@ -223,7 +229,7 @@ watch(
 
 //Получение списка кандидатов при обновлении query status
 watch(
-  () => route.query.status,
+  status,
   () => {
     getAllCandidatesManager();
   }
