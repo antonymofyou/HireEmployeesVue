@@ -5,6 +5,7 @@ export const storageConstants = {
 
 /**
  * Базовый класс взаимодействия с localStorage
+ * Интерфейс взаимодействия совпадает с localStorage
  */
 class StorageActionsBase {
   /**
@@ -12,11 +13,20 @@ class StorageActionsBase {
    * @param {String} key Ключ, по которому получим объект
    * @returns {Object} Результирующий объект
    */
-  static getObjectFromLocalStorage(key) {
+  static getItem(key) {
     // сырая JSON-строка из localStorage
     const rawJson = localStorage.getItem(key) ?? '{}';
     const existVacanciesStatuses = JSON.parse(rawJson);
     return existVacanciesStatuses;
+  }
+
+  /**
+   * Положить данные в localStorage
+   * @param {String} key Ключ, по которому положим объект
+   * @param {any} value Значение для сохранения
+   */
+  static setItem(key, value) {
+    localStorage.setItem(key, JSON.stringify(value));
   }
 }
 
@@ -29,7 +39,7 @@ export class StorageVacanciesPageActions extends StorageActionsBase {
    * @returns {Object} Объект статусов
    */
   static getExistVacanciesStatuses() {
-    return this.getObjectFromLocalStorage(storageConstants.VACANCY_PAGE_VACANCIES_STATUSES)
+    return this.getItem(storageConstants.VACANCY_PAGE_VACANCIES_STATUSES)
   }
 
   /**
@@ -37,7 +47,7 @@ export class StorageVacanciesPageActions extends StorageActionsBase {
    * @param {Object} statuses Объект статусов
    */
   static saveVacanciesStatuses(statuses) {
-    localStorage.setItem(storageConstants.VACANCY_PAGE_VACANCIES_STATUSES, JSON.stringify(statuses));
+    this.setItem(storageConstants.VACANCY_PAGE_VACANCIES_STATUSES, statuses);
   }
 
   /**
