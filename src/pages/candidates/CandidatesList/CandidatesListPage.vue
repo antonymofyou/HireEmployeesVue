@@ -82,11 +82,14 @@ const route = useRoute();
 //Проверка авторизации пользователя
 if (!isManager()) router.push({ name: 'managerAuth' });
 
+// Начальные значения рефов (т.к. используются не один раз)
+const initialStatusValue = 'New';
+
 //Ref-переменные
 const vacanciesIds = ref([]); // список id вакансий
 const candidates = ref([]); // список кандидатов
 const vacancyId = ref(''); // ID вакансии
-const status = ref('New'); // Статус кандидата
+const status = ref(initialStatusValue); // Статус кандидата
 const candidateStatus = ref([{ name: 'Все', id: 'Все', color: 'gray' }, {name:'New', id: 'New', color: 'gray'}]); // Статусы кандидатов
 
 //Флаги загрузки данных
@@ -189,8 +192,14 @@ function getVacancyStatuses() {
 
 // Получение текущего статуса из localStorage
 function getCurrentStatusFromLocalStorage() {
+  // Достаём статус текущей вакансии из localStorage
   const currentVacancyStatus = StorageVacanciesPageActions.getVacancyStatus(vacancyId.value);
   if (currentVacancyStatus) status.value = currentVacancyStatus;
+  else {
+    // Т.к. статус не был найден в localStorage - то не допускаем того,
+    // чтобы у нас остался висеть статус от предыдущей вакансии
+    status.value = initialStatusValue;
+  }
 }
 
 //Обработчик смены query параметра при смене id
@@ -221,6 +230,7 @@ watch(
   () => {
     getVacancyStatuses();
     getAllCandidatesManager();
+    getCurrentStatusFromLocalStorage();
   }
 );
 
