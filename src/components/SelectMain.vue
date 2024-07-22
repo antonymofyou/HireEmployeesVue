@@ -143,6 +143,24 @@ const vClickOutside = {
   overflow-x: hidden;
 }
 
+@media (max-width: 766px) {
+  .options-container-main {
+    min-width: 60%; 
+  }
+}
+
+@media (max-width: 468px) {
+  .options-container-main {
+    min-width: 40%; 
+  }
+}
+
+@media (max-width: 364px) {
+  .options-container-main {
+    min-width: 80%; 
+  }
+}
+
 .options-container-main::-webkit-scrollbar {
   width: 5px;
   background-color: #eee5ff;
