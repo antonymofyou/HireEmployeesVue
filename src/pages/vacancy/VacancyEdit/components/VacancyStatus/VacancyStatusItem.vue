@@ -1,75 +1,68 @@
 <template>
-  <div class="vacancy-edit__statuslist">
-    <div>Статусы: {{ statusList.statuses.length || 'Статусы не заданы' }}</div>
-    <div class="statuslist__list-box">
+  <div class="statuslist__list-items">
+    <div
+        class="statuslist__list-status"
+        @click="toggleStatus(status, 'handlers')"
+    >
+      <div class="status-container" :style="{ backgroundColor: status.statusColor }">
+        <StatusColored
+            :statusText="status.statusName"
+            :statusColor="status.statusColor"
+            class="status-colored-full-width"
+        />
+        <ButtonIcon
+            class="statuslist__list-btn"
+            @click="editStatus(status)"
+        >
+          <template v-slot:icon
+          ><IconEdit
+              :class="getIconClass(status, 'edit')"
+          /></template>
+        </ButtonIcon>
+        <ButtonIcon
+            class="statuslist__list-btn"
+            @click="handleModification(status.statusName, 'delete')"
+        >
+          <template v-slot:icon
+          ><IconDelete
+              :class="getIconClass(status, 'delete')"
+          /></template>
+        </ButtonIcon>
+        <div
+            class="statuslist__list-comment-tooltip"
+        >
+          {{ status.statusComment || 'Нет комментария' }}
+        </div>
+      </div>
+    </div>
+    <div v-if="statusList.transferStatuses[status.statusName].length">
+      <IconArrowSharp class="statuslist__list-arrow" />
+    </div>
+    <div
+        v-if="statusList.transferStatuses[status.statusName].length"
+        class="statuslist__list-transfers"
+    >
       <div
-          class="statuslist__list-items"
-          v-for="status in statusList.statuses"
-          :key="status.statusName"
+          class="statuslist__list-transfers-box"
+          v-for="transfer in statusList.transferStatuses[status.statusName]"
       >
         <div
-            class="statuslist__list-status"
-            @click="toggleStatus(status, 'handlers')"
-        >
-          <div class="status-container" :style="{ backgroundColor: status.statusColor }">
-            <StatusColored
-                :statusText="status.statusName"
-                :statusColor="status.statusColor"
-                class="status-colored-full-width"
-            />
-              <ButtonIcon
-                  class="statuslist__list-btn"
-                  @click="editStatus(status)"
-              >
-                <template v-slot:icon
-                ><IconEdit
-                    :class="getIconClass(status, 'edit')"
-                /></template>
-              </ButtonIcon>
-              <ButtonIcon
-                  class="statuslist__list-btn"
-                  @click="handleModification(status.statusName, 'delete')"
-              >
-                <template v-slot:icon
-                ><IconDelete
-                    :class="getIconClass(status, 'delete')"
-                /></template>
-              </ButtonIcon>
-            <div
-                class="statuslist__list-comment-tooltip"
-            >
-              {{ status.statusComment || 'Нет комментария' }}
-            </div>
-          </div>
-        </div>
-        <div v-if="statusList.transferStatuses[status.statusName].length">
-          <IconArrowSharp class="statuslist__list-arrow" />
-        </div>
-        <div
-            v-if="statusList.transferStatuses[status.statusName].length"
-            class="statuslist__list-transfers"
-        >
-          <div
-              class="statuslist__list-transfers-box"
-              v-for="transfer in statusList.transferStatuses[status.statusName]"
-          >
-            <div
-              class="statuslist__list-transfers-item"
-              :style="{
+            class="statuslist__list-transfers-item"
+            :style="{
                 backgroundColor: statusList.statuses.find(
                   (s) => s.statusName === transfer
                 ).statusColor,
               }"
-                @click="toggleStatus(status, 'transfer')"
-            >
-              <StatusColored
-                  :statusText="transfer"
-                  :statusColor="statusList.statuses.find((s) => s.statusName === transfer).statusColor"
-                  class="status-colored-full-width"
-              />
-              <ButtonIcon
-                class="statuslist__list-btn"
-                @click="
+            @click="toggleStatus(status, 'transfer')"
+        >
+          <StatusColored
+              :statusText="transfer"
+              :statusColor="statusList.statuses.find((s) => s.statusName === transfer).statusColor"
+              class="status-colored-full-width"
+          />
+          <ButtonIcon
+              class="statuslist__list-btn"
+              @click="
                   handleModification(
                     status.statusName,
                     'delete',
@@ -77,30 +70,30 @@
                     transfer
                   )
                 "
-              >
-                <template v-slot:icon
-                  ><IconDelete
-                    :class="getIconClass(status, 'transfer')"
-                /></template>
-              </ButtonIcon>
-            </div>
-          </div>
+          >
+            <template v-slot:icon
+            ><IconDelete
+                :class="getIconClass(status, 'transfer')"
+            /></template>
+          </ButtonIcon>
         </div>
-        <ButtonIcon
-            class="statuslist__list-btn"
-            @click="
+      </div>
+    </div>
+    <ButtonIcon
+        class="statuslist__list-btn"
+        @click="
            handleStatusClick(status)
           "
-        >
-          <template v-slot:icon
-          ><IconAdd class="statuslist__list-icon"
-          /></template>
-        </ButtonIcon>
-        <SelectMain
-            v-if="indicators.isTransfer && statusMod.name === status.statusName"
-            class="statuslist__list-select"
-            v-model="statusMod.toName"
-            :options="
+    >
+      <template v-slot:icon
+      ><IconAdd class="statuslist__list-icon"
+      /></template>
+    </ButtonIcon>
+    <SelectMain
+        v-if="indicators.isTransfer && statusMod.name === status.statusName"
+        class="statuslist__list-select"
+        v-model="statusMod.toName"
+        :options="
             statusList.statusesSelect.filter(
               (el) =>
                 el.id !== status.statusName &&
@@ -109,26 +102,27 @@
                 ) === -1
             )
           "
-            @update:model-value="
+        @update:model-value="
             handleModification(status.statusName, 'create', true)
           "
-        />
-      </div>
-    </div>
+    />
   </div>
 </template>
 
 <script setup>
 import { ref } from 'vue';
-import SelectMain from '@/components/SelectMain.vue';
 import ButtonIcon from '@/components/ButtonIcon.vue';
-import IconAdd from '@/assets/icons/add.svg?component';
+import StatusColored from '@/components/StatusColored.vue';
 import IconEdit from '@/assets/icons/edit.svg?component';
 import IconDelete from '@/assets/icons/close.svg?component';
 import IconArrowSharp from '@/assets/icons/arrow-sharp.svg?component';
-import StatusColored from '@/components/StatusColored.vue';
+import IconAdd from '@/assets/icons/add.svg?component';
+import SelectMain from '@/components/SelectMain.vue';
 
 const props = defineProps({
+  status:{
+    type: Object
+  },
   // Массив статусов
   statusList: {
     type: [Array, Object, Array],
@@ -201,11 +195,6 @@ const handleStatusClick = (status) => {
 </script>
 
 <style scoped>
-.vacancy-edit__statuslist {
-  display: flex;
-  flex-direction: column;
-  gap: 5px;
-}
 
 .statuslist__list-arrow {
   height: fit-content;
@@ -213,12 +202,6 @@ const handleStatusClick = (status) => {
   fill: black;
   width: 25px;
   height: 25px;
-}
-
-.statuslist__list-box {
-  display: flex;
-  flex-direction: column;
-  gap: 5px;
 }
 
 .statuslist__list-items {
