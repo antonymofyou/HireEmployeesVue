@@ -182,6 +182,8 @@ const vClickOutside = {
   align-items: center;
   justify-content: space-between;
   padding-left: 5px;
+  word-break: break-all;
+
 
   cursor: pointer;
   padding: 5px 5px;
@@ -192,6 +194,12 @@ const vClickOutside = {
   position: relative;
 }
 
+@media (max-width: 680px) {
+  .options-container-main {
+    max-width: 80%; 
+    word-break: break-all;
+  }
+}
 
 .dark .selected-main {
   color: var(--white);
