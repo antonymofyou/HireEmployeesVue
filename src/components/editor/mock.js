@@ -67,32 +67,22 @@ export const data = {
           "alignment": "left",
           "text": [
             {
-              "text": "Hello",
+              "text": "Hello1",
               "type": "bold",
               "fontSize": 24,
               "fontColor": "#333333"
             },
-            {
-              "text": " This is a test text.",
-              "fontSize": 18,
-              "fontColor": "#333333"
-            }
           ]
         },
         {
           "alignment": "right",
           "text": [
             {
-              "text": "Hello",
+              "text": "Hello2",
               "type": "bold",
               "fontSize": 24,
               "fontColor": "#333333"
             },
-            {
-              "text": " This is a test text.",
-              "fontSize": 18,
-              "fontColor": "#333333"
-            }
           ]
         }
       ],

@@ -4,25 +4,50 @@
   <div @pointerdown.stop>
     <v-stage :config="configKonva" @pointerdown="callbacks.stagePointerDown">
       <v-layer>
-        <component
+        <v-group
           v-for="shape in data.shapes"
-          :key="shape.id"
-          :config="transformConfigToKonvaCorrect(shape)"
-          :is="shapeReducer(shape)"
+          :config="{
+            draggable: true
+          }"
           @pointerenter="callbacks.pointerEnter"
           @dragstart="callbacks.dragStart"
           @dragend="callbacks.dragEnd"
           @pointerleave="callbacks.pointerLeave"
           @dblclick="callbacks.startTransform"
-        />
-        <v-transformer ref="transformer" />
+        >
+          <component    
+            :key="shape.id"
+            :config="transformConfigToKonvaCorrect(shape)"
+            :is="shapeReducer(shape)"
+          />
+
+          <template
+            v-for="textInfo in shape.text"
+          >
+            <v-text
+              v-for="textRecord in textInfo.text"
+              :config="{
+                x: shape.x,
+                y: shape.y,
+                rotation: shape.rotation,
+                width: shape.width,
+                align: textInfo.alignment,
+                ...transformTextConfigToConvaCorrect(textRecord),
+              }">
+            </v-text>
+          </template>
+        </v-group>
+
+      <v-transformer ref="transformer" />
       </v-layer>
     </v-stage>
   </div>
 
-  <Transition name="actions-animation" v-show="selectedShape">
+  <Transition name="actions-animation" v-show="isActionsVisible">
     <div class="actions">
-      <div class="actions__colors">
+      <div class="actions__item">
+        <span class="actions__item-title">Цвета</span>
+
         <div class="action">
           <label>
             Основной цвет: <b>(fill)</b>
@@ -46,7 +71,9 @@
         </div>
       </div>
 
-      <div class="actions__corners" v-if="selectedShape?.attrs.type === 'rectangle'">
+      <div class="actions__item" v-if="isCornerActionsVisible">
+        <span class="actions__item-title">Углы</span>
+
         <label>
           Скругление: <b>cornerRadius</b>
           <input
@@ -64,12 +91,20 @@
 </template>
 
 <script setup>
-import { ref, reactive, watchEffect } from 'vue';
+import { ref, reactive, watchEffect, computed } from 'vue';
 import { data } from './mock';
 
+// Объект, с помощью которого будет происходить трансформация примитивов
 const transformer = ref(null);
+// Выбранная фигура
 const selectedShape = ref(null);
 
+// Видны ли действия над активной фигурой
+const isActionsVisible = computed(() => Boolean(selectedShape.value));
+// Видны ли действия над углами фигуры
+const isCornerActionsVisible = computed(() => isActionsVisible.value && selectedShape.value.attrs.type === 'rectangle');
+
+// Конфигурация холста
 const configKonva = {
   width: window.innerWidth,
   height: window.innerHeight / 2
@@ -128,11 +163,13 @@ const callbacks = {
    */
   startTransform: (e) => {
     const { target } = e;
+    const group = target.parent;
+    console.log(group);
     const transformerNode = transformer.value.getNode();
     const stage = transformerNode.getStage();
     const selectedNode = stage.findOne(`#${target.id()}`);
 
-    helpers.moveToMaxZIndex(target, { withTransformer: true });
+    // helpers.moveToMaxZIndex(target, { withTransformer: true });
     
     if (target === selectedShape.value) {
       selectedShape.value = null;
@@ -143,7 +180,7 @@ const callbacks = {
     
     if (selectedNode) {
       selectedShape.value = selectedNode;
-      transformerNode.nodes([selectedNode]);
+      transformerNode.nodes([...group.children]);
     }
     else {
       selectedShape.value = null;
@@ -163,9 +200,8 @@ const callbacks = {
 };
 
 watchEffect((onCleanup) => {
-  const pointerDownHandler = (e) => {
-    console.log('body capture');
-    helpers.resetActive();
+  const pointerDownHandler = () => {
+    // helpers.resetActive();
   };
 
   // По клику на body - сбрасываем активную фигуру и её трансформацию
@@ -175,8 +211,6 @@ watchEffect((onCleanup) => {
   onCleanup(() => {
     document.body.removeEventListener('pointerdown', pointerDownHandler);
   });
-
-  console.log('Active shape: ', selectedShape.value);
 });
 
 /**
@@ -186,7 +220,7 @@ watchEffect((onCleanup) => {
  */
 function transformConfigToKonvaCorrect(config) {
   // Собираем корректный конфиг
-  const correctConfig = { ...config, id: String(config.id), draggable: true };
+  const correctConfig = { ...config, id: String(config.id), draggable: false };
 
   if (correctConfig.color) {
     correctConfig.fill = correctConfig.color;
@@ -207,6 +241,22 @@ function transformConfigToKonvaCorrect(config) {
 }
 
 /**
+ * Преобразование конфига текста в корректный конфиг vue-conva
+ * @param {Object} configText Конфиг с бэка
+ * @returns {Object} Конфиг для vue-konva
+ */
+function transformTextConfigToConvaCorrect(configText) {
+  const correctConfigText = { ...configText };
+
+  if (correctConfigText.fontColor) {
+    correctConfigText.fill = correctConfigText.fontColor;
+    delete correctConfigText.fontColor;
+  }
+
+  return correctConfigText;
+}
+
+/**
  * Редьюсер для выдачи корректного имени компонента vue-konva
  * @param {Object} shape Объект фигуры
  */
@@ -217,6 +267,10 @@ function shapeReducer(shape) {
     case 'image': return 'v-image';
     case 'text': return 'v-text';
     case 'arrow': return 'v-arrow';
+    default: {
+      console.log('text here');
+      return 'text';
+    }
   }
 }
 
@@ -230,6 +284,21 @@ function shapeReducer(shape) {
 .actions__colors {
   display: flex;
   column-gap: 30px;
+}
+
+.actions {
+  display: flex;
+  flex-wrap: wrap;
+  column-gap: 50px;
+  row-gap: 20px;
+}
+
+.actions__item-title {
+  display: flex;
+  font-size: 20px;
+  font-weight: 800;
+  flex-direction: column;
+  row-gap: 25px;
 }
 
 .actions-animation-enter-active,
