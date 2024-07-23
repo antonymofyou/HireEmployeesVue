@@ -73,7 +73,6 @@ import InputSimple from '@/components/InputSimple.vue';
 import ButtonMain from '@/components/ButtonMain.vue';
 
 const props = defineProps({
-  show: Boolean,
   // Создаваемый/изменяемый статус
   statusMod: {
     type: Object,
