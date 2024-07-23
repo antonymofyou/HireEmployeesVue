@@ -47,10 +47,14 @@ export class TransformerEditor {
 
   /**
    * Редьюсер для выдачи корректного имени компонента vue-konva
-   * @param {Object} shape Объект фигуры
+   * @param {Object | string} shape Объект или строка с обозначением фигуры
    */
   static shapeReducer(shape) {
-    switch (shape.type) {
+    let shapeType = shape;
+    if (typeof shape === 'object') shapeType = shape.type;
+
+    switch (shapeType) {
+      case 'rect':
       case 'rectangle': return 'v-rect';
       case 'circle': return 'v-circle';
       case 'image': return 'v-image';

@@ -4,10 +4,14 @@
   <div @pointerdown.stop>
     <v-stage
       :config="configKonva"
-      @pointerdown="callbacks.stagePointerDown" 
+      @click="callbacks.stagePointerDown"
+      @pointerdown="drawingHandlers.canvasPointerDown"
+      @pointermove="drawingHandlers.canvasPointerMove"
+      @pointerup="drawingHandlers.canvasPointerUp"
       ref="konva"
     >
-      <v-layer>
+      <v-layer
+      >
         <v-group
           v-for="shape in data.shapes"
           :config="{
@@ -45,6 +49,13 @@
           </template>
         </v-group>
 
+        <v-group v-if="currentDrawingShape">
+          <component
+            :is="TransformerEditor.shapeReducer(currentDrawingShape)"
+            :config="currentShapeConfig"
+          />
+        </v-group>
+
       <v-transformer ref="transformer" />
       </v-layer>
     </v-stage>
@@ -70,10 +81,10 @@
         </div>
 
         <div class="select-shape" v-show="isNewShapeSelecting">
-          <button @click="callbacks.addNewShape('rect')">Rect</button>
-          <button @click="callbacks.addNewShape('circle')">Circle</button>
-          <button @click="callbacks.addNewShape('arrow')">Arrow</button>
-          <button @click="callbacks.addNewShape('image')">Image</button>
+          <button :disabled="currentDrawingShape === 'rect'" @click="callbacks.addNewShape('rect')">Rect</button>
+          <button :disabled="currentDrawingShape === 'circle'" @click="callbacks.addNewShape('circle')">Circle</button>
+          <button :disabled="currentDrawingShape === 'arrow'" @click="callbacks.addNewShape('arrow')">Arrow</button>
+          <button :disabled="currentDrawingShape === 'image'" @click="callbacks.addNewShape('image')">Image</button>
           <button @click="callbacks.addNewShape('text')">Text</button>
         </div>
       </div>
@@ -198,9 +209,10 @@
 <script setup>
 import { data } from './mock';
 
-import { ref, watchEffect, computed } from 'vue';
+import { ref, watchEffect, computed, toValue, reactive, nextTick, watch } from 'vue';
 import { Arrow, Circle, Rectangle } from './js/ShapesClasses';
 import { TransformerEditor } from './js/TransformClasses';
+import { dangerouslyForceToAnotherIterationEventLoop } from './js/utils';
 
 // Объект, с помощью которого будет происходить трансформация примитивов
 const transformer = ref(null);
@@ -214,19 +226,48 @@ const konva = ref(null);
 const scaleX = ref(1);
 // Масштабирование по оси y
 const scaleY = ref(1);
+// Текущая рисуемая фигура
+const currentDrawingShape = ref(null);
+// Нажат ли указатель (обозначает, что пользователь ведёт зажатой кнопкой по канве)
+const isPointerDownNow = ref(null);
+
+watchEffect(() => {
+  console.log(toValue(currentDrawingShape));
+});
 
 // Видны ли действия над активной фигурой
 const isActionsVisible = computed(() => Boolean(selectedShape.value));
 // Видны ли действия над углами фигуры
 const isCornerActionsVisible = computed(() => {
+  // Если фигура не является стрелкой или кругом - то разрешаем менять углы
   return isActionsVisible.value && !(['arrow', 'circle'].includes(selectedShape.value.type))
+});
+// Рисует ли сейчас пользователь на канве
+const isDrawingNow = computed(() => {
+  return isPointerDownNow.value && currentDrawingShape.value;
+});
+
+const currentShapeConfig = ref({
+  type: 'rect',
+  id: crypto.randomUUID(),
+  x: 0,
+  y: 0,
+  fill: 'red',
+  stroke: 'black',
+  strokeWidth: 5,
+  width: 0,
+  height: 0,
+});
+
+watch(currentDrawingShape, () => {
+  currentShapeConfig.value.type = currentDrawingShape.value;
 });
 
 // Конфигурация холста
 const configKonva = {
   width: window.innerWidth,
   height: window.innerHeight / 1.5,
-  draggable: true
+  draggable: false
 };
 
 // Вспомогательные функции
@@ -319,6 +360,14 @@ const helpers = {
 const callbacks = {
   groupDragStart: (e) => {
     const { target } = e;
+    // Т.к. сейчас рисуем - не будем ничего передвигать
+    if (isDrawingNow.value) {
+      target.draggable(false);
+      dangerouslyForceToAnotherIterationEventLoop(() => {
+        target.draggable(true);
+      })
+      return;
+    }
     helpers.moveToMaxZIndex(target, { withTransformer: true });
     document.body.style.cursor = 'grabbing';
   },
@@ -396,22 +445,90 @@ const callbacks = {
    */
   toggleSelectingNewShape: () => {
     isNewShapeSelecting.value = !isNewShapeSelecting.value;
+    // Т.к. закрываем меню для выбора фигуры - обнуляем и саму фигуру
+    if (isNewShapeSelecting.value) currentDrawingShape.value = null;
   },
 
   /**
    * Добавление новой фигуры
    * @param {String} shape Новая фигура
    */
-  addNewShape: (shape) => {
+  addNewShape: async (shape) => {
+    // switch (shape) {
+    //   case 'rect': return data.shapes.push(new Rectangle());
+    //   case 'circle': return data.shapes.push(new Circle());
+    //   case 'arrow': return data.shapes.push(new Arrow());
+    //   case 'image': return helpers.loadNewImageIntoCanvas();
+    //   case 'text': return alert('Under construct');
+    // }
     switch (shape) {
-      case 'rect': return data.shapes.push(new Rectangle());
-      case 'circle': return data.shapes.push(new Circle());
-      case 'arrow': return data.shapes.push(new Arrow());
-      case 'image': return helpers.loadNewImageIntoCanvas();
-      case 'text': return alert('Under construct');
+      case 'rect': {
+        currentDrawingShape.value = 'rect';
+        return;
+      };
+      case 'circle': {
+        currentDrawingShape.value = 'circle';
+        return;
+      };
+      case 'arrow': {
+        await helpers.loadNewImageIntoCanvas();
+        currentDrawingShape.value = null;
+        return;
+      };
     }
   },
 };
+
+// Обработчики для рисования
+const drawingHandlers = {
+  canvasPointerDown: (event) => {
+    // Фигура не выбрана - пользователь не начинает рисовать
+    if (!currentDrawingShape.value) return;
+    const { offsetX, offsetY } = event.evt;
+    isPointerDownNow.value = true;
+
+    currentShapeConfig.value.x = offsetX;
+    currentShapeConfig.value.y = offsetY;
+  },
+
+  canvasPointerMove: (event) => {
+    // Если пользователь не рисует, то значит от просто провёл над канвой и игнорируем
+    if (!isDrawingNow.value) return;
+    const { offsetX, offsetY } = event.evt;
+
+    // Рисование фигуры
+    let calculatedWidth = -(currentShapeConfig.value.x - offsetX);
+    let calculatedHeight = -(currentShapeConfig.value.y - offsetY);
+    // Если круг - то берём модуль, т.к. не может быть отрицательного радиуса
+    if (currentDrawingShape.value === 'circle') { 
+      calculatedWidth = Math.abs(calculatedWidth);
+      calculatedHeight = Math.abs(calculatedHeight);
+    }
+    currentShapeConfig.value.width = calculatedWidth;
+    currentShapeConfig.value.height = calculatedHeight;
+  },
+
+  canvasPointerUp: async () => {
+    if (!isDrawingNow.value) return;
+    console.log('Закончил рисовать');
+   
+    const correctConfig = toValue(currentShapeConfig.value);
+    const drawnShape = { ...correctConfig };
+    data.shapes.push(drawnShape);
+
+    // Зануляем все координаты и размеры
+    currentShapeConfig.value.x = currentShapeConfig.value.y = currentShapeConfig.value.width = currentShapeConfig.value.height = 0;
+    currentShapeConfig.value.id = crypto.randomUUID();
+
+    // Пользователь перестал рисовать на канве
+    isPointerDownNow.value = false;
+    currentDrawingShape.value = null;
+  },
+};
+
+watchEffect(() => {
+  console.log(toValue(data.shapes));
+});
 
 watchEffect((onCleanup) => {
   const pointerDownHandler = () => {
@@ -487,15 +604,5 @@ watchEffect((onCleanup) => {
 .actions__item-title {
   font-size: 20px;
   font-weight: 800;
-}
-
-.actions-animation-enter-active,
-.actions-animation-leave-active {
-  transition: opacity 0.5s ease;
-}
-
-.actions-animation-enter-from,
-.actions-animation-leave-to {
-  opacity: 0;
 }
 </style>
