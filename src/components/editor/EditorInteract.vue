@@ -68,11 +68,13 @@
   
         <div>
           <button
+            class="button"
             @click="callbacks.toggleSelectingNewShape"
           >
             {{ isNewShapeSelecting ? 'Прекратить выбор' : 'Добавить фигуру' }}
           </button>
           <button
+            class="button"
             @click="helpers.deleteActiveShape"
             :disabled="!Boolean(selectedShape)"
           >
@@ -81,11 +83,30 @@
         </div>
 
         <div class="select-shape" v-show="isNewShapeSelecting">
-          <button :disabled="currentDrawingShape === 'rect'" @click="callbacks.addNewShape('rect')">Rect</button>
-          <button :disabled="currentDrawingShape === 'circle'" @click="callbacks.addNewShape('circle')">Circle</button>
-          <button :disabled="currentDrawingShape === 'arrow'" @click="callbacks.addNewShape('arrow')">Arrow</button>
-          <button :disabled="currentDrawingShape === 'image'" @click="callbacks.addNewShape('image')">Image</button>
-          <button @click="callbacks.addNewShape('text')">Text</button>
+          <button class="button" :disabled="currentDrawingShape === 'rect'" @click="callbacks.addNewShape('rect')">Rect</button>
+          <button class="button" :disabled="currentDrawingShape === 'circle'" @click="callbacks.addNewShape('circle')">Circle</button>
+          <button class="button" :disabled="currentDrawingShape === 'arrow'" @click="callbacks.addNewShape('arrow')">Arrow</button>
+          <button class="button" :disabled="currentDrawingShape === 'image'" @click="callbacks.addNewShape('image')">Image</button>
+          <button class="button" @click="callbacks.addNewShape('text')">Text</button>
+        </div>
+      </div>
+
+      <div class="actions__item">
+        <span class="actions__item-title">Операции над холстом</span>
+  
+        <div>
+          <button
+            class="button"
+            @click="callbacks.resetScaleCanvas"
+          >
+            Сбросить масштабирование
+          </button>
+          <button
+            class="button"
+            @click="callbacks.resetTransformCanvas"
+          >
+            Вернуться к 0;0
+          </button>
         </div>
       </div>
 
@@ -244,6 +265,11 @@ const isCornerActionsVisible = computed(() => {
 const isDrawingNow = computed(() => {
   return isPointerDownNow.value && currentDrawingShape.value;
 });
+// Объект канвы, предоставляемый konva
+const konvaStage = computed(() => {
+  if (!konva.value) return;
+  return konva.value.getStage();
+});
 
 const currentShapeConfig = ref(makeShapeConfig());
 
@@ -350,8 +376,10 @@ const helpers = {
    */
   getPointerCoordinates(e) {
     const { offsetX, offsetY } = e;
-    const x = offsetX + canvasTransform.value.x;
-    const y = offsetY + canvasTransform.value.y;
+    // const x = offsetX - canvasTransform.value.x * scaleX.value;
+    // const y = offsetY - canvasTransform.value.y * scaleY.value;
+    const x = offsetX / scaleX.value - canvasTransform.value.x / scaleX.value;
+    const y = offsetY / scaleY.value - canvasTransform.value.y / scaleY.value;
 
     return { x, y };
   },
@@ -392,12 +420,11 @@ const callbacks = {
    */
   stagePointerUp: () => {
     console.log('stage pointer up');
-    const stage = konva.value.getStage();
     // Получаем смещение в виде матрицы. Нам нужны лишь два последних элемента (x, y)
-    const [_a, _b, _c, _d, x, y] = stage.getAbsoluteTransform().m;
+    const [_a, _b, _c, _d, x, y] = konvaStage.value.getAbsoluteTransform().m;
     // Пишем смещение в состояние приложения
-    canvasTransform.value.x = -x;
-    canvasTransform.value.y = -y;
+    canvasTransform.value.x = x;
+    canvasTransform.value.y = y;
   },
   /**
    * Регулировка сразу двух осей для масштабирования
@@ -494,6 +521,21 @@ const callbacks = {
       };
     }
   },
+
+  /**
+   * 
+   */
+  resetScaleCanvas: () => {
+    scaleX.value = 1;
+    scaleY.value = 1;
+  },
+
+  /**
+   * Сбросить трансформации канвы
+   */
+  resetTransformCanvas: () => {
+    konvaStage.value.position({ x: 0, y: 0 });
+  },
 };
 
 // Обработчики для рисования
@@ -506,13 +548,12 @@ const drawingHandlers = {
     // Фигура не выбрана - пользователь не начинает рисовать
     if (!currentDrawingShape.value) return;
     const { x, y } = helpers.getPointerCoordinates(event.evt);
-    const stage = konva.value.getStage();
     isPointerDownNow.value = true;
 
     // Делаем это для того, чтобы мы могли начать рисовать, а не передвигать холст
-    stage.draggable(false);
+    konvaStage.value.draggable(false);
     dangerouslyForceToAnotherIterationEventLoop(() => {
-      stage.draggable(true);
+      konvaStage.value.draggable(true);
     });
 
     currentShapeConfig.value.x = x;
@@ -554,7 +595,7 @@ const drawingHandlers = {
    * Обработка поднятия указателя с канвы. "Коммитим" изменения здесь
    * @params {Object} event Событие
    */
-  canvasPointerUp: async (event) => {
+  canvasPointerUp: async () => {
     if (!isDrawingNow.value) return;
     const correctConfig = toValue(currentShapeConfig.value);
     const drawnShape = { ...correctConfig };
@@ -574,8 +615,7 @@ watch(canvasTransform, () => {
 }, { deep: true });
 
 watch([scaleX, scaleY], () => {
-  const stage = konva.value.getStage();
-  const offset = stage.offset();
+  const offset = konvaStage.value.offset();
 
   console.log('scaleX: ', scaleX.value);
   console.log('scaleY: ', scaleY.value);
@@ -584,8 +624,8 @@ watch([scaleX, scaleY], () => {
 
 // Ставим масштабирование для канваса
 watchEffect(() => {
-  if (!konva.value) return;
-  konva.value.getStage().scale({ x: Number(scaleX.value), y: Number(scaleY.value) });
+  if (!konvaStage.value) return;
+  konvaStage.value.scale({ x: Number(scaleX.value), y: Number(scaleY.value) });
 });
 
 // Корректные размеры при изменении окна браузера
@@ -593,10 +633,9 @@ watchEffect((onCleanup) => {
   if (!konva.value) return;
 
   const resizeHandler = () => {
-    // Берём канву и растягиваем на нужные размеры
-    const stage = konva.value.getStage();
-    stage.width(window.innerWidth);
-    stage.height(window.innerHeight / 1.5);
+    // Растягиваем канву на нужные размеры
+    konvaStage.value.width(window.innerWidth);
+    konvaStage.value.height(window.innerHeight / 1.5);
   };
 
   window.addEventListener('resize', resizeHandler, { passive: true });
@@ -642,5 +681,10 @@ watchEffect((onCleanup) => {
 .actions__item-title {
   font-size: 20px;
   font-weight: 800;
+}
+
+.button {
+  padding: 5px 15px;
+  cursor: pointer;
 }
 </style>
