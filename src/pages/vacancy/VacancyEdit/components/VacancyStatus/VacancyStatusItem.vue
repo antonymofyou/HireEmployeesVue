@@ -110,7 +110,6 @@
 </template>
 
 <script setup>
-import { ref } from 'vue';
 import ButtonIcon from '@/components/ButtonIcon.vue';
 import StatusColored from '@/components/StatusColored.vue';
 import IconEdit from '@/assets/icons/edit.svg?component';
@@ -120,8 +119,10 @@ import IconAdd from '@/assets/icons/add.svg?component';
 import SelectMain from '@/components/SelectMain.vue';
 
 const props = defineProps({
+  // Статус
   status:{
-    type: Object
+    type: Object,
+    required: true
   },
   // Массив статусов
   statusList: {
@@ -144,52 +145,51 @@ const props = defineProps({
     required: true,
   },
 });
-// Индикаторы
-const indicators = ref(props.indicators);
-// Создаваемый/изменяемый статус
-const statusMod = ref(props.statusMod);
 // Функция для редактирования статуса
 const editStatus = (status) => {
-  indicators.value.isEdit = true;
-  statusMod.value.name = status.statusName;
-  statusMod.value.comment = status.statusComment;
-  statusMod.value.color = status.statusColor;
+  props.indicators.isEdit = true;
+  Object.assign(props.statusMod, {
+    action: 'update',
+    name: status.statusName,
+    comment: status.statusComment,
+    color: status.statusColor
+  });
 };
 // Функция для получения класса иконки
 const getIconClass = (status, type) => {
   const isActive = type === 'transfer'
-      ? indicators.value.activeTransfer
-      : indicators.value.activeHandlers;
+      ? props.indicators.activeTransfer
+      : props.indicators.activeHandlers;
 
   return {
     'statuslist__list-icon-edit': type === 'edit',
     'statuslist__list-icon-delete': type === 'delete',
     'statuslist__list-icon-transfer': type === 'transfer',
-    'active': isActive && statusMod.value.name === status.statusName,
+    'active': isActive && props.statusMod.name === status.statusName,
   };
 };
 // Универсальная функция переключения статусов
 const toggleStatus = (status, type) => {
   if (type === 'handlers') {
-    indicators.value.activeHandlers = !indicators.value.activeHandlers || statusMod.value.name !== status.statusName;
-    if (indicators.value.activeHandlers) {
-      indicators.value.activeTransfer = false;
+    props.indicators.activeHandlers = !props.indicators.activeHandlers || props.statusMod.name !== status.statusName;
+    if (props.indicators.activeHandlers) {
+      props.indicators.activeTransfer = false;
     }
   } else if (type === 'transfer') {
-    indicators.value.activeTransfer = !indicators.value.activeTransfer || statusMod.value.name !== status.statusName;
-    if (indicators.value.activeTransfer) {
-      indicators.value.activeHandlers = false;
+    props.indicators.activeTransfer = !props.indicators.activeTransfer || props.statusMod.name !== status.statusName;
+    if (props.indicators.activeTransfer) {
+      props.indicators.activeHandlers = false;
     }
   }
-  statusMod.value.name = status.statusName;
+  props.statusMod.name = status.statusName;
 };
 // Функция для обработки клика трансфера
 const handleStatusClick = (status) => {
-  if (indicators.value.isTransfer && statusMod.value.name !== status.statusName) {
-    statusMod.value.name = status.statusName;
+  if (props.indicators.isTransfer && props.statusMod.name !== status.statusName) {
+    props.statusMod.name = status.statusName;
   } else {
-    indicators.value.isTransfer = !indicators.value.isTransfer;
-    statusMod.value.name = status.statusName;
+    props.indicators.isTransfer = !props.indicators.isTransfer;
+    props.statusMod.name = status.statusName;
   }
 };
 </script>

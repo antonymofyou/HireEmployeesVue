@@ -74,12 +74,36 @@ import ButtonMain from '@/components/ButtonMain.vue';
 
 const props = defineProps({
   show: Boolean,
-  statusMod: Object,
-  indicators: Object,
-  colors: Array,
-  handleModification: Function,
-  errorMessage: String,
-  request: Boolean,
+  // Создаваемый/изменяемый статус
+  statusMod: {
+    type: Object,
+    required: true
+  },
+  // Индикаторы
+  indicators: {
+    type: Object,
+    required: true
+  },
+  // Цвета
+  colors: {
+    type: Array,
+    required: true
+  },
+  // Обработчик изменения статуса
+  handleModification: {
+    type: Function,
+    required: true
+  },
+  // Сообщение об ошибке
+  errorMessage: {
+    type: String,
+    default: ''
+  },
+  // Флаг запроса
+  request: {
+    type: Boolean,
+    default: false
+  }
 });
 </script>
 

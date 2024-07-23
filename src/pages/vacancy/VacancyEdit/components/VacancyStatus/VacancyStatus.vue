@@ -3,7 +3,7 @@
     <SpinnerMain v-if="request" class="vacancy-edit__status-spinner" />
     <p
       class="vacancy-edit__status-error"
-      v-if="errorMessage && !isAdd && !isEdit"
+      v-if="errorMessage && !indicators.isAdd && !indicators.isEdit"
     >
       {{ errorMessage }}
     </p>
@@ -21,16 +21,7 @@
     <div class="vacancy-edit__status-add">
       <ButtonIcon
         class="vacancy-edit__status-add-btn"
-        @click="
-          (indicators.isAdd = true),
-            (statusMod = {
-              action: 'create',
-              name: '',
-              toName: '',
-              comment: '',
-              color: statusMod.color,
-            })
-        "
+        @click="openAddStatusModal"
       >
         <template v-slot:icon
           ><IconAdd class="vacancy-edit__status-add-icon" />
@@ -42,15 +33,13 @@
   <Teleport to="body">
     <!-- Вывод модалки для добавления и изменения статуса -->
     <VacancyStatusModal
-        v-if="indicators.isAdd || indicators.isEdit"
+        :show="indicators.isAdd || indicators.isEdit"
         :statusMod="statusMod"
         :indicators="indicators"
         :colors="colors"
         :handleModification="handleModification"
-        @closeModal="
-        indicators.isAdd = false;
-        indicators.isEdit = false;
-         "
+        :request="request"
+        :errorMessage="errorMessage"
     />
   </Teleport>
 </template>
@@ -101,7 +90,16 @@ const statusMod = ref({
 const request = ref(false);
 // Сообщение об ошибке
 const errorMessage = ref('');
-// Запрос статусов по id
+// Очистка statusMod после создания/изменения
+const resetStatusMod = () => {
+  statusMod.value = {
+    action: 'create',
+    name: '',
+    toName: '',
+    comment: '',
+    color: '#a3a3a2',
+  };
+};
 const requestVacancyStatuses = () => {
   const requestInstance = new VacanciesGetVacancyStatuses();
   requestInstance.vacancyId = props.vacancyId;
@@ -159,13 +157,7 @@ const requestStatusModification = () => {
       // Обновляем данные статусов
       requestVacancyStatuses();
       // Сбрасываем данные статуса
-      statusMod.value = {
-        action: 'create',
-        name: '',
-        toName: '',
-        comment: '',
-        color: '#a3a3a2',
-      };
+      resetStatusMod();
       request.value = false;
       indicators.value.isEdit = false;
       indicators.value.isAdd = false;
@@ -191,13 +183,7 @@ const requestStatusTransfer = () => {
       // Обновляем данные статусов
       requestVacancyStatuses();
       // Сбрасываем данные статуса
-      statusMod.value = {
-        action: 'create',
-        name: '',
-        toName: '',
-        comment: '',
-        color: '#a3a3a2',
-      };
+      resetStatusMod();
       request.value = false;
       indicators.value.isTransfer = false;
     },
@@ -224,6 +210,10 @@ const handleModification = (statusName, method, transfer, toStatus) => {
     }
     requestStatusTransfer();
   } else requestStatusModification();
+};
+const openAddStatusModal = () => {
+  indicators.value.isAdd = true;
+  resetStatusMod();
 };
 onMounted(() => {
   requestVacancyStatuses();
