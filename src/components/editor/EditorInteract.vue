@@ -2,23 +2,27 @@
   <h1 class="title">Редактор</h1>
 
   <div @pointerdown.stop>
-    <v-stage :config="configKonva" @pointerdown="callbacks.stagePointerDown" ref="konva">
+    <v-stage
+      :config="configKonva"
+      @pointerdown="callbacks.stagePointerDown" 
+      ref="konva"
+    >
       <v-layer>
         <v-group
           v-for="shape in data.shapes"
           :config="{
             draggable: true
           }"
-          @pointerenter="callbacks.pointerEnter"
-          @dragstart="callbacks.dragStart"
-          @dragend="callbacks.dragEnd"
-          @pointerleave="callbacks.pointerLeave"
+          @pointerenter="callbacks.groupPointerEnter"
+          @dragstart="callbacks.groupDragStart"
+          @dragend="callbacks.groupDragEnd"
+          @pointerleave="callbacks.groupPointerLeave"
           @dblclick="callbacks.startTransform"
         >
           <component    
             :key="shape.id"
-            :config="transformConfigToKonvaCorrect(shape)"
-            :is="shapeReducer(shape)"
+            :config="TransformerEditor.transformConfigToKonvaCorrect(shape)"
+            :is="TransformerEditor.shapeReducer(shape)"
           />
 
           <template
@@ -32,7 +36,7 @@
                 rotation: shape.rotation,
                 width: shape.width,
                 align: textInfo.alignment,
-                ...transformTextConfigToConvaCorrect(textRecord),
+                ...TransformerEditor.transformTextConfigToConvaCorrect(textRecord),
               }">
             </v-text>
           </template>
@@ -61,6 +65,13 @@
             Удалить
           </button>
         </div>
+
+        <div class="select-shape" v-show="isNewShapeSelecting">
+          <button @click="callbacks.addNewShape('rect')">Rect</button>
+          <button @click="callbacks.addNewShape('circle')">Circle</button>
+          <button @click="callbacks.addNewShape('arrow')">Arrow</button>
+          <button @click="callbacks.addNewShape('text')">Text</button>
+        </div>
       </div>
 
       <div class="actions__item">
@@ -76,6 +87,18 @@
           По оси Y:
           <input type="range" :min="0.1" :max="1" :step="0.1" v-model="scaleY">
           {{  scaleY  }}
+        </label>
+
+        <label>
+          Сразу по двум:
+          <input
+            type="range"
+            :min="0.1"
+            :max="1"
+            :step="0.1"
+            :value="scaleX"
+            @input="callbacks.scaleAllInput">
+          {{  scaleX  }}
         </label>
       </div>
   
@@ -117,10 +140,10 @@
             :min="0"
             :max="50"
             :step="1"
-            :value="selectedShape?.cornerRadius()"
-            @input="selectedShape?.cornerRadius(Number($event.target.value))"
+            :value="selectedShape?.cornerRadius?.()"
+            @input="selectedShape?.cornerRadius?.(Number($event.target.value))"
           />
-          <b>{{ selectedShape?.cornerRadius() }}</b>
+          <b>{{ selectedShape?.cornerRadius?.() }}</b>
         </label>
       </div>
 
@@ -141,20 +164,15 @@
         </label>
       </div>
     </div>
-  
-    <div class="select-shape" v-show="isNewShapeSelecting">
-      <button @click="callbacks.addNewShape('rect')">Rect</button>
-      <button @click="callbacks.addNewShape('circle')">Circle</button>
-      <button @click="callbacks.addNewShape('arrow')">Arrow</button>
-      <button @click="callbacks.addNewShape('text')">Text</button>
-    </div>
   </div>
 </template>
 
 <script setup>
-import { ref, reactive, watchEffect, computed, onMounted } from 'vue';
 import { data } from './mock';
-import { Circle, Rectangle } from './js/ShapesClasses';
+
+import { ref, watchEffect, computed } from 'vue';
+import { Arrow, Circle, Rectangle } from './js/ShapesClasses';
+import { TransformerEditor } from './js/TransformClasses';
 
 // Объект, с помощью которого будет происходить трансформация примитивов
 const transformer = ref(null);
@@ -177,7 +195,7 @@ const isCornerActionsVisible = computed(() => isActionsVisible.value && selected
 // Конфигурация холста
 const configKonva = {
   width: window.innerWidth,
-  height: window.innerHeight / 2,
+  height: window.innerHeight / 1.5,
   draggable: true
 };
 
@@ -225,12 +243,12 @@ const helpers = {
 
 // Переиспользуемые функции
 const callbacks = {
-  dragStart: (e) => {
+  groupDragStart: (e) => {
     const { target } = e;
     helpers.moveToMaxZIndex(target, { withTransformer: true });
     document.body.style.cursor = 'grabbing';
   },
-  dragEnd: (e) => {
+  groupDragEnd: (e) => {
     const { target } = e;
 
     document.body.style.cursor = 'default';
@@ -239,11 +257,19 @@ const callbacks = {
     console.log(target.attrs);
     console.groupEnd('DragEnd');
   },
-  pointerLeave: () => {
+  groupPointerLeave: () => {
     document.body.style.cursor = 'default';
   },
-  pointerEnter: () => {
+  groupPointerEnter: () => {
     document.body.style.cursor = 'grab';
+  },
+  /**
+   * Регулировка сразу двух осей для масштабирования
+   * @param {InputEvent} e Событие
+   */
+  scaleAllInput: (e) => {
+    scaleX.value = e.target.value;
+    scaleY.value = e.target.value;
   },
   /**
    * Помещение target в слой трансформаций
@@ -303,22 +329,10 @@ const callbacks = {
    * @param {String} shape Новая фигура
    */
   addNewShape: (shape) => {
-    console.log({ shape });
     switch (shape) {
       case 'rect': return data.shapes.push(new Rectangle());
       case 'circle': return data.shapes.push(new Circle());
-      case 'arrow': return data.shapes.push({
-      "id": crypto.randomUUID(),
-      "type": "arrow",
-      "x": window.innerWidth / 2,
-      "y": 50,
-      points: [0, 0, 100, 100],
-      pointerLength: 20,
-      pointerWidth: 30,
-      fill: 'black',
-      "borderColor": "#000",
-      "zIndex": 0.2,
-    })
+      case 'arrow': return data.shapes.push(new Arrow());
       case 'text': return alert('Under construct');
     }
   },
@@ -338,72 +352,29 @@ watchEffect((onCleanup) => {
   });
 });
 
+// Ставим масштабирование для канваса
 watchEffect(() => {
   if (!konva.value) return;
-  konva.value.getStage().scale({ x: +scaleX.value, y: +scaleY.value });
+  konva.value.getStage().scale({ x: Number(scaleX.value), y: Number(scaleY.value) });
 });
 
-/**
- * Преобразование конфига с бэка в корректный конфиг vue-konva
- * @param {Object} config Конфиг с бэка
- * @returns {Object} Конфиг для vue-konva
- */
-function transformConfigToKonvaCorrect(config) {
-  // Собираем корректный конфиг
-  const correctConfig = { ...config, id: String(config.id), draggable: false };
+// Корректные размеры при изменении окна браузера
+watchEffect((onCleanup) => {
+  if (!konva.value) return;
 
-  if (correctConfig.color) {
-    correctConfig.fill = correctConfig.color;
-    delete correctConfig.color;
-  }
+  const resizeHandler = () => {
+    // Берём канву
+    const stage = konva.value.getStage();
+    stage.width(window.innerWidth);
+    stage.height(window.innerHeight / 1.5);
+  };
 
-  if (correctConfig.borderColor) {
-    correctConfig.stroke = correctConfig.borderColor;
-    delete correctConfig.borderColor;
-  }
+  window.addEventListener('resize', resizeHandler, { passive: true });
 
-  if (correctConfig.borderWidth) {
-    correctConfig.strokeWidth = correctConfig.borderWidth;
-    delete correctConfig.borderWidth;
-  }
-
-  return reactive(correctConfig);
-}
-
-/**
- * Преобразование конфига текста в корректный конфиг vue-conva
- * @param {Object} configText Конфиг с бэка
- * @returns {Object} Конфиг для vue-konva
- */
-function transformTextConfigToConvaCorrect(configText) {
-  const correctConfigText = { ...configText };
-
-  if (correctConfigText.fontColor) {
-    correctConfigText.fill = correctConfigText.fontColor;
-    delete correctConfigText.fontColor;
-  }
-
-  return correctConfigText;
-}
-
-/**
- * Редьюсер для выдачи корректного имени компонента vue-konva
- * @param {Object} shape Объект фигуры
- */
-function shapeReducer(shape) {
-  switch (shape.type) {
-    case 'rectangle': return 'v-rect';
-    case 'circle': return 'v-circle';
-    case 'image': return 'v-image';
-    case 'text': return 'v-text';
-    case 'arrow': return 'v-arrow';
-    default: {
-      console.log('@@@ Reducer default:', shape);
-      return 'text';
-    }
-  }
-}
-
+  onCleanup(() => {
+    window.removeEventListener('resize', resizeHandler);
+  });
+});
 </script>
 
 <style scoped>
@@ -429,6 +400,7 @@ function shapeReducer(shape) {
   flex-wrap: wrap;
   column-gap: 50px;
   row-gap: 20px;
+  accent-color: var(--cornflower-blue);
 }
 
 .actions__item {
