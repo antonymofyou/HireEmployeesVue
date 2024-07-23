@@ -43,31 +43,47 @@
     </v-stage>
   </div>
 
-  <Transition name="actions-animation" v-show="isActionsVisible">
+  <Transition name="actions-animation">
     <div class="actions">
       <div class="actions__item">
+        <span class="actions__item-title">Операции</span>
+
+        <div>
+          <button :disabled="true" title="В разработке">Добавить</button>
+          <button
+            @click="helpers.deleteActiveShape"
+            :disabled="!Boolean(selectedShape)"
+          >
+            Удалить
+          </button>
+        </div>
+      </div>
+
+      <div class="actions__item" v-show="isActionsVisible">
         <span class="actions__item-title">Цвета</span>
 
-        <div class="action">
-          <label>
-            Основной цвет: <b>(fill)</b>
-            <input
-              type="color"
-              :value="selectedShape?.fill()"
-              @input="selectedShape?.fill($event.target.value)"
-            />
-          </label>
-        </div>
-
-        <div class="action">
-          <label>
-            Цвет границ: <b>(stroke)</b>
-            <input
-              type="color"
-              :value="selectedShape?.stroke()"
-              @input="selectedShape?.stroke($event.target.value)"
-            />
-          </label>
+        <div>
+          <div class="action">
+            <label>
+              Основной цвет: <b>(fill)</b>
+              <input
+                type="color"
+                :value="selectedShape?.fill()"
+                @input="selectedShape?.fill($event.target.value)"
+              />
+            </label>
+          </div>
+  
+          <div class="action">
+            <label>
+              Цвет границ: <b>(stroke)</b>
+              <input
+                type="color"
+                :value="selectedShape?.stroke()"
+                @input="selectedShape?.stroke($event.target.value)"
+              />
+            </label>
+          </div>
         </div>
       </div>
 
@@ -126,13 +142,30 @@ const helpers = {
   },
 
   /**
+   * Удаление выделения трансформаций
+   */
+  unTransformAll: () => {
+    const transformerNode = transformer.value.getNode();
+    if (transformerNode) transformerNode.nodes([]);
+  },
+
+  /**
    * Сброс активной фигуры и трансформаций
    */
   resetActive: () => {
     selectedShape.value = null;
-    const transformerNode = transformer.value.getNode();
-    if (transformerNode) transformerNode.nodes([]);
+    helpers.unTransformAll();
   },
+
+  /**
+   * Удаление активной фигуры
+   */
+  deleteActiveShape: () => {
+    console.log('Удаление активной фигуры');
+    console.log(selectedShape.value.parent.destroy());
+    selectedShape.value = null;
+    helpers.unTransformAll();
+  }
 };
 
 // Переиспользуемые функции
@@ -293,12 +326,15 @@ function shapeReducer(shape) {
   row-gap: 20px;
 }
 
-.actions__item-title {
+.actions__item {
   display: flex;
+  flex-direction: column;
+  row-gap: 10px;
+}
+
+.actions__item-title {
   font-size: 20px;
   font-weight: 800;
-  flex-direction: column;
-  row-gap: 25px;
 }
 
 .actions-animation-enter-active,
