@@ -111,7 +111,7 @@ import ButtonMain from "@/components/ButtonMain.vue";
 import TopSquareButton from "@/components/TopSquareButton.vue";
 import ErrorNotification from "@/components/ErrorNotification.vue";
 import SpinnerMain from "@/components/SpinnerMain.vue";
-import MainEditor from "@/components/editor/MainEditor.vue";
+import MainEditor from "@/components/editor/EditorInteract.vue";
 
 const router = useRouter();
 
