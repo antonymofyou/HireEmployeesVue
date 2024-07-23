@@ -21,7 +21,10 @@
         >
           <component    
             :key="shape.id"
-            :config="TransformerEditor.transformConfigToKonvaCorrect(shape)"
+            :config="{
+              ...TransformerEditor.transformConfigToKonvaCorrect(shape),
+              image: TransformerEditor.shapeReducer(shape) === 'v-image' ? helpers.buildImage(shape) : null,
+            }"
             :is="TransformerEditor.shapeReducer(shape)"
           />
 
@@ -70,6 +73,7 @@
           <button @click="callbacks.addNewShape('rect')">Rect</button>
           <button @click="callbacks.addNewShape('circle')">Circle</button>
           <button @click="callbacks.addNewShape('arrow')">Arrow</button>
+          <button @click="callbacks.addNewShape('image')">Image</button>
           <button @click="callbacks.addNewShape('text')">Text</button>
         </div>
       </div>
@@ -163,6 +167,30 @@
           <b>{{ selectedShape?.strokeWidth() }}</b>
         </label>
       </div>
+
+      <div class="actions__item" v-show="isActionsVisible">
+        <span class="actions__item-title">Размеры</span>
+
+        <label>
+          Ширина:
+          <input
+            type="number"
+            :value="selectedShape?.width?.()"
+            @input="selectedShape?.width(Number($event.target.value))"
+          />&nbsp;
+          <b>{{ selectedShape?.width?.() }}px</b>
+        </label>
+
+        <label>
+          Высота:
+          <input
+            type="number"
+            :value="selectedShape?.height?.()"
+            @input="selectedShape?.height(Number($event.target.value))"
+          />&nbsp;
+          <b>{{ selectedShape?.height?.() }}px</b>
+        </label>
+      </div>
     </div>
   </div>
 </template>
@@ -190,7 +218,9 @@ const scaleY = ref(1);
 // Видны ли действия над активной фигурой
 const isActionsVisible = computed(() => Boolean(selectedShape.value));
 // Видны ли действия над углами фигуры
-const isCornerActionsVisible = computed(() => isActionsVisible.value && selectedShape.value.attrs.type === 'rectangle');
+const isCornerActionsVisible = computed(() => {
+  return isActionsVisible.value && !(['arrow', 'circle'].includes(selectedShape.value.type))
+});
 
 // Конфигурация холста
 const configKonva = {
@@ -234,10 +264,54 @@ const helpers = {
    * Удаление активной фигуры
    */
   deleteActiveShape: () => {
-    console.log('Удаление активной фигуры');
-    console.log(selectedShape.value.parent.destroy());
     selectedShape.value = null;
     helpers.unTransformAll();
+  },
+
+  /**
+   * Загрузка нового изображения на канву
+   */
+  loadNewImageIntoCanvas: async () => {
+    // Разрешённые для загрузки типы файлов
+    const allowedTypesFiles = [
+      {
+        description: "Images",
+        accept: {
+          "image/*": ['.png', '.gif', '.jpeg', '.jpg', '.svg'],
+        },
+      },
+    ];
+    // Массив файлов, которые выбрал пользователь
+    const result = await window.showOpenFilePicker({
+      types: allowedTypesFiles
+    });
+    const file = await result[0].getFile();
+
+    const fileReader = new FileReader();
+
+    fileReader.onloadend = () => {
+      data.shapes.push({
+        type: 'image',
+        width: 250,
+        height: 250,
+        src: fileReader.result,
+        x: 300,
+        y: 150,
+      })
+    };
+
+    fileReader.readAsDataURL(file);
+  },
+
+  /**
+   * Фабрика картинок
+   * @param shape Объект фигуры изображения
+   * @returns {Image} Изображение
+   */
+  buildImage: (shape) => {
+    const image = new Image();
+    image.src = shape.src;
+    return image;
   },
 };
 
@@ -333,6 +407,7 @@ const callbacks = {
       case 'rect': return data.shapes.push(new Rectangle());
       case 'circle': return data.shapes.push(new Circle());
       case 'arrow': return data.shapes.push(new Arrow());
+      case 'image': return helpers.loadNewImageIntoCanvas();
       case 'text': return alert('Under construct');
     }
   },
