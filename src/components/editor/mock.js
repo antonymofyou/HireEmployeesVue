@@ -1,4 +1,6 @@
-export const data = {
+import { reactive } from "vue";
+
+export const data = reactive({
   "imageDictionary": {},
   "shapes": [
     {
@@ -89,4 +91,4 @@ export const data = {
       "borderWidth": 5
     }
   ]
-};
+});

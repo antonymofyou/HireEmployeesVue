@@ -2,7 +2,7 @@
   <h1 class="title">Редактор</h1>
 
   <div @pointerdown.stop>
-    <v-stage :config="configKonva" @pointerdown="callbacks.stagePointerDown">
+    <v-stage :config="configKonva" @pointerdown="callbacks.stagePointerDown" ref="konva">
       <v-layer>
         <v-group
           v-for="shape in data.shapes"
@@ -43,13 +43,17 @@
     </v-stage>
   </div>
 
-  <Transition name="actions-animation">
+  <div class="bottom-area">
     <div class="actions">
       <div class="actions__item">
-        <span class="actions__item-title">Операции</span>
-
+        <span class="actions__item-title">Добавление / Удаление</span>
+  
         <div>
-          <button :disabled="true" title="В разработке">Добавить</button>
+          <button
+            @click="callbacks.toggleSelectingNewShape"
+          >
+            {{ isNewShapeSelecting ? 'Прекратить выбор' : 'Добавить фигуру' }}
+          </button>
           <button
             @click="helpers.deleteActiveShape"
             :disabled="!Boolean(selectedShape)"
@@ -59,9 +63,25 @@
         </div>
       </div>
 
+      <div class="actions__item">
+        <span class="actions__item-title">Масштабирование</span>
+
+        <label>
+          По оси X:
+          <input type="range" :min="0.1" :max="1" :step="0.1" v-model="scaleX">
+          {{  scaleX  }}
+        </label>
+
+        <label>
+          По оси Y:
+          <input type="range" :min="0.1" :max="1" :step="0.1" v-model="scaleY">
+          {{  scaleY  }}
+        </label>
+      </div>
+  
       <div class="actions__item" v-show="isActionsVisible">
         <span class="actions__item-title">Цвета</span>
-
+  
         <div>
           <div class="action">
             <label>
@@ -86,34 +106,68 @@
           </div>
         </div>
       </div>
-
-      <div class="actions__item" v-if="isCornerActionsVisible">
+  
+      <div class="actions__item" v-show="isCornerActionsVisible">
         <span class="actions__item-title">Углы</span>
-
+  
         <label>
           Скругление: <b>cornerRadius</b>
           <input
             type="range"
             :min="0"
-            :max="100"
+            :max="50"
+            :step="1"
             :value="selectedShape?.cornerRadius()"
             @input="selectedShape?.cornerRadius(Number($event.target.value))"
           />
           <b>{{ selectedShape?.cornerRadius() }}</b>
         </label>
       </div>
+
+      <div class="actions__item" v-show="isActionsVisible">
+        <span class="actions__item-title">Границы</span>
+
+        <label>
+          Ширина:
+          <input
+            type="range"
+            :min="0"
+            :max="20"
+            :step="1"
+            :value="selectedShape?.strokeWidth()"
+            @input="selectedShape?.strokeWidth(Number($event.target.value))"
+          />
+          <b>{{ selectedShape?.strokeWidth() }}</b>
+        </label>
+      </div>
     </div>
-  </Transition>
+  
+    <div class="select-shape" v-show="isNewShapeSelecting">
+      <button @click="callbacks.addNewShape('rect')">Rect</button>
+      <button @click="callbacks.addNewShape('circle')">Circle</button>
+      <button @click="callbacks.addNewShape('arrow')">Arrow</button>
+      <button @click="callbacks.addNewShape('text')">Text</button>
+    </div>
+  </div>
 </template>
 
 <script setup>
-import { ref, reactive, watchEffect, computed } from 'vue';
+import { ref, reactive, watchEffect, computed, onMounted } from 'vue';
 import { data } from './mock';
+import { Circle, Rectangle } from './js/ShapesClasses';
 
 // Объект, с помощью которого будет происходить трансформация примитивов
 const transformer = ref(null);
 // Выбранная фигура
 const selectedShape = ref(null);
+// Выбирается ли сейчас новая фигура
+const isNewShapeSelecting = ref(false);
+// Канвас, управляемый konva
+const konva = ref(null);
+// Масштабирование по оси X
+const scaleX = ref(1);
+// Масштабирование по оси y
+const scaleY = ref(1);
 
 // Видны ли действия над активной фигурой
 const isActionsVisible = computed(() => Boolean(selectedShape.value));
@@ -123,7 +177,8 @@ const isCornerActionsVisible = computed(() => isActionsVisible.value && selected
 // Конфигурация холста
 const configKonva = {
   width: window.innerWidth,
-  height: window.innerHeight / 2
+  height: window.innerHeight / 2,
+  draggable: true
 };
 
 // Вспомогательные функции
@@ -165,7 +220,7 @@ const helpers = {
     console.log(selectedShape.value.parent.destroy());
     selectedShape.value = null;
     helpers.unTransformAll();
-  }
+  },
 };
 
 // Переиспользуемые функции
@@ -221,13 +276,50 @@ const callbacks = {
     }
   },
   
+  /**
+   * Обработка клика по канвасу
+   * @param {Object} e Событие
+   */
   stagePointerDown: (e) => {
     const { target } = e;
 
+    // Если кликнули по канвасу - то убираем выделение активной фигуры
     if (target === target.getStage()) {
       selectedShape.value = null;
       const transformerNode = transformer.value.getNode();
       transformerNode.nodes([]);
+    }
+  },
+
+  /**
+   * Переключение статуса выбора новой фигуры
+   */
+  toggleSelectingNewShape: () => {
+    isNewShapeSelecting.value = !isNewShapeSelecting.value;
+  },
+
+  /**
+   * Добавление новой фигуры
+   * @param {String} shape Новая фигура
+   */
+  addNewShape: (shape) => {
+    console.log({ shape });
+    switch (shape) {
+      case 'rect': return data.shapes.push(new Rectangle());
+      case 'circle': return data.shapes.push(new Circle());
+      case 'arrow': return data.shapes.push({
+      "id": crypto.randomUUID(),
+      "type": "arrow",
+      "x": window.innerWidth / 2,
+      "y": 50,
+      points: [0, 0, 100, 100],
+      pointerLength: 20,
+      pointerWidth: 30,
+      fill: 'black',
+      "borderColor": "#000",
+      "zIndex": 0.2,
+    })
+      case 'text': return alert('Under construct');
     }
   },
 };
@@ -244,6 +336,11 @@ watchEffect((onCleanup) => {
   onCleanup(() => {
     document.body.removeEventListener('pointerdown', pointerDownHandler);
   });
+});
+
+watchEffect(() => {
+  if (!konva.value) return;
+  konva.value.getStage().scale({ x: +scaleX.value, y: +scaleY.value });
 });
 
 /**
@@ -301,7 +398,7 @@ function shapeReducer(shape) {
     case 'text': return 'v-text';
     case 'arrow': return 'v-arrow';
     default: {
-      console.log('text here');
+      console.log('@@@ Reducer default:', shape);
       return 'text';
     }
   }
@@ -312,6 +409,14 @@ function shapeReducer(shape) {
 <style scoped>
 .title {
   text-align: center;
+}
+
+.bottom-area {
+  display: flex;
+  flex-direction: column;
+  row-gap: 20px;
+  padding-top: 20px;
+  border-top: 2px solid var(--cornflower-blue);
 }
 
 .actions__colors {
