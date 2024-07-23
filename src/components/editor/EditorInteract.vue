@@ -1,7 +1,7 @@
 <template>
   <h1 class="title">Редактор</h1>
 
-  <div @pointerdown.stop>
+  <div @pointerdown.stop @pointerup="callbacks.stagePointerUp">
     <v-stage
       :config="configKonva"
       @click="callbacks.stagePointerDown"
@@ -212,7 +212,7 @@ import { data } from './mock';
 import { ref, watchEffect, computed, toValue, reactive, nextTick, watch } from 'vue';
 import { Arrow, Circle, Rectangle } from './js/ShapesClasses';
 import { TransformerEditor } from './js/TransformClasses';
-import { dangerouslyForceToAnotherIterationEventLoop } from './js/utils';
+import { dangerouslyForceToAnotherIterationEventLoop, makeShapeConfig } from './js/utils';
 
 // Объект, с помощью которого будет происходить трансформация примитивов
 const transformer = ref(null);
@@ -230,10 +230,8 @@ const scaleY = ref(1);
 const currentDrawingShape = ref(null);
 // Нажат ли указатель (обозначает, что пользователь ведёт зажатой кнопкой по канве)
 const isPointerDownNow = ref(null);
-
-watchEffect(() => {
-  console.log(toValue(currentDrawingShape));
-});
+// Смещение канвы
+const canvasTransform = ref({ x: 0, y: 0 });
 
 // Видны ли действия над активной фигурой
 const isActionsVisible = computed(() => Boolean(selectedShape.value));
@@ -247,17 +245,7 @@ const isDrawingNow = computed(() => {
   return isPointerDownNow.value && currentDrawingShape.value;
 });
 
-const currentShapeConfig = ref({
-  type: 'rect',
-  id: crypto.randomUUID(),
-  x: 0,
-  y: 0,
-  fill: 'red',
-  stroke: 'black',
-  strokeWidth: 5,
-  width: 0,
-  height: 0,
-});
+const currentShapeConfig = ref(makeShapeConfig());
 
 watch(currentDrawingShape, () => {
   currentShapeConfig.value.type = currentDrawingShape.value;
@@ -267,7 +255,7 @@ watch(currentDrawingShape, () => {
 const configKonva = {
   width: window.innerWidth,
   height: window.innerHeight / 1.5,
-  draggable: false
+  draggable: true,
 };
 
 // Вспомогательные функции
@@ -354,6 +342,19 @@ const helpers = {
     image.src = shape.src;
     return image;
   },
+
+  /**
+   * Получить координаты указателя с учётом смещения
+   * @param {PointerEvent} e Pointer-событие
+   * @returns {Object} Объект с координатами
+   */
+  getPointerCoordinates(e) {
+    const { offsetX, offsetY } = e;
+    const x = offsetX + canvasTransform.value.x;
+    const y = offsetY + canvasTransform.value.y;
+
+    return { x, y };
+  },
 };
 
 // Переиспользуемые функции
@@ -387,6 +388,18 @@ const callbacks = {
     document.body.style.cursor = 'grab';
   },
   /**
+   * Обработчик поднятия указателя с канвы. Тут забираем смещение
+   */
+  stagePointerUp: () => {
+    console.log('stage pointer up');
+    const stage = konva.value.getStage();
+    // Получаем смещение в виде матрицы. Нам нужны лишь два последних элемента (x, y)
+    const [_a, _b, _c, _d, x, y] = stage.getAbsoluteTransform().m;
+    // Пишем смещение в состояние приложения
+    canvasTransform.value.x = -x;
+    canvasTransform.value.y = -y;
+  },
+  /**
    * Регулировка сразу двух осей для масштабирования
    * @param {InputEvent} e Событие
    */
@@ -401,7 +414,6 @@ const callbacks = {
   startTransform: (e) => {
     const { target } = e;
     const group = target.parent;
-    console.log(group);
     const transformerNode = transformer.value.getNode();
     const stage = transformerNode.getStage();
     const selectedNode = stage.findOne(`#${target.id()}`);
@@ -471,6 +483,11 @@ const callbacks = {
         return;
       };
       case 'arrow': {
+        // currentDrawingShape.value = 'arrow';
+        data.shapes.push(new Arrow());
+        return;
+      }
+      case 'image': {
         await helpers.loadNewImageIntoCanvas();
         currentDrawingShape.value = null;
         return;
@@ -481,44 +498,70 @@ const callbacks = {
 
 // Обработчики для рисования
 const drawingHandlers = {
+  /**
+   * Обработка первого нажатия на канву. Начинаем рисовать здесь
+   * @params {Object} event Событие
+   */
   canvasPointerDown: (event) => {
     // Фигура не выбрана - пользователь не начинает рисовать
     if (!currentDrawingShape.value) return;
-    const { offsetX, offsetY } = event.evt;
+    const { x, y } = helpers.getPointerCoordinates(event.evt);
+    const stage = konva.value.getStage();
     isPointerDownNow.value = true;
 
-    currentShapeConfig.value.x = offsetX;
-    currentShapeConfig.value.y = offsetY;
+    // Делаем это для того, чтобы мы могли начать рисовать, а не передвигать холст
+    stage.draggable(false);
+    dangerouslyForceToAnotherIterationEventLoop(() => {
+      stage.draggable(true);
+    });
+
+    currentShapeConfig.value.x = x;
+    currentShapeConfig.value.y = y;
   },
 
+  /**
+   * Обработка движения указателя по канве. Рисуем фигуры на лету
+   * @params {Object} event Событие
+   */
   canvasPointerMove: (event) => {
     // Если пользователь не рисует, то значит от просто провёл над канвой и игнорируем
     if (!isDrawingNow.value) return;
-    const { offsetX, offsetY } = event.evt;
 
-    // Рисование фигуры
-    let calculatedWidth = -(currentShapeConfig.value.x - offsetX);
-    let calculatedHeight = -(currentShapeConfig.value.y - offsetY);
-    // Если круг - то берём модуль, т.к. не может быть отрицательного радиуса
-    if (currentDrawingShape.value === 'circle') { 
-      calculatedWidth = Math.abs(calculatedWidth);
-      calculatedHeight = Math.abs(calculatedHeight);
+    const { x, y } = helpers.getPointerCoordinates(event.evt);
+
+    // Рисуем фигуры. Т.к. рисуем по разному - делаем ветки
+    switch (currentDrawingShape.value) {
+      case 'rect': {
+        const calculatedWidth = -(currentShapeConfig.value.x - x);
+        const calculatedHeight = -(currentShapeConfig.value.y - y);
+
+        currentShapeConfig.value.width = calculatedWidth;
+        currentShapeConfig.value.height = calculatedHeight;
+        break;
+      }
+      case 'circle': {
+        const calculatedWidth = Math.abs(currentShapeConfig.value.x - x);
+        const calculatedHeight = Math.abs(currentShapeConfig.value.y - y);
+        const radius = Math.ceil(Math.max(calculatedWidth, calculatedHeight) / 2);
+
+        currentShapeConfig.value.radius = radius;
+        break;
+      }
     }
-    currentShapeConfig.value.width = calculatedWidth;
-    currentShapeConfig.value.height = calculatedHeight;
   },
 
-  canvasPointerUp: async () => {
+  /**
+   * Обработка поднятия указателя с канвы. "Коммитим" изменения здесь
+   * @params {Object} event Событие
+   */
+  canvasPointerUp: async (event) => {
     if (!isDrawingNow.value) return;
-    console.log('Закончил рисовать');
-   
     const correctConfig = toValue(currentShapeConfig.value);
     const drawnShape = { ...correctConfig };
     data.shapes.push(drawnShape);
 
     // Зануляем все координаты и размеры
-    currentShapeConfig.value.x = currentShapeConfig.value.y = currentShapeConfig.value.width = currentShapeConfig.value.height = 0;
-    currentShapeConfig.value.id = crypto.randomUUID();
+    currentShapeConfig.value = makeShapeConfig();
 
     // Пользователь перестал рисовать на канве
     isPointerDownNow.value = false;
@@ -526,22 +569,17 @@ const drawingHandlers = {
   },
 };
 
-watchEffect(() => {
-  console.log(toValue(data.shapes));
-});
+watch(canvasTransform, () => {
+  console.log('Canvas Transform:', toValue(canvasTransform));
+}, { deep: true });
 
-watchEffect((onCleanup) => {
-  const pointerDownHandler = () => {
-    // helpers.resetActive();
-  };
+watch([scaleX, scaleY], () => {
+  const stage = konva.value.getStage();
+  const offset = stage.offset();
 
-  // По клику на body - сбрасываем активную фигуру и её трансформацию
-  // На враппере редактора стоит stopPropagation, поэтому будет иметь действие только по клику вне него
-  document.body.addEventListener('pointerdown', pointerDownHandler);
-
-  onCleanup(() => {
-    document.body.removeEventListener('pointerdown', pointerDownHandler);
-  });
+  console.log('scaleX: ', scaleX.value);
+  console.log('scaleY: ', scaleY.value);
+  console.log('Offset: ', offset);
 });
 
 // Ставим масштабирование для канваса
@@ -555,7 +593,7 @@ watchEffect((onCleanup) => {
   if (!konva.value) return;
 
   const resizeHandler = () => {
-    // Берём канву
+    // Берём канву и растягиваем на нужные размеры
     const stage = konva.value.getStage();
     stage.width(window.innerWidth);
     stage.height(window.innerHeight / 1.5);
