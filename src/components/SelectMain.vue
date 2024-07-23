@@ -143,38 +143,15 @@ const vClickOutside = {
   overflow-x: hidden;
 }
 
-@media (max-width: 778px) {
-  .options-container-main {
-    max-width: 80%; 
-    min-width: 185%; 
-    word-break: break-all;
-    
-  }
-}
 
-@media (max-width: 636px) {
+@media (max-width: 815px) {
   .options-container-main {
-    min-width: 100%; 
-    max-width: 80%; 
+    max-width: 80vh; 
     word-break: break-all;
   }
 }
 
-@media (max-width: 374px) {
-  .options-container-main {
-    min-width: 100%;
-    max-width: 80%; 
-    word-break: break-all;
-  }
-}
 
-@media (max-width: 357px) {
-  .options-container-main {
-    min-width: 100%;
-    max-width: 80%; 
-    word-break: break-all;
-  }
-}
 
 .options-container-main::-webkit-scrollbar {
   width: 5px;
