@@ -1,22 +1,24 @@
 <template>
   <h1 class="title">Редактор</h1>
 
-  <v-stage :config="configKonva" @pointerdown="callbacks.stagePointerDown">
-    <v-layer>
-      <component
-        v-for="shape in data.shapes"
-        :key="shape.id"
-        :config="transformConfigToKonvaCorrect(shape)"
-        :is="shapeReducer(shape)"
-        @pointerenter="callbacks.pointerEnter"
-        @dragstart="callbacks.dragStart"
-        @dragend="callbacks.dragEnd"
-        @pointerleave="callbacks.pointerLeave"
-        @dblclick="callbacks.startTransform"
-      />
-      <v-transformer ref="transformer" />
-    </v-layer>
-  </v-stage>
+  <div @pointerdown.stop>
+    <v-stage :config="configKonva" @pointerdown="callbacks.stagePointerDown">
+      <v-layer>
+        <component
+          v-for="shape in data.shapes"
+          :key="shape.id"
+          :config="transformConfigToKonvaCorrect(shape)"
+          :is="shapeReducer(shape)"
+          @pointerenter="callbacks.pointerEnter"
+          @dragstart="callbacks.dragStart"
+          @dragend="callbacks.dragEnd"
+          @pointerleave="callbacks.pointerLeave"
+          @dblclick="callbacks.startTransform"
+        />
+        <v-transformer ref="transformer" />
+      </v-layer>
+    </v-stage>
+  </div>
 
   <Transition name="actions-animation" v-show="selectedShape">
     <div class="actions">
@@ -62,7 +64,7 @@
 </template>
 
 <script setup>
-import { ref, reactive, watchEffect, toValue } from 'vue';
+import { ref, reactive, watchEffect } from 'vue';
 import { data } from './mock';
 
 const transformer = ref(null);
@@ -73,9 +75,36 @@ const configKonva = {
   height: window.innerHeight / 2
 };
 
+// Вспомогательные функции
+const helpers = {
+  /**
+   * Переместить фигуру на самый высокий слой
+   * @param {Object} target Фигура для перемещения
+   * @param {Object} options Объект настроек
+   */
+  moveToMaxZIndex: (target, options) => {
+    target.moveToTop();
+    if (options.withTransformer) {
+      const transformerNode = transformer.value.getNode();
+      if (transformerNode) transformerNode.moveToTop();
+    }    
+  },
+
+  /**
+   * Сброс активной фигуры и трансформаций
+   */
+  resetActive: () => {
+    selectedShape.value = null;
+    const transformerNode = transformer.value.getNode();
+    if (transformerNode) transformerNode.nodes([]);
+  },
+};
+
 // Переиспользуемые функции
 const callbacks = {
-  dragStart: () => {
+  dragStart: (e) => {
+    const { target } = e;
+    helpers.moveToMaxZIndex(target, { withTransformer: true });
     document.body.style.cursor = 'grabbing';
   },
   dragEnd: (e) => {
@@ -93,11 +122,17 @@ const callbacks = {
   pointerEnter: () => {
     document.body.style.cursor = 'grab';
   },
+  /**
+   * Помещение target в слой трансформаций
+   * @param {Object} e Событие
+   */
   startTransform: (e) => {
     const { target } = e;
     const transformerNode = transformer.value.getNode();
     const stage = transformerNode.getStage();
     const selectedNode = stage.findOne(`#${target.id()}`);
+
+    helpers.moveToMaxZIndex(target, { withTransformer: true });
     
     if (target === selectedShape.value) {
       selectedShape.value = null;
@@ -127,12 +162,21 @@ const callbacks = {
   },
 };
 
-watchEffect(() => {
-  console.group('Active Shape');
+watchEffect((onCleanup) => {
+  const pointerDownHandler = (e) => {
+    console.log('body capture');
+    helpers.resetActive();
+  };
 
-  console.log(toValue(selectedShape));
+  // По клику на body - сбрасываем активную фигуру и её трансформацию
+  // На враппере редактора стоит stopPropagation, поэтому будет иметь действие только по клику вне него
+  document.body.addEventListener('pointerdown', pointerDownHandler);
 
-  console.groupEnd('Active Shape');
+  onCleanup(() => {
+    document.body.removeEventListener('pointerdown', pointerDownHandler);
+  });
+
+  console.log('Active shape: ', selectedShape.value);
 });
 
 /**
@@ -141,6 +185,7 @@ watchEffect(() => {
  * @returns {Object} Конфиг для vue-konva
  */
 function transformConfigToKonvaCorrect(config) {
+  // Собираем корректный конфиг
   const correctConfig = { ...config, id: String(config.id), draggable: true };
 
   if (correctConfig.color) {
