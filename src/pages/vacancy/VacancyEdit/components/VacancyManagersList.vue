@@ -1,77 +1,85 @@
 <template>
   <div class="manager-list__box">
-    <div>Список Менеджеров: {{ managerList.length || 'менеджеры не заданы' }}</div>
-  <div class="manager-list__item-box">
+    <div>
+      Список Менеджеров: {{ managerList.length || "менеджеры не заданы" }}
+    </div>
+    <div class="manager-list__item-box">
       <div
-      class="manager-list__item"
-      v-for="manager in managerList"
-      :key="manager.id"
-    >
-      {{ manager.name }} 
+        class="manager-list__item"
+        v-for="manager in managerList"
+        :key="manager.id"
+        @mouseover="showCloseButton(manager.id)"
+        @mouseout="hideCloseButton(manager.id)"
+      >
+        {{ manager.name }}
+        <ButtonIcon
+          class="statuslist__list-btn"
+          @click="requestManagersModification('delete', manager.id)"
+          :style="{
+            opacity: showCloseButtons[manager.id] ? 1 : 0,
+          }"
+        >
+          <template v-slot:icon>
+            <IconDelete class="statuslist__list-icon-delete" />
+          </template>
+        </ButtonIcon>
+      </div>
     </div>
   </div>
-  <!-- <ButtonIcon
-                class="statuslist__list-btn"
-                @click=""
-              >
-                <template v-slot:icon
-                  ><IconDelete
-                    class="statuslist__list-icon-delete"
-                    :style="{
-                      display:
-                        indicators.activeTransfer &&
-                        statusMod.name === status.statusName
-                          ? 'block'
-                          : 'none',
-                    }"
-                /></template>
-              </ButtonIcon> -->
-  </div>
-
 </template>
 
 <script setup>
-import SelectMain from "@/components/SelectMain.vue";
 import ButtonIcon from "@/components/ButtonIcon.vue";
-import IconAdd from "@/assets/icons/add.svg?component";
-import IconEdit from "@/assets/icons/edit.svg?component";
 import IconDelete from "@/assets/icons/close.svg?component";
-import IconArrowSharp from "@/assets/icons/arrow-sharp.svg?component";
+import { ref } from "vue";
 const props = defineProps({
   // Массив менеджеров
   managerList: {
     type: Array,
     required: true,
   },
-
-
-/*   // Обработчик изменения статуса
-  handleModification: {
+  //Функция удаленния менеджера
+  requestManagersModification: {
     type: Function,
     required: true,
-  }, */
+  },
 });
+const showCloseButtons = ref({}); // Объект для хранения состояния кнопок
 
- 
+// Функция, которая устанавливает `showCloseButtons[managerId]` в `true`
+// Это означает, что кнопка "Закрыть" для менеджера с `managerId` должна быть отображена
+const showCloseButton = (managerId) => {
+  showCloseButtons.value[managerId] = true;
+};
 
+// Функция, которая устанавливает `showCloseButtons[managerId]` в `false`
+// Это означает, что кнопка "Закрыть" для менеджера с `managerId` должна быть скрыта
+const hideCloseButton = (managerId) => {
+  showCloseButtons.value[managerId] = false;
+};
 </script>
 
 <style scoped>
-.manager-list__box{
+.manager-list__box {
   margin-top: 40px;
 }
-.manager-list__item-box{
+.manager-list__item-box {
   display: flex;
   gap: 20px;
   flex-wrap: wrap;
   margin: 10px 0;
 }
-.manager-list__item{
+.manager-list__item {
   margin-top: 10px;
   padding: 7px;
   border: 1px solid gray;
   border-radius: 10px;
   align-items: center;
   cursor: pointer;
+  display: flex;
+  transition: opacity 0.3s ease;
+}
+.statuslist__list-btn {
+  transition: opacity 0.3s ease;
 }
 </style>

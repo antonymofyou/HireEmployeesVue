@@ -1,28 +1,25 @@
 <template>
-  <VacancyManagersList :managerList="managerList.assignedManagers"></VacancyManagersList>
+  <SpinnerMain v-if="request" class="manager-list__status-spinner" />
+  <p
+    class="manager-listt__status-error"
+    v-if="errorMessage && !isAdd && !isEdit"
+  >
+    {{ errorMessage }}
+  </p>
+  <VacancyManagersList
+    v-if="!request"
+    :managerList="managerList.assignedManagers"
+    :requestManagersModification
+  ></VacancyManagersList>
   <div class="manager-list__options-box">
-    <div class="manager-list__add-item">
-              <div>Добавить</div>
-            <SelectMain
-              v-model="formData.id"
-              :options="managerList.unassignedManagers"
-            />
-            <ButtonIcon @click="requestManagersModification('create')">
-              <template v-slot:icon><IconAdd class="statuslist__list-icon" /></template>
-            </ButtonIcon>
-    </div>
-    <div class="manager-list__remove-item">
-            <div>Удалить</div>
-          <SelectMain
-            class="manager-list__select"
-            v-model="formData.id"
-            :options="managerList.assignedManagers"
-          />
-          <ButtonIcon @click="requestManagersModification('delete')">
-            <template v-slot:icon><IconAdd class="statuslist__list-icon" /></template>
-          </ButtonIcon>
-    </div>
-   
+    <div>Добавить</div>
+    <SelectMain
+      v-model="formData.id"
+      :options="managerList.unassignedManagers"
+    />
+    <ButtonIcon @click="requestManagersModification('create')">
+      <template v-slot:icon><IconAdd class="statuslist__list-icon" /></template>
+    </ButtonIcon>
   </div>
 </template>
 
@@ -30,6 +27,7 @@
 import IconAdd from "@/assets/icons/add.svg?component";
 import ButtonIcon from "@/components/ButtonIcon.vue";
 import SelectMain from "@/components/SelectMain.vue";
+import SpinnerMain from "@/components/SpinnerMain.vue";
 
 import {
   VacanciesAccessGetManagerAccessVacancy,
@@ -81,7 +79,6 @@ const requestVacancyManagers = () => {
     "manager",
     (response) => {
       // Обновляем списки менеджеров
-      console.log(response);
       managerList.value.assignedManagers = response.assignedManagers;
 
       managerList.value.unassignedManagers = response.unassignedManagers;
@@ -91,18 +88,22 @@ const requestVacancyManagers = () => {
     (err) => {
       request.value = false;
       errorMessage.value = err;
-      console.log(err);
     }
   );
 };
 
 // Запрос на добавление/удаление менеджера
-const requestManagersModification = (action) => {
+const requestManagersModification = (action, managerId) => {
   const requestInstance = new VacanciesAccessSetManagerAccessVacancy();
-  managerMod.value.action = action; 
-  managerMod.value.managerId = formData.value.id;
+  managerMod.value.action = action;
+  //Условие нужно для проверки удаляем или добавляем
+  if (formData.value.id) {
+    managerMod.value.managerId = formData.value.id;
+  } else {
+    managerMod.value.managerId = managerId;
+  }
   requestInstance.vacancyId = props.vacancyId;
-  requestInstance.action =  managerMod.value.action;
+  requestInstance.action = managerMod.value.action;
   requestInstance.permissionType = managerMod.value.permissionType;
   requestInstance.managerId = managerMod.value.managerId;
   request.value = true;
@@ -111,46 +112,37 @@ const requestManagersModification = (action) => {
     "/vacancies/access/set_manager_access_vacancy.php",
     "manager",
     (response) => {
-      // Обновляем данные статусов
+      // Обновляем данные менеджеров
       requestVacancyManagers();
-      // Сбрасываем данные статуса
-      console.log(response);
     },
     (err) => {
       request.value = false;
       errorMessage.value = err;
-      console.log(err);
     }
   );
 };
 
+//при загрузке делаем запрос к серверу
 onMounted(() => {
   requestVacancyManagers();
 });
 </script>
 
 <style scoped>
+.manager-list__status-error {
+  color: var(--error-color);
+}
+.manager-list__status-spinner {
+  width: 50px;
+}
 .manager-list {
   margin-top: 40px;
 }
 .manager-list__options-box {
   margin: 20px 0;
   display: flex;
-  flex-direction: column;
   justify-content: space-between;
-  max-width: 400px;
-}
-.manager-list__add-item{
-  
-  display: flex;
-  justify-content: space-between;
-
-}
-.manager-list__remove-item{
-  margin-top: 20px;
-  display: flex;
-  justify-content: space-between;
-
+  max-width: 320px;
 }
 .statuslist__list-icon {
   align-self: center;
@@ -160,7 +152,7 @@ onMounted(() => {
   &:hover {
     transform: scale(1.3);
   }
-  .manager-list__select{
+  .manager-list__select {
     width: 200px;
   }
 }
