@@ -119,7 +119,6 @@ const requestManagersModification = (action, managerId) => {
     (err) => {
       request.value = false;
       errorMessage.value = err;
-      console.log(err);
     }
   );
 };
