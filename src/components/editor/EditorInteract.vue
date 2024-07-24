@@ -230,7 +230,7 @@
 <script setup>
 import { data } from './mock';
 
-import { ref, watchEffect, computed, toValue, reactive, nextTick, watch } from 'vue';
+import { ref, watchEffect, computed, toValue, watch, onMounted } from 'vue';
 import { Arrow, Circle, Rectangle } from './js/ShapesClasses';
 import { TransformerEditor } from './js/TransformClasses';
 import { dangerouslyForceToAnotherIterationEventLoop, makeShapeConfig } from './js/utils';
@@ -275,6 +275,12 @@ const currentShapeConfig = ref(makeShapeConfig());
 
 watch(currentDrawingShape, () => {
   currentShapeConfig.value.type = currentDrawingShape.value;
+});
+
+onMounted(() => {
+  if (!konvaStage.value) return;
+  const rawJson = konvaStage.value.toJSON();
+  console.log(JSON.parse(rawJson));
 });
 
 // Конфигурация холста
@@ -510,8 +516,8 @@ const callbacks = {
         return;
       };
       case 'arrow': {
-        // currentDrawingShape.value = 'arrow';
-        data.shapes.push(new Arrow());
+        currentDrawingShape.value = 'arrow';
+        // data.shapes.push(new Arrow());
         return;
       }
       case 'image': {
@@ -523,7 +529,7 @@ const callbacks = {
   },
 
   /**
-   * 
+   * Сбросить масштабирование по двум осям
    */
   resetScaleCanvas: () => {
     scaleX.value = 1;
@@ -556,8 +562,12 @@ const drawingHandlers = {
       konvaStage.value.draggable(true);
     });
 
-    currentShapeConfig.value.x = x;
-    currentShapeConfig.value.y = y;
+    if (currentDrawingShape.value === 'arrow') {
+      currentShapeConfig.value.points = [x, y];
+    } else {
+      currentShapeConfig.value.x = x;
+      currentShapeConfig.value.y = y;
+    }
   },
 
   /**
@@ -588,6 +598,14 @@ const drawingHandlers = {
         currentShapeConfig.value.radius = radius;
         break;
       }
+      case 'arrow': {
+        let slicedPoints = currentShapeConfig.value.points;
+        // Для рисования стрелки - нужны только 4 координаты, поэтому отсеиваем ненужное
+        if (slicedPoints.length > 2)
+          slicedPoints = currentShapeConfig.value.points.slice(0, currentShapeConfig.value.points.length - 2);
+        
+        currentShapeConfig.value.points = [...slicedPoints, x, y];
+      }
     }
   },
 
@@ -613,6 +631,10 @@ const drawingHandlers = {
 watch(canvasTransform, () => {
   console.log('Canvas Transform:', toValue(canvasTransform));
 }, { deep: true });
+
+watch(currentDrawingShape, () => {
+  console.log('Сейчас рисуется: ', currentDrawingShape.value);
+});
 
 watch([scaleX, scaleY], () => {
   const offset = konvaStage.value.offset();
