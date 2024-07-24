@@ -194,7 +194,7 @@ function getVacancyStatuses() {
             count: count
           });
         });
-        candidateStatus.value[0].count = response.statuses.reduce((sum, status) => {
+        candidateStatus.value[0].count = response.statuses.reduce((sum, status) => { //Считывает кол-во всех заявок 
           let count = Number(status.countOtklikov);
           if (isNaN(count)) {
             count = 0;

@@ -14,7 +14,7 @@
         class="status"
         :statusColor="option.color"
         :statusText="option.name"
-        :statusCount="option.count || 0">
+        :statusCount="option.count">
           </StatusColored>
 
 

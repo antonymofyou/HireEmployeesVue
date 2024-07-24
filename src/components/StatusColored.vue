@@ -18,9 +18,9 @@ const props = defineProps({
     type: String,
     required: true,
   },
-  statusCount: {
+  statusCount: { //Счетчик заявок
     type: Number,
-    required: false
+    required: true
   }
 });
 
