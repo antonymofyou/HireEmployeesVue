@@ -374,26 +374,20 @@ const helpers = {
   },
 
   /**
-   * Трансформация координат с учётом масштабирования и смещения
-   * @param {Object} coords Объект с координатами x, y
-   * @returns {Object} Объект с преобразованными координатами
-   */
-  transformCoordsByOffsetAndScale: ({ x, y }) => {
-    const transformedX = x / scale.value.x - canvasTransform.value.x / scale.value.x;
-    const transformedY = y / scale.value.x - canvasTransform.value.y / scale.value.y;
-
-    return { x: transformedX, y: transformedY };
-  },
-
-  /**
    * Получить координаты указателя с учётом смещения
    * @param {PointerEvent} e Pointer-событие
    * @returns {Object} Объект с координатами
    */
   getPointerCoordinates(e) {
-    const { offsetX, offsetY } = e;
-    const { x, y } = helpers.transformCoordsByOffsetAndScale({ x: offsetX, y: offsetY });
-    return { x, y };
+    const transform = konva.value.getStage().getAbsoluteTransform().copy();
+    // Для определения относительной позиции необходимо инвертировать трансформации
+    transform.invert();
+
+    // Получаем координаты указателя
+    const pos = konva.value.getStage().getPointerPosition();
+
+    // Применяем обратные трансформации и находим реальные координаты
+    return transform.point(pos);
   },
 };
 
