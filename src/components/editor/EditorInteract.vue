@@ -5,7 +5,6 @@
     <v-stage
       :config="configKonva"
       @click="callbacks.stagePointerDown"
-      @wheel="callbacks.stageWheel"
       @pointerdown="drawingHandlers.canvasPointerDown"
       @pointermove="drawingHandlers.canvasPointerMove"
       @pointerup="drawingHandlers.canvasPointerUp"
@@ -109,34 +108,6 @@
             Вернуться к 0;0
           </button>
         </div>
-      </div>
-
-      <div class="actions__item">
-        <span class="actions__item-title">Масштабирование</span>
-
-        <label>
-          По оси X:
-          <input type="range" :min="0.1" :max="1" :step="0.1" v-model="scaleX">
-          {{  scaleX?.toFixed(1)  }}
-        </label>
-
-        <label>
-          По оси Y:
-          <input type="range" :min="0.1" :max="1" :step="0.1" v-model="scaleY">
-          {{  scaleY?.toFixed(1)  }}
-        </label>
-
-        <label>
-          Сразу по двум:
-          <input
-            type="range"
-            :min="0.1"
-            :max="1"
-            :step="0.1"
-            :value="scaleX"
-            @input="callbacks.scaleAllInput">
-          {{  scaleX?.toFixed(1)  }}
-        </label>
       </div>
   
       <div class="actions__item" v-show="isActionsVisible">
@@ -244,15 +215,11 @@ const selectedShape = ref(null);
 const isNewShapeSelecting = ref(false);
 // Канвас, управляемый konva
 const konva = ref(null);
-// Масштабирование по оси X
-const scaleX = ref(1);
-// Масштабирование по оси y
-const scaleY = ref(1);
 // Текущая рисуемая фигура
 const currentDrawingShape = ref(null);
 // Нажат ли указатель (обозначает, что пользователь ведёт зажатой кнопкой по канве)
 const isPointerDownNow = ref(null);
-// Смещение канвы
+// Смещение канвы, с учётом перемещения
 const canvasTransform = ref({ x: 0, y: 0 });
 
 // Видны ли действия над активной фигурой
@@ -383,10 +350,8 @@ const helpers = {
    */
   getPointerCoordinates(e) {
     const { offsetX, offsetY } = e;
-    // const x = offsetX - canvasTransform.value.x * scaleX.value;
-    // const y = offsetY - canvasTransform.value.y * scaleY.value;
-    const x = offsetX / scaleX.value - canvasTransform.value.x / scaleX.value;
-    const y = offsetY / scaleY.value - canvasTransform.value.y / scaleY.value;
+    const x = offsetX - canvasTransform.value.x;
+    const y = offsetY - canvasTransform.value.y;
 
     return { x, y };
   },
@@ -422,38 +387,15 @@ const callbacks = {
   groupPointerEnter: () => {
     document.body.style.cursor = 'grab';
   },
-  stageWheel: (e) => {
-    e.evt.preventDefault();
-    const scrollUp = e.evt.deltaY < 0;
-
-    if (scrollUp) {
-      console.log('Приближаем');
-      scaleX.value = Math.min(scaleX.value + 0.1, 1);
-      scaleY.value = Math.min(scaleY.value + 0.1, 1);
-    } else {
-      console.log('Отдаляем');
-      scaleX.value = Math.max(scaleX.value - 0.1, 0.1);
-      scaleY.value = Math.max(scaleY.value - 0.1, 0.1);
-    }
-  },
   /**
    * Обработчик поднятия указателя с канвы. Тут забираем смещение
    */
   stagePointerUp: () => {
-    console.log('stage pointer up');
     // Получаем смещение в виде матрицы. Нам нужны лишь два последних элемента (x, y)
     const [_a, _b, _c, _d, x, y] = konvaStage.value.getAbsoluteTransform().m;
     // Пишем смещение в состояние приложения
     canvasTransform.value.x = x;
     canvasTransform.value.y = y;
-  },
-  /**
-   * Регулировка сразу двух осей для масштабирования
-   * @param {InputEvent} e Событие
-   */
-  scaleAllInput: (e) => {
-    scaleX.value = e.target.value;
-    scaleY.value = e.target.value;
   },
   /**
    * Помещение target в слой трансформаций
@@ -547,8 +489,7 @@ const callbacks = {
    * Сбросить масштабирование по двум осям
    */
   resetScaleCanvas: () => {
-    scaleX.value = 1;
-    scaleY.value = 1;
+    konvaStage.value.scale({ x: 1, y: 1 });
   },
 
   /**
@@ -643,26 +584,48 @@ const drawingHandlers = {
   },
 };
 
-watch(canvasTransform, () => {
-  console.log('Canvas Transform:', toValue(canvasTransform));
-}, { deep: true });
-
-watch(currentDrawingShape, () => {
-  console.log('Сейчас рисуется: ', currentDrawingShape.value);
-});
-
-watch([scaleX, scaleY], () => {
-  const offset = konvaStage.value.offset();
-
-  console.log('scaleX: ', scaleX.value);
-  console.log('scaleY: ', scaleY.value);
-  console.log('Offset: ', offset);
-});
-
 // Ставим масштабирование для канваса
-watchEffect(() => {
+watchEffect((onCleanup) => {
   if (!konvaStage.value) return;
-  konvaStage.value.scale({ x: Number(scaleX.value), y: Number(scaleY.value) });
+  
+  const wheelHandler = (e) => {
+    // Убираем поведение по умолчанию, т.к. начнёт скролиться страница
+    e.evt.preventDefault();
+
+    const oldScale = konvaStage.value.scaleX();
+    const pointer = konvaStage.value.getPointerPosition();
+
+    // Определяем координаты куда будем зумиться, исходя из положения курсора
+    const mousePointTo = {
+      x: (pointer.x - konvaStage.value.x()) / oldScale,
+      y: (pointer.y - konvaStage.value.y()) / oldScale,
+    };
+
+    // Определяем направление зума
+    const direction = e.evt.deltaY > 0 ? -1 : 1;
+
+    // Определяем новое значение зума
+    const newScale = direction > 0 ? oldScale * scaleBy : oldScale / scaleBy;
+    // Применяем зум
+    konvaStage.value.scale({ x: newScale, y: newScale });
+
+    // Определяем новые координаты исходя из получившегося зума
+    const newPos = {
+      x: pointer.x - mousePointTo.x * newScale,
+      y: pointer.y - mousePointTo.y * newScale,
+    };
+    // Применяем новые координаты
+    konvaStage.value.position(newPos);
+  };
+
+  // Коэффициент, на который будем зумиться
+  const scaleBy = 1.1;
+  konvaStage.value.on('wheel', wheelHandler);
+
+  // Во избежание утечек памяти - убираем обработчики
+  onCleanup(() => {
+    konvaStage.value.off('wheel');
+  });
 });
 
 // Корректные размеры при изменении окна браузера
