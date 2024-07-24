@@ -7,6 +7,8 @@
     :height="configKonva.height"
     :draggable="configKonva.draggable"
     :shapesDraggable="configKonva.draggable"
+    :fillX="configKonva.fillX"
+    :fillY="configKonva.fillY"
     :currentDrawingShape="currentDrawingShape"
     :currentShapeConfig="currentShapeConfig"
     :stagePointerUp="callbacks.stagePointerUp"
@@ -102,16 +104,19 @@ watch(currentDrawingShape, () => {
   currentShapeConfig.value.type = currentDrawingShape.value;
 });
 
-onMounted(() => {
-  if (!konvaStage.value) return;
-  const rawJson = konvaStage.value.toJSON();
-  console.log(JSON.parse(rawJson));
-});
+// @TODO данную возможность можно использовать при отправке на сервер
+// onMounted(() => {
+//   if (!konvaStage.value) return;
+//   const rawJson = konvaStage.value.toJSON();
+//   console.log(JSON.parse(rawJson));
+// });
 
 // Конфигурация холста
 const configKonva = {
   width: window.innerWidth,
   height: window.innerHeight / 1.5,
+  fillX: true,
+  fillY: false,
   draggable: true,
   shapesDraggable: true,
 };
@@ -125,7 +130,6 @@ const helpers = {
    */
   moveToMaxZIndex: (target, options) => {
     target.moveToTop();
-    maxZIndex.value = target.zIndex(); // @TODO доработать отправку на верхний слой
 
     if (options.withTransformer) {
       const transformerNode = konva.value.transformer.getNode();
@@ -153,8 +157,9 @@ const helpers = {
    * Удаление активной фигуры
    */
   deleteActiveShape: () => {
-    selectedShape.value.destroy();
-    selectedShape.value = null;
+    // Будем удалять группу, т.к. в ней содержится текст
+    const group = selectedShape.value.parent;
+    group.destroy();
     helpers.unTransformAll();
   },
 
@@ -536,6 +541,7 @@ watchEffect((onCleanup) => {
 
   // Во избежание утечек памяти - убираем обработчики
   onCleanup(() => {
+    if (!konvaStage.value) return;
     konvaStage.value.off('wheel');
   });
 });
@@ -546,23 +552,6 @@ watch([scale, canvasPosition], () => {
   konvaStage.value.scale({ x: scale.value.x, y: scale.value.y });
   // Применяем позиционирование
   konvaStage.value.position({ x: canvasPosition.value.x, y: canvasPosition.value.y });
-});
-
-// Корректные размеры при изменении окна браузера
-watchEffect((onCleanup) => {
-  if (!konva.value?.inner) return;
-
-  const resizeHandler = () => {
-    // Растягиваем канву на нужные размеры
-    konvaStage.value.width(window.innerWidth);
-    konvaStage.value.height(window.innerHeight / 1.5);
-  };
-
-  window.addEventListener('resize', resizeHandler, { passive: true });
-
-  onCleanup(() => {
-    window.removeEventListener('resize', resizeHandler);
-  });
 });
 </script>
 

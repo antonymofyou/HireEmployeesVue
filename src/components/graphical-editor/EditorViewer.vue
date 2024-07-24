@@ -6,6 +6,8 @@
     :shapes="data.shapes"
     :width="configKonva.width"
     :height="configKonva.height"
+    :fillX="configKonva.fillX"
+    :fillY="configKonva.fillY"
     :draggable="configKonva.draggable"
     :shapesDraggable="configKonva.shapesDraggable"
   />
@@ -18,6 +20,8 @@ import Editor from './Editor.vue';
 const configKonva = {
   width: window.innerWidth,
   height: window.innerHeight / 1.5,
+  fillX: true,
+  fillY: false,
   draggable: false,
   shapesDraggable: false,
 };

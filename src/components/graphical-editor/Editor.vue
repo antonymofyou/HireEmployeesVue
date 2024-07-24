@@ -12,7 +12,8 @@
         <v-group
           v-for="shape in props.shapes"
           :config="{
-            draggable: props.shapesDraggable
+            draggable: props.shapesDraggable,
+            zIndex: shape.zIndex,
           }"
           @pointerenter="props.groupPointerEnter"
           @dragstart="props.groupDragStart"
@@ -48,7 +49,11 @@
             </v-text>
           </template>
         </v-group>
+        
+        <v-transformer ref="transformer" />
+      </v-layer>
 
+      <v-layer>
         <v-group v-if="currentDrawingShape">
           <component
             v-if="TransformerEditor.shapeReducer(currentDrawingShape) !== 'v-arrow' || currentShapeConfig.points.length > 0"
@@ -56,18 +61,21 @@
             :config="currentShapeConfig"
           />
         </v-group>
-
-      <v-transformer ref="transformer" />
       </v-layer>
     </v-stage>
   </div>
 </template>
 
 <script setup>
-import { ref } from 'vue';
+import { reactive, ref, watchEffect } from 'vue';
 import { TransformerEditor } from './js/TransformClasses';
 
 const props = defineProps({
+  onlyView: {
+    type: Boolean,
+    required: false,
+    default: true,
+  },
   shapes: {
     type: Array,
     required: false,
@@ -80,6 +88,26 @@ const props = defineProps({
   height: {
     type: Number,
     required: true
+  },
+  maxWidth: {
+    type: Number,
+    required: false,
+    default: Infinity,
+  },
+  maxHeight: {
+    type: Number,
+    required: false,
+    default: Infinity,
+  },
+  fillX: {
+    type: Boolean,
+    required: false,
+    default: false,
+  },
+  fillY: {
+    type: Boolean,
+    required: false,
+    default: false,
   },
   draggable: {
     type: Boolean,
@@ -181,4 +209,32 @@ const helpers = {
   },
 };
 
+const dynamicSizes = reactive({
+  width: props.width,
+  height: props.height,
+});
+
+// Корректные размеры при изменении окна браузера
+watchEffect((onCleanup) => {
+  if (!konva.value) return;
+
+  const konvaStage = konva.value.getStage();
+  const choiceFromWidth = props.fillX ? props.maxWidth : props.width;
+  const choiceFromHeight = props.fillY ? props.maxHeight : props.height;
+
+  const resizeHandler = () => {
+    dynamicSizes.width = Math.min(choiceFromWidth, window.innerWidth);
+    dynamicSizes.height = Math.min(choiceFromHeight, window.innerHeight);
+
+    // Растягиваем канву на нужные размеры
+    konvaStage.width(dynamicSizes.width);
+    konvaStage.height(dynamicSizes.height);
+  };
+
+  window.addEventListener('resize', resizeHandler, { passive: true });
+
+  onCleanup(() => {
+    window.removeEventListener('resize', resizeHandler);
+  });
+});
 </script>
