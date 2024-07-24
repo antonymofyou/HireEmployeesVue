@@ -107,7 +107,6 @@ export class TransformerEditor {
       case 'text': return 'v-text';
       case 'arrow': return 'v-arrow';
       default: {
-        console.log('@@@ Reducer default:', shape);
         return 'text';
       }
     }

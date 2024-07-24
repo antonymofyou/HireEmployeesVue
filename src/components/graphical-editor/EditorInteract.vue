@@ -1,211 +1,42 @@
 <template>
   <h1 class="title">Редактор</h1>
 
-  <div @pointerdown.stop @pointerup="callbacks.stagePointerUp">
-    <v-stage
-      :config="configKonva"
-      @click="callbacks.stagePointerDown"
-      @pointerdown="drawingHandlers.canvasPointerDown"
-      @pointermove="drawingHandlers.canvasPointerMove"
-      @pointerup="drawingHandlers.canvasPointerUp"
-      ref="konva"
-    >
-      <v-layer>
-        <v-group
-          v-for="shape in data.shapes"
-          :config="{
-            draggable: true
-          }"
-          @pointerenter="callbacks.groupPointerEnter"
-          @dragstart="callbacks.groupDragStart"
-          @dragend="callbacks.groupDragEnd"
-          @pointerleave="callbacks.groupPointerLeave"
-          @dblclick="callbacks.startTransform"
-        >
-          <component    
-            @click="callbacks.handleClickOnShape"
-            :key="shape.id"
-            :config="{
-              ...TransformerEditor.transformConfigToKonvaCorrect(shape),
-              image: TransformerEditor.shapeReducer(shape) === 'v-image' ? helpers.buildImage(shape) : null,
-            }"
-            :is="TransformerEditor.shapeReducer(shape)"
-          />
-
-          <!-- Рендерим текст -->
-          <template
-            v-for="textInfo in shape.text"
-          >
-            <v-text
-              v-for="textRecord in textInfo.text"
-              :config="{
-                x: shape.x,
-                y: shape.y,
-                rotation: shape.rotation,
-                width: shape.width,
-                height: shape.height,
-                align: textInfo.alignment,
-                verticalAlign: shape.textVerticalAlignment,
-                ...TransformerEditor.transformTextConfigToConvaCorrect(textRecord),
-              }">
-            </v-text>
-          </template>
-        </v-group>
-
-        <v-group v-if="currentDrawingShape">
-          <component
-            v-if="TransformerEditor.shapeReducer(currentDrawingShape) !== 'v-arrow' || currentShapeConfig.points.length > 0"
-            :is="TransformerEditor.shapeReducer(currentDrawingShape)"
-            :config="currentShapeConfig"
-          />
-        </v-group>
-
-      <v-transformer ref="transformer" />
-      </v-layer>
-    </v-stage>
-  </div>
+  <Editor
+    :shapes="data.shapes"
+    :width="configKonva.width"
+    :height="configKonva.height"
+    :draggable="configKonva.draggable"
+    :shapesDraggable="configKonva.draggable"
+    :currentDrawingShape="currentDrawingShape"
+    :currentShapeConfig="currentShapeConfig"
+    :stagePointerUp="callbacks.stagePointerUp"
+    :stagePointerDown="callbacks.stagePointerDown"
+    :canvasPointerDown="drawingHandlers.canvasPointerDown"
+    :canvasPointerMove="drawingHandlers.canvasPointerMove"
+    :canvasPointerUp="drawingHandlers.canvasPointerUp"
+    :groupPointerEnter="callbacks.groupPointerEnter"
+    :groupDragStart="callbacks.groupDragStart"
+    :groupDragEnd="callbacks.groupDragEnd"
+    :groupPointerLeave="callbacks.groupPointerLeave"
+    :startTransform="callbacks.startTransform"
+    ref="konva"
+  />
 
   <div class="bottom-area">
-    <div class="actions">
-      <div class="actions__item">
-        <span class="actions__item-title">Добавление / Удаление</span>
-  
-        <div>
-          <button
-            class="button"
-            @click="callbacks.toggleSelectingNewShape"
-          >
-            {{ isNewShapeSelecting ? 'Прекратить выбор' : 'Добавить фигуру' }}
-          </button>
-          <button
-            class="button"
-            :disabled="!selectedShape || !isAllowedToAddText"
-            @click="callbacks.addTextToSelectedShape"
-          >
-            Добавить текст
-          </button>
-          <button
-            class="button"
-            @click="helpers.deleteActiveShape"
-            :disabled="!Boolean(selectedShape)"
-          >
-            Удалить
-          </button>
-        </div>
-
-        <div class="select-shape" v-show="isNewShapeSelecting">
-          <button class="button" :disabled="currentDrawingShape === 'rect'" @click="callbacks.addNewShape('rect')">Rect</button>
-          <button class="button" :disabled="currentDrawingShape === 'circle'" @click="callbacks.addNewShape('circle')">Circle</button>
-          <button class="button" :disabled="currentDrawingShape === 'arrow'" @click="callbacks.addNewShape('arrow')">Arrow</button>
-          <button class="button" :disabled="currentDrawingShape === 'image'" @click="callbacks.addNewShape('image')">Image</button>
-        </div>
-      </div>
-
-      <div class="actions__item">
-        <span class="actions__item-title">Операции над холстом</span>
-  
-        <div>
-          <button
-            class="button"
-            @click="callbacks.resetScaleCanvas"
-          >
-            Сбросить масштабирование
-          </button>
-          <button
-            class="button"
-            @click="callbacks.resetTransformCanvas"
-          >
-            Вернуться к 0;0
-          </button>
-        </div>
-      </div>
-  
-      <div class="actions__item" v-show="isActionsVisible">
-        <span class="actions__item-title">Цвета</span>
-  
-        <div>
-          <div class="action">
-            <label>
-              Основной цвет: <b>(fill)</b>
-              <input
-                type="color"
-                :value="selectedShape?.fill()"
-                @input="selectedShape?.fill($event.target.value)"
-              />
-            </label>
-          </div>
-  
-          <div class="action">
-            <label>
-              Цвет границ: <b>(stroke)</b>
-              <input
-                type="color"
-                :value="selectedShape?.stroke()"
-                @input="selectedShape?.stroke($event.target.value)"
-              />
-            </label>
-          </div>
-        </div>
-      </div>
-  
-      <div class="actions__item" v-show="isCornerActionsVisible">
-        <span class="actions__item-title">Углы</span>
-  
-        <label>
-          Скругление: <b>cornerRadius</b>
-          <input
-            type="range"
-            :min="0"
-            :max="50"
-            :step="1"
-            :value="selectedShape?.cornerRadius?.()"
-            @input="selectedShape?.cornerRadius?.(Number($event.target.value))"
-          />
-          <b>{{ selectedShape?.cornerRadius?.() }}</b>
-        </label>
-      </div>
-
-      <div class="actions__item" v-show="isActionsVisible">
-        <span class="actions__item-title">Границы</span>
-
-        <label>
-          Ширина:
-          <input
-            type="range"
-            :min="0"
-            :max="20"
-            :step="1"
-            :value="selectedShape?.strokeWidth()"
-            @input="selectedShape?.strokeWidth(Number($event.target.value))"
-          />
-          <b>{{ selectedShape?.strokeWidth() }}</b>
-        </label>
-      </div>
-
-      <div class="actions__item" v-show="isActionsVisible">
-        <span class="actions__item-title">Размеры</span>
-
-        <label>
-          Ширина:
-          <input
-            type="number"
-            :value="selectedShape?.width?.()"
-            @input="selectedShape?.width(Number($event.target.value))"
-          />&nbsp;
-          <b>{{ selectedShape?.width?.() }}px</b>
-        </label>
-
-        <label>
-          Высота:
-          <input
-            type="number"
-            :value="selectedShape?.height?.()"
-            @input="selectedShape?.height(Number($event.target.value))"
-          />&nbsp;
-          <b>{{ selectedShape?.height?.() }}px</b>
-        </label>
-      </div>
-    </div>
+    <EditorActions
+      :toggleSelectingNewShape="callbacks.toggleSelectingNewShape"
+      :isNewShapeSelecting="isNewShapeSelecting"
+      :selectedShape="selectedShape"
+      :isAllowedToAddText="isAllowedToAddText"
+      :addTextToSelectedShape="callbacks.addTextToSelectedShape"
+      :deleteActiveShape="helpers.deleteActiveShape"
+      :currentDrawingShape="currentDrawingShape"
+      :addNewShape="callbacks.addNewShape"
+      :resetScaleCanvas="callbacks.resetScaleCanvas"
+      :resetTransformCanvas="callbacks.resetTransformCanvas"
+      :isActionsVisible="isActionsVisible"
+      :isCornerActionsVisible="isCornerActionsVisible"
+    />
   </div>
 </template>
 
@@ -213,13 +44,12 @@
 import { data } from './mock';
 
 import { ref, watchEffect, computed, toValue, watch, onMounted, reactive, nextTick } from 'vue';
-import { Arrow, Circle, Rectangle } from './js/ShapesClasses';
-import { TransformerEditor } from './js/TransformClasses';
 import { dangerouslyForceToAnotherIterationEventLoop, makeShapeConfig } from './js/utils';
 import { Text } from 'konva/lib/shapes/Text';
 
-// Объект, с помощью которого будет происходить трансформация примитивов
-const transformer = ref(null);
+import Editor from './Editor.vue';
+import EditorActions from './EditorActions.vue';
+
 // Выбранная фигура
 const selectedShape = ref(null);
 // Выбирается ли сейчас новая фигура
@@ -252,12 +82,12 @@ const isDrawingNow = computed(() => {
 });
 // Объект канвы, предоставляемый konva
 const konvaStage = computed(() => {
-  if (!konva.value) return;
-  return konva.value.getStage();
+  if (!konva.value?.inner) return;
+  return konva.value.inner.getStage();
 });
 // Можно ли добавлять текст к выбранной фигуре
 const isAllowedToAddText = computed(() => {
-  return selectedShape.value.attrs.type === 'rectangle';
+  return selectedShape.value?.attrs.type === 'rectangle';
 });
 const renderStage = ref(0);
 
@@ -283,6 +113,7 @@ const configKonva = {
   width: window.innerWidth,
   height: window.innerHeight / 1.5,
   draggable: true,
+  shapesDraggable: true,
 };
 
 // Вспомогательные функции
@@ -295,19 +126,18 @@ const helpers = {
   moveToMaxZIndex: (target, options) => {
     target.moveToTop();
     maxZIndex.value = target.zIndex(); // @TODO доработать отправку на верхний слой
-    console.log(target.zIndex(), '<---');
 
     if (options.withTransformer) {
-      const transformerNode = transformer.value.getNode();
+      const transformerNode = konva.value.transformer.getNode();
       if (transformerNode) transformerNode.moveToTop();
-    }    
+    }
   },
 
   /**
    * Удаление выделения трансформаций
    */
   unTransformAll: () => {
-    const transformerNode = transformer.value.getNode();
+    const transformerNode = konva.value.transformer.getNode();
     if (transformerNode) transformerNode.nodes([]);
   },
 
@@ -363,28 +193,16 @@ const helpers = {
   },
 
   /**
-   * Фабрика картинок
-   * @param shape Объект фигуры изображения
-   * @returns {Image} Изображение
-   */
-  buildImage: (shape) => {
-    const image = new Image();
-    image.src = shape.src;
-    return image;
-  },
-
-  /**
    * Получить координаты указателя с учётом смещения
-   * @param {PointerEvent} e Pointer-событие
    * @returns {Object} Объект с координатами
    */
-  getPointerCoordinates(e) {
-    const transform = konva.value.getStage().getAbsoluteTransform().copy();
+  getPointerCoordinates() {
+    const transform = konva.value.inner.getStage().getAbsoluteTransform().copy();
     // Для определения относительной позиции необходимо инвертировать трансформации
     transform.invert();
 
     // Получаем координаты указателя
-    const pos = konva.value.getStage().getPointerPosition();
+    const pos = konva.value.inner.getStage().getPointerPosition();
 
     // Применяем обратные трансформации и находим реальные координаты
     return transform.point(pos);
@@ -416,18 +234,6 @@ const callbacks = {
     console.group(`DragEnd ${shapeId}`);
     console.log(shape.attrs);
     console.groupEnd(`DragEnd ${shapeId}`);
-
-    // data.shapes = data.shapes.map((existShape) => {
-    //   if (existShape.id == shapeId) {
-    //     return {
-    //       ...existShape,
-    //       x: shape.attrs.startX + target.attrs.x,
-    //       y: shape.attrs.startY + target.attrs.y
-    //     };
-    //   }
-
-    //   return existShape
-    // });
   },
   groupPointerLeave: () => {
     document.body.style.cursor = 'default';
@@ -452,7 +258,7 @@ const callbacks = {
   startTransform: (e) => {
     const { target } = e;
     const group = target.parent;
-    const transformerNode = transformer.value.getNode();
+    const transformerNode = konva.value.transformer.getNode();
     const stage = transformerNode.getStage();
     const selectedNode = stage.findOne(`#${target.id()}`);
 
@@ -491,7 +297,7 @@ const callbacks = {
     // Если кликнули по канвасу - то убираем выделение активной фигуры
     if (target === target.getStage()) {
       selectedShape.value = null;
-      const transformerNode = transformer.value.getNode();
+      const transformerNode = konva.value.transformer.getNode();
       transformerNode.nodes([]);
     }
   },
@@ -615,9 +421,7 @@ const drawingHandlers = {
   canvasPointerDown: (event) => {
     // Фигура не выбрана - пользователь не начинает рисовать
     if (!currentDrawingShape.value) return;
-    console.log(event.evt);
     const { x, y } = helpers.getPointerCoordinates(event.evt);
-    console.log(x, y);
     isPointerDownNow.value = true;
 
     // Делаем это для того, чтобы мы могли начать рисовать, а не передвигать холст
@@ -693,15 +497,6 @@ const drawingHandlers = {
   },
 };
 
-watchEffect(() => {
-  const shapes = [...data.shapes];
-  console.log('Shapes:', shapes);
-});
-
-watchEffect(() => {
-  console.log('Selected shape: ', selectedShape.value);
-});
-
 // Ставим масштабирование для канваса
 watchEffect((onCleanup) => {
   if (!konvaStage.value) return;
@@ -756,7 +551,7 @@ watch([scale, canvasPosition], () => {
 
 // Корректные размеры при изменении окна браузера
 watchEffect((onCleanup) => {
-  if (!konva.value) return;
+  if (!konva.value?.inner) return;
 
   const resizeHandler = () => {
     // Растягиваем канву на нужные размеры
@@ -783,34 +578,5 @@ watchEffect((onCleanup) => {
   row-gap: 20px;
   padding-top: 20px;
   border-top: 2px solid var(--cornflower-blue);
-}
-
-.actions__colors {
-  display: flex;
-  column-gap: 30px;
-}
-
-.actions {
-  display: flex;
-  flex-wrap: wrap;
-  column-gap: 50px;
-  row-gap: 20px;
-  accent-color: var(--cornflower-blue);
-}
-
-.actions__item {
-  display: flex;
-  flex-direction: column;
-  row-gap: 10px;
-}
-
-.actions__item-title {
-  font-size: 20px;
-  font-weight: 800;
-}
-
-.button {
-  padding: 5px 15px;
-  cursor: pointer;
 }
 </style>
