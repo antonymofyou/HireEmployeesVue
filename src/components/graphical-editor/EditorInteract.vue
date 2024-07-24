@@ -43,7 +43,7 @@
 <script setup>
 import { data } from './mock';
 
-import { ref, watchEffect, computed, toValue, watch, onMounted, reactive, nextTick } from 'vue';
+import { ref, watchEffect, computed, toValue, watch, onMounted, reactive } from 'vue';
 import { dangerouslyForceToAnotherIterationEventLoop, makeShapeConfig } from './js/utils';
 import { Text } from 'konva/lib/shapes/Text';
 
@@ -87,9 +87,9 @@ const konvaStage = computed(() => {
 });
 // Можно ли добавлять текст к выбранной фигуре
 const isAllowedToAddText = computed(() => {
-  return selectedShape.value?.attrs.type === 'rectangle';
+  const allowedTypes = ['rect', 'rectangle'];
+  return allowedTypes.includes(selectedShape.value?.attrs.type);
 });
-const renderStage = ref(0);
 
 // Конфиг рисуемой фигуры (чтобы обновлять лишь часть канвы, не ререндерить полностью)
 const currentShapeConfig = ref(makeShapeConfig());
@@ -153,6 +153,7 @@ const helpers = {
    * Удаление активной фигуры
    */
   deleteActiveShape: () => {
+    selectedShape.value.destroy();
     selectedShape.value = null;
     helpers.unTransformAll();
   },
@@ -407,8 +408,6 @@ const callbacks = {
       findShape.textVerticalAlignment = verticalAlignment;
       addNewText();
     }
-
-    renderStage.value++;
   },
 };
 
