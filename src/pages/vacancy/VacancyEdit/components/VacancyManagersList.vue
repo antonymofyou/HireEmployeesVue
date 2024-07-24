@@ -8,16 +8,17 @@
         class="manager-list__item"
         v-for="manager in managerList"
         :key="manager.id"
-        @mouseover="showCloseButton(manager.id)"
-        @mouseout="hideCloseButton(manager.id)"
+        @click="
+          !showCloseButtons[manager.id]
+            ? showCloseButton(manager.id)
+            : hideCloseButton(manager.id)
+        "
       >
         {{ manager.name }}
         <ButtonIcon
+          v-if="showCloseButtons[manager.id]"
           class="statuslist__list-btn"
           @click="requestManagersModification('delete', manager.id)"
-          :style="{
-            opacity: showCloseButtons[manager.id] ? 1 : 0,
-          }"
         >
           <template v-slot:icon>
             <IconDelete class="statuslist__list-icon-delete" />
@@ -70,14 +71,16 @@ const hideCloseButton = (managerId) => {
   margin: 10px 0;
 }
 .manager-list__item {
+  max-height: 35px;
+  user-select: none;
   margin-top: 10px;
   padding: 7px;
   border: 1px solid gray;
   border-radius: 10px;
   align-items: center;
-  cursor: pointer;
   display: flex;
   transition: opacity 0.3s ease;
+  cursor: pointer;
 }
 .statuslist__list-btn {
   transition: opacity 0.3s ease;

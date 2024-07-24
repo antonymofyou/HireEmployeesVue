@@ -1,9 +1,6 @@
 <template>
   <SpinnerMain v-if="request" class="manager-list__status-spinner" />
-  <p
-    class="manager-listt__status-error"
-    v-if="errorMessage && !isAdd && !isEdit"
-  >
+  <p class="manager-listt__status-error" v-if="errorMessage">
     {{ errorMessage }}
   </p>
   <VacancyManagersList
@@ -12,14 +9,18 @@
     :requestManagersModification
   ></VacancyManagersList>
   <div class="manager-list__options-box">
-    <div>Добавить</div>
-    <SelectMain
-      v-model="formData.id"
-      :options="managerList.unassignedManagers"
-    />
-    <ButtonIcon @click="requestManagersModification('create')">
-      <template v-slot:icon><IconAdd class="statuslist__list-icon" /></template>
-    </ButtonIcon>
+    <div>Добавить:</div>
+    <div class="manager-list__select-box">
+      <SelectMain
+        v-model="formData.id"
+        :options="managerList.unassignedManagers"
+      />
+      <ButtonIcon @click="requestManagersModification('create')">
+        <template v-slot:icon
+          ><IconAdd class="statuslist__list-icon"
+        /></template>
+      </ButtonIcon>
+    </div>
   </div>
 </template>
 
@@ -33,7 +34,7 @@ import {
   VacanciesAccessGetManagerAccessVacancy,
   VacanciesAccessSetManagerAccessVacancy,
 } from "../js/ApiClassesVacancyEdit";
-import { onMounted, ref, watch } from "vue";
+import { onMounted, ref } from "vue";
 import VacancyManagersList from "./VacancyManagersList.vue";
 
 const props = defineProps({
@@ -57,8 +58,6 @@ const managerMod = ref({
 
 //Данные с MainSelect
 const formData = ref({
-  name: "",
-  published: "",
   id: "",
 });
 
@@ -95,13 +94,15 @@ const requestVacancyManagers = () => {
 // Запрос на добавление/удаление менеджера
 const requestManagersModification = (action, managerId) => {
   const requestInstance = new VacanciesAccessSetManagerAccessVacancy();
-  managerMod.value.action = action;
   //Условие нужно для проверки удаляем или добавляем
-  if (formData.value.id) {
-    managerMod.value.managerId = formData.value.id;
-  } else {
-    managerMod.value.managerId = managerId;
-  }
+  formData.value.id
+    ? (managerMod.value.managerId = formData.value.id)
+    : (managerMod.value.managerId = managerId);
+  //Обнуляем форму
+  formData.value.id = "";
+
+  managerMod.value.action = action;
+  requestInstance.action = managerMod.value.action;
   requestInstance.vacancyId = props.vacancyId;
   requestInstance.action = managerMod.value.action;
   requestInstance.permissionType = managerMod.value.permissionType;
@@ -118,6 +119,7 @@ const requestManagersModification = (action, managerId) => {
     (err) => {
       request.value = false;
       errorMessage.value = err;
+      console.log(err);
     }
   );
 };
@@ -141,8 +143,11 @@ onMounted(() => {
 .manager-list__options-box {
   margin: 20px 0;
   display: flex;
-  justify-content: space-between;
-  max-width: 320px;
+  align-items: center;
+}
+.manager-list__select-box {
+  margin-left: 20px;
+  display: flex;
 }
 .statuslist__list-icon {
   align-self: center;
@@ -151,9 +156,6 @@ onMounted(() => {
   height: 20px;
   &:hover {
     transform: scale(1.3);
-  }
-  .manager-list__select {
-    width: 200px;
   }
 }
 </style>
