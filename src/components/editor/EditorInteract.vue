@@ -5,6 +5,7 @@
     <v-stage
       :config="configKonva"
       @click="callbacks.stagePointerDown"
+      @wheel="callbacks.stageWheel"
       @pointerdown="drawingHandlers.canvasPointerDown"
       @pointermove="drawingHandlers.canvasPointerMove"
       @pointerup="drawingHandlers.canvasPointerUp"
@@ -116,13 +117,13 @@
         <label>
           По оси X:
           <input type="range" :min="0.1" :max="1" :step="0.1" v-model="scaleX">
-          {{  scaleX  }}
+          {{  scaleX?.toFixed(1)  }}
         </label>
 
         <label>
           По оси Y:
           <input type="range" :min="0.1" :max="1" :step="0.1" v-model="scaleY">
-          {{  scaleY  }}
+          {{  scaleY?.toFixed(1)  }}
         </label>
 
         <label>
@@ -134,7 +135,7 @@
             :step="0.1"
             :value="scaleX"
             @input="callbacks.scaleAllInput">
-          {{  scaleX  }}
+          {{  scaleX?.toFixed(1)  }}
         </label>
       </div>
   
@@ -420,6 +421,20 @@ const callbacks = {
   },
   groupPointerEnter: () => {
     document.body.style.cursor = 'grab';
+  },
+  stageWheel: (e) => {
+    e.evt.preventDefault();
+    const scrollUp = e.evt.deltaY < 0;
+
+    if (scrollUp) {
+      console.log('Приближаем');
+      scaleX.value = Math.min(scaleX.value + 0.1, 1);
+      scaleY.value = Math.min(scaleY.value + 0.1, 1);
+    } else {
+      console.log('Отдаляем');
+      scaleX.value = Math.max(scaleX.value - 0.1, 0.1);
+      scaleY.value = Math.max(scaleY.value - 0.1, 0.1);
+    }
   },
   /**
    * Обработчик поднятия указателя с канвы. Тут забираем смещение
