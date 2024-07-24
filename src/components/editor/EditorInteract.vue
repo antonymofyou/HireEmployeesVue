@@ -23,8 +23,8 @@
           @dblclick="callbacks.startTransform"
         >
           <component    
-            :key="shape.id"
             @click="callbacks.handleClickOnShape"
+            :key="shape.id"
             :config="{
               ...TransformerEditor.transformConfigToKonvaCorrect(shape),
               image: TransformerEditor.shapeReducer(shape) === 'v-image' ? helpers.buildImage(shape) : null,
@@ -54,6 +54,7 @@
 
         <v-group v-if="currentDrawingShape">
           <component
+            v-if="TransformerEditor.shapeReducer(currentDrawingShape) !== 'v-arrow' || currentShapeConfig.points.length > 0"
             :is="TransformerEditor.shapeReducer(currentDrawingShape)"
             :config="currentShapeConfig"
           />
@@ -231,6 +232,12 @@ const currentDrawingShape = ref(null);
 const isPointerDownNow = ref(null);
 // Смещение канвы, с учётом перемещения
 const canvasTransform = ref({ x: 0, y: 0 });
+// Максимальный zIndex на канве (для вытаскивания элемента на самый верх)
+const maxZIndex = ref(0);
+// Зум канвы
+const scale = ref({ x: 1, y: 1 });
+// Позиционирование канвы относительно предка
+const canvasPosition = ref({ x: 0, y: 0 });
 
 // Видны ли действия над активной фигурой
 const isActionsVisible = computed(() => Boolean(selectedShape.value));
@@ -252,12 +259,16 @@ const konvaStage = computed(() => {
 const isAllowedToAddText = computed(() => {
   return selectedShape.value.attrs.type === 'rectangle';
 });
+const renderStage = ref(0);
 
 // Конфиг рисуемой фигуры (чтобы обновлять лишь часть канвы, не ререндерить полностью)
 const currentShapeConfig = ref(makeShapeConfig());
 
 // Добавляем тип к конфигу выбранной фигуры от текущей выбранной для рисования
 watch(currentDrawingShape, () => {
+  if (!currentDrawingShape.value) {
+    currentShapeConfig.value = makeShapeConfig()
+  }
   currentShapeConfig.value.type = currentDrawingShape.value;
 });
 
@@ -283,6 +294,9 @@ const helpers = {
    */
   moveToMaxZIndex: (target, options) => {
     target.moveToTop();
+    maxZIndex.value = target.zIndex(); // @TODO доработать отправку на верхний слой
+    console.log(target.zIndex(), '<---');
+
     if (options.withTransformer) {
       const transformerNode = transformer.value.getNode();
       if (transformerNode) transformerNode.moveToTop();
@@ -360,17 +374,25 @@ const helpers = {
   },
 
   /**
+   * Трансформация координат с учётом масштабирования и смещения
+   * @param {Object} coords Объект с координатами x, y
+   * @returns {Object} Объект с преобразованными координатами
+   */
+  transformCoordsByOffsetAndScale: ({ x, y }) => {
+    const transformedX = x / scale.value.x - canvasTransform.value.x / scale.value.x;
+    const transformedY = y / scale.value.x - canvasTransform.value.y / scale.value.y;
+
+    return { x: transformedX, y: transformedY };
+  },
+
+  /**
    * Получить координаты указателя с учётом смещения
    * @param {PointerEvent} e Pointer-событие
    * @returns {Object} Объект с координатами
    */
   getPointerCoordinates(e) {
     const { offsetX, offsetY } = e;
-
-    const scale = konvaStage.value.scaleX();
-    const x = offsetX / scale - canvasTransform.value.x / scale;
-    const y = offsetY / scale - canvasTransform.value.y / scale;
-
+    const { x, y } = helpers.transformCoordsByOffsetAndScale({ x: offsetX, y: offsetY });
     return { x, y };
   },
 };
@@ -393,12 +415,25 @@ const callbacks = {
   },
   groupDragEnd: (e) => {
     const { target } = e;
+    const shape = target.children[0];
+    const shapeId = shape.id();
 
     document.body.style.cursor = 'default';
-    console.group('DragEnd');
-    console.log('Coordinates after drag:');
-    console.log(target.attrs);
-    console.groupEnd('DragEnd');
+    console.group(`DragEnd ${shapeId}`);
+    console.log(shape.attrs);
+    console.groupEnd(`DragEnd ${shapeId}`);
+
+    // data.shapes = data.shapes.map((existShape) => {
+    //   if (existShape.id == shapeId) {
+    //     return {
+    //       ...existShape,
+    //       x: shape.attrs.startX + target.attrs.x,
+    //       y: shape.attrs.startY + target.attrs.y
+    //     };
+    //   }
+
+    //   return existShape
+    // });
   },
   groupPointerLeave: () => {
     document.body.style.cursor = 'default';
@@ -427,7 +462,7 @@ const callbacks = {
     const stage = transformerNode.getStage();
     const selectedNode = stage.findOne(`#${target.id()}`);
 
-    // helpers.moveToMaxZIndex(target, { withTransformer: true });
+    helpers.moveToMaxZIndex(group, { withTransformer: true });
     
     if (target === selectedShape.value) {
       selectedShape.value = null;
@@ -444,7 +479,7 @@ const callbacks = {
       } else {
         selectedShape.value = selectedNode;
       }
-      transformerNode.nodes([...group.children]);
+      transformerNode.nodes([group]);
     }
     else {
       selectedShape.value = null;
@@ -473,7 +508,7 @@ const callbacks = {
   toggleSelectingNewShape: () => {
     isNewShapeSelecting.value = !isNewShapeSelecting.value;
     // Т.к. закрываем меню для выбора фигуры - обнуляем и саму фигуру
-    if (isNewShapeSelecting.value) currentDrawingShape.value = null;
+    if (!isNewShapeSelecting.value) currentDrawingShape.value = null;
   },
 
   /**
@@ -517,16 +552,19 @@ const callbacks = {
    * Сбросить масштабирование по двум осям
    */
   resetScaleCanvas: () => {
-    konvaStage.value.scale({ x: 1, y: 1 });
+    scale.value = { x: 1, y: 1 };
   },
 
   /**
    * Сбросить трансформации канвы
    */
   resetTransformCanvas: () => {
-    konvaStage.value.position({ x: 0, y: 0 });
+    canvasPosition.value = { x: 0, y: 0 };
   },
 
+  /**
+   * Процесс нанесения текста на выбранную фигуру
+   */
   addTextToSelectedShape: async () => {
     const selectedId = selectedShape.value.id();
 
@@ -536,20 +574,41 @@ const callbacks = {
     });
 
     if (!findShape) return;
-    console.log(findShape, '<--');
 
-    const newText = prompt('Введите текст: ');
+    // Добавляет текст в фигуру
+    const addNewText = () => {
+      const newText = prompt('Введите текст: ');
+  
+      findShape.text.push(reactive({
+        alignment: 'left',
+        text: [
+          {
+            text: newText,
+            fontSize: 24,
+            type: 'medium',
+          }
+        ]
+      }));
+    };
 
-    findShape.text.push(reactive({
-      alignment: 'left',
-      text: [
-        {
-          text: newText,
-          fontSize: 24,
-          type: 'medium'
-        }
-      ]
-    }));
+    // Если определён массив текста - можем пушить новый текст
+    if (Array.isArray(findShape.text)) {
+      addNewText();
+    } else {
+      // Иначе - заводим массив и спрашиваем про вертикальное выравнивание
+      findShape.text = [];
+      let verticalAlignment = null;
+
+      do {
+        // Будем спрашивать про выравнивание, пока не будет дан корректный ответ
+        verticalAlignment = prompt('Вертикальное выравнивание (top; middle; bottom)').trim().toLowerCase();
+      } while (!['top', 'middle', 'bottom'].includes(verticalAlignment));
+
+      findShape.textVerticalAlignment = verticalAlignment;
+      addNewText();
+    }
+
+    renderStage.value++;
   },
 };
 
@@ -560,11 +619,11 @@ const drawingHandlers = {
    * @params {Object} event Событие
    */
   canvasPointerDown: (event) => {
-    console.log(event)
-
     // Фигура не выбрана - пользователь не начинает рисовать
     if (!currentDrawingShape.value) return;
+    console.log(event.evt);
     const { x, y } = helpers.getPointerCoordinates(event.evt);
+    console.log(x, y);
     isPointerDownNow.value = true;
 
     // Делаем это для того, чтобы мы могли начать рисовать, а не передвигать холст
@@ -573,6 +632,7 @@ const drawingHandlers = {
       konvaStage.value.draggable(true);
     });
 
+    // Если рисуем стрелку - то оперируем не x, y, а points
     if (currentDrawingShape.value === 'arrow') {
       currentShapeConfig.value.points = [x, y];
     } else {
@@ -644,6 +704,10 @@ watchEffect(() => {
   console.log('Shapes:', shapes);
 });
 
+watchEffect(() => {
+  console.log('Selected shape: ', selectedShape.value);
+});
+
 // Ставим масштабирование для канваса
 watchEffect((onCleanup) => {
   if (!konvaStage.value) return;
@@ -666,16 +730,16 @@ watchEffect((onCleanup) => {
 
     // Определяем новое значение зума
     const newScale = direction > 0 ? oldScale * scaleBy : oldScale / scaleBy;
-    // Применяем зум
-    konvaStage.value.scale({ x: newScale, y: newScale });
+    // Пишем новый зум в состояние
+    scale.value = { x: newScale, y: newScale };
 
     // Определяем новые координаты исходя из получившегося зума
     const newPos = {
       x: pointer.x - mousePointTo.x * newScale,
       y: pointer.y - mousePointTo.y * newScale,
     };
-    // Применяем новые координаты
-    konvaStage.value.position(newPos);
+    // Пишем новые координаты в состояние
+    canvasPosition.value = newPos;
   };
 
   // Коэффициент, на который будем зумиться
@@ -686,6 +750,14 @@ watchEffect((onCleanup) => {
   onCleanup(() => {
     konvaStage.value.off('wheel');
   });
+});
+
+// Следим за состоянием для канвы и меняем её
+watch([scale, canvasPosition], () => {
+  // Применяем зум
+  konvaStage.value.scale({ x: scale.value.x, y: scale.value.y });
+  // Применяем позиционирование
+  konvaStage.value.position({ x: canvasPosition.value.x, y: canvasPosition.value.y });
 });
 
 // Корректные размеры при изменении окна браузера

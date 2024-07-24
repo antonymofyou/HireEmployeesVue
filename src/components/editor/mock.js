@@ -94,6 +94,8 @@ export const data = reactive({
     {
       "id": 5,
       "type": "rectangle",
+      startX: 170,
+      startY: 100,
       "x": 170,
       "y": 100,
       "width": 200,
