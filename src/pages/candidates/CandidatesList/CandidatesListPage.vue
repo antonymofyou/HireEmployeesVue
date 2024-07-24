@@ -31,12 +31,15 @@
         />
       </div>
     </div>
-    <StatusMain
+    <div
     class="status_main"
-    v-model="status"
-    :options="candidateStatus"
-    @update:modelValue="updateStatus"
-    />
+    >
+      <StatusMain
+      v-model="status"
+      :options="candidateStatus"
+      @update:modelValue="updateStatus"
+      />
+    </div>
 
     <div class="candidates__description" v-if="vacancyId !== ''">
       <span>{{
@@ -183,24 +186,18 @@ function getVacancyStatuses() {
         //успешный результат
         candidateStatus.value = [{ name: 'Все', id: 'Все', color: 'gray', count: 0}];
         response.statuses.map((status) => {
-          let count = (status.countOtklikov);
-          if (isNaN(count)) {
-            count = 0;
-          }
+          let count = isNaN((status.countOtklikov)) ? 0 : (status.countOtklikov);
           candidateStatus.value.push({
             name: status.statusName,
             id: status.statusName,
             color: status.statusColor,
             count: count
           });
+          candidateStatus.value[0].count = response.statuses.reduce((sum, status) => { //Считывает кол-во всех заявок 
+            count = isNaN(Number(status.countOtklikov)) ? 0 : Number(status.countOtklikov);
+            return sum + count;
+          }, 0);
         });
-        candidateStatus.value[0].count = response.statuses.reduce((sum, status) => { //Считывает кол-во всех заявок 
-          let count = Number(status.countOtklikov);
-          if (isNaN(count)) {
-            count = 0;
-          }
-          return sum + count;
-        }, 0);
       },
       function (err) {
         //неуспешный результат
@@ -330,5 +327,8 @@ watch(
 }
 .status_main{
   margin-top: 25px;
+  display: flex;
+
 }
+
 </style>

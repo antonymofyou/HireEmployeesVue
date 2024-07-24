@@ -19,8 +19,8 @@ const props = defineProps({
     required: true,
   },
   statusCount: { //Счетчик заявок
-    type: Number,
-    required: true
+    type: [String, Number],
+    required: false
   }
 });
 
@@ -31,7 +31,6 @@ const props = defineProps({
   border-radius: 10px;
   color: white;
   padding: 7px 14px;
-  cursor: default;
   user-select: none;
   width: fit-content;
 }
