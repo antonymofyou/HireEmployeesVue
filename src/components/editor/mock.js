@@ -64,7 +64,45 @@ export const data = reactive({
       "color": "#FF5733",
       "borderColor": "#C70039",
       "zIndex": 0.5,
-      "textVerticalAlignment": "top",
+      "textVerticalAlignment": "middle",
+      "text": [
+        {
+          "alignment": "left",
+          "text": [
+            {
+              "text": "Hello1",
+              "type": "bold",
+              "fontSize": 24,
+              "fontColor": "#333333"
+            },
+          ]
+        },
+        {
+          "alignment": "right",
+          "text": [
+            {
+              "text": "Hello2",
+              "type": "bold",
+              "fontSize": 24,
+              "fontColor": "#333333"
+            },
+          ]
+        }
+      ],
+      "borderWidth": 5
+    },
+    {
+      "id": 5,
+      "type": "rectangle",
+      "x": 170,
+      "y": 100,
+      "width": 200,
+      "height": 100,
+      "color": "#FF5733",
+      "rotation": 33,
+      "borderColor": "#C70039",
+      "zIndex": 0.5,
+      "textVerticalAlignment": "bottom",
       "text": [
         {
           "alignment": "left",

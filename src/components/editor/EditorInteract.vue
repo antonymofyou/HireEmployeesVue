@@ -10,8 +10,7 @@
       @pointerup="drawingHandlers.canvasPointerUp"
       ref="konva"
     >
-      <v-layer
-      >
+      <v-layer>
         <v-group
           v-for="shape in data.shapes"
           :config="{
@@ -25,6 +24,7 @@
         >
           <component    
             :key="shape.id"
+            @click="callbacks.handleClickOnShape"
             :config="{
               ...TransformerEditor.transformConfigToKonvaCorrect(shape),
               image: TransformerEditor.shapeReducer(shape) === 'v-image' ? helpers.buildImage(shape) : null,
@@ -32,6 +32,7 @@
             :is="TransformerEditor.shapeReducer(shape)"
           />
 
+          <!-- Рендерим текст -->
           <template
             v-for="textInfo in shape.text"
           >
@@ -42,7 +43,9 @@
                 y: shape.y,
                 rotation: shape.rotation,
                 width: shape.width,
+                height: shape.height,
                 align: textInfo.alignment,
+                verticalAlign: shape.textVerticalAlignment,
                 ...TransformerEditor.transformTextConfigToConvaCorrect(textRecord),
               }">
             </v-text>
@@ -75,6 +78,13 @@
           </button>
           <button
             class="button"
+            :disabled="!selectedShape || !isAllowedToAddText"
+            @click="callbacks.addTextToSelectedShape"
+          >
+            Добавить текст
+          </button>
+          <button
+            class="button"
             @click="helpers.deleteActiveShape"
             :disabled="!Boolean(selectedShape)"
           >
@@ -87,7 +97,6 @@
           <button class="button" :disabled="currentDrawingShape === 'circle'" @click="callbacks.addNewShape('circle')">Circle</button>
           <button class="button" :disabled="currentDrawingShape === 'arrow'" @click="callbacks.addNewShape('arrow')">Arrow</button>
           <button class="button" :disabled="currentDrawingShape === 'image'" @click="callbacks.addNewShape('image')">Image</button>
-          <button class="button" @click="callbacks.addNewShape('text')">Text</button>
         </div>
       </div>
 
@@ -202,10 +211,11 @@
 <script setup>
 import { data } from './mock';
 
-import { ref, watchEffect, computed, toValue, watch, onMounted } from 'vue';
+import { ref, watchEffect, computed, toValue, watch, onMounted, reactive, nextTick } from 'vue';
 import { Arrow, Circle, Rectangle } from './js/ShapesClasses';
 import { TransformerEditor } from './js/TransformClasses';
 import { dangerouslyForceToAnotherIterationEventLoop, makeShapeConfig } from './js/utils';
+import { Text } from 'konva/lib/shapes/Text';
 
 // Объект, с помощью которого будет происходить трансформация примитивов
 const transformer = ref(null);
@@ -238,9 +248,15 @@ const konvaStage = computed(() => {
   if (!konva.value) return;
   return konva.value.getStage();
 });
+// Можно ли добавлять текст к выбранной фигуре
+const isAllowedToAddText = computed(() => {
+  return selectedShape.value.attrs.type === 'rectangle';
+});
 
+// Конфиг рисуемой фигуры (чтобы обновлять лишь часть канвы, не ререндерить полностью)
 const currentShapeConfig = ref(makeShapeConfig());
 
+// Добавляем тип к конфигу выбранной фигуры от текущей выбранной для рисования
 watch(currentDrawingShape, () => {
   currentShapeConfig.value.type = currentDrawingShape.value;
 });
@@ -350,8 +366,10 @@ const helpers = {
    */
   getPointerCoordinates(e) {
     const { offsetX, offsetY } = e;
-    const x = offsetX - canvasTransform.value.x;
-    const y = offsetY - canvasTransform.value.y;
+
+    const scale = konvaStage.value.scaleX();
+    const x = offsetX / scale - canvasTransform.value.x / scale;
+    const y = offsetY / scale - canvasTransform.value.y / scale;
 
     return { x, y };
   },
@@ -363,6 +381,7 @@ const callbacks = {
     const { target } = e;
     // Т.к. сейчас рисуем - не будем ничего передвигать
     if (isDrawingNow.value) {
+      // Выключаем возможность перемещения, чтобы начать рисовать
       target.draggable(false);
       dangerouslyForceToAnotherIterationEventLoop(() => {
         target.draggable(true);
@@ -418,7 +437,13 @@ const callbacks = {
     if (transformerNode.node() === selectedNode) return;
     
     if (selectedNode) {
-      selectedShape.value = selectedNode;
+      // Текст идёт размером с фигуру, поэтому по клику - будем получать текст, =>
+      // Будем делать поиск относительно него
+      if (target instanceof Text) {
+        selectedShape.value = target.parent.children[0];
+      } else {
+        selectedShape.value = selectedNode;
+      }
       transformerNode.nodes([...group.children]);
     }
     else {
@@ -474,14 +499,17 @@ const callbacks = {
       };
       case 'arrow': {
         currentDrawingShape.value = 'arrow';
-        // data.shapes.push(new Arrow());
         return;
       }
       case 'image': {
         await helpers.loadNewImageIntoCanvas();
         currentDrawingShape.value = null;
         return;
-      };
+      }
+      case 'text': {
+        currentDrawingShape.value = 'text';
+        return;
+      }
     }
   },
 
@@ -498,6 +526,31 @@ const callbacks = {
   resetTransformCanvas: () => {
     konvaStage.value.position({ x: 0, y: 0 });
   },
+
+  addTextToSelectedShape: async () => {
+    const selectedId = selectedShape.value.id();
+
+    // Ищем фигуру по айди в стейте
+    const findShape = data.shapes.find((shape) => {
+      return shape.id == selectedId;
+    });
+
+    if (!findShape) return;
+    console.log(findShape, '<--');
+
+    const newText = prompt('Введите текст: ');
+
+    findShape.text.push(reactive({
+      alignment: 'left',
+      text: [
+        {
+          text: newText,
+          fontSize: 24,
+          type: 'medium'
+        }
+      ]
+    }));
+  },
 };
 
 // Обработчики для рисования
@@ -507,6 +560,8 @@ const drawingHandlers = {
    * @params {Object} event Событие
    */
   canvasPointerDown: (event) => {
+    console.log(event)
+
     // Фигура не выбрана - пользователь не начинает рисовать
     if (!currentDrawingShape.value) return;
     const { x, y } = helpers.getPointerCoordinates(event.evt);
@@ -583,6 +638,11 @@ const drawingHandlers = {
     currentDrawingShape.value = null;
   },
 };
+
+watchEffect(() => {
+  const shapes = [...data.shapes];
+  console.log('Shapes:', shapes);
+});
 
 // Ставим масштабирование для канваса
 watchEffect((onCleanup) => {

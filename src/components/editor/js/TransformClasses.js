@@ -7,9 +7,10 @@ export class TransformerEditor {
    * @param {Object} config Конфиг с бэка
    * @returns {Object} Конфиг для vue-konva
    */
-  static transformConfigToKonvaCorrect(config) {
+  static transformConfigToKonvaCorrect(correctConfig) {
     // Собираем корректный конфиг
-    const correctConfig = { ...config, id: String(config.id), draggable: false };
+    // const correctConfig = { ...config, id: String(config.id), draggable: false };
+    correctConfig.id = String(correctConfig.id);
 
     if (correctConfig.color) {
       correctConfig.fill = correctConfig.color;
@@ -34,12 +35,57 @@ export class TransformerEditor {
    * @param {Object} config Конфиг с бэка
    * @returns {Object} Конфиг для vue-konva
    */
-  static transformTextConfigToConvaCorrect(config) {
-    const correctConfigText = { ...config };
+  static transformTextConfigToConvaCorrect(correctConfigText) {
+    // const correctConfigText = { ...config };
 
     if (correctConfigText.fontColor) {
       correctConfigText.fill = correctConfigText.fontColor;
       delete correctConfigText.fontColor;
+    }
+
+    if (correctConfigText.type) {
+      switch (correctConfigText.type) {
+        case 'black': {
+          correctConfigText.fontStyle = '900';
+          break;
+        }
+        case 'extrabold': {
+          correctConfigText.fontStyle = '800';
+          break;
+        }
+        case 'bold': {
+          correctConfigText.fontStyle = '700';
+          break;
+        }
+        case 'semibold': {
+          correctConfigText.fontStyle = '600';
+          break;
+        }
+        case 'medium': {
+          correctConfigText.fontStyle = '500';
+          break;
+        }
+        case 'normal': {
+          correctConfigText.fontStyle = '400';
+          break;
+        }
+        case 'light': {
+          correctConfigText.fontStyle = '300';
+          break;
+        }
+        case 'extralight': {
+          correctConfigText.fontStyle = '200';
+          break;
+        }
+        case 'thin': {
+          correctConfigText.fontStyle = '100';
+          break;
+        }
+        default: {
+          correctConfigText.fontStyle = '400';
+          delete correctConfigText.type;
+        }
+      }
     }
   
     return correctConfigText;
