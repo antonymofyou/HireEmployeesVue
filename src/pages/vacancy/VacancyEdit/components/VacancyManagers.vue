@@ -1,8 +1,5 @@
 <template>
   <SpinnerMain v-if="request" class="manager-list__status-spinner" />
-  <p class="manager-listt__status-error" v-if="errorMessage">
-    {{ errorMessage }}
-  </p>
   <VacancyManagersList
     v-if="!request"
     :managerList="managerList.assignedManagers"
@@ -22,6 +19,9 @@
       </ButtonIcon>
     </div>
   </div>
+  <p class="manager-list__status-error" v-if="errorMessage">
+    {{ errorMessage }}
+  </p>
 </template>
 
 <script setup>
