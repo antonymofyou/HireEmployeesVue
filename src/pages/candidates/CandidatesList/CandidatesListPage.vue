@@ -31,6 +31,12 @@
         />
       </div>
     </div>
+    <StatusMain
+    class="status_main"
+    v-model="status"
+    :options="candidateStatus"
+    @update:modelValue="updateStatus"
+    />
 
     <div class="candidates__description" v-if="vacancyId !== ''">
       <span>{{
@@ -75,6 +81,7 @@ import SelectMain from '@/components/SelectMain.vue';
 import SpinnerMain from '@/components/SpinnerMain.vue';
 import TopSquareButton from '@/components/TopSquareButton.vue';
 import iconBack from '@/assets/icons/back.svg';
+import StatusMain from '@/components/StatusMain.vue';
 
 const router = useRouter();
 const route = useRoute();
@@ -90,7 +97,7 @@ const vacanciesIds = ref([]); // список id вакансий
 const candidates = ref([]); // список кандидатов
 const vacancyId = ref(''); // ID вакансии
 const status = ref(initialStatusValue); // Статус кандидата
-const candidateStatus = ref([{ name: 'Все', id: 'Все', color: 'gray' }, {name:'New', id: 'New', color: 'gray'}]); // Статусы кандидатов
+const candidateStatus = ref([{ name: 'Все', id: 'Все', color: 'gray' }, {name:'New', id: 'New', color: 'gray', count: 0}]); // Статусы кандидатов
 
 //Флаги загрузки данных
 const dataFetched = ref(false);
@@ -165,6 +172,7 @@ function getVacancyStatuses() {
   let requestClass = new VacanciesGetVacancyStatuses();
   requestClass.vacancyId = vacancyId.value;
   requestClass.withTransfers = '0';
+  requestClass.withCountOtklikov = "1"
 
   //Получение статусов
   if (vacancyId.value) {
@@ -173,14 +181,26 @@ function getVacancyStatuses() {
       'manager',
       function (response) {
         //успешный результат
-        candidateStatus.value = [{ name: 'Все', id: 'Все', color: 'gray'}];
+        candidateStatus.value = [{ name: 'Все', id: 'Все', color: 'gray', count: 0}];
         response.statuses.map((status) => {
+          let count = (status.countOtklikov);
+          if (isNaN(count)) {
+            count = 0;
+          }
           candidateStatus.value.push({
             name: status.statusName,
             id: status.statusName,
-            color: status.statusColor
+            color: status.statusColor,
+            count: count
           });
         });
+        candidateStatus.value[0].count = response.statuses.reduce((sum, status) => {
+          let count = Number(status.countOtklikov);
+          if (isNaN(count)) {
+            count = 0;
+          }
+          return sum + count;
+        }, 0);
       },
       function (err) {
         //неуспешный результат
@@ -307,5 +327,8 @@ watch(
   .candidates__filter {
     gap: 15px;
   }
+}
+.status_main{
+  margin-top: 25px;
 }
 </style>

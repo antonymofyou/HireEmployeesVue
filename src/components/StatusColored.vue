@@ -1,6 +1,7 @@
 <template>
   <div class="colored_status" :style="{ backgroundColor: statusColor }">
     {{ statusText }}
+    <span v-if="statusCount">({{ statusCount }})</span>
   </div>
 </template>
 
@@ -16,6 +17,10 @@ const props = defineProps({
   statusColor: {
     type: String,
     required: true,
+  },
+  statusCount: {
+    type: Number,
+    required: false
   }
 });
 
