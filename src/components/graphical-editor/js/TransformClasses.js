@@ -1,5 +1,6 @@
 /**
  * Класс для трансформаций
+ * Т.к. необходимо сохранить реактивность vue - мутируем приходящие данные
  */
 export class TransformerEditor {
   /**
@@ -9,8 +10,6 @@ export class TransformerEditor {
    * @returns {Object} Конфиг для vue-konva
    */
   static transformConfigToKonvaCorrect(correctConfig, propsToDelete) {
-    // Собираем корректный конфиг
-    // const correctConfig = { ...config, id: String(config.id), draggable: false };
     correctConfig.id = String(correctConfig.id);
 
     if (correctConfig.color) {
@@ -47,8 +46,6 @@ export class TransformerEditor {
    * @returns {Object} Конфиг для vue-konva
    */
   static transformTextConfigToConvaCorrect(correctConfigText) {
-    // const correctConfigText = { ...config };
-
     if (correctConfigText.fontColor) {
       correctConfigText.fill = correctConfigText.fontColor;
       delete correctConfigText.fontColor;
@@ -117,9 +114,7 @@ export class TransformerEditor {
       case 'image': return 'v-image';
       case 'text': return 'v-text';
       case 'arrow': return 'v-arrow';
-      default: {
-        return 'text';
-      }
+      default: return 'text';
     }
   }
 }

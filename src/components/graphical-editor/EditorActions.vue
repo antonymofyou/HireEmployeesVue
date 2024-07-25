@@ -58,6 +58,7 @@
       </div>
     </div>
 
+    <!-- Манипуляции с холстом -->
     <div class="actions__item">
       <span class="actions__item-title">Операции над холстом</span>
 
@@ -77,6 +78,7 @@
       </div>
     </div>
 
+    <!-- Манипуляции с цветом выбранной фигуры -->
     <div class="actions__item" v-show="props.isColorsActionsVisible">
       <span class="actions__item-title">Цвета</span>
 
@@ -87,7 +89,8 @@
             <input
               type="color"
               :value="props.selectedShape?.fill()"
-              @input="props.selectedShape?.fill($event.target.value)"
+              @input="handlers.onFillInput"
+              @change="handlers.onFillChange"
             />
           </label>
         </div>
@@ -98,13 +101,15 @@
             <input
               type="color"
               :value="props.selectedShape?.stroke()"
-              @input="props.selectedShape?.stroke($event.target.value)"
+              @input="handlers.onStrokeInput"
+              @change="handlers.onStrokeChange"
             />
           </label>
         </div>
       </div>
     </div>
 
+    <!-- Манипуляции с углами выбранной фигуры -->
     <div class="actions__item" v-show="isCornerActionsVisible">
       <span class="actions__item-title">Углы</span>
 
@@ -116,12 +121,14 @@
           :max="50"
           :step="1"
           :value="props.selectedShape?.cornerRadius?.()"
-          @input="props.selectedShape?.cornerRadius?.(Number($event.target.value))"
+          @input="handlers.onCornerRadiusInput"
+          @change="handlers.onCornerRadiusChange"
         />
         <b>{{ props.selectedShape?.cornerRadius?.() }}</b>
       </label>
     </div>
 
+    <!-- Манипуляции с фигурами выбранной фигуры -->
     <div class="actions__item" v-show="isBoundariesActionsVisible">
       <span class="actions__item-title">Границы</span>
 
@@ -133,39 +140,19 @@
           :max="20"
           :step="1"
           :value="props.selectedShape?.strokeWidth()"
-          @input="props.selectedShape?.strokeWidth(Number($event.target.value))"
+          @input="handlers.onStrokeWidthInput"
+          @change="handlers.onStrokeWidthChange"
         />
         <b>{{ props.selectedShape?.strokeWidth() }}</b>
-      </label>
-    </div>
-
-    <div class="actions__item" v-show="isActionsVisible">
-      <span class="actions__item-title">Размеры</span>
-
-      <label>
-        Ширина:
-        <input
-          type="number"
-          :value="props.selectedShape?.width?.()"
-          @input="props.selectedShape?.width(Number($event.target.value))"
-        />&nbsp;
-        <b>{{ props.selectedShape?.width?.() }}px</b>
-      </label>
-
-      <label>
-        Высота:
-        <input
-          type="number"
-          :value="props.selectedShape?.height?.()"
-          @input="props.selectedShape?.height(Number($event.target.value))"
-        />&nbsp;
-        <b>{{ props.selectedShape?.height?.() }}px</b>
       </label>
     </div>
   </div>
 </template>
 
 <script setup>
+import { data } from './mock';
+import { computed } from 'vue';
+
 const props = defineProps({
   toggleSelectingNewShape: {
     type: Function,
@@ -224,6 +211,82 @@ const props = defineProps({
     required: true,
   },
 });
+
+const currentShapeNode = computed(() => {
+  const findShape = data.shapes.find((existShape) => {
+    return existShape.id === props.selectedShape.attrs.id;
+  });
+  return findShape;
+});
+
+// Обработчики различных инпутов
+const handlers = {
+  /**
+   * Обработчик изменения заливки (на input)
+   * @param {Event} e - Событие
+   */
+  onFillInput: (e) => {
+    props.selectedShape?.fill(e.target.value);
+  },
+  /**
+   * Обработчик изменения заливки (на change)
+   * Тут меняем состояние, для оптимизации - только в конце ввода
+   * @param {Event} e - Событие
+   */
+  onFillChange: (e) => {
+    if (!currentShapeNode.value) return;
+    currentShapeNode.value.color = e.target.value;
+  },
+  /**
+   * Обработчик изменения заливки (на input)
+   * @param {Event} e - Событие
+   */
+  onStrokeInput: (e) => {
+    props.selectedShape?.stroke(e.target.value);
+  },
+  /**
+   * Обработчик изменения обводки (на change)
+   * Тут меняем состояние, для оптимизации - только в конце ввода
+   * @param {Event} e - Событие
+   */
+  onStrokeChange: (e) => { 
+    if (!currentShapeNode.value) return;
+    currentShapeNode.value.borderColor = e.target.value;
+  },
+  /**
+   * Обработчик изменения скругления углов (на input)
+   * @param {Event} e - Событие
+   */
+  onCornerRadiusInput: (e) => {
+    props.selectedShape?.cornerRadius?.(Number(e.target.value));
+  },
+  /**
+   * Обработчик изменения скругления углов (на change)
+   * Тут меняем состояние, для оптимизации - только в конце ввода
+   * @param {Event} e - Событие
+   */
+  onCornerRadiusChange: (e) => {
+    if (!currentShapeNode.value) return;
+    currentShapeNode.value.cornerRadius = (Number(e.target.value));
+  },
+  /**
+   * Обработчик изменения ширины границы (на input)
+   * @param {Event} e - Событие
+   */
+  onStrokeWidthInput: (e) => {
+    props.selectedShape?.strokeWidth?.(Number(e.target.value))
+  },
+  /**
+   * 
+   * Обработчик изменения ширины границы (на input)
+   * Тут меняем состояние, для оптимизации - только в конце ввода
+   * @param {Event} e - Событие
+   */
+  onStrokeWidthChange: (e) => {
+    if (!currentShapeNode.value) return;
+    currentShapeNode.value.borderWidth = (Number(e.target.value));
+  },
+};
 </script>
 
 <style scoped>
