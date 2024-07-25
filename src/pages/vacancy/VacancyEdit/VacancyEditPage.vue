@@ -165,7 +165,7 @@ import TextEditor from "@/components/TextEditor.vue";
 import SpinnerMain from "@/components/SpinnerMain.vue";
 import SaveIcon from '@/assets/icons/save.svg?component';
 import PlusIcon from '@/assets/icons/add.svg?component';
-import VacancyStatus from './components/VacancyStatus.vue';
+import VacancyStatus from './components/VacancyStatus/VacancyStatus.vue';
 import ButtonIcon from '@/components/ButtonIcon.vue';
 import CopyIcon from '@/assets/icons/copy.svg?component';
 
