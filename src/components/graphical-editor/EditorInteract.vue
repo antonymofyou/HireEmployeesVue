@@ -199,19 +199,28 @@ const helpers = {
   },
 
   /**
+   * Применить текущие трансформации канвы к координатам и преобразовать их
+   * @param {Object} coords Объект с координатами x, y
+   */
+  getCoordsByTransformationsKonva: (coords) => {
+    const transform = konva.value.inner.getStage().getAbsoluteTransform().copy();
+    // Для определения относительной позиции необходимо инвертировать трансформации
+    transform.invert();
+    
+    // Применяем обратные трансформации и находим реальные координаты
+    return transform.point(coords);
+  },
+
+  /**
    * Получить координаты указателя с учётом смещения
    * @returns {Object} Объект с координатами
    */
   getPointerCoordinates() {
-    const transform = konva.value.inner.getStage().getAbsoluteTransform().copy();
-    // Для определения относительной позиции необходимо инвертировать трансформации
-    transform.invert();
-
     // Получаем координаты указателя
     const pos = konva.value.inner.getStage().getPointerPosition();
+    const transformCoords = helpers.getCoordsByTransformationsKonva(pos);
 
-    // Применяем обратные трансформации и находим реальные координаты
-    return transform.point(pos);
+    return transformCoords;
   },
 };
 
@@ -231,15 +240,34 @@ const callbacks = {
     helpers.moveToMaxZIndex(target, { withTransformer: true });
     document.body.style.cursor = 'grabbing';
   },
+  /**
+   * Обработка конца перетаскивания. Здесь синхронизируем с состоянием
+   * @param {Object} e Событие
+   */
   groupDragEnd: (e) => {
+    // Перетаскивать закончили - ставим обычный курсор
+    document.body.style.cursor = 'default';
+
+    // Получаем группу, которую перетаскивали
     const { target } = e;
+    // Достаём фигуру, лежащую внутри группы. Одна группа - одна фигура (и несколько текстов внутри)
     const shape = target.children[0];
+    // Достаём id фигуры, чтобы далее производить поиск
     const shapeId = shape.id();
 
-    document.body.style.cursor = 'default';
-    console.group(`DragEnd ${shapeId}`);
-    console.log(shape.attrs);
-    console.groupEnd(`DragEnd ${shapeId}`);
+    const position = target.position();
+    console.log('Position: ', position);
+
+    // Ищем фигуру
+    const findShape = data.shapes.find((existShape) => {
+      return existShape.id == shapeId;
+    });
+
+    // Фигура есть - меняем состояние
+    if (findShape) {
+      findShape.startX = position.x;
+      findShape.startY = position.y;
+    }
   },
   groupPointerLeave: () => {
     document.body.style.cursor = 'default';

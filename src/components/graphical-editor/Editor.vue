@@ -14,6 +14,8 @@
           :config="{
             draggable: props.shapesDraggable,
             zIndex: shape.zIndex,
+            x: shape.startX,
+            y: shape.startY,
           }"
           @pointerenter="props.groupPointerEnter"
           @dragstart="props.groupDragStart"
