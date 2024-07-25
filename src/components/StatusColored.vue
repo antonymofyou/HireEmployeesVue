@@ -1,7 +1,7 @@
 <template>
   <div class="colored_status" :style="{ backgroundColor: statusColor }">
     {{ statusText }}
-    <span v-if="statusCount">({{ statusCount }})</span>
+    <span v-if="statusCount"> - {{ statusCount }}</span>
   </div>
 </template>
 

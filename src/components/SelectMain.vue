@@ -112,9 +112,10 @@ const vClickOutside = {
 <style scoped>
 .select-box-main {
   display: flex;
-  width: max-content;
+  width: 100%;
   flex-direction: column;
   position: relative;
+  flex: 1;
 }
 
 .options-container-main {
