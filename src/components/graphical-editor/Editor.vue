@@ -11,11 +11,13 @@
       <v-layer>
         <v-group
           v-for="shape in props.shapes"
+          :key="shape.id"
           :config="{
             draggable: props.shapesDraggable,
             zIndex: shape.zIndex,
             x: shape.startX,
             y: shape.startY,
+            rotation: shape.startRotation
           }"
           @pointerenter="props.groupPointerEnter"
           @dragstart="props.groupDragStart"

@@ -77,7 +77,7 @@
       </div>
     </div>
 
-    <div class="actions__item" v-show="props.isActionsVisible">
+    <div class="actions__item" v-show="props.isColorsActionsVisible">
       <span class="actions__item-title">Цвета</span>
 
       <div>
@@ -122,7 +122,7 @@
       </label>
     </div>
 
-    <div class="actions__item" v-show="isActionsVisible">
+    <div class="actions__item" v-show="isBoundariesActionsVisible">
       <span class="actions__item-title">Границы</span>
 
       <label>
@@ -208,6 +208,14 @@ const props = defineProps({
     required: true,
   },
   isActionsVisible: {
+    type: Boolean,
+    required: true,
+  },
+  isColorsActionsVisible: {
+    type: Boolean,
+    required: true,
+  },
+  isBoundariesActionsVisible: {
     type: Boolean,
     required: true,
   },

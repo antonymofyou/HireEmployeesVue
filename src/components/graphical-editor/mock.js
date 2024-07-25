@@ -15,7 +15,7 @@ export const data = reactive({
       "zIndex": 0.5,
       "cornerRadius": 20,
       "borderWidth": 5,
-      "rotation": 90
+      "startRotation": 90
     },
     {
       "id": crypto.randomUUID(),
@@ -29,7 +29,7 @@ export const data = reactive({
       "zIndex": 0.5,
       "cornerRadius": 20,
       "borderWidth": 5,
-      "rotation": 90
+      "startRotation": 90
     },
     {
       "id": 2,
@@ -52,7 +52,7 @@ export const data = reactive({
       "height": 150,
       "borderColor": "#C70039",
       "zIndex": 0.2,
-      "rotation": 110
+      "startRotation": 110
     },
     {
       "id": 4,
@@ -99,7 +99,7 @@ export const data = reactive({
       "width": 200,
       "height": 100,
       "color": "#FF5733",
-      "rotation": 33,
+      "startRotation": 33,
       "borderColor": "#C70039",
       "zIndex": 0.5,
       "textVerticalAlignment": "bottom",

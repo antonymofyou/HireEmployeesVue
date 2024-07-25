@@ -37,6 +37,8 @@
       :resetScaleCanvas="callbacks.resetScaleCanvas"
       :resetTransformCanvas="callbacks.resetTransformCanvas"
       :isActionsVisible="isActionsVisible"
+      :isColorsActionsVisible="isColorsActionsVisible"
+      :isBoundariesActionsVisible="isBoundariesActionsVisible"
       :isCornerActionsVisible="isCornerActionsVisible"
     />
   </div>
@@ -45,7 +47,7 @@
 <script setup>
 import { data } from './mock';
 
-import { ref, watchEffect, computed, toValue, watch, onMounted, reactive } from 'vue';
+import { ref, watchEffect, computed, toValue, watch, reactive } from 'vue';
 import { dangerouslyForceToAnotherIterationEventLoop, makeShapeConfig } from './js/utils';
 import { Text } from 'konva/lib/shapes/Text';
 
@@ -76,7 +78,17 @@ const isActionsVisible = computed(() => Boolean(selectedShape.value));
 // Видны ли действия над углами фигуры
 const isCornerActionsVisible = computed(() => {
   // Если фигура не является стрелкой или кругом - то разрешаем менять углы
-  return isActionsVisible.value && !(['arrow', 'circle'].includes(selectedShape.value.type))
+  return isActionsVisible.value && !(['arrow', 'circle'].includes(selectedShape.value?.attrs.type))
+});
+// Видны ли действия над цветом (fill, stroke)
+const isColorsActionsVisible = computed(() => {
+  // Действия над цветами не разрешены над картинками
+  return isActionsVisible.value && selectedShape.value?.attrs.type !== 'image';
+});
+// Видны ли действия над границами
+const isBoundariesActionsVisible = computed(() => {
+  // Действия над границами не разрешены над картинками
+  return isActionsVisible.value && selectedShape.value?.attrs.type !== 'image';
 });
 // Рисует ли сейчас пользователь на канве
 const isDrawingNow = computed(() => {
@@ -292,6 +304,8 @@ const callbacks = {
   startTransform: (e) => {
     const { target } = e;
     const group = target.parent;
+    const shape = group.children[0];
+    const shapeId = shape.id();
     const transformerNode = konva.value.transformer.getNode();
     const stage = transformerNode.getStage();
     const selectedNode = stage.findOne(`#${target.id()}`);
@@ -314,6 +328,25 @@ const callbacks = {
         selectedShape.value = selectedNode;
       }
       transformerNode.nodes([group]);
+
+      // Ставим обработчики на конец трансформации для синхронизации состояния и канвы
+      group.on('transformend', () => {
+        // Достаём текущий поворот и координаты
+        const rotation = group.rotation();
+        const position = group.position();
+        
+        // Ищем фигуру
+        const findShape = data.shapes.find((existShape) => {
+          return existShape.id == shapeId;
+        });
+
+        // Если фигура была найдена - применяем трансформации
+        if (findShape) {
+          findShape.startRotation = rotation;
+          findShape.startX = position.x;
+          findShape.startY = position.y;
+        }
+      });
     }
     else {
       selectedShape.value = null;

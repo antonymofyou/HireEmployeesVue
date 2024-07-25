@@ -10,12 +10,22 @@
     :fillY="configKonva.fillY"
     :draggable="configKonva.draggable"
     :shapesDraggable="configKonva.shapesDraggable"
+    :key="renderStage"
   />
 </template>
 
 <script setup>
 import { data } from './mock';
 import Editor from './Editor.vue';
+import { ref, watch } from 'vue';
+
+const renderStage = ref(0);
+
+watch(data, () => {
+  console.log(data.shapes);
+  renderStage.value++;
+}, { deep: true });
+
 
 const configKonva = {
   width: window.innerWidth,
