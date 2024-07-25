@@ -96,6 +96,8 @@ export const data = reactive({
       "type": "rectangle",
       startX: 170,
       startY: 100,
+      scaleX: 1,
+      scaleY: 1,
       "width": 200,
       "height": 100,
       "color": "#FF5733",

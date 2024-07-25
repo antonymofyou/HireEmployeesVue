@@ -17,6 +17,8 @@
             zIndex: shape.zIndex,
             x: shape.startX,
             y: shape.startY,
+            scaleX: shape.scaleX,
+            scaleY: shape.scaleY,
             rotation: shape.startRotation
           }"
           @pointerenter="props.groupPointerEnter"
@@ -28,7 +30,14 @@
           <component    
             :key="shape.id"
             :config="{
-              ...TransformerEditor.transformConfigToKonvaCorrect(shape),
+              ...TransformerEditor
+              .transformConfigToKonvaCorrect(
+                shape,
+                // Передаём параметры для удаления для избежания увеличения значения на само себя
+                // Т.к. стейт конвы и наш - синхронизирован не полностью, мы, после изменения стейта конвы,
+                // Пишем в свой стейт значения. Написали значения - конва ререндерит компоненты
+                ['scaleX', 'scaleY']
+              ),
               image: TransformerEditor.shapeReducer(shape) === 'v-image' ? helpers.buildImage(shape) : null,
             }"
             :is="TransformerEditor.shapeReducer(shape)"

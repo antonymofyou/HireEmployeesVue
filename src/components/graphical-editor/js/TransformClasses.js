@@ -5,9 +5,10 @@ export class TransformerEditor {
   /**
    * Преобразование конфига с бэка в корректный конфиг vue-konva
    * @param {Object} config Конфиг с бэка
+   * @param {Array<string>} [propsToDelete] Свойства для удаления
    * @returns {Object} Конфиг для vue-konva
    */
-  static transformConfigToKonvaCorrect(correctConfig) {
+  static transformConfigToKonvaCorrect(correctConfig, propsToDelete) {
     // Собираем корректный конфиг
     // const correctConfig = { ...config, id: String(config.id), draggable: false };
     correctConfig.id = String(correctConfig.id);
@@ -27,7 +28,17 @@ export class TransformerEditor {
       delete correctConfig.borderWidth;
     }
 
-    return correctConfig;
+    if (propsToDelete) {
+      const newConfig = { ...correctConfig };
+      
+      propsToDelete.forEach((property) => {
+        delete newConfig[property];
+      });
+
+      return newConfig;
+    } else {
+      return correctConfig;
+    }
   }
 
   /**

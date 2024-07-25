@@ -3,6 +3,7 @@
 
   <Editor
     :shapes="data.shapes"
+    :onlyView="false"
     :width="configKonva.width"
     :height="configKonva.height"
     :draggable="configKonva.draggable"
@@ -268,7 +269,6 @@ const callbacks = {
     const shapeId = shape.id();
 
     const position = target.position();
-    console.log('Position: ', position);
 
     // Ищем фигуру
     const findShape = data.shapes.find((existShape) => {
@@ -334,6 +334,9 @@ const callbacks = {
         // Достаём текущий поворот и координаты
         const rotation = group.rotation();
         const position = group.position();
+        // Достаём размеры
+        const scaleX = group.attrs.scaleX;
+        const scaleY = group.attrs.scaleY;
         
         // Ищем фигуру
         const findShape = data.shapes.find((existShape) => {
@@ -345,6 +348,8 @@ const callbacks = {
           findShape.startRotation = rotation;
           findShape.startX = position.x;
           findShape.startY = position.y;
+          findShape.scaleX = scaleX;
+          findShape.scaleY = scaleY;
         }
       });
     }
