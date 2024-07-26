@@ -35,6 +35,7 @@
     class="status_main"
     >
       <StatusMain
+      v-if="vacancyId !== '' && dataFetched"
       v-model="status"
       :options="candidateStatus"
       @update:modelValue="updateStatus"

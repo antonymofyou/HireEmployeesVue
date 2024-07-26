@@ -26,7 +26,7 @@
   </template>
   
   <script setup>
-  import { ref } from 'vue';
+  import { ref, watchEffect } from 'vue';
 import StatusColored from './StatusColored.vue';
   
   const selectedOption = ref(null); //Хранит выбранный статус 
@@ -83,12 +83,16 @@ import StatusColored from './StatusColored.vue';
     document.removeEventListener("click", el.clickOutsideEvent);
   },
 };
+watchEffect(() => {
+  selectedOption.value = props.options.find(option => option.id == props.modelValue) || null;
+});
   </script>
   
   <style scoped>
   .show-status{
     display: flex;
     max-width: 100%;
+    flex-wrap: wrap;
   }
  
   .option-main.selected{
