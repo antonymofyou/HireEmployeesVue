@@ -1,6 +1,4 @@
 <template>
-    <div class="select-box-main" :class="{ active: openSelect }" v-click-outside="closeSelect">
-      <!-- Компонент плавного открытия селекта -->
       <Transition>
       <div class="show-status">
         <div class="option-main"
@@ -17,20 +15,16 @@
         :statusCount="option.count">
         </StatusColored>
 
-
         </div>
       </div>
     </Transition>
-  
-    </div>
   </template>
   
   <script setup>
   import { ref, watchEffect } from 'vue';
-import StatusColored from './StatusColored.vue';
+  import StatusColored from './StatusColored.vue';
   
   const selectedOption = ref(null); //Хранит выбранный статус 
-
 
   const props = defineProps({
     // Модель для обновления, опции селекта
@@ -48,41 +42,15 @@ import StatusColored from './StatusColored.vue';
   // Передача значения родителю
   const emit = defineEmits(['update:modelValue']);
   
-  // Открытие селекта
-  const openSelect = ref(false);
-  // Выбранная опция
-  const selected = ref(null);
   // Цвет текста опций по умолчанию
   const defaultColor = 'var(--mine-shaft)';
   
   // Установка выбранной опции
   const setSelected = (option) => {
     selectedOption.value = option;
-    openSelect.value = false;
     emit('update:modelValue', option.id);
   };
   
-  // Закрытие селекта
-  const closeSelect = () => {
-    openSelect.value = false;
-  }
-  const vClickOutside = {
-  beforeMount(el, binding) {
-    el.clickOutsideEvent = function (event) {
-      // Проверка местоположения элемента
-      if (!(el === event.target || el.contains(event.target))) {
-        // Вызываем метод после срабатывания клика снаружи
-        binding.value(event);
-      }
-    };
-    // Добавляем обработчик нажатия
-    document.addEventListener("click", el.clickOutsideEvent);
-  },
-  unmounted(el) {
-    // Удаляем обработчик при размонтировании
-    document.removeEventListener("click", el.clickOutsideEvent);
-  },
-};
 watchEffect(() => {
   selectedOption.value = props.options.find(option => option.id == props.modelValue) || null;
 });
