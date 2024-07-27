@@ -2,6 +2,7 @@
   <section class="vacancies">
     <h1 class="vacancies__title">Вакансии</h1>
     <TopSquareButton
+      v-if="isManager()"
       class="vacancies__add-vacancy-btn"
       @click="showModal = true"
       :icon="plusIcon"

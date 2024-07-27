@@ -97,6 +97,7 @@
             <SpinnerMain class="vacancy-edit__loader-spinner"/>
           </div>
           <ButtonMain
+            v-if="isManager()"
             buttonColor="var(--cinnabar)"
             type="button"
             @click="showModalOnRemoveVacancy = true"
