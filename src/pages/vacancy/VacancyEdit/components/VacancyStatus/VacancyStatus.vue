@@ -154,13 +154,13 @@ const requestStatusModification = () => {
     '/vacancies/modify_vacancy_status.php',
     'manager',
     (response) => {
-      // Обновляем данные статусов
-      requestVacancyStatuses();
       // Сбрасываем данные статуса
       resetStatusMod();
       request.value = false;
       indicators.value.isEdit = false;
       indicators.value.isAdd = false;
+      // Обновляем данные статусов
+      requestVacancyStatuses();
     },
     (err) => {
       request.value = false;
@@ -180,12 +180,12 @@ const requestStatusTransfer = () => {
     '/vacancies/set_vacancy_status_transfer.php',
     'manager',
     (response) => {
-      // Обновляем данные статусов
-      requestVacancyStatuses();
       // Сбрасываем данные статуса
       resetStatusMod();
       request.value = false;
       indicators.value.isTransfer = false;
+      // Обновляем данные статусов
+      requestVacancyStatuses();
     },
     (err) => {
       request.value = false;
