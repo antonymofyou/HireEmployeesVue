@@ -8,7 +8,7 @@
     :width="configKonva.width"
     :height="configKonva.height"
     :draggable="configKonva.draggable"
-    :shapesDraggable="configKonva.draggable"
+    :shapesDraggable="configKonva.shapesDraggable"
     :fillX="configKonva.fillX"
     :fillY="configKonva.fillY"
     :currentDrawingShape="currentDrawingShape"
@@ -59,6 +59,21 @@ import { Text } from 'konva/lib/shapes/Text';
 
 import Editor from './Editor.vue';
 import EditorActions from './EditorActions.vue';
+
+const props = defineProps({
+  // Перетаскивание канвы
+  isStageDraggable: {
+    type: Boolean,
+    required: false,
+    default: false,
+  },
+  // Масштабирование по колёсику (или тачпаду, и т.д.)
+  isScaleByWheel: {
+    type: Boolean,
+    required: false,
+    default: false,
+  }
+});
 
 // Выбранная фигура
 const selectedShape = ref(null);
@@ -135,7 +150,7 @@ const configKonva = {
   height: window.innerHeight / 1.5,
   fillX: true,
   fillY: false,
-  draggable: true,
+  draggable: false,
   shapesDraggable: true,
 };
 
@@ -186,7 +201,6 @@ const helpers = {
    * @param {File} file - Файл
    */
    loadNewImageIntoCanvas: async (file) => {
-    console.log('fileUpload: ', file);
     const fileReader = new FileReader();
 
     fileReader.onloadend = () => {
@@ -615,7 +629,7 @@ const drawingHandlers = {
 
 // Ставим масштабирование на прокрутку у канвы
 watchEffect((onCleanup) => {
-  if (!konvaStage.value) return;
+  if (!props.isScaleByWheel || !konvaStage.value) return;
   
   const wheelHandler = (e) => {
     e.evt.preventDefault();
