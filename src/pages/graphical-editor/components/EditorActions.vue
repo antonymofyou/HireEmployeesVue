@@ -114,17 +114,15 @@
       <span class="actions__item-title">Углы</span>
 
       <label>
-        Скругление: <b>cornerRadius</b>
+        Скругление:
         <input
-          type="range"
+          v-only-numeric
+          type="number"
           :min="0"
-          :max="50"
-          :step="1"
           :value="props.selectedShape?.cornerRadius?.()"
           @input="handlers.onCornerRadiusInput"
           @change="handlers.onCornerRadiusChange"
         />
-        <b>{{ props.selectedShape?.cornerRadius?.() }}</b>
       </label>
     </div>
 
@@ -135,15 +133,13 @@
       <label>
         Ширина:
         <input
-          type="range"
+          v-only-numeric
+          type="number"
           :min="0"
-          :max="20"
-          :step="1"
           :value="props.selectedShape?.strokeWidth()"
           @input="handlers.onStrokeWidthInput"
           @change="handlers.onStrokeWidthChange"
         />
-        <b>{{ props.selectedShape?.strokeWidth() }}</b>
       </label>
     </div>
   </div>
@@ -285,6 +281,45 @@ const handlers = {
   onStrokeWidthChange: (e) => {
     if (!currentShapeNode.value) return;
     currentShapeNode.value.borderWidth = (Number(e.target.value));
+  },
+};
+
+// Директива, позволяющая вводить в <input type="number" /> только numeric-значения
+const vOnlyNumeric = {
+  mounted(el) {
+    /**
+     * Запрещаем пользователю вставлять неверные значения
+     * @param {ClipboardEvent} e Событие
+     */
+    const pasteHandler = (e) => {
+      // Берём вставляемое значение
+      const pastedText = e.clipboardData.getData('text');
+      // Если пользователь вставляет не число или число отрицательное - не разрешаем
+      if (!isFinite(pastedText) || parseFloat(pastedText) < 0) e.preventDefault();
+    };
+
+    /**
+     * Запрещаем вводить неверные значения
+     * @param {KeyboardEvent} e Событие
+     */
+    const keyDownHandler = (e) => {
+      const charCode = (e.which) ? e.which : e.keyCode;
+
+      // Разрешаем ctrl + a
+      if ((e.ctrlKey || e.metaKey) && charCode === 65) return;
+
+      // Не разрешаем не числовые символы
+      if ((charCode > 31 && (charCode < 48 || charCode > 57)) && charCode !== 46)
+        e.preventDefault();
+    };
+
+    el.onpaste = pasteHandler;
+    el.onkeydown = keyDownHandler;
+  },
+  // Чистим обработчики для избежания утечек памяти
+  unmounted() {
+    el.onpaste = null;
+    el.onkeydown = null;
   },
 };
 </script>

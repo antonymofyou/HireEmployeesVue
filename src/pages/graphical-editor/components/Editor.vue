@@ -25,7 +25,7 @@
           @dragstart="props.groupDragStart"
           @dragend="props.groupDragEnd"
           @pointerleave="props.groupPointerLeave"
-          @dblclick="props.startTransform"
+          @click="props.startTransform"
         >
           <component    
             :key="shape.id"

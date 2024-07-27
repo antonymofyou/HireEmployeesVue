@@ -50,7 +50,7 @@ const router = createRouter({
     {
       path: '/graphical-editor',
       name: 'graphical-editor',
-      component: GraphicalEditor
+      component: GraphicalEditor,
     }
   ],
 });
