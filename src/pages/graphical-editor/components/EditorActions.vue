@@ -150,7 +150,7 @@
 </template>
 
 <script setup>
-import { data } from './mock';
+import { data } from '../js/mock';
 import { computed } from 'vue';
 
 const props = defineProps({

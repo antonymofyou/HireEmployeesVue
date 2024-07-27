@@ -46,10 +46,10 @@
 </template>
 
 <script setup>
-import { data } from './mock';
+import { data } from '../js/mock';
 
 import { ref, watchEffect, computed, toValue, watch, reactive } from 'vue';
-import { dangerouslyForceToAnotherIterationEventLoop, makeShapeConfig } from './js/utils';
+import { dangerouslyForceToAnotherIterationEventLoop, makeShapeConfig } from '../js/utils';
 import { Text } from 'konva/lib/shapes/Text';
 
 import Editor from './Editor.vue';

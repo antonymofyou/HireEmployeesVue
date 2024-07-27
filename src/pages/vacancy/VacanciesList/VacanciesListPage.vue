@@ -1,10 +1,4 @@
 <template>
-  <MainEditor />
-
-  <hr>
-
-  <MainViewer />
-
   <section class="vacancies">
     <h1 class="vacancies__title">Вакансии</h1>
     <TopSquareButton
@@ -115,8 +109,6 @@ import ButtonMain from "@/components/ButtonMain.vue";
 import TopSquareButton from "@/components/TopSquareButton.vue";
 import ErrorNotification from "@/components/ErrorNotification.vue";
 import SpinnerMain from "@/components/SpinnerMain.vue";
-import MainEditor from "@/components/graphical-editor/EditorInteract.vue";
-import MainViewer from '@/components/graphical-editor/EditorViewer.vue';
 
 const router = useRouter();
 

@@ -15,7 +15,7 @@
 </template>
 
 <script setup>
-import { data } from './mock';
+import { data } from '../js/mock';
 import Editor from './Editor.vue';
 
 const configKonva = {

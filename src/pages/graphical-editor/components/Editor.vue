@@ -81,7 +81,7 @@
 
 <script setup>
 import { reactive, ref, watchEffect } from 'vue';
-import { TransformerEditor } from './js/TransformClasses';
+import { TransformerEditor } from '../js/TransformClasses';
 
 const props = defineProps({
   onlyView: {
