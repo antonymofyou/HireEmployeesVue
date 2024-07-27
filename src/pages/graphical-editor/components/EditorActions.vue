@@ -1,81 +1,122 @@
 <template>
   <div class="actions">
+    <!-- Добавление / Удаление элементов -->
     <div class="actions__item">
       <span class="actions__item-title">Добавление / Удаление</span>
 
-      <div>
-        <button
-          class="button"
-          @click="props.toggleSelectingNewShape"
-        >
-          {{ props.isNewShapeSelecting ? 'Прекратить выбор' : 'Добавить фигуру' }}
-        </button>
-        <button
-          class="button"
-          :disabled="!props.selectedShape || !props.isAllowedToAddText"
-          @click="props.addTextToSelectedShape"
-        >
-          Добавить текст
-        </button>
-        <button
-          class="button"
-          @click="props.deleteActiveShape"
-          :disabled="!Boolean(selectedShape)"
-        >
-          Удалить
-        </button>
-      </div>
+      <Panel>
+        <PanelItem>
+          <Button
+            @click="props.toggleSelectingNewShape"
+          >
+            {{ props.isNewShapeSelecting ? 'Прекратить выбор' : 'Добавить фигуру' }}
+          </Button>
+        </PanelItem>
 
-      <div class="select-shape" v-show="isNewShapeSelecting">
-        <button
-          class="button"
-          :disabled="props.currentDrawingShape === 'rect'"
-          @click="props.addNewShape('rect')"
-        >
-          Rect
-        </button>
-        <button
-          class="button"
-          :disabled="props.currentDrawingShape === 'circle'"
-          @click="props.addNewShape('circle')"
-        >
-          Circle
-        </button>
-        <button 
-          class="button"
-          :disabled="props.currentDrawingShape === 'arrow'"
-          @click="props.addNewShape('arrow')"
-        >
-          Arrow
-        </button>
-        <button
-          class="button"
-          :disabled="props.currentDrawingShape === 'image'"
-          @click="props.addNewShape('image')"
-        >
-          Image
-        </button>
-      </div>
+        <PanelItem>
+          <Button
+            :disabled="!props.selectedShape || !props.isAllowedToAddText"
+            @click="props.addTextToSelectedShape"
+          >
+            Добавить текст
+          </Button>
+        </PanelItem>
+
+        <PanelItem>
+          <Button
+            @click="props.deleteActiveShape"
+            :disabled="!Boolean(selectedShape)"
+          >
+            Удалить
+          </Button>
+        </PanelItem>
+      </Panel>
+
+      <Panel class="select-shape" v-show="isNewShapeSelecting">
+        <PanelItem>
+          <Button
+            :disabled="props.currentDrawingShape === 'rect'"
+            @click="props.addNewShape('rect')"
+          >
+            Прямоугольник
+          </Button>
+        </PanelItem>
+
+        <PanelItem>
+          <Button
+            :disabled="props.currentDrawingShape === 'circle'"
+            @click="props.addNewShape('circle')"
+          >
+            Круг
+          </Button>
+        </PanelItem>
+
+        <PanelItem>
+          <Button
+            :disabled="props.currentDrawingShape === 'arrow'"
+            @click="props.addNewShape('arrow')"
+          >
+            Стрелка
+          </Button>
+        </PanelItem>
+
+        <PanelItem>
+          <Button
+            :disabled="props.currentDrawingShape === 'image'"
+            @click="props.addNewShape('image')"
+          >
+            Картинка
+          </Button>
+        </PanelItem>
+      </Panel>
     </div>
 
     <!-- Манипуляции с холстом -->
     <div class="actions__item">
       <span class="actions__item-title">Операции над холстом</span>
 
-      <div>
-        <button
-          class="button"
-          @click="props.resetScaleCanvas"
-        >
-          Сбросить масштабирование
-        </button>
-        <button
-          class="button"
-          @click="props.resetTransformCanvas"
-        >
-          Вернуться к 0;0
-        </button>
-      </div>
+      <Panel>
+        <PanelItem>
+          <Button
+            class="button"
+            @click="props.resetScaleCanvas"
+          >
+            Сбросить масштабирование
+          </Button>
+        </PanelItem>
+
+        <PanelItem>
+          <Button
+            class="button"
+            @click="props.resetTransformCanvas"
+          >
+            Вернуться к 0;0
+          </Button>
+        </PanelItem>
+      </Panel>
+    </div>
+
+    <!-- Масштабирование -->
+    <div class="actions__item">
+      <span class="actions__item-title">Масштабирование</span>
+
+      <Panel>
+        <PanelItem>
+          <Button @click="props.incrementScale">
+            <PlusIcon size="13" />
+          </Button>
+        </PanelItem>
+
+        <PanelItem>
+          <Button @click="props.decrementScale">
+            <MinusIcon size="13" />
+          </Button>
+        </PanelItem>
+
+        <PanelItem>
+          {{ currentScale }}
+        </PanelItem>
+      </Panel>
     </div>
 
     <!-- Манипуляции с цветом выбранной фигуры -->
@@ -85,7 +126,7 @@
       <div>
         <div class="action">
           <label>
-            Основной цвет: <b>(fill)</b>
+            Основной цвет:
             <input
               type="color"
               :value="props.selectedShape?.fill()"
@@ -97,7 +138,7 @@
 
         <div class="action">
           <label>
-            Цвет границ: <b>(stroke)</b>
+            Цвет границ:
             <input
               type="color"
               :value="props.selectedShape?.stroke()"
@@ -113,41 +154,40 @@
     <div class="actions__item" v-show="isCornerActionsVisible">
       <span class="actions__item-title">Углы</span>
 
-      <label>
-        Скругление:
-        <input
-          v-only-numeric
-          type="number"
-          :min="0"
-          :value="props.selectedShape?.cornerRadius?.()"
-          @input="handlers.onCornerRadiusInput"
-          @change="handlers.onCornerRadiusChange"
-        />
-      </label>
+      Скругление:
+      <CounterStep
+        :value="props.selectedShape?.cornerRadius?.()"
+        @input="handlers.onCornerRadiusInput"
+        @change="handlers.onCornerRadiusChange"
+      />
     </div>
 
     <!-- Манипуляции с фигурами выбранной фигуры -->
     <div class="actions__item" v-show="isBoundariesActionsVisible">
       <span class="actions__item-title">Границы</span>
 
-      <label>
-        Ширина:
-        <input
-          v-only-numeric
-          type="number"
-          :min="0"
-          :value="props.selectedShape?.strokeWidth()"
-          @input="handlers.onStrokeWidthInput"
-          @change="handlers.onStrokeWidthChange"
-        />
-      </label>
+      Ширина:
+      <CounterStep
+        :value="props.selectedShape?.strokeWidth()"
+        @input="handlers.onStrokeWidthInput"
+        @change="handlers.onStrokeWidthChange"
+      />
     </div>
   </div>
 </template>
 
 <script setup>
-import { data } from '../js/mock';
 import { computed } from 'vue';
+
+import Button from './ui/Button.vue';
+import Panel from './ui/Panel.vue';
+import PanelItem from './ui/PanelItem.vue';
+
+import PlusIcon from 'vue-material-design-icons/Plus.vue';
+import MinusIcon from 'vue-material-design-icons/Minus.vue';
+
+import { data } from '../js/mock';
+import CounterStep from './ui/CounterStep.vue';
 
 const props = defineProps({
   toggleSelectingNewShape: {
@@ -206,6 +246,21 @@ const props = defineProps({
     type: Boolean,
     required: true,
   },
+  incrementScale: {
+    type: Function,
+    required: false,
+    default: () => {},
+  },
+  decrementScale: {
+    type: Function,
+    required: false,
+    default: () => {},
+  },
+  currentScale: {
+    type: String,
+    required: false,
+    default: '100%',
+  }
 });
 
 const currentShapeNode = computed(() => {
@@ -251,36 +306,36 @@ const handlers = {
   },
   /**
    * Обработчик изменения скругления углов (на input)
-   * @param {Event} e - Событие
+   * @param {Number} radius - Радиус
    */
-  onCornerRadiusInput: (e) => {
-    props.selectedShape?.cornerRadius?.(Number(e.target.value));
+  onCornerRadiusInput: (radius) => {
+    props.selectedShape?.cornerRadius?.(radius);
   },
   /**
    * Обработчик изменения скругления углов (на change)
    * Тут меняем состояние, для оптимизации - только в конце ввода
-   * @param {Event} e - Событие
+   * @param {Number} radius - Радиус
    */
-  onCornerRadiusChange: (e) => {
+  onCornerRadiusChange: (radius) => {
     if (!currentShapeNode.value) return;
-    currentShapeNode.value.cornerRadius = (Number(e.target.value));
+    currentShapeNode.value.cornerRadius = radius;
   },
   /**
    * Обработчик изменения ширины границы (на input)
-   * @param {Event} e - Событие
+   * @param {Number} strokeWidth - Ширина границы
    */
-  onStrokeWidthInput: (e) => {
-    props.selectedShape?.strokeWidth?.(Number(e.target.value))
+  onStrokeWidthInput: (strokeWidth) => {
+    props.selectedShape?.strokeWidth?.(strokeWidth)
   },
   /**
    * 
    * Обработчик изменения ширины границы (на input)
    * Тут меняем состояние, для оптимизации - только в конце ввода
-   * @param {Event} e - Событие
+   * @param {Number} strokeWidth - Ширина границы
    */
-  onStrokeWidthChange: (e) => {
+  onStrokeWidthChange: (strokeWidth) => {
     if (!currentShapeNode.value) return;
-    currentShapeNode.value.borderWidth = (Number(e.target.value));
+    currentShapeNode.value.borderWidth = (strokeWidth);
   },
 };
 
@@ -347,10 +402,5 @@ const vOnlyNumeric = {
 .actions__item-title {
   font-size: 20px;
   font-weight: 800;
-}
-
-.button {
-  padding: 5px 15px;
-  cursor: pointer;
 }
 </style>

@@ -13,7 +13,7 @@ export const data = reactive({
           "color": "#FF5733",
           "borderColor": "#C70039",
           "zIndex": 0.5,
-          "cornerRadius": 20,
+          "cornerRadius": 5,
           "borderWidth": 5,
           "rotation":90
       },

@@ -27,12 +27,6 @@
   />
 
   <div class="bottom-area">
-    <div class="scale-measure">
-      <button @click="callbacks.changeScale(1)">+</button>
-      {{ formatNumToPercent(scale.x) }}
-      <button @click="callbacks.changeScale(-1)">-</button>
-    </div>
-
     <EditorActions
       :toggleSelectingNewShape="callbacks.toggleSelectingNewShape"
       :isNewShapeSelecting="isNewShapeSelecting"
@@ -48,6 +42,9 @@
       :isColorsActionsVisible="isColorsActionsVisible"
       :isBoundariesActionsVisible="isBoundariesActionsVisible"
       :isCornerActionsVisible="isCornerActionsVisible"
+      :incrementScale="() => callbacks.changeScale(1)"
+      :decrementScale="() => callbacks.changeScale(-1)"
+      :currentScale="formatNumToPercent(scale.x)"
     />
   </div>
 </template>
@@ -55,7 +52,7 @@
 <script setup>
 import { data } from '../js/mock';
 
-import { ref, watchEffect, computed, toValue, watch, reactive, onMounted } from 'vue';
+import { ref, watchEffect, computed, toValue, watch, reactive } from 'vue';
 import { dangerouslyForceToAnotherIterationEventLoop, formatNumToPercent, makeShapeConfig } from '../js/utils';
 import { Text } from 'konva/lib/shapes/Text';
 
@@ -631,11 +628,6 @@ watch([scale, canvasPosition], () => {
   konvaStage.value.scale({ x: scale.value.x, y: scale.value.y });
   // Применяем позиционирование
   konvaStage.value.position({ x: canvasPosition.value.x, y: canvasPosition.value.y });
-
-});
-
-onMounted(() => {
-  callbacks.changeScale();
 });
 </script>
 
@@ -650,9 +642,5 @@ onMounted(() => {
   row-gap: 20px;
   padding-top: 20px;
   border-top: 2px solid var(--cornflower-blue);
-}
-
-.scale-measure {
-  padding: 10px;
 }
 </style>
