@@ -202,14 +202,19 @@ const helpers = {
     const fileReader = new FileReader();
 
     fileReader.onloadend = () => {
+      const shapeId = crypto.randomUUID();
+      const imageId = crypto.randomUUID();
+
       data.shapes.push({
+        id: shapeId,
         type: 'image',
         width: 250,
         height: 250,
-        src: fileReader.result,
         x: 300,
         y: 150,
-      })
+        imageId,
+      });
+      data.imageDictionary[imageId] = fileReader.result;
     };
 
     fileReader.readAsDataURL(file);
