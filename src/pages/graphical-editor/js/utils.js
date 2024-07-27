@@ -37,3 +37,14 @@ export function makeShapeConfig() {
     points: [],
   };
 }
+
+/**
+ * Преобразовать число от 0 до 1 в проценты
+ * @param {Number} num Число от 0 до 1
+ * @returns {String} Строка с числом в виде процентов
+ */
+export function formatNumToPercent(num) {
+  return new Intl.NumberFormat('RU-ru', {
+    style: 'percent'
+  }).format(num);
+}

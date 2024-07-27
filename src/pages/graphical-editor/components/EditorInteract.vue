@@ -26,6 +26,12 @@
   />
 
   <div class="bottom-area">
+    <div class="scale-measure">
+      <button @click="callbacks.changeScale(1)">+</button>
+      {{ formatNumToPercent(scale.x) }}
+      <button @click="callbacks.changeScale(-1)">-</button>
+    </div>
+
     <EditorActions
       :toggleSelectingNewShape="callbacks.toggleSelectingNewShape"
       :isNewShapeSelecting="isNewShapeSelecting"
@@ -48,8 +54,8 @@
 <script setup>
 import { data } from '../js/mock';
 
-import { ref, watchEffect, computed, toValue, watch, reactive } from 'vue';
-import { dangerouslyForceToAnotherIterationEventLoop, makeShapeConfig } from '../js/utils';
+import { ref, watchEffect, computed, toValue, watch, reactive, onMounted } from 'vue';
+import { dangerouslyForceToAnotherIterationEventLoop, formatNumToPercent, makeShapeConfig } from '../js/utils';
 import { Text } from 'konva/lib/shapes/Text';
 
 import Editor from './Editor.vue';
@@ -480,6 +486,37 @@ const callbacks = {
       addNewText();
     }
   },
+
+  /**
+   * Увеличение масштаба 
+   * @param {Number} direction Направление зума
+   */
+  changeScale: (direction = 1) => {
+    // Достаём координаты центра
+    const centerX = konvaStage.value.width() / 2;
+    const centerY = konvaStage.value.height() / 2;
+
+    const oldScale = konvaStage.value.scaleX();
+
+    const mousePointTo = {
+      x: (centerX - konvaStage.value.x()) / oldScale,
+      y: (centerY - konvaStage.value.y()) / oldScale,
+    };
+
+    const scaleBy = 1.1;
+    // Определяем новое значение зума
+    const newScale = direction > 0 ? oldScale * scaleBy : oldScale / scaleBy;
+    // Пишем новый зум в состояние
+    scale.value = { x: newScale, y: newScale };
+
+    // Определяем новые координаты исходя из получившегося зума
+    const newPos = {
+      x: centerX - mousePointTo.x * newScale,
+      y: centerY - mousePointTo.y * newScale,
+    };
+    // Пишем новые координаты в состояние
+    canvasPosition.value = newPos;
+  },
 };
 
 // Обработчики для рисования
@@ -572,37 +609,12 @@ watchEffect((onCleanup) => {
   if (!konvaStage.value) return;
   
   const wheelHandler = (e) => {
-    // Убираем поведение по умолчанию, т.к. начнёт скролиться страница
     e.evt.preventDefault();
-
-    const oldScale = konvaStage.value.scaleX();
-    const pointer = konvaStage.value.getPointerPosition();
-
-    // Определяем координаты куда будем зумиться, исходя из положения курсора
-    const mousePointTo = {
-      x: (pointer.x - konvaStage.value.x()) / oldScale,
-      y: (pointer.y - konvaStage.value.y()) / oldScale,
-    };
-
     // Определяем направление зума
     const direction = e.evt.deltaY > 0 ? -1 : 1;
-
-    // Определяем новое значение зума
-    const newScale = direction > 0 ? oldScale * scaleBy : oldScale / scaleBy;
-    // Пишем новый зум в состояние
-    scale.value = { x: newScale, y: newScale };
-
-    // Определяем новые координаты исходя из получившегося зума
-    const newPos = {
-      x: pointer.x - mousePointTo.x * newScale,
-      y: pointer.y - mousePointTo.y * newScale,
-    };
-    // Пишем новые координаты в состояние
-    canvasPosition.value = newPos;
+    callbacks.changeScale(direction);
   };
 
-  // Коэффициент, на который будем зумиться
-  const scaleBy = 1.1;
   konvaStage.value.on('wheel', wheelHandler);
 
   // Во избежание утечек памяти - убираем обработчики
@@ -618,6 +630,11 @@ watch([scale, canvasPosition], () => {
   konvaStage.value.scale({ x: scale.value.x, y: scale.value.y });
   // Применяем позиционирование
   konvaStage.value.position({ x: canvasPosition.value.x, y: canvasPosition.value.y });
+
+});
+
+onMounted(() => {
+  callbacks.changeScale();
 });
 </script>
 
@@ -632,5 +649,9 @@ watch([scale, canvasPosition], () => {
   row-gap: 20px;
   padding-top: 20px;
   border-top: 2px solid var(--cornflower-blue);
+}
+
+.scale-measure {
+  padding: 10px;
 }
 </style>

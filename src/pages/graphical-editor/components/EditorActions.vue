@@ -317,7 +317,7 @@ const vOnlyNumeric = {
     el.onkeydown = keyDownHandler;
   },
   // Чистим обработчики для избежания утечек памяти
-  unmounted() {
+  unmounted(el) {
     el.onpaste = null;
     el.onkeydown = null;
   },
