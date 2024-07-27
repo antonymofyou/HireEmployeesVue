@@ -306,12 +306,19 @@ const callbacks = {
    * @param {Object} e Событие
    */
   startTransform: (e) => {
+    // Фигура, или картинка - если взаимодействуем с изображением, кликнули по тексту - получим текст
     const { target } = e;
+    // Достаём группу, в которой находится фигура
     const group = target.parent;
+    // Достаём фигуру или картинку
     const shape = group.children[0];
+    // Достаём id, чтобы не вызывать в .find
     const shapeId = shape.id();
+    // Делаем объект-трансформатор. Сюда будем кидать группу для преобразования
     const transformerNode = konva.value.transformer.getNode();
+    // Достём объект канвы
     const stage = transformerNode.getStage();
+    // Текущая выбранная нода
     const selectedNode = stage.findOne(`#${target.id()}`);
 
     helpers.moveToMaxZIndex(group, { withTransformer: true });
@@ -322,7 +329,7 @@ const callbacks = {
       return;
     }
     if (transformerNode.node() === selectedNode) return;
-    
+      
     if (selectedNode) {
       // Текст идёт размером с фигуру, поэтому по клику - будем получать текст, =>
       // Будем делать поиск относительно него
@@ -334,14 +341,31 @@ const callbacks = {
       transformerNode.nodes([group]);
 
       // Ставим обработчики на конец трансформации для синхронизации состояния и канвы
-      group.on('transformend', () => {
+      // @TODO Если возникнут проблемы с производительностью - смотреть сюда (возможно лучше будет ставить на transformend)
+      group.on('transform', () => {
         // Достаём текущий поворот и координаты
         const rotation = group.rotation();
         const position = group.position();
         // Достаём размеры
         const scaleX = group.attrs.scaleX;
         const scaleY = group.attrs.scaleY;
+        // Достаём ширину и высоту
+        const width = group.width();
+        const height = group.height();
+        // Konva меняет scaleX и scaleY - мы узнаём точную ширину и высоту
+        const correctWidthByScale = width * scaleX;
+        const correctHeightByScale = height * scaleY;
         
+        // Меняем scaleX, scaleY на изначальные значения
+        group.scaleX(1);
+        group.scaleY(1);
+
+        // Для корректного обновления
+        dangerouslyForceToAnotherIterationEventLoop(() => {
+          transformerNode.update();
+          transformerNode.nodes([group]);
+        });
+
         // Ищем фигуру
         const findShape = data.shapes.find((existShape) => {
           return existShape.id == shapeId;
@@ -352,8 +376,8 @@ const callbacks = {
           findShape.startRotation = rotation;
           findShape.x = position.x;
           findShape.y = position.y;
-          findShape.scaleX = scaleX;
-          findShape.scaleY = scaleY;
+          findShape.width = correctWidthByScale;
+          findShape.height = correctHeightByScale;
         }
       });
     }

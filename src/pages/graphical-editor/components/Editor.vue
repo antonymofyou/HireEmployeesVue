@@ -19,7 +19,9 @@
             y: shape.y,
             scaleX: shape.scaleX,
             scaleY: shape.scaleY,
-            rotation: shape.startRotation
+            rotation: shape.startRotation,
+            width: shape.width,
+            height: shape.height
           }"
           @pointerenter="props.groupPointerEnter"
           @dragstart="props.groupDragStart"
