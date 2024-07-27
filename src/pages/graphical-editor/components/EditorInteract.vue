@@ -3,6 +3,7 @@
 
   <Editor
     :shapes="data.shapes"
+    :imageDictionary="data.imageDictionary"
     :onlyView="false"
     :width="configKonva.width"
     :height="configKonva.height"
@@ -283,8 +284,8 @@ const callbacks = {
 
     // Фигура есть - меняем состояние
     if (findShape) {
-      findShape.startX = position.x;
-      findShape.startY = position.y;
+      findShape.x = position.x;
+      findShape.y = position.y;
     }
   },
   groupPointerLeave: () => {
@@ -352,8 +353,8 @@ const callbacks = {
         // Если фигура была найдена - применяем трансформации
         if (findShape) {
           findShape.startRotation = rotation;
-          findShape.startX = position.x;
-          findShape.startY = position.y;
+          findShape.x = position.x;
+          findShape.y = position.y;
           findShape.scaleX = scaleX;
           findShape.scaleY = scaleY;
         }

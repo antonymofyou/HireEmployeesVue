@@ -15,8 +15,8 @@
           :config="{
             draggable: props.shapesDraggable,
             zIndex: shape.zIndex,
-            x: shape.startX,
-            y: shape.startY,
+            x: shape.x,
+            y: shape.y,
             scaleX: shape.scaleX,
             scaleY: shape.scaleY,
             rotation: shape.startRotation
@@ -36,9 +36,9 @@
                 // Передаём параметры для удаления для избежания увеличения значения на само себя
                 // Т.к. стейт конвы и наш - синхронизирован не полностью, мы, после изменения стейта конвы,
                 // Пишем в свой стейт значения. Написали значения - конва ререндерит компоненты
-                ['scaleX', 'scaleY']
+                ['scaleX', 'scaleY', 'x', 'y']
               ),
-              image: TransformerEditor.shapeReducer(shape) === 'v-image' ? helpers.buildImage(shape) : null,
+              image: TransformerEditor.shapeReducer(shape) === 'v-image' ? helpers.buildImage(shape.imageId) : null,
             }"
             :is="TransformerEditor.shapeReducer(shape)"
           />
@@ -50,8 +50,6 @@
             <v-text
               v-for="textRecord in textInfo.text"
               :config="{
-                x: shape.x,
-                y: shape.y,
                 rotation: shape.rotation,
                 width: shape.width,
                 height: shape.height,
@@ -91,8 +89,11 @@ const props = defineProps({
   },
   shapes: {
     type: Array,
-    required: false,
-    default: [],
+    required: true,
+  },
+  imageDictionary: {
+    type: Object,
+    required: true,
   },
   width: {
     type: Number,
@@ -212,12 +213,13 @@ const configKonva = {
 const helpers = {
   /**
    * Фабрика картинок
-   * @param {Object} shape Объект фигуры изображения
+   * @param {Object} imageId ID картинки
    * @returns {HTMLImageElement} Изображение
    */
-   buildImage: (shape) => {
+  buildImage: (imageId) => {
+    const imageBase64 = props.imageDictionary[imageId];
     const image = new Image();
-    image.src = shape.src;
+    image.src = imageBase64;
     return image;
   },
 };

@@ -4,6 +4,7 @@
   <!-- тут v-stage без каких-либо обработчиков, просто отображение -->
   <Editor
     :shapes="data.shapes"
+    :imageDictionary="data.imageDictionary"
     :onlyView="true"
     :width="configKonva.width"
     :height="configKonva.height"
