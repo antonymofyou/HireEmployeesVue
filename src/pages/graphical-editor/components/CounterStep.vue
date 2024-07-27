@@ -38,7 +38,7 @@
 </template>
 
 <script setup>
-import { computed, onMounted } from 'vue';
+import { computed } from 'vue';
 
 const props = defineProps({
   value: {
@@ -110,7 +110,7 @@ const callbacks = {
    * @param {InputEvent} e - Событие
    */
   handleInput: (e) => {
-    emit('input', e.target.value);
+    emit('input', Number(e.target.value));
   },
   /**
    * Обработчик события change у элемента <input />
@@ -223,7 +223,6 @@ input::-webkit-inner-spin-button {
   -webkit-appearance: none;
   margin: 0;
 }
-
 /* Firefox */
 input[type=number] {
   -moz-appearance: textfield;

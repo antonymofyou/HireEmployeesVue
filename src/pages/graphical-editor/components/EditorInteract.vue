@@ -45,6 +45,7 @@
       :incrementScale="() => callbacks.changeScale(1)"
       :decrementScale="() => callbacks.changeScale(-1)"
       :currentScale="formatNumToPercent(scale.x)"
+      @fileUpload="helpers.loadNewImageIntoCanvas"
     />
   </div>
 </template>
@@ -52,7 +53,7 @@
 <script setup>
 import { data } from '../js/mock';
 
-import { ref, watchEffect, computed, toValue, watch, reactive } from 'vue';
+import { ref, watchEffect, computed, toValue, watch, reactive, toHandlers } from 'vue';
 import { dangerouslyForceToAnotherIterationEventLoop, formatNumToPercent, makeShapeConfig } from '../js/utils';
 import { Text } from 'konva/lib/shapes/Text';
 
@@ -182,23 +183,10 @@ const helpers = {
 
   /**
    * Загрузка нового изображения на канву
+   * @param {File} file - Файл
    */
-  loadNewImageIntoCanvas: async () => {
-    // Разрешённые для загрузки типы файлов
-    const allowedTypesFiles = [
-      {
-        description: "Images",
-        accept: {
-          "image/*": ['.png', '.gif', '.jpeg', '.jpg', '.svg'],
-        },
-      },
-    ];
-    // Массив файлов, которые выбрал пользователь
-    const result = await window.showOpenFilePicker({
-      types: allowedTypesFiles
-    });
-    const file = await result[0].getFile();
-
+   loadNewImageIntoCanvas: async (file) => {
+    console.log('fileUpload: ', file);
     const fileReader = new FileReader();
 
     fileReader.onloadend = () => {
@@ -218,7 +206,7 @@ const helpers = {
     };
 
     fileReader.readAsDataURL(file);
-  },
+   },
 
   /**
    * Применить текущие трансформации канвы к координатам и преобразовать их
@@ -347,7 +335,7 @@ const callbacks = {
 
       // Ставим обработчики на конец трансформации для синхронизации состояния и канвы
       // @TODO Если возникнут проблемы с производительностью - смотреть сюда (возможно лучше будет ставить на transformend)
-      group.on('transform', () => {
+      group.on('transformend', () => {
         // Достаём текущий поворот и координаты
         const rotation = group.rotation();
         const position = group.position();
@@ -364,6 +352,8 @@ const callbacks = {
         // Меняем scaleX, scaleY на изначальные значения
         group.scaleX(1);
         group.scaleY(1);
+
+        transformerNode.nodes([]);
 
         // Для корректного обновления
         dangerouslyForceToAnotherIterationEventLoop(() => {
@@ -421,13 +411,6 @@ const callbacks = {
    * @param {String} shape Новая фигура
    */
   addNewShape: async (shape) => {
-    // switch (shape) {
-    //   case 'rect': return data.shapes.push(new Rectangle());
-    //   case 'circle': return data.shapes.push(new Circle());
-    //   case 'arrow': return data.shapes.push(new Arrow());
-    //   case 'image': return helpers.loadNewImageIntoCanvas();
-    //   case 'text': return alert('Under construct');
-    // }
     switch (shape) {
       case 'rect': {
         currentDrawingShape.value = 'rect';
@@ -442,7 +425,6 @@ const callbacks = {
         return;
       }
       case 'image': {
-        await helpers.loadNewImageIntoCanvas();
         currentDrawingShape.value = null;
         return;
       }
@@ -631,7 +613,7 @@ const drawingHandlers = {
   },
 };
 
-// Ставим масштабирование для канваса
+// Ставим масштабирование на прокрутку у канвы
 watchEffect((onCleanup) => {
   if (!konvaStage.value) return;
   

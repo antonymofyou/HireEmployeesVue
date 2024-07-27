@@ -62,9 +62,16 @@
 
         <PanelItem>
           <Button
-            :disabled="props.currentDrawingShape === 'image'"
             @click="props.addNewShape('image')"
+            :disabled="props.currentDrawingShape === 'image'"
+            class="input-file__wrapper"
           >
+            <input
+              @change="handlers.handleFileUpload"
+              accept=".png, .jpg, .jpeg"
+              type="file"
+              class="input-file"
+            />
             Картинка
           </Button>
         </PanelItem>
@@ -182,12 +189,12 @@ import { computed } from 'vue';
 import Button from './ui/Button.vue';
 import Panel from './ui/Panel.vue';
 import PanelItem from './ui/PanelItem.vue';
+import CounterStep from './CounterStep.vue';
 
 import PlusIcon from 'vue-material-design-icons/Plus.vue';
 import MinusIcon from 'vue-material-design-icons/Minus.vue';
 
 import { data } from '../js/mock';
-import CounterStep from './ui/CounterStep.vue';
 
 const props = defineProps({
   toggleSelectingNewShape: {
@@ -263,6 +270,8 @@ const props = defineProps({
   }
 });
 
+const emit = defineEmits(['fileUpload']);
+
 const currentShapeNode = computed(() => {
   const findShape = data.shapes.find((existShape) => {
     return existShape.id === props.selectedShape.attrs.id;
@@ -337,6 +346,13 @@ const handlers = {
     if (!currentShapeNode.value) return;
     currentShapeNode.value.borderWidth = (strokeWidth);
   },
+  /**
+   * Обработчик загрузки файла
+   */
+  handleFileUpload: (e) => {
+    const file = e.target.files[0];
+    emit('fileUpload', file);
+  },
 };
 
 // Директива, позволяющая вводить в <input type="number" /> только numeric-значения
@@ -402,5 +418,19 @@ const vOnlyNumeric = {
 .actions__item-title {
   font-size: 20px;
   font-weight: 800;
+}
+
+.input-file__wrapper {
+  position: relative;
+}
+
+.input-file {
+  position: absolute;
+  left: 0;
+  top: 0;
+  width: 100%;
+  height: 100%;
+  opacity: 0;
+  cursor: pointer;
 }
 </style>
