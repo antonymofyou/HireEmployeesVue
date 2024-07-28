@@ -4,37 +4,46 @@
     v-if="!request"
     :managerList="managerList.assignedManagers"
     :requestManagersModification
+    :indicators
+    :managerMod
   ></VacancyManagersList>
   <div class="manager-list__options-box">
-    <div>Добавить:</div>
-    <div class="manager-list__select-box">
-      <SelectMain
-        v-model="formData.id"
-        :options="managerList.unassignedManagers"
-      />
-      <ButtonIcon @click="requestManagersModification('create')">
-        <template v-slot:icon
-          ><IconAdd class="statuslist__list-icon"
-        /></template>
-      </ButtonIcon>
-    </div>
+    <ButtonIcon @click="openAddManagersModal" class="manager-list__add-btn">
+      <template v-slot:icon
+        ><IconAdd class="manager-list__list-icon"
+      /></template>
+    </ButtonIcon>
   </div>
   <p class="manager-list__status-error" v-if="errorMessage">
     {{ errorMessage }}
   </p>
+
+  <Teleport to="body">
+    <!-- Вывод модалки для добавления и изменения статуса -->
+    <VacancyManagersModal
+      :show="indicators.isAdd || indicators.isDelete"
+      :managerMod
+      :indicators
+      :managerList="managerList.unassignedManagers"
+      :requestManagersModification
+      :request
+      :errorMessage
+      :formData
+    />
+  </Teleport>
 </template>
 
 <script setup>
 import IconAdd from "@/assets/icons/add.svg?component";
 import ButtonIcon from "@/components/ButtonIcon.vue";
-import SelectMain from "@/components/SelectMain.vue";
 import SpinnerMain from "@/components/SpinnerMain.vue";
+import VacancyManagersModal from "./VacancyManagersModal.vue";
 
 import {
   VacanciesAccessGetManagerAccessVacancy,
   VacanciesAccessSetManagerAccessVacancy,
-} from "../js/ApiClassesVacancyEdit";
-import { onMounted, ref } from "vue";
+} from "../../js/ApiClassesVacancyEdit";
+import { onMounted, watch, ref } from "vue";
 import VacancyManagersList from "./VacancyManagersList.vue";
 
 const props = defineProps({
@@ -55,10 +64,15 @@ const managerMod = ref({
   permissionType: "VACANCY_PERMISSION",
   managerId: "",
 });
-
 //Данные с MainSelect
 const formData = ref({
   id: "",
+});
+
+//Индикаторы для открытия попапа
+const indicators = ref({
+  isDelete: false,
+  isAdd: false,
 });
 
 // Флаг запроса
@@ -95,11 +109,7 @@ const requestVacancyManagers = () => {
 const requestManagersModification = (action, managerId) => {
   const requestInstance = new VacanciesAccessSetManagerAccessVacancy();
   //Условие нужно для проверки удаляем или добавляем
-  formData.value.id
-    ? (managerMod.value.managerId = formData.value.id)
-    : (managerMod.value.managerId = managerId);
-  //Обнуляем форму
-  formData.value.id = "";
+  managerMod.value.managerId = managerId;
 
   managerMod.value.action = action;
   requestInstance.action = managerMod.value.action;
@@ -115,6 +125,10 @@ const requestManagersModification = (action, managerId) => {
     (response) => {
       // Обновляем данные менеджеров
       requestVacancyManagers();
+      indicators.value.isAdd = false;
+      indicators.value.isDelete = false;
+      formData.value.id = "";
+      managerMod.value.managerId = "";
     },
     (err) => {
       request.value = false;
@@ -123,10 +137,22 @@ const requestManagersModification = (action, managerId) => {
   );
 };
 
+const openAddManagersModal = () => {
+  indicators.value.isAdd = true;
+};
+
 //при загрузке делаем запрос к серверу
 onMounted(() => {
   requestVacancyManagers();
 });
+
+watch(
+  () => [indicators.value.isAdd, indicators.value.isDelete],
+  () => {
+    document.body.style.overflow =
+      indicators.value.isAdd || indicators.value.isDelete ? "hidden" : "";
+  }
+);
 </script>
 
 <style scoped>
@@ -135,9 +161,6 @@ onMounted(() => {
 }
 .manager-list__status-spinner {
   width: 50px;
-}
-.manager-list {
-  margin-top: 40px;
 }
 .manager-list__options-box {
   margin: 20px 0;
@@ -148,7 +171,10 @@ onMounted(() => {
   margin-left: 20px;
   display: flex;
 }
-.statuslist__list-icon {
+.manager-list__add-btn{
+  padding: 0;
+}
+.manager-list__list-icon {
   align-self: center;
   transition: all 0.3s ease;
   width: 20px;
