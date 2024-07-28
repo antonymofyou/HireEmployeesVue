@@ -3,7 +3,7 @@
     <SpinnerMain v-if="request" class="vacancy-edit__status-spinner" />
     <p
       class="vacancy-edit__status-error"
-      v-if="errorMessage && !indicators.isAdd && !indicators.isEdit"
+      v-if="errorMessage && !isAdd && !isEdit"
     >
       {{ errorMessage }}
     </p>
@@ -21,7 +21,16 @@
     <div class="vacancy-edit__status-add">
       <ButtonIcon
         class="vacancy-edit__status-add-btn"
-        @click="openAddStatusModal"
+        @click="
+          (indicators.isAdd = true),
+            (statusMod = {
+              action: 'create',
+              name: '',
+              toName: '',
+              comment: '',
+              color: statusMod.color,
+            })
+        "
       >
         <template v-slot:icon
           ><IconAdd class="vacancy-edit__status-add-icon" />
@@ -32,31 +41,90 @@
 
   <Teleport to="body">
     <!-- Вывод модалки для добавления и изменения статуса -->
-    <VacancyStatusModal
-        :show="indicators.isAdd || indicators.isEdit"
-        :statusMod="statusMod"
-        :indicators="indicators"
-        :colors="colors"
-        :handleModification="handleModification"
-        :request="request"
-        :errorMessage="errorMessage"
-    />
+    <Modal
+      class="vacancy-edit__modal"
+      :show="indicators.isAdd || indicators.isEdit"
+      @click.self="
+        indicators.isAdd = false;
+        indicators.isEdit = false;
+      "
+    >
+      <template v-slot:header>
+        <div class="vacancy-edit__modal__title">
+          {{ indicators.isAdd ? 'Добавление статуса' : 'Изменение статуса' }}
+        </div>
+      </template>
+
+      <template v-slot:body>
+        <InputSimple
+          v-if="indicators.isAdd"
+          v-model="statusMod.name"
+          id="statusEdit"
+          inputType="input"
+          placeholder="Название статуса"
+        />
+        <InputSimple
+          v-model="statusMod.comment"
+          id="statusEdit"
+          inputType="textarea"
+          placeholder="Комментарий"
+        />
+
+        <div
+          v-if="statusMod.action !== 'delete'"
+          class="vacancy-edit__modal-select"
+        >
+          <div>Цвет:</div>
+          <select
+            v-model="statusMod.color"
+            class="vacancy-edit__modal-select-color"
+            :style="{ backgroundColor: statusMod.color }"
+          >
+            <option
+              v-for="color in colors"
+              :key="color.value"
+              :value="color.value"
+              :style="{ backgroundColor: color.value }"
+            >
+              {{ color.value }}
+            </option>
+          </select>
+        </div>
+
+        <ButtonMain
+          class="vacancy-edit__modal-btn-add"
+          @click="
+            indicators.isAdd
+              ? handleModification(statusMod.name, 'create')
+              : handleModification(statusMod.name, 'update')
+          "
+          :isActive="request"
+          :message="errorMessage"
+        >
+          <template v-slot:text>{{
+            indicators.isAdd ? 'Добавить' : 'Изменить'
+          }}</template>
+        </ButtonMain>
+      </template>
+    </Modal>
   </Teleport>
 </template>
 
 <script setup>
+import ButtonMain from '@/components/ButtonMain.vue';
 import {
   VacanciesGetVacancyStatuses,
   VacanciesModifyVacancyStatus,
   VacanciesSetVacancyStatusTransfer,
-} from '../../js/ApiClassesVacancyEdit.js';
+} from '../js/ApiClassesVacancyEdit';
 import { onMounted, ref, watch } from 'vue';
+import InputSimple from '@/components/InputSimple.vue';
 import ButtonIcon from '@/components/ButtonIcon.vue';
 import IconAdd from '@/assets/icons/add.svg?component';
-import { colors } from '../../js/statusColors.js';
+import Modal from '@/components/Modal.vue';
+import { colors } from '../js/statusColors.js';
 import VacancyStatusList from './VacancyStatusList.vue';
 import SpinnerMain from '@/components/SpinnerMain.vue';
-import VacancyStatusModal from './VacancyStatusModal.vue';
 const props = defineProps({
   // Id вакансии
   vacancyId: {
@@ -90,16 +158,7 @@ const statusMod = ref({
 const request = ref(false);
 // Сообщение об ошибке
 const errorMessage = ref('');
-// Очистка statusMod после создания/изменения
-const resetStatusMod = () => {
-  statusMod.value = {
-    action: 'create',
-    name: '',
-    toName: '',
-    comment: '',
-    color: '#a3a3a2',
-  };
-};
+// Запрос статусов по id
 const requestVacancyStatuses = () => {
   const requestInstance = new VacanciesGetVacancyStatuses();
   requestInstance.vacancyId = props.vacancyId;
@@ -154,13 +213,19 @@ const requestStatusModification = () => {
     '/vacancies/modify_vacancy_status.php',
     'manager',
     (response) => {
+      // Обновляем данные статусов
+      requestVacancyStatuses();
       // Сбрасываем данные статуса
-      resetStatusMod();
+      statusMod.value = {
+        action: 'create',
+        name: '',
+        toName: '',
+        comment: '',
+        color: '#a3a3a2',
+      };
       request.value = false;
       indicators.value.isEdit = false;
       indicators.value.isAdd = false;
-      // Обновляем данные статусов
-      requestVacancyStatuses();
     },
     (err) => {
       request.value = false;
@@ -180,12 +245,18 @@ const requestStatusTransfer = () => {
     '/vacancies/set_vacancy_status_transfer.php',
     'manager',
     (response) => {
-      // Сбрасываем данные статуса
-      resetStatusMod();
-      request.value = false;
-      indicators.value.isTransfer = false;
       // Обновляем данные статусов
       requestVacancyStatuses();
+      // Сбрасываем данные статуса
+      statusMod.value = {
+        action: 'create',
+        name: '',
+        toName: '',
+        comment: '',
+        color: '#a3a3a2',
+      };
+      request.value = false;
+      indicators.value.isTransfer = false;
     },
     (err) => {
       request.value = false;
@@ -210,10 +281,6 @@ const handleModification = (statusName, method, transfer, toStatus) => {
     }
     requestStatusTransfer();
   } else requestStatusModification();
-};
-const openAddStatusModal = () => {
-  indicators.value.isAdd = true;
-  resetStatusMod();
 };
 onMounted(() => {
   requestVacancyStatuses();
@@ -264,10 +331,34 @@ watch(
   transition: all 0.3s ease;
   width: 20px;
   height: 20px;
-
   &:hover {
     transform: scale(1.3);
   }
+}
+
+.vacancy-edit__modal-btn-add {
+  display: flex;
+  align-items: center;
+  align-self: center;
+  width: fit-content;
+  gap: 5px;
+}
+
+.vacancy-edit__modal-select {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  gap: 5px;
+}
+
+.vacancy-edit__modal-select-color {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 90px;
+  height: 20px;
+  cursor: pointer;
+  border-radius: 10px;
+  text-align: center;
 }
 
 .vacancy-edit__status-spinner {

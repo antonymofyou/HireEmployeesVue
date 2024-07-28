@@ -35,10 +35,9 @@ function checkCodeParam() {
     return !!getCodeParam();
 }
 //Устанавливаем авторизацию в localstorage
-function setAuth(nasotkuToken, device, managerType) {
+function setAuth(nasotkuToken, device) {
     localStorage.setItem(configData.MANAGER_TOK_NAME, nasotkuToken);
     localStorage.setItem(configData.MANAGER_DEVICE_NAME, device);
-    localStorage.setItem(configData.MANAGER_TYPE_NAME, managerType);
 }
 //Получаем токен nasotku //:(токенВК, идентификатор пользователя)
 function getNasotkuTokenFromServer(vkToken, vkUserId) {
@@ -58,8 +57,8 @@ function getNasotkuTokenFromServer(vkToken, vkUserId) {
             if(response.success==='0'){
                 errorMessage.value += ' '+response.message+'.'
             }
-            else {             
-                setAuth(response.nasotkuToken, response.device, response.managerType || '')
+            else {
+                setAuth(response.nasotkuToken, response.device)
                 router.push({name:'vacanciesList'})
             }
             

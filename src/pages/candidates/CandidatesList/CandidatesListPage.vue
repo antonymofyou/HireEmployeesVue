@@ -68,7 +68,6 @@ import { useRoute, useRouter } from 'vue-router';
 import { isManager } from '@/js/AuthFunctions';
 import { MainRequestClass } from '@/js/RootClasses.js';
 import { CandidatesGetCandidatesByVacancyId, VacanciesGetVacancyStatuses } from './js/CandidatesClasses.js';
-import { StorageVacanciesPageActions } from './js/StorageClasses.js';
 import CandidateCard from './components/CandidateCard.vue';
 import ErrorNotification from '@/components/ErrorNotification.vue';
 import SelectMain from '@/components/SelectMain.vue';
@@ -82,14 +81,11 @@ const route = useRoute();
 //Проверка авторизации пользователя
 if (!isManager()) router.push({ name: 'managerAuth' });
 
-// Начальные значения рефов (т.к. используются не один раз)
-const initialStatusValue = 'New';
-
 //Ref-переменные
 const vacanciesIds = ref([]); // список id вакансий
 const candidates = ref([]); // список кандидатов
 const vacancyId = ref(''); // ID вакансии
-const status = ref(initialStatusValue); // Статус кандидата
+const status = ref('New'); // Статус кандидата
 const candidateStatus = ref([{ name: 'Все', id: 'Все', color: 'gray' }, {name:'New', id: 'New', color: 'gray'}]); // Статусы кандидатов
 
 //Флаги загрузки данных
@@ -102,6 +98,9 @@ const errorMessage = ref('');
 // Получение из роута параметров, если есть query
 if (route.query.vacancyId) {
   vacancyId.value = route.query.vacancyId;
+  if (route.query.status) {
+    status.value = route.query.status;
+  }
 }
 
 //Получение списка id вакансий при загрузке страницы
@@ -190,34 +189,23 @@ function getVacancyStatuses() {
   }
 }
 
-// Получение текущего статуса из localStorage
-function getCurrentStatusFromLocalStorage() {
-  // Достаём статус текущей вакансии из localStorage
-  const currentVacancyStatus = StorageVacanciesPageActions.getVacancyStatus(vacancyId.value);
-  if (currentVacancyStatus) status.value = currentVacancyStatus;
-  else {
-    // Т.к. статус не был найден в localStorage - то не допускаем того,
-    // чтобы у нас остался висеть статус от предыдущей вакансии
-    status.value = initialStatusValue;
-  }
-}
-
 //Обработчик смены query параметра при смене id
 const updateVacancyId = () => {
   router.push({
-    query: { ...route.query, vacancyId: vacancyId.value },
+    query: { ...route.query, vacancyId: vacancyId.value, status: status.value },
   });
 };
 
 //Обработчик смены query параметра при смене id
 const updateStatus = () => {
-  StorageVacanciesPageActions.updateVacancyStatus(vacancyId.value, status.value);
+  router.push({ 
+    query: { ...route.query, vacancyId: vacancyId.value, status: status.value } 
+  });
 };
 
 //Получение списка кандидатов при загрузке страницы
 onMounted(() => {
   getAllVacanciesManager();
-  getCurrentStatusFromLocalStorage();
   if (route.query.vacancyId) {
     getAllCandidatesManager();
     getVacancyStatuses();
@@ -230,13 +218,12 @@ watch(
   () => {
     getVacancyStatuses();
     getAllCandidatesManager();
-    getCurrentStatusFromLocalStorage();
   }
 );
 
 //Получение списка кандидатов при обновлении query status
 watch(
-  status,
+  () => route.query.status,
   () => {
     getAllCandidatesManager();
   }
