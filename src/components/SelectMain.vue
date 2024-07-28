@@ -34,7 +34,7 @@
 </template>
 
 <script setup>
-import { ref, computed, onMounted, watch } from 'vue';
+import { ref, computed, watchEffect } from 'vue';
 
 const props = defineProps({
   // Модель для обновления, опции селекта
@@ -84,14 +84,9 @@ const optionsContainerStyle = computed(() => {
   };
 });
 
-// Установка значения и орбаботчика при монтировании
-onMounted(() => {
+// Отслеживание изменений, отработает и при монтировании
+watchEffect(() => {
   selected.value = props.options.find(option => option.id == props.modelValue) || null;
-});
-
-// Отслеживание изменений
-watch(() => props.modelValue, (newValue) => {
-  selected.value = props.options.find(option => option.id == newValue) || null;
 });
 
 // Директива для закрытия селекта по клику снаружи
@@ -117,9 +112,10 @@ const vClickOutside = {
 <style scoped>
 .select-box-main {
   display: flex;
-  width: max-content;
+  width: 100%;
   flex-direction: column;
   position: relative;
+  flex: 1;
 }
 
 .options-container-main {
@@ -220,6 +216,8 @@ const vClickOutside = {
   align-items: center;
   justify-content: space-between;
   padding-left: 5px;
+  word-break: break-all;
+
 
   cursor: pointer;
   padding: 5px 5px;
@@ -230,6 +228,12 @@ const vClickOutside = {
   position: relative;
 }
 
+@media (max-width: 620px) {
+  .options-container-main {
+    max-width: 80%; 
+    word-break: break-all;
+  }
+}
 
 .dark .selected-main {
   color: var(--white);
