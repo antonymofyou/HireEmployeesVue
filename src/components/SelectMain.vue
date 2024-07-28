@@ -223,6 +223,9 @@ const vClickOutside = {
 }
 
 .option-main {
+  min-width: 82px;
+  max-width: 380px;
+  word-wrap: break-word;
   cursor: pointer;
   padding: 5px 10px;
   transition: 0.1s ease;
