@@ -28,6 +28,7 @@
     :groupDragEnd="callbacks.groupDragEnd"
     :groupPointerLeave="callbacks.groupPointerLeave"
     :startTransform="callbacks.startTransform"
+    @scale="callbacks.setScale"
     ref="konva"
     id="graphical-editor"
   />
@@ -210,7 +211,18 @@ const helpers = {
     const group = selectedShape.value.parent;
     group.destroy();
     helpers.unTransformAll();
+    helpers.deleteShapeById(selectedShape.value.attrs.id);
     selectedShape.value = null;
+  },
+
+  /**
+   * Удаление фигуры из состояния по айди
+   * @param {Number | String} shapeId - ID фигуры
+   */
+  deleteShapeById(shapeId) {
+    const findIndex = data.shapes.findIndex((existShape) => existShape.id == shapeId);
+    if (findIndex === -1) return;
+    data.shapes.splice(findIndex, 1);
   },
 
   /**
@@ -662,6 +674,13 @@ const callbacks = {
   },
 
   /**
+   * Поставить нужный scale сразу
+   */
+  setScale: (scaleVal) => {
+    scale.value = { x: scaleVal, y: scaleVal };
+  },
+
+  /**
    * Отправка конфига канвы на сервер
    */
   saveCanvasToServer: () => {
@@ -725,7 +744,7 @@ const drawingHandlers = {
       case 'circle': {
         const calculatedWidth = Math.abs(currentShapeConfig.value.x - x);
         const calculatedHeight = Math.abs(currentShapeConfig.value.y - y);
-        const radius = Math.ceil(Math.max(calculatedWidth, calculatedHeight) / 2);
+        const radius = Math.ceil(Math.max(calculatedWidth, calculatedHeight));
 
         currentShapeConfig.value.radius = radius;
         break;
@@ -807,6 +826,7 @@ watch([scale, canvasPosition], () => {
 .header {
   margin-bottom: 20px;
   display: flex;
+  justify-content: center
 }
 </style>
 

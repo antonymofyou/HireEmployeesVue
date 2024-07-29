@@ -86,6 +86,7 @@
 <script setup>
 import { ref, watchEffect } from 'vue';
 import { TransformerEditor } from '../js/TransformClasses';
+import { sharedKonvaConfig } from '../js/config';
 
 const props = defineProps({
   onlyView: {
@@ -190,6 +191,8 @@ defineExpose({
   transformer: transformer,
 });
 
+const emit = defineEmits(['scale']);
+
 const configKonva = {
   width: props.width,
   height: props.height,
@@ -227,6 +230,8 @@ watchEffect((onCleanup) => {
     stage.width(containerWidth);
     stage.height(containerHeight);
     stage.scale({ x: scale, y: scale });
+
+    emit('scale', scale);
   };
   resizeHandler();
 
@@ -243,6 +248,9 @@ watchEffect((onCleanup) => {
 
 <style scoped>
 .canvas-wrapper {
+  max-width: 1400px;
+  margin: 0 auto;
+
   margin-bottom: 1rem;
   border-radius: 24px;
   box-shadow: rgba(99, 99, 99, 0.2) 0px 2px 8px 0px;

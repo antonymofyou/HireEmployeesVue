@@ -128,7 +128,7 @@
         </PanelItem>
 
         <PanelItem>
-          {{ currentScale }}
+          {{ props.currentScale }}
         </PanelItem>
       </Panel>
     </div>
@@ -379,6 +379,7 @@ const handlers = {
 
 .actions {
   display: flex;
+  justify-content: center;
   flex-wrap: wrap;
   column-gap: 50px;
   row-gap: 20px;

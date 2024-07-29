@@ -57,7 +57,7 @@ const response = {
       {
           "id": 4,
           "type": "rectangle",
-          "x": 1095,
+          "x": 300,
           "y": 30,
           "width": 200,
           "height": 100,
@@ -104,7 +104,7 @@ const response = {
       {
         "id": crypto.randomUUID(),
         "type": "rectangle",
-        "x": 1094,
+        "x": 230,
         "y": 177,
         "width": 200,
         "height": 100,
