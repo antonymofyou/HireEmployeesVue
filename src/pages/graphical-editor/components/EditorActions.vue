@@ -272,6 +272,7 @@ const props = defineProps({
 
 const emit = defineEmits(['fileUpload']);
 
+// Текущая активаная фигура
 const currentShapeNode = computed(() => {
   const findShape = data.shapes.find((existShape) => {
     return existShape.id === props.selectedShape.attrs.id;
@@ -352,45 +353,6 @@ const handlers = {
   handleFileUpload: (e) => {
     const file = e.target.files[0];
     emit('fileUpload', file);
-  },
-};
-
-// Директива, позволяющая вводить в <input type="number" /> только numeric-значения
-const vOnlyNumeric = {
-  mounted(el) {
-    /**
-     * Запрещаем пользователю вставлять неверные значения
-     * @param {ClipboardEvent} e Событие
-     */
-    const pasteHandler = (e) => {
-      // Берём вставляемое значение
-      const pastedText = e.clipboardData.getData('text');
-      // Если пользователь вставляет не число или число отрицательное - не разрешаем
-      if (!isFinite(pastedText) || parseFloat(pastedText) < 0) e.preventDefault();
-    };
-
-    /**
-     * Запрещаем вводить неверные значения
-     * @param {KeyboardEvent} e Событие
-     */
-    const keyDownHandler = (e) => {
-      const charCode = (e.which) ? e.which : e.keyCode;
-
-      // Разрешаем ctrl + a
-      if ((e.ctrlKey || e.metaKey) && charCode === 65) return;
-
-      // Не разрешаем не числовые символы
-      if ((charCode > 31 && (charCode < 48 || charCode > 57)) && charCode !== 46)
-        e.preventDefault();
-    };
-
-    el.onpaste = pasteHandler;
-    el.onkeydown = keyDownHandler;
-  },
-  // Чистим обработчики для избежания утечек памяти
-  unmounted(el) {
-    el.onpaste = null;
-    el.onkeydown = null;
   },
 };
 </script>

@@ -24,6 +24,7 @@
     :groupPointerLeave="callbacks.groupPointerLeave"
     :startTransform="callbacks.startTransform"
     ref="konva"
+    id="graphical-editor"
   />
 
   <div class="bottom-area">
@@ -150,7 +151,7 @@ watch(currentDrawingShape, () => {
 // Конфигурация холста
 const configKonva = {
   width: window.innerWidth,
-  height: window.innerHeight / 1.5,
+  height: 450,
   fillX: true,
   fillY: false,
   draggable: false,
@@ -732,5 +733,11 @@ watch([scale, canvasPosition], () => {
   row-gap: 20px;
   padding-top: 20px;
   border-top: 2px solid var(--cornflower-blue);
+}
+</style>
+
+<style>
+body:has(#graphical-editor) {
+  overflow-x: clip;
 }
 </style>

@@ -235,6 +235,7 @@ watchEffect((onCleanup) => {
   if (!konva.value) return;
 
   const konvaStage = konva.value.getStage();
+  // Берём разные размеры, поскольку есть выбор, растягивать или нет
   const choiceFromWidth = props.fillX ? props.maxWidth : props.width;
   const choiceFromHeight = props.fillY ? props.maxHeight : props.height;
 
