@@ -86,7 +86,20 @@ const response = {
               }
           ],
           "borderWidth": 5
-      }
+      },
+      {
+        "id": crypto.randomUUID(),
+        "type": "rectangle",
+        "x": 300,
+        "y": 250,
+        "width": 200,
+        "height": 100,
+        "color": "#FF5733",
+        "borderColor": "#C70039",
+        "zIndex": 1,
+        "textVerticalAlignment": "top",
+        "borderWidth": 5
+    }
   ],
   "imageDictionary": {
     "1": exampleImageBase64,

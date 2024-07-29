@@ -315,7 +315,6 @@ const callbacks = {
       return existShape.id == shapeId;
     });
 
-    
     // Фигура есть - меняем состояние
     if (findShape) {
       helpers.setShapeMaxZIndex(findShape.id);
@@ -349,6 +348,8 @@ const callbacks = {
     const { target } = e;
     // Достаём группу, в которой находится фигура
     const group = target.parent;
+    // Достаём тексты текущей выбранной группы
+    const texts = group.children.filter((child) => child.constructor.name === 'Text');
     // Достаём фигуру или картинку
     const shape = group.children[0];
     // Достаём id, чтобы не вызывать в .find
@@ -379,9 +380,8 @@ const callbacks = {
       }
       transformerNode.nodes([group]);
 
-      // Ставим обработчики на конец трансформации для синхронизации состояния и канвы
-      // @TODO Если возникнут проблемы с производительностью - смотреть сюда (возможно лучше будет ставить на transformend)
-      group.on('transformend', () => {
+      // Функция получения сущностей канвы (координаты, поворот, и т.д.)
+      const getEntities = () => {
         // Достаём текущий поворот и координаты
         const rotation = group.rotation();
         const position = {...group.position()};
@@ -394,9 +394,35 @@ const callbacks = {
         // Konva меняет scaleX и scaleY - мы узнаём точную ширину и высоту
         const correctWidthByScale = width * scaleX;
         const correctHeightByScale = height * scaleY;
+
+        return { rotation, position, scaleX, scaleY, width, height, correctWidthByScale, correctHeightByScale };
+      };
+
+      // Ставим обработчики на конец трансформации для синхронизации состояния и канвы
+      // @TODO Если возникнут проблемы с производительностью - смотреть сюда (возможно лучше будет ставить на transformend)
+      group.on('transform', () => {
+        const { rotation, correctWidthByScale, correctHeightByScale } = getEntities();
         
-        // Чтобы трансформер не дёргался
-        transformerNode.nodes([]);
+        // Меняем координаты и иные сущности внутри канвы (тут не меняем состояние, т.к.
+        // нам не нужны ререндеры каждую миллисекунду)
+        group.rotation(rotation);
+        group.width(correctWidthByScale);
+        group.height(correctHeightByScale);
+        shape.width(correctWidthByScale);
+        shape.height(correctHeightByScale);
+        texts.forEach((text) => {
+          text.width(correctWidthByScale);
+          text.height(correctHeightByScale);
+        });
+        
+        // Меняем scaleX, scaleY на изначальные значения
+        group.scaleX(1);
+        group.scaleY(1);
+      });
+
+      // Применение изменений в канве (тут пишем в состояние)
+      group.on('transformend', () => {
+        const { rotation, position, correctWidthByScale, correctHeightByScale } = getEntities();
         
         // Ищем фигуру
         const findShape = data.shapes.find((existShape) => {
@@ -405,42 +431,31 @@ const callbacks = {
         
         // Если фигура была найдена - применяем трансформации
         if (findShape) {
+          // Выносим фигуру на максимальный zIndex, т.к. трансформируемая фигура не должна быть снизу
+          helpers.setShapeMaxZIndex(findShape.id);
+
+          // Пишем в состояние (после этого последует ререндер)
+          findShape.rotation = rotation;
+          findShape.x = position.x;
+          findShape.y = position.y;
+          findShape.width = correctWidthByScale;
+          findShape.height = correctHeightByScale;
+
+          // Меняем scaleX, scaleY на изначальные значения
+          group.scaleX(1);
+          group.scaleY(1);
+
+          // Для корректного отображения
           requestAnimationFrame(() => {
-            // Выносим фигуру на максимальный zIndex, т.к. трансформируемая фигура не должна быть снизу
-            helpers.setShapeMaxZIndex(findShape.id);
-  
-            console.group('TransformShape');
-            console.log('Before: ', findShape.width, findShape.height);
-  
-            findShape.rotation = rotation;
-            findShape.x = position.x;
-            findShape.y = position.y;
-            findShape.width = correctWidthByScale;
-            findShape.height = correctHeightByScale;
-
-            // group.rotation(rotation);
-            // group.width(correctWidthByScale);
-            // group.height(correctHeightByScale);
-            // shape.width(correctWidthByScale);
-            // shape.height(correctHeightByScale);
-            
-            // Меняем scaleX, scaleY на изначальные значения
-            group.scaleX(1);
-            group.scaleY(1);
-
-            // Для корректного отображения
-            dangerouslyForceToAnotherIterationEventLoop(() => {
-              transformerNode.update();
-              transformerNode.nodes([group]);
-            });
-
-            console.log('After: ', findShape.width, findShape.height);
-            console.groupEnd('TransformShape');
+            transformerNode.update();
+            transformerNode.nodes([group]);
           });
         }
       });
     }
     else {
+      // Для избежания утечек памяти отписываемся от событий
+      group.off('transform transformend');
       selectedShape.value = null;
       transformerNode.nodes([]);
     }

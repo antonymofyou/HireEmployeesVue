@@ -52,7 +52,6 @@
             <v-text
               v-for="textRecord in textInfo.text"
               :config="{
-                rotation: shape.rotation,
                 width: shape.width,
                 height: shape.height,
                 align: textInfo.alignment,
