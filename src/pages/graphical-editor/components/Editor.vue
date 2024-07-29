@@ -219,7 +219,9 @@ watchEffect((onCleanup) => {
     const containerWidth = canvasWrapper.value.offsetWidth;
     const containerHeight = canvasWrapper.value.offsetHeight;
     
-    const scale = containerWidth / props.width;
+    const scaleX = containerWidth / props.width;
+    const scaleY = containerHeight / props.height;
+    const scale = Math.min(scaleX, scaleY);
     const stage = konva.value.getStage();
 
     stage.width(containerWidth);

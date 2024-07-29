@@ -30,6 +30,19 @@ const response = {
           "cornerRadius": 40
       },
       {
+        "id": crypto.randomUUID(),
+        "type": "circle",
+        "x": 170,
+        "y": 100,
+        "width": 200,
+        "height": 100,
+        "color": "#9ddb6b",
+        "borderColor": "#C70039",
+        "zIndex": 0.5,
+        "cornerRadius": 20,
+        "borderWidth": 5,
+      },
+      {
         "id": 3,
         "type": "arrow",
         "x": 100,

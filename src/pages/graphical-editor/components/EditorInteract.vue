@@ -434,15 +434,27 @@ const callbacks = {
         
         // Меняем координаты и иные сущности внутри канвы (тут не меняем состояние, т.к.
         // нам не нужны ререндеры каждую миллисекунду)
-        group.rotation(rotation);
-        group.width(correctWidthByScale);
-        group.height(correctHeightByScale);
-        shape.width(correctWidthByScale);
-        shape.height(correctHeightByScale);
-        texts.forEach((text) => {
-          text.width(correctWidthByScale);
-          text.height(correctHeightByScale);
-        });
+        switch (shape.attrs.type) {
+          case 'rectangle':
+          case 'image': {
+            group.rotation(rotation);
+            group.width(correctWidthByScale);
+            group.height(correctHeightByScale);
+            shape.width(correctWidthByScale);
+            shape.height(correctHeightByScale);
+            texts.forEach((text) => {
+              text.width(correctWidthByScale);
+              text.height(correctHeightByScale);
+            });
+            break;
+          }
+          case 'circle': {
+            const scale = group.scaleY() * group.scaleX();
+            const radius = shape.radius() * scale;
+            shape.radius(radius);
+            break;
+          }
+        }
         
         // Меняем scaleX, scaleY на изначальные значения
         group.scaleX(1);
@@ -469,12 +481,19 @@ const callbacks = {
           findShape.y = position.y;
           findShape.width = correctWidthByScale;
           findShape.height = correctHeightByScale;
-
+          
           // Для стрелок - меняем scaleX, scaleY
           if (shape.attrs.type === 'arrow') {
             findShape.scaleX = scaleX;
             findShape.scaleY = scaleY;
-          }     
+          }
+
+          // Для круга - меняем радиус
+          if (shape.attrs.type === 'circle') {
+            const scale = group.scaleY() * group.scaleX();
+            const radius = shape.radius() * scale;
+            findShape.radius = radius;
+          }
 
           // Меняем scaleX, scaleY на изначальные значения
           group.scaleX(1);
