@@ -87,12 +87,13 @@
           <Button
             class="button"
             @click="props.resetScaleCanvas"
+            :disabled="!props.isResetScaleCanvasAllowed"
           >
             Сбросить масштабирование
           </Button>
         </PanelItem>
 
-        <PanelItem>
+        <PanelItem v-if="props.isStageDraggable">
           <Button
             class="button"
             @click="props.resetTransformCanvas"
@@ -267,7 +268,17 @@ const props = defineProps({
     type: String,
     required: false,
     default: '100%',
-  }
+  },
+  isStageDraggable: {
+    type: Boolean,
+    required: false,
+    default: false,
+  },
+  isResetScaleCanvasAllowed: {
+    type: Boolean,
+    required: false,
+    default: true,
+  },
 });
 
 const emit = defineEmits(['fileUpload']);

@@ -46,6 +46,8 @@
       :incrementScale="() => callbacks.changeScale(1)"
       :decrementScale="() => callbacks.changeScale(-1)"
       :currentScale="formatNumToPercent(scale.x)"
+      :isStageDraggable="props.isStageDraggable"
+      :isResetScaleCanvasAllowed="isResetScaleCanvasAllowed"
       @fileUpload="helpers.loadNewImageIntoCanvas"
     />
   </div>
@@ -62,13 +64,13 @@ import Editor from './Editor.vue';
 import EditorActions from './EditorActions.vue';
 
 const props = defineProps({
-  // Перетаскивание канвы
+  // Разрешено ли перетаскивание канвы
   isStageDraggable: {
     type: Boolean,
     required: false,
     default: false,
   },
-  // Масштабирование по колёсику (или тачпаду, и т.д.)
+  // Разрешено ли масштабирование по колёсику (или тачпаду, и т.д.)
   isScaleByWheel: {
     type: Boolean,
     required: false,
@@ -128,6 +130,10 @@ const konvaStage = computed(() => {
 const isAllowedToAddText = computed(() => {
   const allowedTypes = ['rect', 'rectangle'];
   return allowedTypes.includes(selectedShape.value?.attrs.type);
+});
+// Разрешён ли сброс масштабирования канвы
+const isResetScaleCanvasAllowed = computed(() => {
+  return scale.value.x !== 1;
 });
 
 // Конфиг рисуемой фигуры (чтобы обновлять лишь часть канвы, не ререндерить полностью)
@@ -325,9 +331,15 @@ const callbacks = {
       findShape.y = position.y;
     }
   },
+  /**
+   * Обработка выхода за границы группы
+   */
   groupPointerLeave: () => {
     document.body.style.cursor = 'default';
   },
+  /**
+   * Обработка наведения на группу
+   */
   groupPointerEnter: () => {
     document.body.style.cursor = 'grab';
   },
@@ -403,6 +415,7 @@ const callbacks = {
       // Ставим обработчики на конец трансформации для синхронизации состояния и канвы
       // @TODO Если возникнут проблемы с производительностью - смотреть сюда (возможно лучше будет ставить на transformend)
       group.on('transform', () => {
+        // У стрелок отдельная ветка обработки в transformend
         if (shape.attrs.type === 'arrow') return;
 
         const { rotation, correctWidthByScale, correctHeightByScale } = getEntities();
@@ -426,9 +439,7 @@ const callbacks = {
 
       // Применение изменений в канве (тут пишем в состояние)
       group.on('transformend', () => {
-        if (shape.attrs.type === 'arrow') return;
-
-        const { rotation, position, correctWidthByScale, correctHeightByScale } = getEntities();
+        const { rotation, scaleX, scaleY, position, correctWidthByScale, correctHeightByScale } = getEntities();
         
         // Ищем фигуру
         const findShape = data.shapes.find((existShape) => {
@@ -446,6 +457,11 @@ const callbacks = {
           findShape.y = position.y;
           findShape.width = correctWidthByScale;
           findShape.height = correctHeightByScale;
+
+          if (shape.attrs.type === 'arrow') {
+            findShape.scaleX = scaleX;
+            findShape.scaleY = scaleY;
+          }
 
           // Меняем scaleX, scaleY на изначальные значения
           group.scaleX(1);
@@ -525,6 +541,7 @@ const callbacks = {
    */
   resetScaleCanvas: () => {
     scale.value = { x: 1, y: 1 };
+    canvasPosition.value = { x: 0, y: 0 };
   },
 
   /**
