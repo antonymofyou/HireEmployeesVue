@@ -1,6 +1,7 @@
+import { toValue } from "vue";
+
 /**
  * Класс для трансформаций
- * Т.к. необходимо сохранить реактивность vue - мутируем приходящие данные
  */
 export class TransformerEditor {
   /**
@@ -10,6 +11,7 @@ export class TransformerEditor {
    * @returns {Object} Конфиг для vue-konva
    */
   static transformConfigToKonvaCorrect(correctConfig, propsToDelete) {
+    // const correctConfig = { ...shape };
     correctConfig.id = String(correctConfig.id);
 
     if (correctConfig.color) {
@@ -25,6 +27,15 @@ export class TransformerEditor {
     if (correctConfig.borderWidth) {
       correctConfig.strokeWidth = correctConfig.borderWidth;
       delete correctConfig.borderWidth;
+    }
+
+    if (correctConfig.type === 'arrow' && !correctConfig.points) {
+      correctConfig.points = [
+        correctConfig.x,
+        correctConfig.y,
+        correctConfig.width,
+        correctConfig.height,
+      ];
     }
 
     if (propsToDelete) {

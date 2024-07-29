@@ -199,6 +199,7 @@ const helpers = {
     const group = selectedShape.value.parent;
     group.destroy();
     helpers.unTransformAll();
+    selectedShape.value = null;
   },
 
   /**
@@ -286,7 +287,7 @@ const callbacks = {
       // Выключаем возможность перемещения, чтобы начать рисовать
       target.draggable(false);
       dangerouslyForceToAnotherIterationEventLoop(() => {
-        target.draggable(true);
+        target.draggable(props.isStageDraggable);
       })
       return;
     }
@@ -402,6 +403,8 @@ const callbacks = {
       // Ставим обработчики на конец трансформации для синхронизации состояния и канвы
       // @TODO Если возникнут проблемы с производительностью - смотреть сюда (возможно лучше будет ставить на transformend)
       group.on('transform', () => {
+        if (shape.attrs.type === 'arrow') return;
+
         const { rotation, correctWidthByScale, correctHeightByScale } = getEntities();
         
         // Меняем координаты и иные сущности внутри канвы (тут не меняем состояние, т.к.
@@ -423,6 +426,8 @@ const callbacks = {
 
       // Применение изменений в канве (тут пишем в состояние)
       group.on('transformend', () => {
+        if (shape.attrs.type === 'arrow') return;
+
         const { rotation, position, correctWidthByScale, correctHeightByScale } = getEntities();
         
         // Ищем фигуру
@@ -612,7 +617,7 @@ const callbacks = {
 const drawingHandlers = {
   /**
    * Обработка первого нажатия на канву. Начинаем рисовать здесь
-   * @params {Object} event Событие
+   * @param {Object} event Событие
    */
   canvasPointerDown: (event) => {
     // Фигура не выбрана - пользователь не начинает рисовать
@@ -623,7 +628,7 @@ const drawingHandlers = {
     // Делаем это для того, чтобы мы могли начать рисовать, а не передвигать холст
     konvaStage.value.draggable(false);
     dangerouslyForceToAnotherIterationEventLoop(() => {
-      konvaStage.value.draggable(true);
+      konvaStage.value.draggable(props.isStageDraggable);
     });
 
     // Если рисуем стрелку - то оперируем не x, y, а points
@@ -637,7 +642,7 @@ const drawingHandlers = {
 
   /**
    * Обработка движения указателя по канве. Рисуем фигуры на лету
-   * @params {Object} event Событие
+   * @param {Object} event Событие
    */
   canvasPointerMove: (event) => {
     // Если пользователь не рисует, то значит от просто провёл над канвой и игнорируем
@@ -676,7 +681,7 @@ const drawingHandlers = {
 
   /**
    * Обработка поднятия указателя с канвы. "Коммитим" изменения здесь
-   * @params {Object} event Событие
+   * @param {Object} event Событие
    */
   canvasPointerUp: async () => {
     if (!isDrawingNow.value) return;
@@ -715,11 +720,13 @@ watchEffect((onCleanup) => {
 
 // Следим за состоянием для канвы и меняем её
 watch([scale, canvasPosition], () => {
+  if (!konvaStage.value) return;
+
   // Применяем зум
   konvaStage.value.scale({ x: scale.value.x, y: scale.value.y });
   // Применяем позиционирование
   konvaStage.value.position({ x: canvasPosition.value.x, y: canvasPosition.value.y });
-});
+}, { immediate: true });
 </script>
 
 <style scoped>

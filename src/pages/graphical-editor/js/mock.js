@@ -30,16 +30,27 @@ const response = {
           "cornerRadius": 40
       },
       {
-          "id": 3,
-          "type": "arrow",
-          "x": 200,
-          "y": 200,
-          "width": 250,
-          "height": 150,
-          "borderColor": "#C70039",
-          "zIndex": 0.2,
-          "rotation":110
+        "id": 3,
+        "type": "arrow",
+        "x": 100,
+        "y": 100,
+        "width": 200,
+        "height": 200,
+        fill: '#C70039',
+        "borderColor": "#C70039",
+        "zIndex": 2,
+        "startRotation": 110,
       },
+      // {
+      //   "type":"arrow",
+      //   "id":"66bfd5eb-4f37-432e-9c76-fd3f9d14045e",
+      //   "fill":"#ff0000",
+      //   "stroke":"#000000",
+      //   "strokeWidth":5,
+      //   "zIndex":1.6000000000000005,
+      //   "radius":0,
+      //   "points":[200,200,250,150]
+      // },
       {
           "id": 4,
           "type": "rectangle",

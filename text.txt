@@ -1,0 +1,1 @@
+{"id":"c9e5d063-434e-4407-bb64-df44aba62693","type":"rectangle","x":311,"y":251,"width":200,"height":100,"color":"#FF5733","borderColor":"#C70039","zIndex":1.9000000000000008,"textVerticalAlignment":"top","borderWidth":5}
