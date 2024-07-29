@@ -358,7 +358,6 @@ const handlers = {
    * @param {Number} strokeWidth - Ширина границы
    */
   onStrokeWidthChange: (strokeWidth) => {
-    console.log({ strokeWidth });
     if (!currentShapeNode.value) return;
     currentShapeNode.value.borderWidth = strokeWidth;
   },

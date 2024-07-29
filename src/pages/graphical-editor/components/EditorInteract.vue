@@ -1,6 +1,13 @@
 <template>
   <h1 class="title">Редактор</h1>
 
+  <div class="header">
+    <Panel>
+      <Button @click="callbacks.saveCanvasToServer">Сохранить</Button>
+    </Panel>
+  </div>
+
+
   <Editor
     :shapes="data.shapes"
     :imageDictionary="data.imageDictionary"
@@ -52,7 +59,6 @@
 </template>
 
 <script setup>
-
 import { ref, watchEffect, computed, toValue, watch, reactive } from 'vue';
 import { dangerouslyForceToAnotherIterationEventLoop, formatNumToPercent, makeShapeConfig } from '../js/utils';
 
@@ -61,6 +67,8 @@ import EditorActions from './EditorActions.vue';
 
 import { data } from '../js/mock';
 import { sharedKonvaConfig } from '../js/config';
+import Button from './ui/Button.vue';
+import Panel from './ui/Panel.vue';
 
 const props = defineProps({
   // Разрешено ли перетаскивание канвы
@@ -170,7 +178,7 @@ const helpers = {
    */
   moveToMaxZIndex: (target, options) => {
     target.moveToTop();
-    // helpers.setShapeMaxZIndex(target.children[0].id());
+    helpers.setShapeMaxZIndex(target.children[0].id());
 
     if (options.withTransformer) {
       const transformerNode = konva.value.transformer.getNode();
@@ -210,7 +218,6 @@ const helpers = {
    * @param {File} file - Файл
    */
    loadNewImageIntoCanvas: async (file) => {
-    console.log(file);
     const fileReader = new FileReader();
 
     const defaultImageWidth = 250;
@@ -287,6 +294,10 @@ const helpers = {
 
 // Переиспользуемые функции
 const callbacks = {
+  /**
+   * Обработка начала перетаскивания
+   * @param {Object} e Событие
+   */
   groupDragStart: (e) => {
     const { target } = e;
     // Т.к. сейчас рисуем - не будем ничего передвигать
@@ -374,7 +385,7 @@ const callbacks = {
     // Достём объект канвы
     const stage = transformerNode.getStage();
     // Текущая выбранная нода
-    const selectedNode = stage.findOne(`#${target.id()}`);
+    const selectedNode = stage.findOne(`#${shape.id()}`);
 
     helpers.moveToMaxZIndex(group, { withTransformer: true });
     
@@ -389,7 +400,7 @@ const callbacks = {
       // Текст идёт размером с фигуру, поэтому по клику - будем получать текст, =>
       // Будем делать поиск относительно него
       if (target instanceof Text) {
-        selectedShape.value = target.parent.children[0];
+        selectedShape.value = group.children[0];
       } else {
         selectedShape.value = selectedNode;
       }
@@ -459,10 +470,11 @@ const callbacks = {
           findShape.width = correctWidthByScale;
           findShape.height = correctHeightByScale;
 
+          // Для стрелок - меняем scaleX, scaleY
           if (shape.attrs.type === 'arrow') {
             findShape.scaleX = scaleX;
             findShape.scaleY = scaleY;
-          }
+          }     
 
           // Меняем scaleX, scaleY на изначальные значения
           group.scaleX(1);
@@ -629,6 +641,19 @@ const callbacks = {
     // Пишем новые координаты в состояние
     canvasPosition.value = newPos;
   },
+
+  /**
+   * Отправка конфига канвы на сервер
+   */
+  saveCanvasToServer: () => {
+    const configToSend = data;
+
+    console.group('Server save Canvas');
+    console.log(configToSend);
+    console.groupEnd('Server save Canvas');
+
+    alert('Under construct');
+  },
 };
 
 // Обработчики для рисования
@@ -758,6 +783,11 @@ watch([scale, canvasPosition], () => {
   row-gap: 20px;
   padding-top: 20px;
   border-top: 2px solid var(--cornflower-blue);
+}
+
+.header {
+  margin-bottom: 20px;
+  display: flex;
 }
 </style>
 

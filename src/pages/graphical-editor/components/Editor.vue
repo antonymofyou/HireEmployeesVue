@@ -32,6 +32,7 @@
           @dragend="props.groupDragEnd"
           @pointerleave="props.groupPointerLeave"
           @click="props.startTransform"
+          @tap="props.startTransform"
         >
           <component    
             :key="shape.id"
@@ -83,7 +84,7 @@
 </template>
 
 <script setup>
-import { reactive, ref, watchEffect } from 'vue';
+import { ref, watchEffect } from 'vue';
 import { TransformerEditor } from '../js/TransformClasses';
 
 const props = defineProps({
@@ -210,31 +211,6 @@ const helpers = {
   },
 };
 
-// Корректные размеры при изменении окна браузера
-// watchEffect((onCleanup) => {
-//   if (!konva.value) return;
-
-//   const konvaStage = konva.value.getStage();
-//   // Берём разные размеры, поскольку есть выбор, растягивать или нет
-//   const choiceFromWidth = props.fillX ? props.maxWidth : props.width;
-//   const choiceFromHeight = props.fillY ? props.maxHeight : props.height;
-
-//   const resizeHandler = () => {
-//     dynamicSizes.width = Math.min(choiceFromWidth, window.innerWidth);
-//     dynamicSizes.height = Math.min(choiceFromHeight, window.innerHeight);
-
-//     // Растягиваем канву на нужные размеры
-//     konvaStage.width(dynamicSizes.width);
-//     konvaStage.height(dynamicSizes.height);
-//   };
-
-//   window.addEventListener('resize', resizeHandler, { passive: true });
-
-//   onCleanup(() => {
-//     window.removeEventListener('resize', resizeHandler);
-//   });
-// });
-
 // Эффект, в котором достигаем того, что содержимое канвы на всех экранах будет одинаковым
 watchEffect((onCleanup) => {
   if (!canvasWrapper.value) return;
@@ -256,6 +232,11 @@ watchEffect((onCleanup) => {
 
   onCleanup(() => window.removeEventListener('resize', resizeHandler));
 });
+
+// onMounted(() => {
+//   canvasWrapper.value.style.width = 1400 + 'px';
+//   canvasWrapper.value.style.height = 460 + 'px';
+// });
 </script>
 
 <style scoped>
