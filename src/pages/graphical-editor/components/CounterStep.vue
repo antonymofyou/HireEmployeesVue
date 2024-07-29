@@ -145,6 +145,9 @@ const vOnlyNumeric = {
       // Разрешаем ctrl + a
       if ((e.ctrlKey || e.metaKey) && charCode === 65) return;
 
+      // Разрешаем двигаться по стрелочкам
+      if (['ArrowLeft', 'ArrowRight'].includes(e.key)) return;
+
       // Не разрешаем не числовые символы
       if ((charCode > 31 && (charCode < 48 || charCode > 57)) && charCode !== 46)
         e.preventDefault();

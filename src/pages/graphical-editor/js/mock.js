@@ -1,7 +1,8 @@
 import { reactive } from "vue";
 import { exampleImageBase64 } from "./image";
 
-export const data = reactive({
+// Запросим с сервера
+const response = {
   "shapes": [
       {
           "id": 1,
@@ -90,6 +91,12 @@ export const data = reactive({
   "imageDictionary": {
     "1": exampleImageBase64,
   },
+};
+
+// После - отсортируем по zIndex
+export const data = reactive({
+  ...response,
+  shapes: response.shapes.sort((a, b) => a.zIndex - b.zIndex),
 });
 
 export const prevData = reactive({

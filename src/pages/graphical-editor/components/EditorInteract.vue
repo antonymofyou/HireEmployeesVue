@@ -53,7 +53,7 @@
 <script setup>
 import { data } from '../js/mock';
 
-import { ref, watchEffect, computed, toValue, watch, reactive, toHandlers } from 'vue';
+import { ref, watchEffect, computed, toValue, watch, reactive, onMounted } from 'vue';
 import { dangerouslyForceToAnotherIterationEventLoop, formatNumToPercent, makeShapeConfig } from '../js/utils';
 import { Text } from 'konva/lib/shapes/Text';
 
@@ -88,7 +88,10 @@ const isPointerDownNow = ref(null);
 // Смещение канвы, с учётом перемещения
 const canvasTransform = ref({ x: 0, y: 0 });
 // Максимальный zIndex на канве (для вытаскивания элемента на самый верх)
-const maxZIndex = ref(0);
+const maxZIndex = ref(data.shapes.reduce((maxZIndex, shape) => {
+  // Вычисляем максимальный zIndex при инициализации
+  return shape.zIndex > maxZIndex ? shape.zIndex : maxZIndex;
+}, data.shapes[0].zIndex));
 // Зум канвы
 const scale = ref({ x: 1, y: 1 });
 // Позиционирование канвы относительно предка
@@ -127,12 +130,12 @@ const isAllowedToAddText = computed(() => {
 });
 
 // Конфиг рисуемой фигуры (чтобы обновлять лишь часть канвы, не ререндерить полностью)
-const currentShapeConfig = ref(makeShapeConfig());
+const currentShapeConfig = ref(makeShapeConfig(maxZIndex.value));
 
 // Добавляем тип к конфигу выбранной фигуры от текущей выбранной для рисования
 watch(currentDrawingShape, () => {
   if (!currentDrawingShape.value) {
-    currentShapeConfig.value = makeShapeConfig()
+    currentShapeConfig.value = makeShapeConfig(maxZIndex.value);
   }
   currentShapeConfig.value.type = currentDrawingShape.value;
 });
@@ -163,6 +166,15 @@ const helpers = {
    */
   moveToMaxZIndex: (target, options) => {
     target.moveToTop();
+    // const shape = target.children[0];
+    // const shapeId = shape.id();
+
+    // const findShapeIndex = data.shapes.findIndex((existShape) => {
+    //   return existShape.id === shapeId;
+    // });
+
+    // data.shapes.push(data.shapes[findShapeIndex]);
+    // data.shapes.splice(findShapeIndex, 1);
 
     if (options.withTransformer) {
       const transformerNode = konva.value.transformer.getNode();
@@ -239,12 +251,36 @@ const helpers = {
    * Получить координаты указателя с учётом смещения
    * @returns {Object} Объект с координатами
    */
-  getPointerCoordinates() {
+  getPointerCoordinates: () => {
     // Получаем координаты указателя
     const pos = konva.value.inner.getStage().getPointerPosition();
     const transformCoords = helpers.getCoordsByTransformationsKonva(pos);
 
     return transformCoords;
+  },
+
+  /**
+   * Вынести элемент на самый верхний слой
+   * @param {Number | String} id ID фигуры для перемещения
+   */
+  setShapeMaxZIndex: (id) => {
+    let findIndex = null;
+
+    const findShape = data.shapes.find((existShape, index) => {
+      const result = existShape.id == id;
+
+      if (result) findIndex = index;
+
+      return result;
+    });
+
+    if (!findShape) return;
+
+    maxZIndex.value += 0.1;
+
+    data.shapes.push(data.shapes[findIndex]);
+    findShape.zIndex = maxZIndex.value;
+    data.shapes.splice(findIndex, 1);
   },
 };
 
@@ -279,15 +315,19 @@ const callbacks = {
     // Достаём id фигуры, чтобы далее производить поиск
     const shapeId = shape.id();
 
+    // Координаты фигуры
     const position = target.position();
 
     // Ищем фигуру
-    const findShape = data.shapes.find((existShape) => {
+    const findShape = data.shapes.find((existShape, index) => {
       return existShape.id == shapeId;
     });
 
+    
     // Фигура есть - меняем состояние
     if (findShape) {
+      helpers.setShapeMaxZIndex(findShape.id);
+
       findShape.x = position.x;
       findShape.y = position.y;
     }
@@ -376,12 +416,15 @@ const callbacks = {
         });
 
         // Ищем фигуру
-        const findShape = data.shapes.find((existShape) => {
+        const findShape = data.shapes.find((existShape, index) => {
           return existShape.id == shapeId;
         });
 
         // Если фигура была найдена - применяем трансформации
         if (findShape) {
+          // Выносим фигуру на максимальный zIndex, т.к. трансформируемая фигура не должна быть снизу
+          helpers.setShapeMaxZIndex(findShape.id);
+
           findShape.startRotation = rotation;
           findShape.x = position.x;
           findShape.y = position.y;
@@ -619,7 +662,7 @@ const drawingHandlers = {
     data.shapes.push(drawnShape);
 
     // Зануляем все координаты и размеры
-    currentShapeConfig.value = makeShapeConfig();
+    currentShapeConfig.value = makeShapeConfig(maxZIndex.value);
 
     // Пользователь перестал рисовать на канве
     isPointerDownNow.value = false;

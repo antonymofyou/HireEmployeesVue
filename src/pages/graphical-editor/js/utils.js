@@ -15,9 +15,10 @@ export function dangerouslyForceToAnotherIterationEventLoop(fn) {
 
 /**
  * Фабрика для конфига фигуры
+ * @param {Number} zIndex zIndex для инициализации фигуры
  * @returns {Object} Конфиг фигуры
  */
-export function makeShapeConfig() {
+export function makeShapeConfig(zIndex) {
   return {
     // Общие
     type: null,
@@ -29,6 +30,7 @@ export function makeShapeConfig() {
     strokeWidth: 5,
     width: 0,
     height: 0,
+    zIndex,
   
     // Для Circle
     radius: 0,
