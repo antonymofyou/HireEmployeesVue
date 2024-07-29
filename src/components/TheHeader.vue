@@ -4,7 +4,7 @@
             <BurgerTrigger :aria-expanded="isOpenBurgerMenu" :class="{'active': isOpenBurgerMenu}" @pointerup="toggleBurgerMenu" @keydown.enter.space="toggleBurgerMenu" />
             <NavigationMenu :list-items="listNavigation" />
         </div>
-        <BurgerMenu :model-value="isOpenBurgerMenu" @update:model-value="isOpenBurgerMenu = $event" :breakpoints="breakpointsBurgerMenu">
+        <BurgerMenu v-if="isRenderBurgerMenu" :model-value="isOpenBurgerMenu" @update:model-value="isOpenBurgerMenu = $event">
             <NavigationMenu @transition="closeBurgerMenu" :list-items="listNavigation" />
         </BurgerMenu>
     </header>
@@ -17,6 +17,7 @@ import { ref } from 'vue';
 import NavigationMenu from "@/components/NavigationMenu.vue";
 import BurgerTrigger from "@/components/BurgerTrigger.vue";
 import BurgerMenu from "@/components/BurgerMenu.vue";
+import breakpoints from '@/assets/js/breakpoints';
 
 const listNavigation = [
     ["Вакансии", "vacanciesList"],
@@ -24,10 +25,7 @@ const listNavigation = [
     ["Стандарты", "home"],
 ];
 const isOpenBurgerMenu = ref(false);
-const breakpointsBurgerMenu = {
-    // window > 576px
-    [576]: closeBurgerMenu
-}
+const isRenderBurgerMenu = ref(false);
 
 function closeBurgerMenu() {
     if (isOpenBurgerMenu.value) {
@@ -44,6 +42,15 @@ function toggleBurgerMenu() {
 
     isOpenBurgerMenu.value = false;
 }
+
+breakpoints({
+    // 576px
+    [576]: closeBurgerMenu,
+    // 0px
+    [0] : function() {
+        isRenderBurgerMenu.value = true;
+    },
+});
 
 </script>
   
@@ -68,7 +75,7 @@ function toggleBurgerMenu() {
     display: flex;
     flex-wrap: wrap;
     align-items: center;
-    justify-content: flex-end;
+    justify-content: center;
     gap: 1rem 4rem;
 }
 
@@ -83,7 +90,7 @@ function toggleBurgerMenu() {
 
     .burger-trigger {
         display: grid;
-        margin-left: auto;
+        margin: 0 auto;
     }
 }
 </style>

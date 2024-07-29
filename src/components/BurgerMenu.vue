@@ -16,7 +16,7 @@
 
 <script setup>
 
-import { ref, watch, onBeforeUnmount } from 'vue';
+import { watch } from 'vue';
 
 const emits = defineEmits({
     'update:modelValue': null,
@@ -25,15 +25,8 @@ const props = defineProps({
     modelValue: {
         type: Boolean,
         required: true,
-    },
-    breakpoints: {
-        type: Object,
-        default() {
-            return {};
-        }
     }
 });
-const currentBreakpoint = ref(0);
 
 watch(() => props.modelValue, () => {
     if (props.modelValue) {
@@ -73,79 +66,9 @@ function removesScrollLock() {
     body.style.overflow = 'unset';
 }
 
-const wrapperForUpdatingBreakpoints = debounce(function () {
-    updatesBreakpoint();
-}, 400);
-
-function initBreakpointUpdate() {
-    if (!Object.keys(props.breakpoints).length) return;
-
-    updatesBreakpoint();
-
-    window.addEventListener("resize", wrapperForUpdatingBreakpoints);
-};
-
-initBreakpointUpdate();
-
-function debounce(callback, delay) {
-  let timer;
-
-  return function (...args) {
-    clearTimeout(timer);
-
-    timer = setTimeout(() => {
-      callback.apply(this, args);
-    }, delay);
-  };
-}
-
-function updatesBreakpoint() {
-    const breakpoint = getCurrentBreakpoint();
-
-    if (currentBreakpoint.value == breakpoint) return;
-
-    currentBreakpoint.value = breakpoint;
-};
-
-function getCurrentBreakpoint() {
-    const width = window.innerWidth;
-
-    return Object.keys(props.breakpoints).reduce((acc, breakpoint) => {
-        if (width >= breakpoint) {
-            acc = breakpoint;
-        }
-
-        return acc;
-    }, 0);
-};
-
-watch(currentBreakpoint, function() {
-    callsFunctionsBreakpoint();
-});
-
-function callsFunctionsBreakpoint() {
-    const functionsBreakpoint = props.breakpoints[currentBreakpoint.value];
-
-    if (!functionsBreakpoint) return;
-
-    if (typeof functionsBreakpoint === "function") {
-        functionsBreakpoint();
-
-        return;
-    }
-
-    functionsBreakpoint?.forEach((func) => {
-        func();
-    });
-};
-
 function updateModelValue(value) {
     emits('update:modelValue', value);
 }
-
-onBeforeUnmount(() => {
-    window.removeEventListener("resize", wrapperForUpdatingBreakpoints);
-});
 
 </script>
 
