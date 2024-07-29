@@ -181,6 +181,9 @@ function getVacancyStatuses() {
       '/vacancies/get_vacancy_statuses.php',
       'manager',
       function (response) {
+        if (response.statuses && response.statuses.length > 0){
+
+        
         //успешный результат
         candidateStatus.value = [{ name: 'Все', id: 'Все', color: 'gray', count: 0}];
         response.statuses.map((status) => {
@@ -196,6 +199,10 @@ function getVacancyStatuses() {
             return sum + count;
           }, 0);
         });
+      } else {
+        candidateStatus.value = [{ name: 'Все', id: 'Все', color: 'gray', count: 0}];
+        status.value = "Все"
+      }
       },
       function (err) {
         //неуспешный результат
