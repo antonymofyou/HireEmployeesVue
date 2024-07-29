@@ -412,12 +412,13 @@ const callbacks = {
             console.group('TransformShape');
             console.log('Before: ', findShape.width, findShape.height);
   
-            findShape.startRotation = rotation;
+            findShape.rotation = rotation;
             findShape.x = position.x;
             findShape.y = position.y;
             findShape.width = correctWidthByScale;
             findShape.height = correctHeightByScale;
 
+            // group.rotation(rotation);
             // group.width(correctWidthByScale);
             // group.height(correctHeightByScale);
             // shape.width(correctWidthByScale);

@@ -19,7 +19,7 @@
             y: shape.y,
             scaleX: shape.scaleX,
             scaleY: shape.scaleY,
-            rotation: shape.startRotation,
+            rotation: shape.rotation,
             width: shape.width,
             height: shape.height
           }"
@@ -38,7 +38,7 @@
                 // Передаём параметры для удаления для избежания увеличения значения на само себя
                 // Т.к. стейт конвы и наш - синхронизирован не полностью, мы, после изменения стейта конвы,
                 // Пишем в свой стейт значения. Написали значения - конва ререндерит компоненты
-                ['scaleX', 'scaleY', 'x', 'y']
+                ['scaleX', 'scaleY', 'x', 'y', 'rotation']
               ),
               image: TransformerEditor.shapeReducer(shape) === 'v-image' ? helpers.buildImage(shape.imageId) : null,
             }"
