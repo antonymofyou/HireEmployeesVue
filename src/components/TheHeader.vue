@@ -5,7 +5,7 @@
             <NavigationMenu :list-items="listNavigation" />
         </div>
         <BurgerMenu :model-value="isOpenBurgerMenu" @update:model-value="isOpenBurgerMenu = $event" :breakpoints="breakpointsBurgerMenu">
-            <NavigationMenu :list-items="listNavigation" />
+            <NavigationMenu @transition="closeBurgerMenu" :list-items="listNavigation" />
         </BurgerMenu>
     </header>
 </template>
@@ -26,10 +26,12 @@ const listNavigation = [
 const isOpenBurgerMenu = ref(false);
 const breakpointsBurgerMenu = {
     // window > 576px
-    [576]: () => {
-        if (isOpenBurgerMenu.value) {
-            isOpenBurgerMenu.value = false;
-        }
+    [576]: closeBurgerMenu
+}
+
+function closeBurgerMenu() {
+    if (isOpenBurgerMenu.value) {
+        isOpenBurgerMenu.value = false;
     }
 }
 

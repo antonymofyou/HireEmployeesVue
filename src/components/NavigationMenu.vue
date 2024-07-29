@@ -7,12 +7,14 @@
                 class="navigation-menu__item"
             >
                 <RouterLink
+                    @pointerup="emits('transition')"
+                    @keydown.enter.space="emits('transition')"
                     :to="{
                         name: pathName,
                     }"
                     class="navigation-menu__link"
                 >
-                    {{ pageName }}
+                    <slot>{{ pageName }}</slot>
                 </RouterLink>
             </li>
         </ul>
@@ -26,6 +28,9 @@ const props = defineProps({
         type: Array,
         required: true,
     }
+});
+const emits = defineEmits({
+    transition: null,
 });
 
 </script>
