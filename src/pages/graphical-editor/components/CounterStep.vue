@@ -3,11 +3,11 @@
     <div class="stepper">
       <div class="stepper__item">
         <button
-          :disabled="isIncrementButtonDisabled"
-          @click="callbacks.increment"
+          :disabled="isDecrementButtonDisabled"
+          @click="callbacks.decrement"
           class="stepper__button stepper__button--left"
         >
-          +
+          -
         </button>
       </div>
 
@@ -26,11 +26,11 @@
 
       <div class="stepper__item">
         <button
-          :disabled="isDecrementButtonDisabled"
-          @click="callbacks.decrement"
+          :disabled="isIncrementButtonDisabled"
+          @click="callbacks.increment"
           class="stepper__button stepper__button--right"
         >
-          -
+          +
         </button>
       </div>
     </div>

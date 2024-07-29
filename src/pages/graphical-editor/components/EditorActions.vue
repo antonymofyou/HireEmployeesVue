@@ -110,14 +110,20 @@
 
       <Panel>
         <PanelItem>
-          <Button @click="props.incrementScale">
-            <PlusIcon size="13" />
+          <Button
+            class="scale-btn"
+            @click="props.decrementScale"
+          >
+            -
           </Button>
         </PanelItem>
 
         <PanelItem>
-          <Button @click="props.decrementScale">
-            <MinusIcon size="13" />
+          <Button
+            class="scale-btn"
+            @click="props.incrementScale"
+          >
+            +
           </Button>
         </PanelItem>
 
@@ -191,9 +197,6 @@ import Button from './ui/Button.vue';
 import Panel from './ui/Panel.vue';
 import PanelItem from './ui/PanelItem.vue';
 import CounterStep from './CounterStep.vue';
-
-import PlusIcon from 'vue-material-design-icons/Plus.vue';
-import MinusIcon from 'vue-material-design-icons/Minus.vue';
 
 import { data } from '../js/mock';
 
@@ -405,5 +408,9 @@ const handlers = {
   height: 100%;
   opacity: 0;
   cursor: pointer;
+}
+
+.scale-btn {
+  font-size: 16px;
 }
 </style>

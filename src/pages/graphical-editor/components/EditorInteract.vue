@@ -9,8 +9,6 @@
     :height="configKonva.height"
     :draggable="configKonva.draggable"
     :shapesDraggable="configKonva.shapesDraggable"
-    :fillX="configKonva.fillX"
-    :fillY="configKonva.fillY"
     :currentDrawingShape="currentDrawingShape"
     :currentShapeConfig="currentShapeConfig"
     :stagePointerUp="callbacks.stagePointerUp"
@@ -54,14 +52,15 @@
 </template>
 
 <script setup>
-import { data } from '../js/mock';
 
-import { ref, watchEffect, computed, toValue, watch, reactive, onMounted } from 'vue';
+import { ref, watchEffect, computed, toValue, watch, reactive } from 'vue';
 import { dangerouslyForceToAnotherIterationEventLoop, formatNumToPercent, makeShapeConfig } from '../js/utils';
-import { Text } from 'konva/lib/shapes/Text';
 
 import Editor from './Editor.vue';
 import EditorActions from './EditorActions.vue';
+
+import { data } from '../js/mock';
+import { sharedKonvaConfig } from '../js/config';
 
 const props = defineProps({
   // Разрешено ли перетаскивание канвы
@@ -155,11 +154,9 @@ watch(currentDrawingShape, () => {
 // });
 
 // Конфигурация холста
+// width, height - виртуальные размеры канвы, чтобы помещалось на любом устройстве
 const configKonva = {
-  width: window.innerWidth,
-  height: 450,
-  fillX: true,
-  fillY: false,
+  ...sharedKonvaConfig,
   draggable: false,
   shapesDraggable: true,
 };
@@ -213,7 +210,11 @@ const helpers = {
    * @param {File} file - Файл
    */
    loadNewImageIntoCanvas: async (file) => {
+    console.log(file);
     const fileReader = new FileReader();
+
+    const defaultImageWidth = 250;
+    const defaultImageHeight = 250;
 
     fileReader.onloadend = () => {
       const shapeId = crypto.randomUUID();
@@ -222,10 +223,10 @@ const helpers = {
       data.shapes.push({
         id: shapeId,
         type: 'image',
-        width: 250,
-        height: 250,
-        x: 300,
-        y: 150,
+        width: defaultImageWidth,
+        height: defaultImageHeight,
+        x: configKonva.width / 2 - defaultImageWidth / 2,
+        y: configKonva.height / 2 - defaultImageHeight / 2,
         imageId,
       });
       data.imageDictionary[imageId] = fileReader.result;

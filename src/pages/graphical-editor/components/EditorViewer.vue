@@ -8,22 +8,19 @@
     :onlyView="true"
     :width="configKonva.width"
     :height="configKonva.height"
-    :fillX="configKonva.fillX"
-    :fillY="configKonva.fillY"
     :draggable="configKonva.draggable"
     :shapesDraggable="configKonva.shapesDraggable"
   />
 </template>
 
 <script setup>
-import { data } from '../js/mock';
 import Editor from './Editor.vue';
 
+import { sharedKonvaConfig } from '../js/config';
+import { data } from '../js/mock';
+
 const configKonva = {
-  width: window.innerWidth,
-  height: window.innerHeight / 1.5,
-  fillX: true,
-  fillY: false,
+  ...sharedKonvaConfig,
   draggable: false,
   shapesDraggable: false,
 };

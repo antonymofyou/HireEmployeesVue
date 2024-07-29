@@ -1,5 +1,9 @@
 <template>
-  <div @pointerdown.stop @pointerup="props.stagePointerUp">
+  <div
+    class="canvas-wrapper"
+    @pointerdown.stop @pointerup="props.stagePointerUp"
+    ref="canvasWrapper"
+  >
     <v-stage
       :config="configKonva"
       @click="props.stagePointerDown"
@@ -104,26 +108,6 @@ const props = defineProps({
     type: Number,
     required: true
   },
-  maxWidth: {
-    type: Number,
-    required: false,
-    default: Infinity,
-  },
-  maxHeight: {
-    type: Number,
-    required: false,
-    default: Infinity,
-  },
-  fillX: {
-    type: Boolean,
-    required: false,
-    default: false,
-  },
-  fillY: {
-    type: Boolean,
-    required: false,
-    default: false,
-  },
   draggable: {
     type: Boolean,
     required: false,
@@ -198,6 +182,7 @@ const props = defineProps({
 
 const konva = ref(null);
 const transformer = ref(null);
+const canvasWrapper = ref(null);
 
 defineExpose({
   inner: konva,
@@ -225,33 +210,58 @@ const helpers = {
   },
 };
 
-const dynamicSizes = reactive({
-  width: props.width,
-  height: props.height,
-});
-
 // Корректные размеры при изменении окна браузера
-watchEffect((onCleanup) => {
-  if (!konva.value) return;
+// watchEffect((onCleanup) => {
+//   if (!konva.value) return;
 
-  const konvaStage = konva.value.getStage();
-  // Берём разные размеры, поскольку есть выбор, растягивать или нет
-  const choiceFromWidth = props.fillX ? props.maxWidth : props.width;
-  const choiceFromHeight = props.fillY ? props.maxHeight : props.height;
+//   const konvaStage = konva.value.getStage();
+//   // Берём разные размеры, поскольку есть выбор, растягивать или нет
+//   const choiceFromWidth = props.fillX ? props.maxWidth : props.width;
+//   const choiceFromHeight = props.fillY ? props.maxHeight : props.height;
+
+//   const resizeHandler = () => {
+//     dynamicSizes.width = Math.min(choiceFromWidth, window.innerWidth);
+//     dynamicSizes.height = Math.min(choiceFromHeight, window.innerHeight);
+
+//     // Растягиваем канву на нужные размеры
+//     konvaStage.width(dynamicSizes.width);
+//     konvaStage.height(dynamicSizes.height);
+//   };
+
+//   window.addEventListener('resize', resizeHandler, { passive: true });
+
+//   onCleanup(() => {
+//     window.removeEventListener('resize', resizeHandler);
+//   });
+// });
+
+// Эффект, в котором достигаем того, что содержимое канвы на всех экранах будет одинаковым
+watchEffect((onCleanup) => {
+  if (!canvasWrapper.value) return;
 
   const resizeHandler = () => {
-    dynamicSizes.width = Math.min(choiceFromWidth, window.innerWidth);
-    dynamicSizes.height = Math.min(choiceFromHeight, window.innerHeight);
+    const containerWidth = canvasWrapper.value.offsetWidth;
+    const containerHeight = canvasWrapper.value.offsetHeight;
+    
+    const scale = containerWidth / props.width;
+    const stage = konva.value.getStage();
 
-    // Растягиваем канву на нужные размеры
-    konvaStage.width(dynamicSizes.width);
-    konvaStage.height(dynamicSizes.height);
+    stage.width(containerWidth);
+    stage.height(containerHeight);
+    stage.scale({ x: scale, y: scale });
   };
+  resizeHandler();
 
   window.addEventListener('resize', resizeHandler, { passive: true });
 
-  onCleanup(() => {
-    window.removeEventListener('resize', resizeHandler);
-  });
+  onCleanup(() => window.removeEventListener('resize', resizeHandler));
 });
 </script>
+
+<style scoped>
+.canvas-wrapper {
+  margin-bottom: 1rem;
+  border-radius: 24px;
+  box-shadow: rgba(99, 99, 99, 0.2) 0px 2px 8px 0px;
+}
+</style>
