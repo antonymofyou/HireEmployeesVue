@@ -166,15 +166,7 @@ const helpers = {
    */
   moveToMaxZIndex: (target, options) => {
     target.moveToTop();
-    // const shape = target.children[0];
-    // const shapeId = shape.id();
-
-    // const findShapeIndex = data.shapes.findIndex((existShape) => {
-    //   return existShape.id === shapeId;
-    // });
-
-    // data.shapes.push(data.shapes[findShapeIndex]);
-    // data.shapes.splice(findShapeIndex, 1);
+    // helpers.setShapeMaxZIndex(target.children[0].id());
 
     if (options.withTransformer) {
       const transformerNode = konva.value.transformer.getNode();
@@ -392,7 +384,7 @@ const callbacks = {
       group.on('transformend', () => {
         // Достаём текущий поворот и координаты
         const rotation = group.rotation();
-        const position = group.position();
+        const position = {...group.position()};
         // Достаём размеры
         const scaleX = group.attrs.scaleX;
         const scaleY = group.attrs.scaleY;
@@ -403,33 +395,47 @@ const callbacks = {
         const correctWidthByScale = width * scaleX;
         const correctHeightByScale = height * scaleY;
         
-        // Меняем scaleX, scaleY на изначальные значения
-        group.scaleX(1);
-        group.scaleY(1);
-
+        // Чтобы трансформер не дёргался
         transformerNode.nodes([]);
-
-        // Для корректного обновления
-        dangerouslyForceToAnotherIterationEventLoop(() => {
-          transformerNode.update();
-          transformerNode.nodes([group]);
-        });
-
+        
         // Ищем фигуру
-        const findShape = data.shapes.find((existShape, index) => {
+        const findShape = data.shapes.find((existShape) => {
           return existShape.id == shapeId;
         });
-
+        
         // Если фигура была найдена - применяем трансформации
         if (findShape) {
-          // Выносим фигуру на максимальный zIndex, т.к. трансформируемая фигура не должна быть снизу
-          helpers.setShapeMaxZIndex(findShape.id);
+          requestAnimationFrame(() => {
+            // Выносим фигуру на максимальный zIndex, т.к. трансформируемая фигура не должна быть снизу
+            helpers.setShapeMaxZIndex(findShape.id);
+  
+            console.group('TransformShape');
+            console.log('Before: ', findShape.width, findShape.height);
+  
+            findShape.startRotation = rotation;
+            findShape.x = position.x;
+            findShape.y = position.y;
+            findShape.width = correctWidthByScale;
+            findShape.height = correctHeightByScale;
 
-          findShape.startRotation = rotation;
-          findShape.x = position.x;
-          findShape.y = position.y;
-          findShape.width = correctWidthByScale;
-          findShape.height = correctHeightByScale;
+            // group.width(correctWidthByScale);
+            // group.height(correctHeightByScale);
+            // shape.width(correctWidthByScale);
+            // shape.height(correctHeightByScale);
+            
+            // Меняем scaleX, scaleY на изначальные значения
+            group.scaleX(1);
+            group.scaleY(1);
+
+            // Для корректного отображения
+            dangerouslyForceToAnotherIterationEventLoop(() => {
+              transformerNode.update();
+              transformerNode.nodes([group]);
+            });
+
+            console.log('After: ', findShape.width, findShape.height);
+            console.groupEnd('TransformShape');
+          });
         }
       });
     }
