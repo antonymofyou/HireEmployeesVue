@@ -39,6 +39,7 @@
 
 <script setup>
 import { computed } from 'vue';
+import { makeDebouncedFn } from '../js/utils';
 
 const props = defineProps({
   value: {
@@ -71,7 +72,6 @@ const minLengthByEx = 4;
 const minimumLengthByEx = computed(() => {
   return `${String(props.value).length + minLengthByEx}ex`;
 });
-
 // Статус дизейбла кнопок
 const isIncrementButtonDisabled = computed(() => {
   return props.value >= props.max;
@@ -79,16 +79,23 @@ const isIncrementButtonDisabled = computed(() => {
 const isDecrementButtonDisabled = computed(() => {
   return props.value <= props.min;
 });
+// Событие change будем вызывать отложенно, т.к. пользователь не всегда будет взаимодействовать с <input />
+const debouncedChangeEventEmit = computed(() => {
+  const { debouncedFn } = makeDebouncedFn(() => emit('change', props.value));
+  return debouncedFn;
+});
 
 // Переиспользуемые функции
 const callbacks = {
   increment: () => {
     if (props.value + props.byStep > props.max) return;
     emit('input', props.value + props.byStep);
+    debouncedChangeEventEmit.value();
   },
   decrement: () => {
     if (props.value - props.byStep < props.min) return;
     emit('input', props.value - props.byStep);
+    debouncedChangeEventEmit.value();
   },
   /**
    * Обработчик нажатия клавиши
@@ -111,13 +118,14 @@ const callbacks = {
    */
   handleInput: (e) => {
     emit('input', Number(e.target.value));
+    debouncedChangeEventEmit.value();
   },
   /**
    * Обработчик события change у элемента <input />
    * @param {ChangeEvent} e - Событие
    */
   handleChange: () => {
-    emit('input', props.value);
+    emit('change', props.value);
   },
 };
 
