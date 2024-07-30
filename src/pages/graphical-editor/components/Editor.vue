@@ -58,6 +58,7 @@
             <v-text
               v-for="textRecord in textInfo.text"
               :config="{
+                padding: shape.strokeWidth,
                 width: shape.width,
                 height: shape.height,
                 align: textInfo.alignment,

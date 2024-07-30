@@ -498,6 +498,7 @@ const callbacks = {
         // нам не нужны ререндеры каждую миллисекунду)
         switch (shape.attrs.type) {
           case 'rectangle':
+          case 'rect':
           case 'image': {
             group.rotation(rotation);
             group.width(correctWidthByScale);
@@ -705,24 +706,24 @@ const callbacks = {
    * Добавить вертикальное выравнивание к фигуре
    * @param {'top' | 'middle' | 'bottom'} align - Выравнивание
    */
-   setVerticalAlignActiveShape: (align) => {
-    selectedShapeFromState.value.textVerticalAlignment = align;
-    isConfigOfTextVisible.value = false;
+  setVerticalAlignActiveShape: (align) => {
+  selectedShapeFromState.value.textVerticalAlignment = align;
+  isConfigOfTextVisible.value = false;
 
-    // Если нет текста - то даём ввести текст
-    if (!Array.isArray(selectedShapeFromState.value.text) || selectedShapeFromState.value.text.length === 0) {
-      isInputForEnterShapeTextVisible.value = true;
-    }
-   },
+  // Если нет текста - то даём ввести текст
+  if (!Array.isArray(selectedShapeFromState.value.text) || selectedShapeFromState.value.text.length === 0) {
+    isInputForEnterShapeTextVisible.value = true;
+  }
+  },
 
-   /**
-    * Установить видимость конфигурации для текста
-    * @param {Boolean} status - Виден / не виден конфиг
-    */
-   setConfigOfTextVisibility: (status) => {
-    isInputForEnterShapeTextVisible.value = false;
-    isConfigOfTextVisible.value = status;
-   },
+  /**
+   * Установить видимость конфигурации для текста
+   * @param {Boolean} status - Виден / не виден конфиг
+   */
+  setConfigOfTextVisibility: (status) => {
+  isInputForEnterShapeTextVisible.value = false;
+  isConfigOfTextVisible.value = status;
+  },
 
   /**
    * Увеличение масштаба 
