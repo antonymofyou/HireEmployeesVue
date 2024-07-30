@@ -494,6 +494,12 @@ const callbacks = {
 
         const { rotation, correctWidthByScale, correctHeightByScale } = getEntities();
         
+        // Если слишком маленькие размеры у фигуры - дальше трансформировать не будем
+        if (correctWidthByScale < 20 || correctHeightByScale < 20) {
+          transformerNode.stopTransform();
+          return;
+        }
+
         // Меняем координаты и иные сущности внутри канвы (тут не меняем состояние, т.к.
         // нам не нужны ререндеры каждую миллисекунду)
         switch (shape.attrs.type) {
@@ -540,15 +546,16 @@ const callbacks = {
 
           // Пишем в состояние (после этого последует ререндер)
           findShape.rotation = rotation;
-          findShape.x = position.x;
-          findShape.y = position.y;
-          findShape.width = correctWidthByScale;
-          findShape.height = correctHeightByScale;
           
           // Для стрелок - меняем scaleX, scaleY
           if (shape.attrs.type === 'arrow') {
             findShape.scaleX = scaleX;
             findShape.scaleY = scaleY;
+          } else {
+            findShape.x = position.x;
+            findShape.y = position.y;
+            findShape.width = correctWidthByScale;
+            findShape.height = correctHeightByScale;
           }
 
           // Для круга - меняем радиус
@@ -559,8 +566,10 @@ const callbacks = {
           }
 
           // Меняем scaleX, scaleY на изначальные значения
-          group.scaleX(1);
-          group.scaleY(1);
+          if (shape.attrs.type !== 'arrow') {
+            group.scaleX(1);
+            group.scaleY(1);
+          }
 
           // Для корректного отображения
           requestAnimationFrame(() => {
