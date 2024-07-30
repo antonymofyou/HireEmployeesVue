@@ -4,10 +4,6 @@
   </button>
 </template>
 
-<script setup>
-
-</script>
-
 <style scoped>
 .button {
   appearance: none;

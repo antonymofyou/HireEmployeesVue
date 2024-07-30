@@ -1,7 +1,8 @@
 <template>
   <div
     class="canvas-wrapper"
-    @pointerdown.stop @pointerup="props.stagePointerUp"
+    @pointerdown.stop
+    @pointerup="props.stagePointerUp"
     ref="canvasWrapper"
   >
     <v-stage
@@ -86,7 +87,6 @@
 <script setup>
 import { ref, watchEffect } from 'vue';
 import { TransformerEditor } from '../js/TransformClasses';
-import { sharedKonvaConfig } from '../js/config';
 
 const props = defineProps({
   onlyView: {

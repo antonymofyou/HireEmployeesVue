@@ -25,75 +25,79 @@
         </Panel>
       </div>
 
-      <Panel class="select-shape" v-show="isNewShapeSelecting">
-        <PanelItem>
-          <Button
-            :disabled="props.currentDrawingShape === 'rect'"
-            @click="props.addNewShape('rect')"
-          >
-            Прямоугольник
-          </Button>
-        </PanelItem>
+      <div class="actions__item-row">
+        <Panel class="select-shape" v-show="isNewShapeSelecting">
+          <PanelItem>
+            <Button
+              :disabled="props.currentDrawingShape === 'rect'"
+              @click="props.addNewShape('rect')"
+            >
+              Прямоугольник
+            </Button>
+          </PanelItem>
 
-        <PanelItem>
-          <Button
-            :disabled="props.currentDrawingShape === 'circle'"
-            @click="props.addNewShape('circle')"
-          >
-            Круг
-          </Button>
-        </PanelItem>
+          <PanelItem>
+            <Button
+              :disabled="props.currentDrawingShape === 'circle'"
+              @click="props.addNewShape('circle')"
+            >
+              Круг
+            </Button>
+          </PanelItem>
 
-        <PanelItem>
-          <Button
-            :disabled="props.currentDrawingShape === 'arrow'"
-            @click="props.addNewShape('arrow')"
-          >
-            Стрелка
-          </Button>
-        </PanelItem>
+          <PanelItem>
+            <Button
+              :disabled="props.currentDrawingShape === 'arrow'"
+              @click="props.addNewShape('arrow')"
+            >
+              Стрелка
+            </Button>
+          </PanelItem>
 
-        <PanelItem>
-          <Button
-            @click="props.addNewShape('image')"
-            :disabled="props.currentDrawingShape === 'image'"
-            class="input-file__wrapper"
-          >
-            <input
-              @change="handlers.handleFileUpload"
-              accept=".png, .jpg, .jpeg"
-              type="file"
-              class="input-file"
-            />
-            Картинка
-          </Button>
-        </PanelItem>
-      </Panel>
+          <PanelItem>
+            <Button
+              @click="props.addNewShape('image')"
+              :disabled="props.currentDrawingShape === 'image'"
+              class="input-file__wrapper"
+            >
+              <input
+                @change="handlers.handleFileUpload"
+                accept=".png, .jpg, .jpeg"
+                type="file"
+                class="input-file"
+              />
+              Картинка
+            </Button>
+          </PanelItem>
+        </Panel>
+      </div>
     </div>
 
     <!-- Работа с текстом на фигуре -->
     <div class="actions__item">
       <span class="actions__item-title">Работа с текстом</span>
 
-      <Panel>
-        <PanelItem>
-          <Button
-            :disabled="!props.selectedShape || !props.isAllowedToAddText"
-            @click="props.addTextToSelectedShape"
-          >
-            Добавить текст
-          </Button>
-        </PanelItem>
+      <div class="actions__item-row">
+        <Panel>
+          <PanelItem>
+            <Button
+              :disabled="!props.selectedShape || !props.isAllowedToAddText"
+              @click="props.addTextToSelectedShape"
+            >
+              Добавить текст
+            </Button>
+          </PanelItem>
 
-        <PanelItem>
-          <Button
-            :disabled="!props.selectedShape || !props.isAllowedToAddText"
-            @click="callbacks.activateConfig"
-          >
-            Изменить конфигурацию
-          </Button>
-        </PanelItem>
-      </Panel>
+          <PanelItem>
+            <Button
+              :disabled="!props.selectedShape || !props.isAllowedToAddText"
+              @click="callbacks.activateConfig"
+            >
+              Изменить конфигурацию
+            </Button>
+          </PanelItem>
+        </Panel>
+      </div>
       
       <div class="actions-advanced config-text" v-show="props.isConfigOfTextVisible">
         <span class="actions-advanced__title">
@@ -103,15 +107,30 @@
         <div class="actions-advanced__row">
           <Panel>
             <PanelItem>
-              <Button @click="callbacks.setVerticalAlign('top')">Сверху</Button>
+              <Button
+                :disabled="props.selectedShapeFromState?.textVerticalAlignment === 'top'"
+                @click="callbacks.setVerticalAlign('top')"
+              >
+                Сверху
+              </Button>
             </PanelItem>
             
             <PanelItem>
-            <Button @click="callbacks.setVerticalAlign('middle')">По центру</Button>
+            <Button
+              :disabled="props.selectedShapeFromState?.textVerticalAlignment === 'middle'"
+              @click="callbacks.setVerticalAlign('middle')"
+            >
+              По центру
+            </Button>
           </PanelItem>
           
           <PanelItem>
-            <Button @click="callbacks.setVerticalAlign('bottom')">Снизу</Button>
+            <Button
+              :disabled="props.selectedShapeFromState?.textVerticalAlignment === 'bottom'"
+              @click="callbacks.setVerticalAlign('bottom')"
+            >
+              Снизу
+            </Button>
           </PanelItem>
         </Panel>
         </div>
@@ -152,55 +171,59 @@
     <div class="actions__item">
       <span class="actions__item-title">Операции над холстом</span>
 
-      <Panel>
-        <PanelItem>
-          <Button
-            class="button"
-            @click="props.resetScaleCanvas"
-            :disabled="!props.isResetScaleCanvasAllowed"
-          >
-            Сбросить масштабирование
-          </Button>
-        </PanelItem>
+      <div class="actions__item-row">
+        <Panel>
+          <PanelItem>
+            <Button
+              class="button"
+              @click="props.resetScaleCanvas"
+              :disabled="!props.isResetScaleCanvasAllowed"
+            >
+              Сбросить масштабирование
+            </Button>
+          </PanelItem>
 
-        <PanelItem v-if="props.isStageDraggable">
-          <Button
-            class="button"
-            @click="props.resetTransformCanvas"
-          >
-            Вернуться к 0;0
-          </Button>
-        </PanelItem>
-      </Panel>
+          <PanelItem v-if="props.isStageDraggable">
+            <Button
+              class="button"
+              @click="props.resetTransformCanvas"
+            >
+              Вернуться к 0;0
+            </Button>
+          </PanelItem>
+        </Panel>
+      </div>
     </div>
 
     <!-- Масштабирование -->
     <div class="actions__item">
       <span class="actions__item-title">Масштабирование</span>
 
-      <Panel>
-        <PanelItem>
-          <Button
-            class="scale-btn"
-            @click="props.decrementScale"
-          >
-            -
-          </Button>
-        </PanelItem>
+      <div class="actions__item-row">
+        <Panel>
+          <PanelItem>
+            <Button
+              class="scale-btn"
+              @click="props.decrementScale"
+            >
+              -
+            </Button>
+          </PanelItem>
 
-        <PanelItem>
-          <Button
-            class="scale-btn"
-            @click="props.incrementScale"
-          >
-            +
-          </Button>
-        </PanelItem>
+          <PanelItem>
+            <Button
+              class="scale-btn"
+              @click="props.incrementScale"
+            >
+              +
+            </Button>
+          </PanelItem>
 
-        <PanelItem>
-          {{ props.currentScale }}
-        </PanelItem>
-      </Panel>
+          <PanelItem>
+            {{ props.currentScale }}
+          </PanelItem>
+        </Panel>
+      </div>
     </div>
 
     <!-- Манипуляции с цветом выбранной фигуры -->
@@ -261,7 +284,7 @@
 </template>
 
 <script setup>
-import { ref, computed } from 'vue';
+import { ref, computed, watchEffect } from 'vue';
 
 import Button from './ui/Button.vue';
 import Panel from './ui/Panel.vue';
@@ -280,6 +303,10 @@ const props = defineProps({
     required: true,
   },
   selectedShape: {
+    type: [Object, null],
+    required: true,
+  },
+  selectedShapeFromState: {
     type: [Object, null],
     required: true,
   },

@@ -7,7 +7,6 @@
     </Panel>
   </div>
 
-
   <Editor
     :shapes="data.shapes"
     :imageDictionary="data.imageDictionary"
@@ -38,6 +37,7 @@
       :toggleSelectingNewShape="callbacks.toggleSelectingNewShape"
       :isNewShapeSelecting="isNewShapeSelecting"
       :selectedShape="selectedShape"
+      :selectedShapeFromState="selectedShapeFromState"
       :isAllowedToAddText="isAllowedToAddText"
       :addTextToSelectedShape="callbacks.startProcessAddTextToActiveShape"
       :deleteActiveShape="helpers.deleteActiveShape"
@@ -152,6 +152,17 @@ const isAllowedToAddText = computed(() => {
 const isResetScaleCanvasAllowed = computed(() => {
   return scale.value.x !== 1;
 });
+// Текущая выбранная фигура из стейта (который потом полетит на сервер)
+const selectedShapeFromState = computed(() => {
+  if (!selectedShape.value) return null;
+
+  const shapeId = selectedShape.value.id();
+  const findShape = data.shapes.find((existShape) => {
+    return existShape.id == shapeId;
+  });
+
+  return findShape;
+});
 
 // Конфиг рисуемой фигуры (чтобы обновлять лишь часть канвы, не ререндерить полностью)
 const currentShapeConfig = ref(makeShapeConfig(maxZIndex.value));
@@ -164,12 +175,42 @@ watch(currentDrawingShape, () => {
   currentShapeConfig.value.type = currentDrawingShape.value;
 });
 
+// Действия при появлении / исчезновении / изменении  выбранной фигуры
 watch(selectedShape, () => {
-  if (selectedShape.value) return;
-  // Выбранной фигуры нет - поэтому отменяем все действия с ней связанные
+  // Выбранной фигуры нет / она поменялась - поэтому отменяем все действия с ней связанные
   isConfigOfTextVisible.value = false;
   isInputForEnterShapeTextVisible.value = false;
 });
+
+// Ставим масштабирование на прокрутку у канвы
+watchEffect((onCleanup) => {
+  if (!props.isScaleByWheel || !konvaStage.value) return;
+  
+  const wheelHandler = (e) => {
+    e.evt.preventDefault();
+    // Определяем направление зума
+    const direction = e.evt.deltaY > 0 ? -1 : 1;
+    callbacks.changeScale(direction);
+  };
+
+  konvaStage.value.on('wheel', wheelHandler);
+
+  // Во избежание утечек памяти - убираем обработчики
+  onCleanup(() => {
+    if (!konvaStage.value) return;
+    konvaStage.value.off('wheel');
+  });
+});
+
+// Следим за состоянием для канвы и меняем её
+watch([scale, canvasPosition], () => {
+  if (!konvaStage.value) return;
+
+  // Применяем зум
+  konvaStage.value.scale({ x: scale.value.x, y: scale.value.y });
+  // Применяем позиционирование
+  konvaStage.value.position({ x: canvasPosition.value.x, y: canvasPosition.value.y });
+}, { immediate: true });
 
 // Конфигурация холста
 // width, height - виртуальные размеры канвы, чтобы помещалось на любом устройстве
@@ -643,14 +684,10 @@ const callbacks = {
    * @param {String} text - Добавляемый текст
    */
   addTextToSelectedShape: (text) => {
-    const shapeId = selectedShape.value.id();
-    const findShape = data.shapes.find((existShape) => {
-      return existShape.id == shapeId;
-    });
+    if (!Array.isArray(selectedShapeFromState.value.text))
+      selectedShapeFromState.value.text = [];
 
-    if (!Array.isArray(findShape.text)) findShape.text = [];
-
-    findShape.text.push(reactive({
+    selectedShapeFromState.value.text.push(reactive({
       alignment: 'left',
       text: [
         {
@@ -658,7 +695,7 @@ const callbacks = {
           fontSize: 24,
           type: 'medium',
         }
-      ]
+      ],
     }));
 
     isInputForEnterShapeTextVisible.value = false;
@@ -669,14 +706,13 @@ const callbacks = {
    * @param {'top' | 'middle' | 'bottom'} align - Выравнивание
    */
    setVerticalAlignActiveShape: (align) => {
-    const shapeId = selectedShape.value.id();
-    const findShape = data.shapes.find((existShape) => {
-      return existShape.id == shapeId;
-    });
-
-    findShape.textVerticalAlignment = align;
+    selectedShapeFromState.value.textVerticalAlignment = align;
     isConfigOfTextVisible.value = false;
-    isInputForEnterShapeTextVisible.value = true;
+
+    // Если нет текста - то даём ввести текст
+    if (!Array.isArray(selectedShapeFromState.value.text) || selectedShapeFromState.value.text.length === 0) {
+      isInputForEnterShapeTextVisible.value = true;
+    }
    },
 
    /**
@@ -828,36 +864,6 @@ const drawingHandlers = {
     currentDrawingShape.value = null;
   },
 };
-
-// Ставим масштабирование на прокрутку у канвы
-watchEffect((onCleanup) => {
-  if (!props.isScaleByWheel || !konvaStage.value) return;
-  
-  const wheelHandler = (e) => {
-    e.evt.preventDefault();
-    // Определяем направление зума
-    const direction = e.evt.deltaY > 0 ? -1 : 1;
-    callbacks.changeScale(direction);
-  };
-
-  konvaStage.value.on('wheel', wheelHandler);
-
-  // Во избежание утечек памяти - убираем обработчики
-  onCleanup(() => {
-    if (!konvaStage.value) return;
-    konvaStage.value.off('wheel');
-  });
-});
-
-// Следим за состоянием для канвы и меняем её
-watch([scale, canvasPosition], () => {
-  if (!konvaStage.value) return;
-
-  // Применяем зум
-  konvaStage.value.scale({ x: scale.value.x, y: scale.value.y });
-  // Применяем позиционирование
-  konvaStage.value.position({ x: canvasPosition.value.x, y: canvasPosition.value.y });
-}, { immediate: true });
 </script>
 
 <style scoped>
