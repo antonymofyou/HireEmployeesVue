@@ -65,11 +65,11 @@ import { dangerouslyForceToAnotherIterationEventLoop, formatNumToPercent, makeSh
 
 import Editor from './Editor.vue';
 import EditorActions from './EditorActions.vue';
+import Button from './ui/Button.vue';
+import Panel from './ui/Panel.vue';
 
 import { data } from '../js/mock';
 import { sharedKonvaConfig } from '../js/config';
-import Button from './ui/Button.vue';
-import Panel from './ui/Panel.vue';
 
 const props = defineProps({
   // Разрешено ли перетаскивание канвы
@@ -658,9 +658,9 @@ const callbacks = {
       y: (centerY - konvaStage.value.y()) / oldScale,
     };
 
-    const scaleBy = 1.1;
+    const scaleBy = 0.1;
     // Определяем новое значение зума
-    const newScale = direction > 0 ? oldScale * scaleBy : oldScale / scaleBy;
+    const newScale = direction > 0 ? oldScale + scaleBy : oldScale - scaleBy;
     // Пишем новый зум в состояние
     scale.value = { x: newScale, y: newScale };
 
