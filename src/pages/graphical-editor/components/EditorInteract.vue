@@ -682,14 +682,13 @@ const callbacks = {
 
   /**
    * Добавить текст к выделенной фигуре
-   * @param {String} text - Добавляемый текст
    */
-  addTextToSelectedShape: (text) => {
+  addTextToSelectedShape: ({ text, align }) => {
     if (!Array.isArray(selectedShapeFromState.value.text))
       selectedShapeFromState.value.text = [];
 
     selectedShapeFromState.value.text.push(reactive({
-      alignment: 'left',
+      alignment: align,
       text: [
         {
           text,
@@ -700,6 +699,7 @@ const callbacks = {
     }));
 
     isInputForEnterShapeTextVisible.value = false;
+    isConfigOfTextVisible.value = false;
   },
 
   /**
@@ -707,13 +707,14 @@ const callbacks = {
    * @param {'top' | 'middle' | 'bottom'} align - Выравнивание
    */
   setVerticalAlignActiveShape: (align) => {
-  selectedShapeFromState.value.textVerticalAlignment = align;
-  isConfigOfTextVisible.value = false;
+    selectedShapeFromState.value.textVerticalAlignment = align;
+    // isConfigOfTextVisible.value = false;
 
-  // Если нет текста - то даём ввести текст
-  if (!Array.isArray(selectedShapeFromState.value.text) || selectedShapeFromState.value.text.length === 0) {
-    isInputForEnterShapeTextVisible.value = true;
-  }
+    // Если нет текста - то даём ввести текст
+    if (!Array.isArray(selectedShapeFromState.value.text)) {
+      selectedShapeFromState.value.text = [];
+      isInputForEnterShapeTextVisible.value = true;
+    }
   },
 
   /**
@@ -721,8 +722,8 @@ const callbacks = {
    * @param {Boolean} status - Виден / не виден конфиг
    */
   setConfigOfTextVisibility: (status) => {
-  isInputForEnterShapeTextVisible.value = false;
-  isConfigOfTextVisible.value = status;
+    isInputForEnterShapeTextVisible.value = false;
+    isConfigOfTextVisible.value = status;
   },
 
   /**

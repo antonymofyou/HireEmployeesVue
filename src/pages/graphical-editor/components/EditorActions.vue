@@ -138,6 +138,41 @@
 
       <div class="actions-advanced" v-show="props.isInputForEnterShapeTextVisible">
         <span class="actions-advanced__title">
+          Горизонтальное выравнивание
+        </span>
+
+        <div class="actions-advanced__row">
+          <Panel>
+            <PanelItem>
+              <Button
+                :disabled="horizontalAlign === 'left'"
+                @click="callbacks.setHorizontalAlign('left')"
+              >
+                Слева
+              </Button>
+            </PanelItem>
+            
+            <PanelItem>
+              <Button
+                :disabled="horizontalAlign === 'center'"
+                @click="callbacks.setHorizontalAlign('center')"
+              >
+                По центру
+              </Button>
+            </PanelItem>
+          
+            <PanelItem>
+              <Button
+                :disabled="horizontalAlign === 'right'"
+                @click="callbacks.setHorizontalAlign('right')"
+              >
+                Справа
+              </Button>
+            </PanelItem>
+          </Panel>
+        </div>
+
+        <span class="actions-advanced__title">
           Текст для фигуры
         </span>
 
@@ -243,7 +278,10 @@
           </label>
         </div>
 
-        <div class="action">
+        <div
+          class="action"
+          v-show="isStrokeColorOptionsVisible"
+        >
           <label>
             Цвет границ:
             <input
@@ -284,7 +322,7 @@
 </template>
 
 <script setup>
-import { ref, computed, watchEffect } from 'vue';
+import { ref, computed, watchEffect, watch } from 'vue';
 
 import Button from './ui/Button.vue';
 import Panel from './ui/Panel.vue';
@@ -406,10 +444,17 @@ const props = defineProps({
   },
 });
 
+// Видны ли настройки цвета у границ фигуры
+const isStrokeColorOptionsVisible = computed(() => {
+  return props.selectedShape?.attrs.type !== 'arrow';
+});
+
 const emit = defineEmits(['fileUpload']);
 
 // Вводимый в форме текста
 const text = ref('');
+// Выравнивание по горизонтали
+const horizontalAlign = ref('left');
 
 // Задизейблена ли форма в данный момент
 const isFormEnterTextDisabled = computed(() => {
@@ -431,6 +476,10 @@ const handlers = {
    * @param {Event} e - Событие
    */
   onFillInput: (e) => {
+    // Если стрелка - будем менять и цвет границы (т.к. стрелка однотонна)
+    if (props.selectedShape?.attrs.type === 'arrow')
+      props.selectedShape?.stroke(e.target.value);
+    
     props.selectedShape?.fill(e.target.value);
   },
   /**
@@ -440,6 +489,11 @@ const handlers = {
    */
   onFillChange: (e) => {
     if (!currentShapeNode.value) return;
+
+    // Если стрелка - будем менять и цвет границы (т.к. стрелка однотонна)
+    if (props.selectedShape?.attrs.type === 'arrow')
+      currentShapeNode.value.strokeColor = e.target.value;
+
     currentShapeNode.value.color = e.target.value;
   },
   /**
@@ -509,13 +563,26 @@ const callbacks = {
   setVerticalAlign: (align) => {
     props.setVerticalAlignActiveShape(align);
   },
+  
+  /**
+   * Установить горизонтальное выравнивание
+   * @param {'left' | 'center' | 'right'} align - Выравнивание
+   */
+   setHorizontalAlign: (align) => {
+    horizontalAlign.value = align;
+   },
 
   /**
    * Отправить введённый текст на верх
    */
    sendEnteredText: () => {
-    props.onEnterText(text.value);
+    props.onEnterText({
+      text: text.value,
+      align: horizontalAlign.value,
+    });
+
     text.value = '';
+    horizontalAlign.value = 'left';
    },
 
    /**
@@ -572,6 +639,10 @@ const callbacks = {
 
 .scale-btn {
   font-size: 16px;
+}
+
+.actions-advanced .actions-advanced__row:not(:last-of-type) {
+  margin-bottom: 15px;
 }
 
 .actions-advanced__row {
