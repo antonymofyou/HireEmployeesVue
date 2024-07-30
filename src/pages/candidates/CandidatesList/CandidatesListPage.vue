@@ -21,18 +21,9 @@
           @update:modelValue="updateVacancyId"
         />
       </div>
-      <div class="candidates__filter-title">
-        <div v-if="vacancyId && dataFetched">Статус:</div>
-        <SelectMain
-          v-if="vacancyId !== '' && dataFetched"
-          v-model="status"
-          :options="candidateStatus"
-          @update:modelValue="updateStatus"
-        />
-      </div>
     </div>
     <div class="status_main">
-      <StatusMain
+      <CandidateStatus
         v-model="status"
         :options="candidateStatus"
         @update:modelValue="updateStatus"
@@ -82,7 +73,7 @@ import SelectMain from '@/components/SelectMain.vue';
 import SpinnerMain from '@/components/SpinnerMain.vue';
 import TopSquareButton from '@/components/TopSquareButton.vue';
 import iconBack from '@/assets/icons/back.svg';
-import StatusMain from '@/components/StatusMain.vue';
+import CandidateStatus from '@/pages/candidates/CandidatesList/components/CandidateStatus.vue';
 
 const router = useRouter();
 const route = useRoute();
@@ -182,8 +173,6 @@ function getVacancyStatuses() {
       'manager',
       function (response) {
         if (response.statuses && response.statuses.length > 0){
-
-        
         //успешный результат
         candidateStatus.value = [{ name: 'Все', id: 'Все', color: 'gray', count: 0}];
         response.statuses.map((status) => {

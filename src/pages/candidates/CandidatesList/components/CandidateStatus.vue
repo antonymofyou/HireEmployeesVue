@@ -17,7 +17,7 @@
 
 <script setup>
 import { ref, watchEffect } from 'vue';
-import StatusColored from './StatusColored.vue';
+import StatusColored from '../../../../components/StatusColored.vue'
 const selectedOption = ref(null); //Хранит выбранный статус 
 const props = defineProps({
   // Модель для обновления, опции селекта
@@ -50,6 +50,7 @@ watchEffect(() => {
   display: flex;
   max-width: 100%;
   flex-wrap: wrap;
+  justify-content: center;
 }
 .option-main.selected{
   opacity: 1;
@@ -58,7 +59,7 @@ watchEffect(() => {
   cursor: pointer;
   padding: 5px 10px;
   transition: 0.1s ease;
-  opacity: 0.4;
+  opacity: 0.35;
 }
 .option-main:hover {
   opacity: 1;
