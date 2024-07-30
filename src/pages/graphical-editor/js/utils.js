@@ -15,17 +15,20 @@ export function dangerouslyForceToAnotherIterationEventLoop(fn) {
 
 /**
  * Фабрика для конфига фигуры
- * @param {Number} zIndex zIndex для инициализации фигуры
+ * @param {Object} config Описание добавляемой фигуры
  * @returns {Object} Конфиг фигуры
  */
-export function makeShapeConfig(zIndex) {
+export function makeShapeConfig({
+  zIndex,
+  type,
+}) {
   return {
     // Общие
-    type: null,
+    type,
     id: crypto.randomUUID(),
     x: 0,
     y: 0,
-    fill: '#ff0000',
+    fill: type === 'arrow' ? '#000000' : '#ff0000',
     stroke: '#000000',
     strokeWidth: 5,
     width: 0,

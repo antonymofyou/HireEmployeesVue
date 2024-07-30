@@ -165,14 +165,17 @@ const selectedShapeFromState = computed(() => {
 });
 
 // Конфиг рисуемой фигуры (чтобы обновлять лишь часть канвы, не ререндерить полностью)
-const currentShapeConfig = ref(makeShapeConfig(maxZIndex.value));
+const currentShapeConfig = ref(makeShapeConfig({
+  type: currentDrawingShape.value,
+  zIndex: maxZIndex.value,
+}));
 
 // Добавляем тип к конфигу выбранной фигуры от текущей выбранной для рисования
 watch(currentDrawingShape, () => {
-  if (!currentDrawingShape.value) {
-    currentShapeConfig.value = makeShapeConfig(maxZIndex.value);
-  }
-  currentShapeConfig.value.type = currentDrawingShape.value;
+  currentShapeConfig.value = makeShapeConfig({
+    type: currentDrawingShape.value,
+    zIndex: maxZIndex.value,
+  });
 });
 
 // Действия при появлении / исчезновении / изменении  выбранной фигуры
@@ -546,14 +549,14 @@ const callbacks = {
 
           // Пишем в состояние (после этого последует ререндер)
           findShape.rotation = rotation;
+          findShape.x = position.x;
+          findShape.y = position.y;
           
           // Для стрелок - меняем scaleX, scaleY
           if (shape.attrs.type === 'arrow') {
             findShape.scaleX = scaleX;
             findShape.scaleY = scaleY;
           } else {
-            findShape.x = position.x;
-            findShape.y = position.y;
             findShape.width = correctWidthByScale;
             findShape.height = correctHeightByScale;
           }
@@ -868,7 +871,10 @@ const drawingHandlers = {
     data.shapes.push(drawnShape);
 
     // Зануляем все координаты и размеры
-    currentShapeConfig.value = makeShapeConfig(maxZIndex.value);
+    currentShapeConfig.value = makeShapeConfig({
+      type: currentDrawingShape.value,
+      zIndex: maxZIndex.value,
+    });
 
     // Пользователь перестал рисовать на канве
     isPointerDownNow.value = false;
