@@ -39,7 +39,7 @@
       :isNewShapeSelecting="isNewShapeSelecting"
       :selectedShape="selectedShape"
       :isAllowedToAddText="isAllowedToAddText"
-      :addTextToSelectedShape="callbacks.addTextToSelectedShape"
+      :addTextToSelectedShape="callbacks.startProcessAddTextToActiveShape"
       :deleteActiveShape="helpers.deleteActiveShape"
       :currentDrawingShape="currentDrawingShape"
       :addNewShape="callbacks.addNewShape"
@@ -54,6 +54,11 @@
       :currentScale="formatNumToPercent(scale.x)"
       :isStageDraggable="props.isStageDraggable"
       :isResetScaleCanvasAllowed="isResetScaleCanvasAllowed"
+      :isConfigOfTextVisible="isConfigOfTextVisible"
+      :setVerticalAlignActiveShape="callbacks.setVerticalAlignActiveShape"
+      :isInputForEnterShapeTextVisible="isInputForEnterShapeTextVisible"
+      :onEnterText="callbacks.addTextToSelectedShape"
+      :setConfigOfTextVisibility="callbacks.setConfigOfTextVisibility"
       @fileUpload="helpers.loadNewImageIntoCanvas"
     />
   </div>
@@ -107,6 +112,10 @@ const maxZIndex = ref(data.shapes.reduce((maxZIndex, shape) => {
 const scale = ref({ x: 1, y: 1 });
 // Позиционирование канвы относительно предка
 const canvasPosition = ref({ x: 0, y: 0 });
+// Разрешено ли менять конфиг фигуры для текста
+const isConfigOfTextVisible = ref(false);
+// Разрешён ли ввод текста для фигуры
+const isInputForEnterShapeTextVisible = ref(false);
 
 // Видны ли действия над активной фигурой
 const isActionsVisible = computed(() => Boolean(selectedShape.value));
@@ -155,12 +164,12 @@ watch(currentDrawingShape, () => {
   currentShapeConfig.value.type = currentDrawingShape.value;
 });
 
-// @TODO данную возможность можно использовать при отправке на сервер
-// onMounted(() => {
-//   if (!konvaStage.value) return;
-//   const rawJson = konvaStage.value.toJSON();
-//   console.log(JSON.parse(rawJson));
-// });
+watch(selectedShape, () => {
+  if (selectedShape.value) return;
+  // Выбранной фигуры нет - поэтому отменяем все действия с ней связанные
+  isConfigOfTextVisible.value = false;
+  isInputForEnterShapeTextVisible.value = false;
+});
 
 // Конфигурация холста
 // width, height - виртуальные размеры канвы, чтобы помещалось на любом устройстве
@@ -596,51 +605,88 @@ const callbacks = {
   },
 
   /**
-   * Процесс нанесения текста на выбранную фигуру
+   * Начать процесс ввода нового текста к выделенной фигуре
    */
-  addTextToSelectedShape: async () => {
-    const selectedId = selectedShape.value.id();
+  startProcessAddTextToActiveShape: () => {
+    // Зануляли ли мы значения в стейте. От этого зависят дальнейшие действия
+    let isConfigAlreadyNullable = false;
+    let isInputTextAlreadyNullable = false;
 
-    // Ищем фигуру по айди в стейте
-    const findShape = data.shapes.find((shape) => {
-      return shape.id == selectedId;
+    // Пользователь нажал на уже активную кнопку - делаем тоггл
+    if (isConfigOfTextVisible.value || isInputForEnterShapeTextVisible.value) {
+      if (isConfigOfTextVisible.value) {
+        isConfigAlreadyNullable = true;
+        isConfigOfTextVisible.value = false;
+      }
+      if (isInputForEnterShapeTextVisible.value) {
+        isInputTextAlreadyNullable = true;
+        isInputForEnterShapeTextVisible.value = false;
+      }
+    }
+
+    const shapeId = selectedShape.value.id();
+    const findShape = data.shapes.find((existShape) => {
+      return existShape.id == shapeId;
     });
 
-    if (!findShape) return;
-
-    // Добавляет текст в фигуру
-    const addNewText = () => {
-      const newText = prompt('Введите текст: ');
-  
-      findShape.text.push(reactive({
-        alignment: 'left',
-        text: [
-          {
-            text: newText,
-            fontSize: 24,
-            type: 'medium',
-          }
-        ]
-      }));
-    };
-
-    // Если определён массив текста - можем пушить новый текст
-    if (Array.isArray(findShape.text)) {
-      addNewText();
+    // Если ещё не задан конфиг для текста на фигуре - даём проставить
+    if (!('textVerticalAlignment' in findShape)) {
+      if (!isConfigAlreadyNullable) isConfigOfTextVisible.value = true;
     } else {
-      // Иначе - заводим массив и спрашиваем про вертикальное выравнивание
-      findShape.text = [];
-      let verticalAlignment = null;
-
-      do {
-        // Будем спрашивать про выравнивание, пока не будет дан корректный ответ
-        verticalAlignment = prompt('Вертикальное выравнивание (top; middle; bottom)').trim().toLowerCase();
-      } while (!['top', 'middle', 'bottom'].includes(verticalAlignment));
-
-      findShape.textVerticalAlignment = verticalAlignment;
-      addNewText();
+      // Иначе - пускай вводит текст для нанесения на фигуру
+      if (!isInputTextAlreadyNullable) isInputForEnterShapeTextVisible.value = true;
     }
   },
+
+  /**
+   * Добавить текст к выделенной фигуре
+   * @param {String} text - Добавляемый текст
+   */
+  addTextToSelectedShape: (text) => {
+    const shapeId = selectedShape.value.id();
+    const findShape = data.shapes.find((existShape) => {
+      return existShape.id == shapeId;
+    });
+
+    if (!Array.isArray(findShape.text)) findShape.text = [];
+
+    findShape.text.push(reactive({
+      alignment: 'left',
+      text: [
+        {
+          text,
+          fontSize: 24,
+          type: 'medium',
+        }
+      ]
+    }));
+
+    isInputForEnterShapeTextVisible.value = false;
+  },
+
+  /**
+   * Добавить вертикальное выравнивание к фигуре
+   * @param {'top' | 'middle' | 'bottom'} align - Выравнивание
+   */
+   setVerticalAlignActiveShape: (align) => {
+    const shapeId = selectedShape.value.id();
+    const findShape = data.shapes.find((existShape) => {
+      return existShape.id == shapeId;
+    });
+
+    findShape.textVerticalAlignment = align;
+    isConfigOfTextVisible.value = false;
+    isInputForEnterShapeTextVisible.value = true;
+   },
+
+   /**
+    * Установить видимость конфигурации для текста
+    * @param {Boolean} status - Виден / не виден конфиг
+    */
+   setConfigOfTextVisibility: (status) => {
+    isInputForEnterShapeTextVisible.value = false;
+    isConfigOfTextVisible.value = status;
+   },
 
   /**
    * Увеличение масштаба 
@@ -661,6 +707,10 @@ const callbacks = {
     const scaleBy = 0.1;
     // Определяем новое значение зума
     const newScale = direction > 0 ? oldScale + scaleBy : oldScale - scaleBy;
+
+    // Не дадим полностью пропасть канве
+    if (newScale <= 0) return;
+
     // Пишем новый зум в состояние
     scale.value = { x: newScale, y: newScale };
 
@@ -817,7 +867,7 @@ watch([scale, canvasPosition], () => {
 
 .bottom-area {
   display: flex;
-  flex-direction: column;
+  justify-content: center;
   row-gap: 20px;
   padding-top: 20px;
   border-top: 2px solid var(--cornflower-blue);

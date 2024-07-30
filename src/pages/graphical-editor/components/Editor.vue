@@ -227,11 +227,11 @@ watchEffect((onCleanup) => {
     const scale = Math.min(scaleX, scaleY);
     const stage = konva.value.getStage();
 
-    stage.width(containerWidth);
-    stage.height(containerHeight);
-    stage.scale({ x: scale, y: scale });
+    // stage.width(containerWidth);
+    // stage.height(containerHeight);
+    // stage.scale({ x: scale, y: scale });
 
-    emit('scale', scale);
+    // emit('scale', scale);
   };
   resizeHandler();
 

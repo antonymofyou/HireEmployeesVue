@@ -4,33 +4,26 @@
     <div class="actions__item">
       <span class="actions__item-title">Добавление / Удаление</span>
 
-      <Panel>
-        <PanelItem>
-          <Button
-            @click="props.toggleSelectingNewShape"
-          >
-            {{ props.isNewShapeSelecting ? 'Прекратить выбор' : 'Добавить фигуру' }}
-          </Button>
-        </PanelItem>
+      <div class="actions__item-row">
+        <Panel>
+          <PanelItem>
+            <Button
+              @click="props.toggleSelectingNewShape"
+            >
+              {{ props.isNewShapeSelecting ? 'Прекратить выбор' : 'Добавить фигуру' }}
+            </Button>
+          </PanelItem>
 
-        <PanelItem>
-          <Button
-            :disabled="!props.selectedShape || !props.isAllowedToAddText"
-            @click="props.addTextToSelectedShape"
-          >
-            Добавить текст
-          </Button>
-        </PanelItem>
-
-        <PanelItem>
-          <Button
-            @click="props.deleteActiveShape"
-            :disabled="!Boolean(selectedShape)"
-          >
-            Удалить
-          </Button>
-        </PanelItem>
-      </Panel>
+          <PanelItem>
+            <Button
+              @click="props.deleteActiveShape"
+              :disabled="!Boolean(selectedShape)"
+            >
+              Удалить
+            </Button>
+          </PanelItem>
+        </Panel>
+      </div>
 
       <Panel class="select-shape" v-show="isNewShapeSelecting">
         <PanelItem>
@@ -76,6 +69,83 @@
           </Button>
         </PanelItem>
       </Panel>
+    </div>
+
+    <!-- Работа с текстом на фигуре -->
+    <div class="actions__item">
+      <span class="actions__item-title">Работа с текстом</span>
+
+      <Panel>
+        <PanelItem>
+          <Button
+            :disabled="!props.selectedShape || !props.isAllowedToAddText"
+            @click="props.addTextToSelectedShape"
+          >
+            Добавить текст
+          </Button>
+        </PanelItem>
+
+        <PanelItem>
+          <Button
+            :disabled="!props.selectedShape || !props.isAllowedToAddText"
+            @click="callbacks.activateConfig"
+          >
+            Изменить конфигурацию
+          </Button>
+        </PanelItem>
+      </Panel>
+      
+      <div class="actions-advanced config-text" v-show="props.isConfigOfTextVisible">
+        <span class="actions-advanced__title">
+          Вертикальное выравнивание
+        </span>
+
+        <div class="actions-advanced__row">
+          <Panel>
+            <PanelItem>
+              <Button @click="callbacks.setVerticalAlign('top')">Сверху</Button>
+            </PanelItem>
+            
+            <PanelItem>
+            <Button @click="callbacks.setVerticalAlign('middle')">По центру</Button>
+          </PanelItem>
+          
+          <PanelItem>
+            <Button @click="callbacks.setVerticalAlign('bottom')">Снизу</Button>
+          </PanelItem>
+        </Panel>
+        </div>
+      </div>
+
+      <div class="actions-advanced" v-show="props.isInputForEnterShapeTextVisible">
+        <span class="actions-advanced__title">
+          Текст для фигуры
+        </span>
+
+        <div class="actions-advanced__row">
+          <Panel>
+            <PanelItem>
+              <form 
+                @submit.prevent="callbacks.sendEnteredText"
+                class="add-text__form"
+              >
+                <input
+                  class="add-text__input"
+                  type="text"
+                  placeholder="Текст"
+                  v-model="text"
+                />
+                <Button
+                  type="submit"
+                  :disabled="isFormEnterTextDisabled"
+                >
+                  Создать
+                </Button>
+              </form>
+            </PanelItem>
+          </Panel>
+        </div>
+      </div>
     </div>
 
     <!-- Манипуляции с холстом -->
@@ -191,7 +261,7 @@
 </template>
 
 <script setup>
-import { computed } from 'vue';
+import { ref, computed } from 'vue';
 
 import Button from './ui/Button.vue';
 import Panel from './ui/Panel.vue';
@@ -282,11 +352,44 @@ const props = defineProps({
     required: false,
     default: true,
   },
+  isConfigOfTextVisible: {
+    type: Boolean,
+    required: false,
+    default: false,
+  },
+  setVerticalAlignActiveShape: {
+    type: Boolean,
+    required: false,
+    default: () => {},
+  },
+  isInputForEnterShapeTextVisible: {
+    type: Boolean,
+    required: false,
+    default: false,
+  },
+  onEnterText: {
+    type: Function,
+    required: false,
+    default: () => {},
+  },
+  setConfigOfTextVisibility: {
+    type: Function,
+    required: false,
+    default: () => {},
+  },
 });
 
 const emit = defineEmits(['fileUpload']);
 
-// Текущая активаная фигура
+// Вводимый в форме текста
+const text = ref('');
+
+// Задизейблена ли форма в данный момент
+const isFormEnterTextDisabled = computed(() => {
+  return text.value.length === 0;
+});
+
+// Текущая активная фигура
 const currentShapeNode = computed(() => {
   const findShape = data.shapes.find((existShape) => {
     return existShape.id === props.selectedShape.attrs.id;
@@ -369,6 +472,32 @@ const handlers = {
     emit('fileUpload', file);
   },
 };
+
+// Переиспользуемые функции
+const callbacks = {
+  /**
+   * Установить вертикальное выравнивание
+   * @param {'top' | 'middle' | 'bottom'} align - Выравнивание
+   */
+  setVerticalAlign: (align) => {
+    props.setVerticalAlignActiveShape(align);
+  },
+
+  /**
+   * Отправить введённый текст на верх
+   */
+   sendEnteredText: () => {
+    props.onEnterText(text.value);
+    text.value = '';
+   },
+
+   /**
+    * Активировать изменение конфига
+    */
+   activateConfig: () => {
+    props.setConfigOfTextVisibility(!props.isConfigOfTextVisible);
+   },
+};
 </script>
 
 <style scoped>
@@ -379,7 +508,6 @@ const handlers = {
 
 .actions {
   display: flex;
-  justify-content: center;
   flex-wrap: wrap;
   column-gap: 50px;
   row-gap: 20px;
@@ -390,6 +518,10 @@ const handlers = {
   display: flex;
   flex-direction: column;
   row-gap: 10px;
+}
+
+.actions__item-row {
+  display: flex;
 }
 
 .actions__item-title {
@@ -413,5 +545,29 @@ const handlers = {
 
 .scale-btn {
   font-size: 16px;
+}
+
+.actions-advanced__row {
+  display: flex;
+  justify-content: center;
+}
+
+.actions-advanced__title {
+  text-align: center;
+  display: block;
+  margin-bottom: 6px;
+}
+
+.add-text__form {
+  display: flex;
+  column-gap: 10px;
+}
+
+.add-text__input {
+  font-size: 14px;
+  border: none;
+  padding: 2px 5px;
+  border-radius: 6px;
+  background: transparent;
 }
 </style>
