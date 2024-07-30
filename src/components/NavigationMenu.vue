@@ -2,19 +2,22 @@
     <nav class="navigation-menu">
         <ul class="navigation-menu__list">
             <li
-                v-for="[pageName, pathName] of listItems"
-                :key="pageName"
+                v-for="item of listItems"
+                :key="item.pageName"
                 class="navigation-menu__item"
             >
                 <RouterLink
                     @pointerup="emits('transition')"
                     @keydown.enter.space="emits('transition')"
                     :to="{
-                        name: pathName,
+                        name: item.pathName,
                     }"
                     class="navigation-menu__link"
                 >
-                    <slot>{{ pageName }}</slot>
+                    <slot :item="item">
+                        {{ item.pageName }}
+                        <component v-if="item.icon" class="navigation-menu__icon" :is="item.icon" />
+                    </slot>
                 </RouterLink>
             </li>
         </ul>
@@ -49,5 +52,13 @@ const emits = defineEmits({
     letter-spacing: 0.02em;
     color: var(--mine-shaft);
     text-decoration: none;
+}
+
+.navigation-menu__icon {
+    margin-left: 0.5rem;
+    width: 1rem;
+    height: 1rem;
+    transform: translateY(2px);
+    fill: var(--mine-shaft);
 }
 </style>

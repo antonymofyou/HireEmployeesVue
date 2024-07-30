@@ -242,16 +242,9 @@ watch(
 
 .vacancies__add-vacancy-btn {
   position: fixed;
-  top: 60px;
-  right: 50px;
+  top: 20px;
+  right: 20px;
   display: flex;
-}
-
-@media screen and (max-width: 426px) {
-  .vacancies__add-vacancy-btn {
-    top: 20px;
-    right: 20px;
-  }
 }
 
 .modal__close {

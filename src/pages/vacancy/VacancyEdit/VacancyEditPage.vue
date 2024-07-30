@@ -433,13 +433,14 @@ const copyToClipboard = async () => {
 }
 
 .container {
+  position: relative;
   margin: 0 auto;
   width: 100%;
   max-width: 925px;
 }
 
 .vacancy-edit__title {
-  margin-bottom: 40px;
+  margin-bottom: 80px;
   text-align: center;
 }
 
@@ -545,9 +546,10 @@ const copyToClipboard = async () => {
 }
 
 .vacancy-edit__save-btn {
-  position: fixed;
-  top: 20px;
-  right: 30px;
+  position: absolute;
+  top: 0;
+  right: 0;
+  transform: translateY(100%);
   z-index: 10;
 }
 

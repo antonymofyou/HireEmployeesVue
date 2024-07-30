@@ -18,11 +18,26 @@ import NavigationMenu from "@/components/NavigationMenu.vue";
 import BurgerTrigger from "@/components/BurgerTrigger.vue";
 import BurgerMenu from "@/components/BurgerMenu.vue";
 import breakpoints from '@/assets/js/breakpoints';
+import BookIcon from '@/assets/icons/book.svg?component';
+import PersonIcon from '@/assets/icons/person.svg?component';
+import BriefcaseIcon from '@/assets/icons/briefcase.svg?component';
 
 const listNavigation = [
-    ["Вакансии", "vacanciesList"],
-    ["Сотрудники", "home"],
-    ["Стандарты", "home"],
+    {
+        pageName: 'Вакансии',
+        pathName: 'vacanciesList',
+        icon: BriefcaseIcon,
+    },
+    {
+        pageName: 'Сотрудники',
+        pathName: 'home',
+        icon: PersonIcon,
+    },
+    {
+        pageName: 'Стандарты',
+        pathName: 'home',
+        icon: BookIcon,
+    },
 ];
 const isOpenBurgerMenu = ref(false);
 const isRenderBurgerMenu = ref(false);
@@ -75,8 +90,8 @@ breakpoints({
     display: flex;
     flex-wrap: wrap;
     align-items: center;
-    justify-content: center;
-    gap: 1rem 4rem;
+    justify-content: space-evenly;
+    gap: 1rem 2rem;
 }
 
 @media (max-width: 575.98px) {
