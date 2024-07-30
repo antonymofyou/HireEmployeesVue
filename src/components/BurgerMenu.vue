@@ -92,7 +92,7 @@ function updateModelValue(value) {
 .burger-menu__body {
     display: flex;
     flex-direction: column;
-    padding: 100px 0 3rem;
+    padding: 100px 0 48px;
     max-height: 100%;
     background-color: var(--white);
     opacity: 0;

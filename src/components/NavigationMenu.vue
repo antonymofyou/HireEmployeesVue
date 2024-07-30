@@ -47,7 +47,7 @@ const emits = defineEmits({
 
 .navigation-menu__link {
     outline: none;
-    font-size: 1rem;
+    font-size: 16px;
     line-height: 1.2;
     letter-spacing: 0.02em;
     color: var(--mine-shaft);
@@ -55,9 +55,9 @@ const emits = defineEmits({
 }
 
 .navigation-menu__icon {
-    margin-left: 0.5rem;
-    width: 1rem;
-    height: 1rem;
+    margin-left: 8px;
+    width: 16px;
+    height: 16px;
     transform: translateY(2px);
     fill: var(--mine-shaft);
 }

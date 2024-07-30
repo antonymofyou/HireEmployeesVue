@@ -71,13 +71,13 @@ breakpoints({
   
 <style scoped>
 .header {
-    padding: 2rem 0;
+    padding: 32px 0;
 }
 
 .container {
     max-width: 80%;
     margin: 0 auto;
-    padding: 0 1rem;
+    padding: 0 16px;
 }
 
 .burger-trigger {
@@ -91,7 +91,7 @@ breakpoints({
     flex-wrap: wrap;
     align-items: center;
     justify-content: space-evenly;
-    gap: 1rem 2rem;
+    gap: 16px 32px;
 }
 
 @media (max-width: 575.98px) {
