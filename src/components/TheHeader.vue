@@ -1,7 +1,7 @@
 <template>
     <header class="header">
         <div class="container">
-            <BurgerTrigger :aria-expanded="isOpenBurgerMenu" :class="{'active': isOpenBurgerMenu}" @pointerup="toggleBurgerMenu" @keydown.enter.space="toggleBurgerMenu" />
+            <BurgerTrigger v-if="isRenderBurgerMenu" :aria-expanded="isOpenBurgerMenu" :class="{'active': isOpenBurgerMenu}" @pointerup="toggleBurgerMenu" @keydown.enter.space="toggleBurgerMenu" />
             <NavigationMenu :list-items="listNavigation" />
         </div>
         <BurgerMenu v-if="isRenderBurgerMenu" :model-value="isOpenBurgerMenu" @update:model-value="isOpenBurgerMenu = $event">
@@ -12,15 +12,15 @@
 
 <script setup>
 
-import { ref } from 'vue';
+import { ref, watch, onBeforeUnmount } from 'vue';
 
 import NavigationMenu from "@/components/NavigationMenu.vue";
 import BurgerTrigger from "@/components/BurgerTrigger.vue";
 import BurgerMenu from "@/components/BurgerMenu.vue";
-import breakpoints from '@/assets/js/breakpoints';
 import BookIcon from '@/assets/icons/book.svg?component';
 import PersonIcon from '@/assets/icons/person.svg?component';
 import BriefcaseIcon from '@/assets/icons/briefcase.svg?component';
+import debounce from '@/assets/js/debounce';
 
 const listNavigation = [
     {
@@ -40,7 +40,23 @@ const listNavigation = [
     },
 ];
 const isOpenBurgerMenu = ref(false);
+const innerWidth = ref(window.innerWidth);
+const updateInnerWidth = debounce(function() {
+    innerWidth.value = window.innerWidth;
+}, 400);
 const isRenderBurgerMenu = ref(false);
+
+watch(() => innerWidth.value, function() {
+    if (innerWidth.value < 576) {
+        isRenderBurgerMenu.value = true;
+    }
+
+    if (innerWidth.value >= 576) {
+        closeBurgerMenu();
+    }
+},
+    { immediate: true }
+);
 
 function closeBurgerMenu() {
     if (isOpenBurgerMenu.value) {
@@ -58,14 +74,11 @@ function toggleBurgerMenu() {
     isOpenBurgerMenu.value = false;
 }
 
-breakpoints({
-    // 576px
-    [576]: closeBurgerMenu,
-    // 0px
-    [0] : function() {
-        isRenderBurgerMenu.value = true;
-    },
-});
+window.addEventListener('resize', updateInnerWidth);
+
+onBeforeUnmount(() => {
+    window.removeEventListener('resize', updateInnerWidth);
+})
 
 </script>
   
