@@ -117,6 +117,8 @@ const canvasPosition = ref({ x: 0, y: 0 });
 const isConfigOfTextVisible = ref(false);
 // Разрешён ли ввод текста для фигуры
 const isInputForEnterShapeTextVisible = ref(false);
+// Вводится ли текст в textarea (изменение, добавление текста в фигуру)
+const isEnteringTextInTextareaNow = ref(false);
 
 // Видны ли действия над активной фигурой
 const isActionsVisible = computed(() => Boolean(selectedShape.value));
@@ -359,9 +361,93 @@ const helpers = {
 
   /**
    * Проверка, является ли фигура текстом
+   * @returns {Boolean}
    */
   isShapeText: (shape) => {
     return shape.constructor.name === 'Text';
+  },
+
+  /**
+   * Проверка, находятся ли переданные координаты внутри текста
+   * @param {Object} text - Объект текста
+   * @param {Object} coords - Координаты клика
+   * @param {Number} coords.x - Координата x
+   * @param {Number} coords.y - Координата y
+   * @returns {Boolean}
+   */
+  isCoordsInText: (text, { x, y }) => {
+    // Вычисляем координаты углов прямоугольника, образованного от текста
+    const x1 = text._partialTextX + (text.attrs.x || 0);
+    const y1 = text._partialTextY + (text.attrs.y || 0);
+
+    const x2 = x1 + text.textWidth;
+    const y2 = y1;
+
+    const x3 = x2;
+    const y3 = y2 + text.textHeight;
+
+    const x4 = x1;
+    const y4 = y3;
+
+    // Вектор от первой точки к точке проверки
+    const v1 = { x: x - x1, y: y - y1 };
+
+    // Вектор первой стороны прямоугольника
+    const a = { x: x2 - x1, y: y2 - y1 };
+
+    // Вектор второй стороны прямоугольника
+    const b = { x: x4 - x1, y: y4 - y1 };
+
+    // Скалярные произведения для проекции
+    const dotProduct = (v1, v2) => v1.x * v2.x + v1.y * v2.y;
+    
+    // Проекции
+    const t_a = dotProduct(v1, a) / dotProduct(a, a);
+    const t_b = dotProduct(v1, b) / dotProduct(b, b);
+
+    // Проверка вхождения
+    return 0 <= t_a && t_a <= 1 && 0 <= t_b && t_b <= 1;
+  },
+
+  /**
+   * Функция показа textarea на определённых координатах. Резолвится с введёным текстом
+   * @param {Object} config - Конфигурация для показа textarea
+   * @param {Number} config.x - Координата x
+   * @param {Number} config.y - Координата y
+   * @param {Number} config.width - Ширина textarea
+   * @param {Number} config.height - Высота textarea
+   * @param {Number} config.rotation - Поворот textarea (по часовой, свойство rotation CSS)
+   * @param {String} [config.text] - Текст по умолчанию
+   * @returns {Promise<String>}
+   */
+  showTextareaAndWaitText: ({ x, y, width, height, rotation, text = '' }) => {
+    return new Promise((resolve) => {
+      // Добавляем textarea в DOM
+      const textarea = document.createElement('textarea');
+      document.body.append(textarea);
+
+      textarea.value = text;
+
+      // Настраиваем стили
+      textarea.style.position = 'absolute';
+      textarea.style.top = y + 'px';
+      textarea.style.left = x + 'px';
+      textarea.style.width = width + 'px';
+      textarea.style.height = height + 'px';
+      textarea.style.resize = 'none';
+      textarea.style.transform = `rotate(${rotation}deg)`;
+
+      // Как только textarea появится - ставим в неё фокус
+      textarea.focus();
+
+      const enterCode = 13;
+      textarea.addEventListener('keydown', (e) => {
+        if (e.keyCode === enterCode) {
+          resolve(textarea.value);
+          textarea.remove();
+        }
+      });
+    });
   },
 };
 
@@ -605,41 +691,6 @@ const callbacks = {
   stagePointerDown: (e) => {
     const { target } = e;
 
-    // // Если пользователь выбрал текст - даём возможность редактировать его
-    // if (helpers.isShapeText(target)) {
-    //   const textarea = document.createElement('textarea');
-    //   document.body.append(textarea);
-
-      // const textPosition = target.getAbsolutePosition();
-
-      // // then lets find position of stage container on the page:
-      // const stageBox = konvaStage.value.container().getBoundingClientRect();
-
-      // const areaPosition = {
-      //   x: stageBox.left + textPosition.x,
-      //   y: stageBox.top + textPosition.y,
-      // };
-
-    //   console.log('Клик по тексту: ', target.attrs.text);
-    //   console.log('Координаты: ', areaPosition);
-
-    //   textarea.value = target.text();
-    //   textarea.style.position = 'absolute';
-    //   textarea.style.top = areaPosition.y + 'px';
-    //   textarea.style.left = areaPosition.x + 'px';
-    //   textarea.style.width = target.width();
-
-    //   textarea.focus();
-
-    //   textarea.addEventListener('keydown', function (e) {
-    //     // hide on enter
-    //     if (e.keyCode === 13) {
-    //       target.text(textarea.value);
-    //       document.body.removeChild(textarea);
-    //     }
-    //   });
-    // }
-
     // Если кликнули по канвасу - то убираем выделение активной фигуры
     if (target === target.getStage()) {
       selectedShape.value = null;
@@ -653,6 +704,10 @@ const callbacks = {
    * @param {Object} e - Событие
    */
   selectAndEditText: (e) => {
+    // Может редактироваться только один текст за раз
+    if (isEnteringTextInTextareaNow.value) return;
+
+    // Текстовая нода
     const textNode = e.target;
 
     // Группа, в которой лежит фигура и все текста для неё
@@ -662,49 +717,53 @@ const callbacks = {
     // Позиция фигуры относительно всей канвы
     const shapePosition = shape.getAbsolutePosition();
 
+    console.log('Rotation = ', group.rotation());
+
     // Координаты курсора относительно канвы
     const pointerPosition = konvaStage.value.getPointerPosition();
     // Координаты курсора относительно фигуры
     const pointerPositionInCanvas = {
       x: pointerPosition.x - shapePosition.x,
       y: pointerPosition.y - shapePosition.y,
-    };
-
-    /**
-     * Проверка, кликнул ли пользователь в текущий текст
-     * @param {Object} text - Объект текста
-     * @param {Object} coords - Координаты клика
-     */
-    const isPointerInText = (text, coords) => {
-      console.log({ text, coords });
-      const diffX = (text.textWidth + text._partialTextX) - coords.x;
-      const diffY = (text.textHeight + text._partialTextY) - coords.y;
-
-      // Получаем положительную разность - значит клик был внутри
-      if (diffX > 0 && diffY > 0) {
-        console.log('Клик внутри');
-        return true;
-      }
+      rotation: group.rotation(),
     };
 
     // Вычисляем, какой из текстов выделить
     const onlyTextChildren = group.children.slice(1);
-    const selectedText = onlyTextChildren.find((text) => isPointerInText(text, pointerPositionInCanvas));
+    // Выбранный текст
+    const selectedText = onlyTextChildren.find((text) => {
+      return helpers.isCoordsInText(text, pointerPositionInCanvas)
+    });
 
-    console.log(pointerPositionInCanvas)
-    console.log('Кликнули по:', selectedText);
+    // Координаты выбранного текста относительно всей канвы
+    const textPosition = selectedText.getAbsolutePosition();
 
-    const textPosition = textNode.getAbsolutePosition();
-
-    // Позиция контейнера канвы на в документе:
+    // Позиция контейнера канвы относительно вьюпорта:
     const stageBox = konvaStage.value.container().getBoundingClientRect();
 
+    // Координаты относительно всего документа
+    const correctRectX = window.scrollX + stageBox.left;
+    const correctRectY = window.scrollY + stageBox.top;
+
+    // Координаты, на которых расположим textarea
     const areaPosition = {
-      x: stageBox.left + textPosition.x,
-      y: stageBox.top + textPosition.y,
+      x: correctRectX + textPosition.x + selectedText._partialTextX - shape.attrs.strokeWidth,
+      y: correctRectY + textPosition.y + selectedText._partialTextY - shape.attrs.strokeWidth,
     };
 
-    // console.log(textNode.width(), areaPosition);
+    isEnteringTextInTextareaNow.value = true;
+
+    // Показываем textarea, введённый в неё текст - пойдёт в фигуру
+    helpers.showTextareaAndWaitText({
+      x: areaPosition.x,
+      y: areaPosition.y,
+      width: selectedText.textWidth,
+      height: selectedText.textHeight,
+      rotation: group.attrs.rotation,
+      text: selectedText.text(),
+    })
+    .then((text) => selectedText.text(text))
+    .finally(() => isEnteringTextInTextareaNow.value = false);
   },
 
   /**
