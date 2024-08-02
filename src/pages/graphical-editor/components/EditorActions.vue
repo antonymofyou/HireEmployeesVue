@@ -239,6 +239,7 @@
           <PanelItem>
             <Button
               class="scale-btn"
+              :disabled="props.isDecrementScaleDisabled"
               @click="props.decrementScale"
             >
               -
@@ -248,6 +249,7 @@
           <PanelItem>
             <Button
               class="scale-btn"
+              :disabled="props.isIncrementScaleDisabled"
               @click="props.incrementScale"
             >
               +
@@ -441,6 +443,16 @@ const props = defineProps({
     type: Function,
     required: false,
     default: () => {},
+  },
+  isDecrementScaleDisabled: {
+    type: Boolean,
+    required: false,
+    default: false,
+  },
+  isIncrementScaleDisabled: {
+    type: Boolean,
+    required: false,
+    default: false,
   },
 });
 

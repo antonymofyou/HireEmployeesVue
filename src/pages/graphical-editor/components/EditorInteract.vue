@@ -60,6 +60,8 @@
       :isInputForEnterShapeTextVisible="isInputForEnterShapeTextVisible"
       :onEnterText="callbacks.addTextToSelectedShape"
       :setConfigOfTextVisibility="callbacks.setConfigOfTextVisibility"
+      :isDecrementScaleDisabled="isDecrementScaleDisabled"
+      :isIncrementScaleDisabled="isIncrementScaleDisabled"
       @fileUpload="helpers.loadNewImageIntoCanvas"
     />
   </div>
@@ -154,6 +156,14 @@ const isAllowedToAddText = computed(() => {
 // Разрешён ли сброс масштабирования канвы
 const isResetScaleCanvasAllowed = computed(() => {
   return scale.value.x !== 1;
+});
+// Разрешено ли изменение масштабирования канвы вниз
+const isDecrementScaleDisabled = computed(() => {
+  return Math.trunc(scale.value.x * 100) / 100 === 0.1;
+});
+// Разрешено ли изменение масштабирования канвы вверх
+const isIncrementScaleDisabled = computed(() => {
+  return Math.trunc(scale.value.x * 100) / 100 === 2;
 });
 // Текущая выбранная фигура из стейта (который потом полетит на сервер)
 const selectedShapeFromState = computed(() => {
@@ -663,6 +673,7 @@ const callbacks = {
             shape.height(correctHeightByScale);
             texts.forEach((text) => {
               text.width(correctWidthByScale);
+              // text.height(correctHeightByScale);
             });
             break;
           }
