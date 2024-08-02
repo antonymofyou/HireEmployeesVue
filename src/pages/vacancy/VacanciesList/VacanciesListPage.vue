@@ -236,28 +236,16 @@ watch(
   grid-template-columns: repeat(auto-fill, minmax(min-content, 300px));
   justify-content: center;
   gap: 15px;
-  margin-top: 40px;
   width: 100%;
 }
 
 .vacancies__add-vacancy-btn {
-  position: fixed;
-  top: 20px;
+  position: sticky;
+  align-self: flex-end;
+  top: 60px;
   right: 20px;
+  transform: translateY(-100%);
   display: flex;
-}
-
-@media (max-width: 575.98px) {
-  .vacancies__add-vacancy-btn {
-    position: sticky;
-    align-self: flex-end;
-    top: 60px;
-    transform: translateY(-100%);
-  }
-
-  .vacancies__box-vacancies {
-    margin-top: 0;
-  }
 }
 
 .modal__close {

@@ -249,6 +249,7 @@ watch(
   flex-direction: column;
   align-items: center;
   padding-bottom: 80px;
+  margin-top: 20px;
 }
 
 .candidates__title {
@@ -291,16 +292,8 @@ watch(
 }
 
 .candidates__back-btn {
-  position: fixed;
+  position: sticky;
   top: 20px;
-}
-
-@media (max-width: 575.98px) {
-  .candidates__back-btn {
-    top: 32px;
-    left: 0;
-    border-radius: 0 10px 10px 0;
-  }
 }
 
 @media screen and (max-width: 350px) {

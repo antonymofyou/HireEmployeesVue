@@ -35,32 +35,40 @@ const listNavigation = [
   
 <style scoped>
 .header {
-    padding: 32px 0;
     border-bottom: 1px solid var(--transparent-blue);
 }
 
 .container {
-    max-width: 75%;
+    max-width: 90%;
     margin: 0 auto;
-    padding: 0 16px;
+    padding: 32px 16px;
 }
 
 .navigation-menu:deep(.navigation-menu__list) {
     display: flex;
     flex-wrap: wrap;
     align-items: center;
-    justify-content: space-evenly;
+    justify-content: space-around;
     gap: 16px;
 }
 
 @media (max-width: 575.98px) {
+    .container {
+        max-width: 100%;
+        padding: 16px;
+    }
+
+    .navigation-menu:deep(.navigation-menu__list) {
+        justify-content: space-between;
+    }
+
     .navigation-menu:deep(.navigation-menu__text) {
         display: none;
     }
 
     .navigation-menu:deep(.navigation-menu__icon) {
-        width: 32px;
-        height: 32px;
+        width: 24px;
+        height: 24px;
     }
 }
 </style>

@@ -429,7 +429,7 @@ const copyToClipboard = async () => {
 
 <style scoped>
 .content {
-  margin-top: 60px;
+  margin-top: 20px;
 }
 
 .container {
@@ -554,17 +554,9 @@ const copyToClipboard = async () => {
 }
 
 .vacancy-edit__back-btn {
-  position: fixed;
+  position: sticky;
   top: 20px;
   left: 20px;
-}
-
-@media (max-width: 575.98px) {
-  .vacancy-edit__back-btn {
-    top: 32px;
-    left: 0;
-    border-radius: 0 10px 10px 0;
-  }
 }
 
 .vacancy-edit__loader {

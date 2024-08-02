@@ -206,7 +206,7 @@ const getVacancyInfo = (successCallback, errorCallback) => {
 .comments-page {
   max-width: 925px;
   margin: 0 auto;
-  margin-top: 55px;
+  margin-top: 20px;
   padding-bottom: 20px ;
 }
 
@@ -230,17 +230,9 @@ const getVacancyInfo = (successCallback, errorCallback) => {
 }
 
 .comments-page__back-btn {
-  position: fixed;
+  position: sticky;
   top: 20px;
   left: 20px;
-}
-
-@media (max-width: 575.98px) {
-  .comments-page__back-btn {
-    top: 32px;
-    left: 0;
-    border-radius: 0 10px 10px 0;
-  }
 }
 
 @media screen and (max-width: 350px) {
