@@ -73,7 +73,8 @@ const response = {
                           "text": "Hello",
                           "type": "bold",
                           "fontSize": 24,
-                          "fontColor": "#333333"
+                          "fontColor": "#333333",
+                          textDecoration: 'underline',
                       },
                       {
                           "text": " This is a test text.",

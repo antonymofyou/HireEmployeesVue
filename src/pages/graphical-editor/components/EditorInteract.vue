@@ -27,6 +27,7 @@
     :groupDragEnd="callbacks.groupDragEnd"
     :groupPointerLeave="callbacks.groupPointerLeave"
     :startTransform="callbacks.startTransform"
+    :selectText="callbacks.selectAndEditText"
     @scale="callbacks.setScale"
     ref="konva"
     id="graphical-editor"
@@ -355,6 +356,13 @@ const helpers = {
     findShape.zIndex = maxZIndex.value;
     data.shapes.splice(findIndex, 1);
   },
+
+  /**
+   * Проверка, является ли фигура текстом
+   */
+  isShapeText: (shape) => {
+    return shape.constructor.name === 'Text';
+  },
 };
 
 // Переиспользуемые функции
@@ -496,7 +504,7 @@ const callbacks = {
         if (shape.attrs.type === 'arrow') return;
 
         const { rotation, correctWidthByScale, correctHeightByScale } = getEntities();
-        
+
         // Если слишком маленькие размеры у фигуры - дальше трансформировать не будем
         if (correctWidthByScale < 20 || correctHeightByScale < 20) {
           transformerNode.stopTransform();
@@ -516,7 +524,7 @@ const callbacks = {
             shape.height(correctHeightByScale);
             texts.forEach((text) => {
               text.width(correctWidthByScale);
-              text.height(correctHeightByScale);
+              // text.height(correctHeightByScale);
             });
             break;
           }
@@ -597,12 +605,106 @@ const callbacks = {
   stagePointerDown: (e) => {
     const { target } = e;
 
+    // // Если пользователь выбрал текст - даём возможность редактировать его
+    // if (helpers.isShapeText(target)) {
+    //   const textarea = document.createElement('textarea');
+    //   document.body.append(textarea);
+
+      // const textPosition = target.getAbsolutePosition();
+
+      // // then lets find position of stage container on the page:
+      // const stageBox = konvaStage.value.container().getBoundingClientRect();
+
+      // const areaPosition = {
+      //   x: stageBox.left + textPosition.x,
+      //   y: stageBox.top + textPosition.y,
+      // };
+
+    //   console.log('Клик по тексту: ', target.attrs.text);
+    //   console.log('Координаты: ', areaPosition);
+
+    //   textarea.value = target.text();
+    //   textarea.style.position = 'absolute';
+    //   textarea.style.top = areaPosition.y + 'px';
+    //   textarea.style.left = areaPosition.x + 'px';
+    //   textarea.style.width = target.width();
+
+    //   textarea.focus();
+
+    //   textarea.addEventListener('keydown', function (e) {
+    //     // hide on enter
+    //     if (e.keyCode === 13) {
+    //       target.text(textarea.value);
+    //       document.body.removeChild(textarea);
+    //     }
+    //   });
+    // }
+
     // Если кликнули по канвасу - то убираем выделение активной фигуры
     if (target === target.getStage()) {
       selectedShape.value = null;
       const transformerNode = konva.value.transformer.getNode();
       transformerNode.nodes([]);
     }
+  },
+
+  /**
+   * Выбор и редактирование текста
+   * @param {Object} e - Событие
+   */
+  selectAndEditText: (e) => {
+    const textNode = e.target;
+
+    // Группа, в которой лежит фигура и все текста для неё
+    const group = textNode.parent;
+    // Фигура, в которой выбираем текст
+    const shape = group.children[0];
+    // Позиция фигуры относительно всей канвы
+    const shapePosition = shape.getAbsolutePosition();
+
+    // Координаты курсора относительно канвы
+    const pointerPosition = konvaStage.value.getPointerPosition();
+    // Координаты курсора относительно фигуры
+    const pointerPositionInCanvas = {
+      x: pointerPosition.x - shapePosition.x,
+      y: pointerPosition.y - shapePosition.y,
+    };
+
+    /**
+     * Проверка, кликнул ли пользователь в текущий текст
+     * @param {Object} text - Объект текста
+     * @param {Object} coords - Координаты клика
+     */
+    const isPointerInText = (text, coords) => {
+      console.log({ text, coords });
+      const diffX = (text.textWidth + text._partialTextX) - coords.x;
+      const diffY = (text.textHeight + text._partialTextY) - coords.y;
+
+      // Получаем положительную разность - значит клик был внутри
+      if (diffX > 0 && diffY > 0) {
+        console.log('Клик внутри');
+        return true;
+      }
+    };
+
+    // Вычисляем, какой из текстов выделить
+    const onlyTextChildren = group.children.slice(1);
+    const selectedText = onlyTextChildren.find((text) => isPointerInText(text, pointerPositionInCanvas));
+
+    console.log(pointerPositionInCanvas)
+    console.log('Кликнули по:', selectedText);
+
+    const textPosition = textNode.getAbsolutePosition();
+
+    // Позиция контейнера канвы на в документе:
+    const stageBox = konvaStage.value.container().getBoundingClientRect();
+
+    const areaPosition = {
+      x: stageBox.left + textPosition.x,
+      y: stageBox.top + textPosition.y,
+    };
+
+    // console.log(textNode.width(), areaPosition);
   },
 
   /**
