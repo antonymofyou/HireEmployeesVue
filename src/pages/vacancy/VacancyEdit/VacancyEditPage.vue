@@ -559,6 +559,14 @@ const copyToClipboard = async () => {
   left: 20px;
 }
 
+@media (max-width: 575.98px) {
+  .vacancy-edit__back-btn {
+    top: 32px;
+    left: 0;
+    border-radius: 0 10px 10px 0;
+  }
+}
+
 .vacancy-edit__loader {
   margin-top: 100px;
   text-align: center;

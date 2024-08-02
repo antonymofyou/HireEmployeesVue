@@ -15,7 +15,7 @@
                     class="navigation-menu__link"
                 >
                     <slot :item="item">
-                        {{ item.pageName }}
+                        <span class="navigation-menu__text">{{ item.pageName }}</span>
                         <component v-if="item.icon" class="navigation-menu__icon" :is="item.icon" />
                     </slot>
                 </RouterLink>
@@ -46,6 +46,7 @@ const emits = defineEmits({
 }
 
 .navigation-menu__link {
+    display: block;
     outline: none;
     font-size: 16px;
     line-height: 1.2;
@@ -55,8 +56,11 @@ const emits = defineEmits({
     transition: opacity 0.2s;
 }
 
+.navigation-menu__text {
+    margin-right: 8px;
+}
+
 .navigation-menu__icon {
-    margin-left: 8px;
     width: 16px;
     height: 16px;
     transform: translateY(2px);

@@ -235,6 +235,14 @@ const getVacancyInfo = (successCallback, errorCallback) => {
   left: 20px;
 }
 
+@media (max-width: 575.98px) {
+  .comments-page__back-btn {
+    top: 32px;
+    left: 0;
+    border-radius: 0 10px 10px 0;
+  }
+}
+
 @media screen and (max-width: 350px) {
   .heading {
     margin-top: 70px;

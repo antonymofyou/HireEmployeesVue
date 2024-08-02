@@ -247,6 +247,19 @@ watch(
   display: flex;
 }
 
+@media (max-width: 575.98px) {
+  .vacancies__add-vacancy-btn {
+    position: sticky;
+    align-self: flex-end;
+    top: 60px;
+    transform: translateY(-100%);
+  }
+
+  .vacancies__box-vacancies {
+    margin-top: 0;
+  }
+}
+
 .modal__close {
   display: flex;
   justify-content: end;

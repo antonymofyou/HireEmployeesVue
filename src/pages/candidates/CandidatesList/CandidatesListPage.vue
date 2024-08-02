@@ -295,6 +295,14 @@ watch(
   top: 20px;
 }
 
+@media (max-width: 575.98px) {
+  .candidates__back-btn {
+    top: 32px;
+    left: 0;
+    border-radius: 0 10px 10px 0;
+  }
+}
+
 @media screen and (max-width: 350px) {
   .candidates__title {
     h1 {
