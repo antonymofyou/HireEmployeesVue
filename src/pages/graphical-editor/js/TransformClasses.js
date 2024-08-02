@@ -9,8 +9,22 @@ export class TransformerEditor {
    * @returns {Object} Конфиг для vue-konva
    */
   static transformConfigToKonvaCorrect(correctConfig, propsToDelete) {
-    // const correctConfig = { ...shape };
     correctConfig.id = String(correctConfig.id);
+
+    // Если есть текст внутри конфига - то будем выводить его в виде стека (вертикально)
+    if (Array.isArray(correctConfig.text)) {
+      let reducedOffsetTop = 0;
+
+      for (const textInfo of correctConfig.text) {
+        textInfo.text.forEach((text, index) => {
+          const prevText = textInfo.text[index - 1];
+          if (!prevText) return;
+          
+          reducedOffsetTop += prevText.y ? prevText.fontSize + prevText.y :  prevText.fontSize;
+          text.y = reducedOffsetTop;
+        });
+      }
+    }
 
     if (correctConfig.color) {
       correctConfig.fill = correctConfig.color;
