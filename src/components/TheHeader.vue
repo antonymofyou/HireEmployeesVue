@@ -30,12 +30,12 @@ const listNavigation = [
     },
     {
         pageName: 'Сотрудники',
-        pathName: 'home',
+        pathName: 'employees',
         icon: PersonIcon,
     },
     {
         pageName: 'Стандарты',
-        pathName: 'home',
+        pathName: 'standards',
         icon: BookIcon,
     },
 ];
@@ -99,7 +99,7 @@ onBeforeUnmount(() => {
     display: none;
 }
 
-.navigation-menu >>> .navigation-menu__list {
+.navigation-menu:deep(.navigation-menu__list) {
     display: flex;
     flex-wrap: wrap;
     align-items: center;
@@ -112,7 +112,7 @@ onBeforeUnmount(() => {
         display: none;
     }
 
-    .navigation-menu >>> .navigation-menu__list {
+    .navigation-menu:deep(.navigation-menu__list) {
         flex-direction: column;
     }
 

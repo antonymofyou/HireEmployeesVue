@@ -52,6 +52,7 @@ const emits = defineEmits({
     letter-spacing: 0.02em;
     color: var(--mine-shaft);
     text-decoration: none;
+    transition: opacity 0.2s;
 }
 
 .navigation-menu__icon {
@@ -59,6 +60,19 @@ const emits = defineEmits({
     width: 16px;
     height: 16px;
     transform: translateY(2px);
-    fill: var(--mine-shaft);
+    fill: currentColor;
+}
+
+.router-link-active {
+    color:var(--transparent-blue);
+}
+
+/* Устройства с мышью */
+
+@media (hover: hover) and (pointer: fine) {
+    .navigation-menu__link:hover,
+    .navigation-menu__link:focus {
+        opacity: 0.5;
+    }
 }
 </style>
