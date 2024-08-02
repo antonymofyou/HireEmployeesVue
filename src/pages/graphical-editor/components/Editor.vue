@@ -188,6 +188,11 @@ const props = defineProps({
     required: false,
     default: () => {},
   },
+  startInputTextOnShape: {
+    type: Function,
+    required: false,
+    default: () => {},
+  },
 });
 
 const konva = ref(null);

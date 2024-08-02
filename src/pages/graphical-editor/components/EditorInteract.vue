@@ -28,6 +28,7 @@
     :groupPointerLeave="callbacks.groupPointerLeave"
     :startTransform="callbacks.startTransform"
     :selectText="callbacks.selectAndEditText"
+    :startInputTextOnShape="callbacks.startInputTextOnShape"
     @scale="callbacks.setScale"
     ref="konva"
     id="graphical-editor"
@@ -469,7 +470,7 @@ const helpers = {
    * @returns {Promise<String>}
    */
   showTextareaAndWaitText: ({ x, y, rotation, textNode }) => {
-    return new Promise((resolve) => {
+    return new Promise((resolve, reject) => {
       // Добавляем textarea в DOM
       const textarea = document.createElement('textarea');
       document.body.append(textarea);
@@ -477,6 +478,7 @@ const helpers = {
       // Скрываем текстовую ноду
       textNode.hide();
 
+      // Ставим корректные стили
       textarea.value = textNode.text();
       textarea.style.position = 'absolute';
       textarea.style.top = y + 'px';
@@ -502,8 +504,26 @@ const helpers = {
       // Как только textarea появится - ставим в неё фокус
       textarea.focus();
 
+      // Обработчик иных действий пользователя
+      const pointerDownHandler = (e) => {
+        // Если кликаем внутри textarea - всё хорошо
+        if (e.target === textarea) return;
+
+        // Клик вне textarea - удаляем всё, что ввёл пользователь в textarea
+        textarea.remove();
+        textNode.show();
+
+        window.removeEventListener('pointerdown', pointerDownHandler);
+        reject(textarea.value);
+      };
+
+      // Ловим на событие стадии погружения
+      window.addEventListener('pointerdown', pointerDownHandler, { capture: true });
+
       const enterCode = 13;
+      // Пользователь нажал Enter === успешно введённый текст
       textarea.addEventListener('keydown', (e) => {
+
         if (e.keyCode === enterCode) {
           resolve(textarea.value);
           textarea.remove();
@@ -1016,6 +1036,53 @@ const callbacks = {
 
     alert('Under construct');
   },
+
+  /** @TODO доделать процесс ввода текста. По клику на v-group
+   * Начать ввод текста на фигуре
+   * @param {Object} e - Событие
+   */
+   startInputTextOnShape: (e) => {
+     // Фигура
+     const shape = e.target;
+     // Группа, в которой лежит фигура и текста
+     const group = shape.parent;
+    // Координаты фигуры относительно канвы
+    const absolutePosition = shape.getAbsolutePosition();
+
+    // Позиция контейнера канвы относительно вьюпорта:
+    const stageBox = konvaStage.value.container().getBoundingClientRect();
+
+    // Координаты контейнера канвы относительно всего документа
+    const correctRectX = window.scrollX + stageBox.left;
+    const correctRectY = window.scrollY + stageBox.top;
+
+    const simpleText = new Konva.Text({
+      text: 'Text',
+      fontSize: 24,
+      fontFamily: 'Calibri',
+      fill: '#000000',
+    });
+
+    // Координаты, на которых расположим textarea
+    const areaPosition = {
+      x: (correctRectX + absolutePosition.x) + (shape.width() / 2) - (simpleText.width() * 0.5),
+      y: (correctRectY + absolutePosition.y) + (shape.height() / 2) - (simpleText.height() * 0.5),
+    };
+    
+    isEnteringTextInTextareaNow.value = true;
+
+    // Начинаем процесс ввода текста
+    helpers.showTextareaAndWaitText({
+      x: areaPosition.x,
+      y: areaPosition.y,
+      rotation: group.rotation(),
+      textNode: simpleText
+    }).then((text) => {
+      // Обработка успешно введённого текста
+      alert('Был введён: ' + text);
+      callbacks.addTextToSelectedShape({ text, align: 'center' });
+    }).finally(() => isEnteringTextInTextareaNow.value = false);
+   },
 };
 
 // Обработчики для рисования
