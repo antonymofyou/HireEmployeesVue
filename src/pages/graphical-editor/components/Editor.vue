@@ -61,7 +61,6 @@
               @dbltap="props.selectText"
               :ref="(el) => el !== null ? textRefs.push(el) : {}"
               :config="{
-                padding: shape.strokeWidth,
                 width: shape.width,
                 wrap: 'char',
                 // height: shape.height,
@@ -202,9 +201,9 @@ onMounted(() => {
     const textNode = textElem.getNode();
     const parentGroup = textNode.parent;
 
-    console.log(parentGroup);
-    // textNode.x(textNode._partialTextX);
-    console.log(textNode);
+    // console.log(parentGroup);
+    // // textNode.x(textNode._partialTextX);
+    // console.log(textNode);
   }
 });
 

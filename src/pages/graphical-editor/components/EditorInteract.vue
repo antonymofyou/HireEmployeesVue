@@ -375,13 +375,13 @@ const helpers = {
    * @param {Number} coords.y - Координата y
    * @returns {Boolean}
    */
-  isCoordsInText: (text, { x, y }) => {
+  prevIsCoordsInText: (text, { x, y }) => {
     // Вычисляем координаты углов прямоугольника, образованного от текста
     const x1 = text._partialTextX + (text.attrs.x || 0);
     const y1 = text._partialTextY + (text.attrs.y || 0);
 
     const x2 = x1 + text.textWidth;
-    const y2 = y1;
+    const y2 = y1 + text.textHeight;
 
     const x3 = x2;
     const y3 = y2 + text.textHeight;
@@ -409,6 +409,46 @@ const helpers = {
     return 0 <= t_a && t_a <= 1 && 0 <= t_b && t_b <= 1;
   },
 
+  isCoordsInText: (text, { x, y, rotation }) => {
+    function isPointInRect(x1, y1, x2, y2, rotation, x, y) {
+      // Вычисляем ширину и высоту прямоугольника
+      const width = Math.hypot(x2 - x1, y2 - y1);
+      const height = y2 - y1;
+
+      // Вычисляем центр прямоугольника
+      const centerX = (x1 + x2) / 2;
+      const centerY = (y1 + y2) / 2;
+
+      // Преобразуем угол в радианы
+      const rad = -rotation * Math.PI / 180;
+
+      // Смещаем точку и центрируем прямоугольник на (0, 0)
+      const translatedX = x - centerX;
+      const translatedY = y - centerY;
+
+      // Выполним обратное вращение точки
+      const rotatedX = translatedX * Math.cos(rad) - translatedY * Math.sin(rad);
+      const rotatedY = translatedX * Math.sin(rad) + translatedY * Math.cos(rad);
+
+      // Проверяем, находится ли повернутая точка внутри осевого прямоугольника
+      const halfWidth = width / 2;
+      const halfHeight = height / 2;
+
+      return rotatedX >= -halfWidth && rotatedX <= halfWidth &&
+            rotatedY >= -halfHeight && rotatedY <= halfHeight;
+    }
+
+    const x1 = text._partialTextX + (text.attrs.x || 0);
+    const y1 = text._partialTextY + (text.attrs.y || 0);
+
+    const x2 = x1 + text.textWidth;
+    const y2 = y1 + text.textHeight;
+
+    const result = isPointInRect(x1, y1, x2, y2, rotation, x, y);
+
+    return result;
+  },
+
   /**
    * Функция показа textarea на определённых координатах. Резолвится с введёным текстом
    * @param {Object} config - Конфигурация для показа textarea
@@ -431,9 +471,8 @@ const helpers = {
       textarea.style.position = 'absolute';
       textarea.style.top = y + 'px';
       textarea.style.left = x + 'px';
-      textarea.style.width = textNode.width() - textNode.padding() * 2 + 'px';
-      textarea.style.height =
-        textNode.height() - textNode.padding() * 2 + 5 + 'px';
+      textarea.style.width = textNode.width() + 'px';
+      textarea.style.height = textNode.height() + 'px';
       textarea.style.fontSize = textNode.fontSize() + 'px';
       textarea.style.border = 'none';
       textarea.style.padding = '0px';
@@ -624,7 +663,6 @@ const callbacks = {
             shape.height(correctHeightByScale);
             texts.forEach((text) => {
               text.width(correctWidthByScale);
-              // text.height(correctHeightByScale);
             });
             break;
           }
@@ -724,8 +762,6 @@ const callbacks = {
     // Текстовая нода
     const textNode = e.target;
 
-    console.log(textNode);
-
     // Группа, в которой лежит фигура и все текста для неё
     const group = textNode.parent;
     // Фигура, в которой выбираем текст
@@ -739,7 +775,7 @@ const callbacks = {
     const pointerPositionInCanvas = {
       x: pointerPosition.x - shapePosition.x,
       y: pointerPosition.y - shapePosition.y,
-      rotation: group.rotation(),
+      rotation: -group.rotation(),
     };
 
     // Вычисляем, какой из текстов выделить
@@ -748,7 +784,10 @@ const callbacks = {
     // const selectedText = onlyTextChildren.find((text) => {
     //   return helpers.isCoordsInText(text, pointerPositionInCanvas)
     // });
+
     const selectedText = textNode;
+
+    if (!selectedText) return;
 
     // Координаты выбранного текста относительно всей канвы
     const textPosition = selectedText.getAbsolutePosition();
@@ -762,8 +801,8 @@ const callbacks = {
 
     // Координаты, на которых расположим textarea
     const areaPosition = {
-      x: correctRectX + textPosition.x + shape.attrs.strokeWidth,
-      y: correctRectY + textPosition.y + shape.attrs.strokeWidth,
+      x: correctRectX + textPosition.x,
+      y: correctRectY + textPosition.y,
     };
 
     isEnteringTextInTextareaNow.value = true;
