@@ -68,8 +68,7 @@
                 align: textInfo.alignment,
                 verticalAlign: shape.textVerticalAlignment,
                 ...TransformerEditor.transformTextConfigToConvaCorrect(textRecord),
-              }">
-            </v-text>
+              }"/>
           </template>
         </v-group>
         
@@ -201,28 +200,11 @@ onMounted(() => {
   for (const textElem of textRefs.value) {
     // console.log(textElem)
     const textNode = textElem.getNode();
+    const parentGroup = textNode.parent;
 
-    // Если выравнивание по левому краю - ничего не выравниваем
-    if (textNode.attrs.align === 'left') continue;
-
-    // console.log(textNode.getAbsolutePosition());
-    // console.log(textNode, textNode.x(), textNode._partialTextX);
-    // Если у родителя есть дети - то выравниваем
-    // if (textNode.parent?.children) {
-      // Достаём фигуру, которая содержит текст
-      // const shape = textNode.parent?.children[0];
-      // Ширина обводки
-      // const strokeWidth = shape.strokeWidth();
-      // Смещение по горизонтали
-      // const offsetLeft = textNode._partialTextX - 5 + textNode.getAbsolutePosition().x;
-      // console.log({ offsetLeft, partialTextX: textNode._partialTextX });
-
-      // textNode.width(0);
-      // textNode.x(offsetLeft);
-
-      // console.log('Применил к: ', textNode)
-      // console.log(textNode.position());
-    // }
+    console.log(parentGroup);
+    // textNode.x(textNode._partialTextX);
+    console.log(textNode);
   }
 });
 

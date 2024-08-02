@@ -414,27 +414,40 @@ const helpers = {
    * @param {Object} config - Конфигурация для показа textarea
    * @param {Number} config.x - Координата x
    * @param {Number} config.y - Координата y
-   * @param {Number} config.width - Ширина textarea
-   * @param {Number} config.height - Высота textarea
-   * @param {Number} config.rotation - Поворот textarea (по часовой, свойство rotation CSS)
-   * @param {String} [config.text] - Текст по умолчанию
+   * @param {Number} config.rotation - Поворот в градусах
+   * @param {Object} config.textNode - Нода текста от канвы
    * @returns {Promise<String>}
    */
-  showTextareaAndWaitText: ({ x, y, width, height, rotation, text = '' }) => {
+  showTextareaAndWaitText: ({ x, y, rotation, textNode }) => {
     return new Promise((resolve) => {
       // Добавляем textarea в DOM
       const textarea = document.createElement('textarea');
       document.body.append(textarea);
 
-      textarea.value = text;
+      // Скрываем текстовую ноду
+      textNode.hide();
 
-      // Настраиваем стили
+      textarea.value = textNode.text();
       textarea.style.position = 'absolute';
       textarea.style.top = y + 'px';
       textarea.style.left = x + 'px';
-      textarea.style.width = width + 'px';
-      textarea.style.height = height + 'px';
+      textarea.style.width = textNode.width() - textNode.padding() * 2 + 'px';
+      textarea.style.height =
+        textNode.height() - textNode.padding() * 2 + 5 + 'px';
+      textarea.style.fontSize = textNode.fontSize() + 'px';
+      textarea.style.border = 'none';
+      textarea.style.padding = '0px';
+      textarea.style.margin = '0px';
+      textarea.style.overflow = 'hidden';
+      textarea.style.background = 'none';
+      textarea.style.outline = 'none';
       textarea.style.resize = 'none';
+      textarea.style.lineHeight = textNode.lineHeight();
+      textarea.style.fontFamily = textNode.fontFamily();
+      textarea.style.fontWeight = textNode.fontStyle();
+      textarea.style.transformOrigin = 'left top';
+      textarea.style.textAlign = textNode.align();
+      textarea.style.color = textNode.fill();
       textarea.style.transform = `rotate(${rotation}deg)`;
 
       // Как только textarea появится - ставим в неё фокус
@@ -445,6 +458,7 @@ const helpers = {
         if (e.keyCode === enterCode) {
           resolve(textarea.value);
           textarea.remove();
+          textNode.show();
         }
       });
     });
@@ -710,14 +724,14 @@ const callbacks = {
     // Текстовая нода
     const textNode = e.target;
 
+    console.log(textNode);
+
     // Группа, в которой лежит фигура и все текста для неё
     const group = textNode.parent;
     // Фигура, в которой выбираем текст
     const shape = group.children[0];
     // Позиция фигуры относительно всей канвы
     const shapePosition = shape.getAbsolutePosition();
-
-    console.log('Rotation = ', group.rotation());
 
     // Координаты курсора относительно канвы
     const pointerPosition = konvaStage.value.getPointerPosition();
@@ -731,9 +745,10 @@ const callbacks = {
     // Вычисляем, какой из текстов выделить
     const onlyTextChildren = group.children.slice(1);
     // Выбранный текст
-    const selectedText = onlyTextChildren.find((text) => {
-      return helpers.isCoordsInText(text, pointerPositionInCanvas)
-    });
+    // const selectedText = onlyTextChildren.find((text) => {
+    //   return helpers.isCoordsInText(text, pointerPositionInCanvas)
+    // });
+    const selectedText = textNode;
 
     // Координаты выбранного текста относительно всей канвы
     const textPosition = selectedText.getAbsolutePosition();
@@ -741,14 +756,14 @@ const callbacks = {
     // Позиция контейнера канвы относительно вьюпорта:
     const stageBox = konvaStage.value.container().getBoundingClientRect();
 
-    // Координаты относительно всего документа
+    // Координаты контейнера канвы относительно всего документа
     const correctRectX = window.scrollX + stageBox.left;
     const correctRectY = window.scrollY + stageBox.top;
 
     // Координаты, на которых расположим textarea
     const areaPosition = {
-      x: correctRectX + textPosition.x + selectedText._partialTextX - shape.attrs.strokeWidth,
-      y: correctRectY + textPosition.y + selectedText._partialTextY - shape.attrs.strokeWidth,
+      x: correctRectX + textPosition.x + shape.attrs.strokeWidth,
+      y: correctRectY + textPosition.y + shape.attrs.strokeWidth,
     };
 
     isEnteringTextInTextareaNow.value = true;
@@ -757,10 +772,8 @@ const callbacks = {
     helpers.showTextareaAndWaitText({
       x: areaPosition.x,
       y: areaPosition.y,
-      width: selectedText.textWidth,
-      height: selectedText.textHeight,
       rotation: group.attrs.rotation,
-      text: selectedText.text(),
+      textNode: selectedText,
     })
     .then((text) => selectedText.text(text))
     .finally(() => isEnteringTextInTextareaNow.value = false);
