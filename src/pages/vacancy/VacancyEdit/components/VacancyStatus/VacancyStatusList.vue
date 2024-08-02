@@ -10,6 +10,8 @@
           :indicators="indicators"
           :statusMod="statusMod"
           :handleModification="handleModification"
+          :requestSortVacancyStatus="requestSortVacancyStatus"
+          :vacancyId="vacancyId"
       />
     </div>
   </div>
@@ -39,6 +41,15 @@ const props = defineProps({
     type: Function,
     required: true,
   },
+  vacancyId: {
+    type: String,
+    required: true,
+  },
+  requestSortVacancyStatus: {
+    type: Function,
+    required: true,
+  },
+  
 });
 </script>
 
