@@ -3,8 +3,9 @@
     <div @click="handleManagerClick(manager)" class="manager-item__box">
       <ManagerAssigned :ManagerText="manager.name" class="manager-item__name" />
       <ButtonIcon
+  
         class="manager-item__btn"
-        v-if="indicators.isHandled && props.managerMod.managerId === manager.id"
+        v-if="indicators.isHandled && props.managerMod.managerId === manager.id && isAdmin()"
         @click="handleManagerDeleteClick"
       >
         <template v-slot:icon>
@@ -19,6 +20,8 @@
 import ManagerAssigned from "@/components/ManagerAssigned.vue";
 import ButtonIcon from "@/components/ButtonIcon.vue";
 import IconDelete from "@/assets/icons/close.svg?component";
+import { isAdmin } from '@/js/AuthFunctions'; 
+
 
 const props = defineProps({
   // менеджер
@@ -60,13 +63,9 @@ const handleManagerDeleteClick = () => {
   border: 1px solid gray;
   border-radius: 20px;
   display: flex;
-  transition: opacity 0.3s ease, background-color 0.3s ease;
   cursor: pointer;
   align-items: center;
   position: relative;
-}
-.manager-item__box:hover {
-  background-color: #d3d3d3;
 }
 .manager-item__icon {
   height: 12px;

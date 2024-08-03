@@ -12,8 +12,8 @@
           :indicators
           :managerMod
         ></VacancyManagersItem>
-      </div>
-      <ButtonIcon
+				<ButtonIcon
+        v-if="isAdmin()"
         @click="openAddManagersModal"
         class="manager-list__add-btn"
         :class="{ 'manager-list__empty-add-btn': managerList.length === 0 }"
@@ -22,6 +22,7 @@
           <IconAdd class="manager-list__list-icon" />
         </template>
       </ButtonIcon>
+      </div>
     </div>
   </div>
 </template>
@@ -30,6 +31,7 @@
 import VacancyManagersItem from "./VacancyManagersItem.vue";
 import IconAdd from "@/assets/icons/add.svg?component";
 import ButtonIcon from "@/components/ButtonIcon.vue";
+import { isAdmin } from '@/js/AuthFunctions'; 
 
 const props = defineProps({
   // Массив менеджеров
@@ -89,11 +91,10 @@ const vClickOutside = {
 }
 .manager-list__items-box {
   display: flex;
-  margin: 10px 0;
+  margin: 20px 0;
 }
 .manager-list__add-btn {
   padding: 0;
-  margin-left: 10px;
 }
 .manager-list__list-icon {
   align-self: center;
@@ -103,9 +104,6 @@ const vClickOutside = {
   &:hover {
     transform: scale(1.3);
   }
-}
-.manager-list__empty-add-btn {
-  margin-left: 0px;
 }
 .manager-list__item-box {
   display: flex;

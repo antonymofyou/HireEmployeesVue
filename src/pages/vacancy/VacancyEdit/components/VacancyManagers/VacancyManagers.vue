@@ -1,4 +1,7 @@
 <template>
+  <div v-if="request === true" class="manager-list__header">
+      Менеджеры вакансии:
+  </div>
   <SpinnerMain v-if="request" class="manager-list__status-spinner" />
   <VacancyManagersList
     v-if="!request"
@@ -78,20 +81,20 @@ const requestVacancyManagers = () => {
   requestInstance.permissionType = managerMod.value.permissionType;
   request.value = true;
   errorMessage.value.error = "";
-  requestInstance.request(
-    "/vacancies/access/get_managers_access_vacancy.php",
-    "manager",
-    (response) => {
-      // Обновляем списки менеджеров
-      managerList.value.assignedManagers = response.assignedManagers;
-      managerList.value.unassignedManagers = response.unassignedManagers;
-      request.value = false;
-    },
-    (err) => {
-      request.value = false;
-      errorMessage.value.error = err;
-    }
-  );
+    requestInstance.request(
+      "/vacancies/access/get_managers_access_vacancy.php",
+      "manager",
+      (response) => {
+        // Обновляем списки менеджеров
+        managerList.value.assignedManagers = response.assignedManagers;
+        managerList.value.unassignedManagers = response.unassignedManagers;
+        request.value = false;
+      },
+      (err) => {
+        request.value = false;
+        errorMessage.value.error = err;
+      }
+    );
 };
 
 // Запрос на добавление/удаление менеджера
@@ -155,5 +158,12 @@ watch(
 .manager-list__select-box {
   margin-left: 20px;
   display: flex;
+}
+.manager-list__status-spinner{
+  margin-top: 20px;
+}
+.manager-list__header{
+  margin-top: 40px;
+  user-select: none;
 }
 </style>
