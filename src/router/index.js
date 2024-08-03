@@ -24,31 +24,6 @@ const router = createRouter({
       component: ManagerAuth,
     },
     {
-      path: "/vacancies_list",
-      name: "vacanciesList",
-      component: VacanciesListPage,
-    },
-    {
-      path: "/vac/:id",
-      name: "Idvacancy",
-      component: VacancyIdPage,
-    },
-    {
-      path: "/vacancy_edit/:id",
-      name: "vacancy_edit",
-      component: VacancyEditPage,
-    },
-    {
-      path: "/candidates_list",
-      name: "candidates",
-      component: CandidatesListPage,
-    },
-    {
-      path: "/candidate",
-      name: "candidate",
-      component: CandidateCommentsPage,
-    },
-    {
       path: "/employees",
       name: "employees",
       component: EmployeesPage
@@ -57,7 +32,39 @@ const router = createRouter({
       path: "/standards",
       name: "standards",
       component: StandardsPage
-    }
+    },
+    {
+      path: "/vacancy",
+      name: 'vacancy',
+      redirect: { name: 'vacanciesList' },
+      children: [
+        {
+          path: 'list',
+          name: 'vacanciesList',
+          component: VacanciesListPage,
+        },
+        {
+          path: 'edit/:id',
+          name: 'vacancy_edit',
+          component: VacancyEditPage,
+        },
+        {
+          path: 'candidates',
+          name: 'candidates',
+          component: CandidatesListPage,
+        },
+        {
+          path: "candidate",
+          name: "candidate",
+          component: CandidateCommentsPage,
+        },
+      ],
+    },
+    {
+      path: "/vac/:id",
+      name: "Idvacancy",
+      component: VacancyIdPage,
+    },
   ],
 });
 

@@ -17,7 +17,7 @@ import { isAdmin } from "@/js/AuthFunctions";
 const listNavigation = [
     {
         pageName: 'Вакансии',
-        pathName: 'vacanciesList',
+        pathName: 'vacancy',
         icon: BriefcaseIcon,
     },
     {
