@@ -2,7 +2,7 @@
   <div ref="coords" class="select-box-main" :class="{ active: openSelect }" v-click-outside="closeSelect">
     <!-- Компонент плавного открытия селекта -->
     <Transition>
-    <div ref="openSelect" :class="{'options-container-main': !state.isAtRightEdge, 'options-container-main2': state.isAtRightEdge}" :style="optionsContainerStyle" v-if="openSelect">
+    <div ref="openSelect" class="options-container-main" :style="optionsContainerStyle" v-if="openSelect">
       <div class="option-main"
         
         v-for="option in options"
@@ -62,6 +62,7 @@ const coords = ref(null);
 const state = reactive({
   isAtRightEdge: false,
   rightOffset: '0px', // добавляем новое состояние
+  leftOffset: '',
 });
 // Цвет текста опций по умолчанию
 const defaultColor = 'var(--mine-shaft)';
@@ -69,13 +70,7 @@ const defaultColor = 'var(--mine-shaft)';
 const checkIfAtRightEdge = () => {
   if (openSelect.value) {
     const rect = openSelect.value.getBoundingClientRect();
-    const selectRect = coords.value.getBoundingClientRect();
     state.isAtRightEdge = rect.right >= window.innerWidth;
-    if (state.isAtRightEdge) {
-      state.rightOffset = (selectRect.right + selectRect.width - window.innerWidth) + 'px';
-    } else {
-      state.rightOffset = '0px';
-    }
   }
 };
 
@@ -104,7 +99,8 @@ const optionsContainerStyle = computed(() => {
   const maxHeight = props.options.length > 5 ? '200px' : 'none';
   return {
     maxHeight: maxHeight,
-    right: state.isAtRightEdge ? state.rightOffset : '0px',
+    right: state.isAtRightEdge ? state.rightOffset : '',
+    left: state.isAtRightEdge ? state.leftOffset : '0px'
   };
 });
 
@@ -152,26 +148,6 @@ onMounted(() => {
 }
 
 .options-container-main {
-  color: var(--cornflower-blue);
-  min-width: fit-content;
-  width: 100%;
-  transition: all 0.4s;
-  border-radius: 8px;
-  overflow-y: auto;
-  background-color: var(--white);
-  order: 1;
-  position: absolute;
-  top: 25px;
-  left: 0;
-
-  z-index: 999;
-  border: 1px solid var(--cornflower-blue);
-  color: var(--mine-shaft);
-  font-size: 14px;
-
-  overflow-x: hidden;
-}
-.options-container-main2 {
   color: var(--cornflower-blue);
   min-width: fit-content;
   width: 100%;
