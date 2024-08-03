@@ -86,9 +86,14 @@ const requestVacancyManagers = () => {
       "manager",
       (response) => {
         // Обновляем списки менеджеров
-        managerList.value.assignedManagers = response.assignedManagers;
-        managerList.value.unassignedManagers = response.unassignedManagers;
-        request.value = false;
+        if (response.success === '1') {
+          managerList.value.assignedManagers = response.assignedManagers;
+          managerList.value.unassignedManagers = response.unassignedManagers;
+          request.value = false;
+        }
+        else {
+          errorMessage.value = err;
+        }
       },
       (err) => {
         request.value = false;
@@ -116,11 +121,16 @@ const requestManagersModification = (action, managerId) => {
     "manager",
     (response) => {
       // Обновляем данные менеджеров
-      requestVacancyManagers();
-      indicators.value.isAdd = false;
-      indicators.value.isDelete = false;
-      formData.value.id = "";
-      managerMod.value.managerId = "";
+      if (response.success === '1') {
+        requestVacancyManagers();
+        indicators.value.isAdd = false;
+        indicators.value.isDelete = false;
+        formData.value.id = "";
+        managerMod.value.managerId = "";
+      }
+      else {
+        errorMessage.value = err;
+      }
     },
     (err) => {
       request.value = false;
