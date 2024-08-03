@@ -5,7 +5,7 @@
    </div>
   <div class="content vacancy-edit" v-if="isLoaded">
     <section class="container">
-      <RouterLink :to="{ name: 'vacanciesList' }">
+      <RouterLink class="vacancy-edit__back-link" :to="{ name: 'vacanciesList' }">
         <TopSquareButton class="vacancy-edit__back-btn" :icon="iconBack" />
       </RouterLink>
       <h2 class="vacancy-edit__title">Редактирование вакансии</h2>
@@ -550,10 +550,15 @@ const copyToClipboard = async () => {
   margin: 0 0 20px;
 }
 
+.vacancy-edit__back-link {
+  display: inline-block;
+}
+
 .vacancy-edit__back-btn {
   position: sticky;
   top: 20px;
   left: 20px;
+  width: 40px;
 }
 
 .vacancy-edit__loader {

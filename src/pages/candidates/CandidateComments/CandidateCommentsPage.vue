@@ -1,6 +1,7 @@
 <template>
   <section v-if="isLoaded" class="comments-page">
     <RouterLink
+    class="comments-page__back-link"
         :to="{
           name: 'candidates',
           query: { vacancyId: respondData.vacancyId },
@@ -229,10 +230,15 @@ const getVacancyInfo = (successCallback, errorCallback) => {
   text-align: center;
 }
 
+.comments-page__back-link {
+  display: inline-block;
+}
+
 .comments-page__back-btn {
   position: sticky;
   top: 20px;
   left: 20px;
+  width: 40px;
 }
 
 @media screen and (max-width: 350px) {

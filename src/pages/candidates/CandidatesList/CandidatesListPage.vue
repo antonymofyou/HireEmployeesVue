@@ -1,6 +1,6 @@
 <template>
   <section class="candidates">
-    <RouterLink :to="{ name: 'vacanciesList' }">
+    <RouterLink class="candidates__back-link" :to="{ name: 'vacanciesList' }">
       <TopSquareButton
         class="candidates__back-btn"
         :icon="iconBack"
@@ -290,9 +290,14 @@ watch(
   }
 }
 
+.candidates__back-link {
+  display: inline-block;
+}
+
 .candidates__back-btn {
   position: sticky;
   top: 20px;
+  width: 40px;
 }
 
 @media screen and (max-width: 350px) {
