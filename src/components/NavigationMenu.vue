@@ -1,25 +1,23 @@
 <template>
     <nav class="navigation-menu">
         <ul class="navigation-menu__list">
-            <li
-                v-for="item of listItems"
-                :key="item.pageName"
-                class="navigation-menu__item"
-            >
-                <RouterLink
-                    @pointerup="emits('transition')"
-                    @keydown.enter.space="emits('transition')"
-                    :to="{
-                        name: item.pathName,
-                    }"
-                    class="navigation-menu__link"
-                >
-                    <slot :item="item">
-                        <span class="navigation-menu__text">{{ item.pageName }}</span>
-                        <component v-if="item.icon" class="navigation-menu__icon" :is="item.icon" />
-                    </slot>
-                </RouterLink>
-            </li>
+            <template v-for="item of listItems" :key="item.pageName">
+                <li v-if="isVisible(item.isVisible)" class="navigation-menu__item">
+                    <RouterLink
+                        @pointerup="emits('transition')"
+                        @keydown.enter.space="emits('transition')"
+                        :to="{
+                            name: item.pathName,
+                        }"
+                        class="navigation-menu__link"
+                    >
+                        <slot :item="item">
+                            <span class="navigation-menu__text">{{ item.pageName }}</span>
+                            <component v-if="item.icon" class="navigation-menu__icon" :is="item.icon" />
+                        </slot>
+                    </RouterLink>
+                </li>
+            </template>
         </ul>
     </nav>
 </template>
@@ -35,6 +33,17 @@ const props = defineProps({
 const emits = defineEmits({
     transition: null,
 });
+
+/**
+ * 
+ * Если значение isVisible не передано (isVisible = undefined)
+ * значением по умолчанию будет true , иначе возвращается значение isVisible
+ * 
+ */
+
+function isVisible(flag) {
+    return flag === undefined || flag;
+}
 
 </script>
   

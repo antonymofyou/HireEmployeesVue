@@ -12,6 +12,7 @@ import NavigationMenu from "@/components/NavigationMenu.vue";
 import BookIcon from '@/assets/icons/book.svg?component';
 import PersonIcon from '@/assets/icons/person.svg?component';
 import BriefcaseIcon from '@/assets/icons/briefcase.svg?component';
+import { isAdmin } from "@/js/AuthFunctions";
 
 const listNavigation = [
     {
@@ -23,6 +24,7 @@ const listNavigation = [
         pageName: 'Сотрудники',
         pathName: 'employees',
         icon: PersonIcon,
+        isVisible: isAdmin(),
     },
     {
         pageName: 'Стандарты',
