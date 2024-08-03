@@ -14,6 +14,7 @@
       :statusList
       :statusMod
       :indicators
+      :status="statusList"
       :handleModification
       :vacancyId="vacancyId"
       :requestSortVacancyStatus="requestSortVacancyStatus"
@@ -117,6 +118,9 @@ const requestVacancyStatuses = () => {
       statusList.value.statusesSelect = response.statuses.map((status) => {
         return { name: status.statusName, id: status.statusName };
       });
+      watch(() =>{
+        console.log(response)
+      })
       statusList.value.transferStatuses = response.transfers;
       // Если статусов нет - создаем шаблонный
       if (!statusList.value.statuses.length) {
@@ -204,12 +208,20 @@ const requestSortVacancyStatus = (vacancyId, statusName, direction) => {
 
   request.value = true;
   errorMessage.value = '';
+
+  watch(() =>{
+    console.log(vacancyId)
+    console.log(statusName)
+    console.log(direction)
+
+  })
   
   requestInstance.request(
     '/vacancies/sort_vacancy_status.php',
     'manager',
     (response) => {
       // После успешного запроса обновляем данные статусов
+      console.log('Порядок статусов обновлен', response);
       requestVacancyStatuses();
       request.value = false;
     },

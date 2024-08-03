@@ -4,10 +4,6 @@
         class="statuslist__list-status"
         @click="toggleStatus(status, 'handlers')"
     >
-    <div class="status-item__arrows">
-      <button @click.stop="moveStatus('up')" :disabled="isFirst">↑</button>
-      <button @click.stop="moveStatus('down')" :disabled="isLast">↓</button>
-    </div>
       <div class="status-container" :style="{ backgroundColor: status.statusColor }">
         <StatusColored
             :statusText="status.statusName"
@@ -114,8 +110,6 @@
 </template>
 
 <script setup>
-import { computed } from 'vue';
-
 import ButtonIcon from '@/components/ButtonIcon.vue';
 import StatusColored from '@/components/StatusColored.vue';
 import IconEdit from '@/assets/icons/edit.svg?component';
@@ -148,14 +142,6 @@ const props = defineProps({
   // Обработчик изменения статуса
   handleModification: {
     type: Function,
-    required: true,
-  },
-  requestSortVacancyStatus: {
-    type: Function,
-    required: true,
-  },
-  vacancyId: {
-    type: String,
     required: true,
   },
 });
@@ -205,21 +191,6 @@ const handleStatusClick = (status) => {
     props.indicators.isTransfer = !props.indicators.isTransfer;
     props.statusMod.name = status.statusName;
   }
-};
-
-const isFirst = computed(() => {
-  return props.statusList.statuses[0].statusName === props.status.statusName;
-});
-
-const isLast = computed(() => {
-  return props.statusList.statuses[props.statusList.statuses.length - 1].statusName === props.status.statusName;
-});
-
-const moveStatus = (direction) => {
-  const movement = direction === 'up' ? -1 : 1;
-
-  // Вызов функции для отправки запроса на сервер
-  props.requestSortVacancyStatus(props.vacancyId, props.status.statusName, movement);
 };
 </script>
 
