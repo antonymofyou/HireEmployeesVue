@@ -2,7 +2,7 @@
   <div ref="coords" class="select-box-main" :class="{ active: openSelect }" v-click-outside="closeSelect">
     <!-- Компонент плавного открытия селекта -->
     <Transition>
-    <div ref="isOpened" :class="{'options-container-main': !state.isAtRightEdge, 'options-container-main2': state.isAtRightEdge}" :style="optionsContainerStyle" v-if="openSelect">
+    <div ref="openSelect" :class="{'options-container-main': !state.isAtRightEdge, 'options-container-main2': state.isAtRightEdge}" :style="optionsContainerStyle" v-if="openSelect">
       <div class="option-main"
         
         v-for="option in options"
@@ -56,22 +56,26 @@ const emit = defineEmits(['update:modelValue']);
 const openSelect = ref(false);
 // Выбранная опция
 const selected = ref(null);
-// Проверка открытия списка
-const isOpened = ref(null);
 // Координаты селекта
 const coords = ref(null);
 // Состояние упирается ли список в правую границу экрана
 const state = reactive({
   isAtRightEdge: false,
-})
+  rightOffset: '0px', // добавляем новое состояние
+});
 // Цвет текста опций по умолчанию
 const defaultColor = 'var(--mine-shaft)';
 
 const checkIfAtRightEdge = () => {
-  if (isOpened.value) {
-    const rect = isOpened.value.getBoundingClientRect();
+  if (openSelect.value) {
+    const rect = openSelect.value.getBoundingClientRect();
+    const selectRect = coords.value.getBoundingClientRect();
     state.isAtRightEdge = rect.right >= window.innerWidth;
-    console.log('Упирается в правую границу:', state.isAtRightEdge);
+    if (state.isAtRightEdge) {
+      state.rightOffset = (selectRect.right + selectRect.width - window.innerWidth) + 'px';
+    } else {
+      state.rightOffset = '0px';
+    }
   }
 };
 
@@ -90,15 +94,17 @@ const closeSelect = () => {
 // Переключатель открытия селекта
 const toggleSelect = () => {
   openSelect.value = !openSelect.value;
+  if (openSelect.value) {
+    checkIfAtRightEdge();
+  }
 };
 
 // Дополнительные стили для контейнера (для корректного отображения скролла)
 const optionsContainerStyle = computed(() => {
   const maxHeight = props.options.length > 5 ? '200px' : 'none';
-  const selectRect = -coords.value.getBoundingClientRect().right + 'px';
   return {
     maxHeight: maxHeight,
-    selectRect: selectRect,
+    right: state.isAtRightEdge ? state.rightOffset : '0px',
   };
 });
 
@@ -176,7 +182,6 @@ onMounted(() => {
   order: 1;
   position: absolute;
   top: 25px;
-  right: v-bind(selectRect);
 
   z-index: 999;
   border: 1px solid var(--cornflower-blue);
