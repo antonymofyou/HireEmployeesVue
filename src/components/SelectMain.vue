@@ -1,8 +1,8 @@
 <template>
-  <div ref="coords" class="select-box-main" :class="{ active: openSelect }" v-click-outside="closeSelect">
+  <div class="select-box-main" :class="{ active: openSelect }" v-click-outside="closeSelect">
     <!-- Компонент плавного открытия селекта -->
     <Transition>
-    <div ref="openSelect" class="options-container-main" :style="optionsContainerStyle" v-if="openSelect">
+    <div ref="openSelect" class="options-container-main" :style="[optionsContainerStyle, styles]" v-if="openSelect">
       <div class="option-main"
         
         v-for="option in options"
@@ -34,7 +34,7 @@
 </template>
 
 <script setup>
-import { ref, reactive, computed, watchEffect, onMounted } from 'vue';
+import { ref, reactive, computed, watchEffect, onMounted, nextTick } from 'vue';
 
 const props = defineProps({
   // Модель для обновления, опции селекта
@@ -56,22 +56,29 @@ const emit = defineEmits(['update:modelValue']);
 const openSelect = ref(false);
 // Выбранная опция
 const selected = ref(null);
-// Координаты селекта
-const coords = ref(null);
+// Начальные значения стилей для выпадающего списка
+const styles = ref({
+  right: '',
+  left: '0px'
+});
 // Состояние упирается ли список в правую границу экрана
 const state = reactive({
   isAtRightEdge: false,
-  rightOffset: '0px', // добавляем новое состояние
-  leftOffset: '',
 });
 // Цвет текста опций по умолчанию
 const defaultColor = 'var(--mine-shaft)';
 
+// Проверка упирается ли список в правую границу экрана
 const checkIfAtRightEdge = () => {
   if (openSelect.value) {
-    const rect = openSelect.value.getBoundingClientRect();
+    const rect = openSelect.value.getBoundingClientRect(); 
     state.isAtRightEdge = rect.right >= window.innerWidth;
-  }
+    if (state.isAtRightEdge) {
+      styles.value.right = '0px';
+      styles.value.left = '';
+      window.removeEventListener('resize', checkIfAtRightEdge);
+    }
+  }  
 };
 
 // Установка выбранной опции
@@ -90,7 +97,9 @@ const closeSelect = () => {
 const toggleSelect = () => {
   openSelect.value = !openSelect.value;
   if (openSelect.value) {
-    checkIfAtRightEdge();
+    nextTick(() => { // Для проверки после отрисовки
+      checkIfAtRightEdge();
+    })
   }
 };
 
@@ -99,8 +108,6 @@ const optionsContainerStyle = computed(() => {
   const maxHeight = props.options.length > 5 ? '200px' : 'none';
   return {
     maxHeight: maxHeight,
-    right: state.isAtRightEdge ? state.rightOffset : '',
-    left: state.isAtRightEdge ? state.leftOffset : '0px'
   };
 });
 
@@ -129,9 +136,6 @@ const vClickOutside = {
 };
 
 onMounted(() => {
-  // Проверка при монтировании компонента
-  checkIfAtRightEdge();
-  
   // Опционально: добавить обработчик события resize
   window.addEventListener('resize', checkIfAtRightEdge);
 });
