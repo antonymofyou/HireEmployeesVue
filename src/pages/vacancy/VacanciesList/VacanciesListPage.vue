@@ -2,6 +2,7 @@
   <section class="vacancies">
     <h1 class="vacancies__title">Вакансии</h1>
     <TopSquareButton
+      v-if="isAdmin()"
       class="vacancies__add-vacancy-btn"
       @click="showModal = true"
       :icon="plusIcon"
@@ -100,7 +101,7 @@
 import { onMounted, ref, watch } from "vue";
 import { useRouter } from "vue-router";
 import { MainRequestClass } from "@/js/RootClasses";
-import { isManager } from "@/js/AuthFunctions";
+import { isManager, isAdmin } from "@/js/AuthFunctions";
 import VacancyCard from "./components/VacancyCard.vue";
 import plusIcon from "@/assets/icons/plus.svg";
 import Modal from "@/components/Modal.vue";

@@ -98,6 +98,7 @@
             <SpinnerMain class="vacancy-edit__loader-spinner"/>
           </div>
           <ButtonMain
+            v-if="isAdmin()"
             buttonColor="var(--cinnabar)"
             type="button"
             @click="showModalOnRemoveVacancy = true"
@@ -152,7 +153,7 @@ import VacancyQuestion from './components/VacancyQuestion.vue';
 import { ref, computed, onMounted, watch, reactive } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
 
-import { isManager } from '@/js/AuthFunctions';
+import { isAdmin, isManager } from '@/js/AuthFunctions';
 import { VacanciesGetAllVacancyById, 
   VacanciesQuestionsCreateVacancyQuestion,
   VacanciesQuestionsDeleteVacancyQuestion,
