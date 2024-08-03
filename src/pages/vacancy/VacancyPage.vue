@@ -1,20 +1,18 @@
 <template>
     <TheHeader />
     <main>
-        <h1>
-            Сотрудники
-        </h1>
+        <router-view></router-view>
     </main>
 </template>
 
 <script setup>
 
 import TheHeader from '@/components/TheHeader.vue';
+import { RouterView } from 'vue-router';
 import { useRouter } from 'vue-router';
-import { isAdmin } from '@/js/AuthFunctions';
 
 const router = useRouter();
 
-if (!isAdmin()) router.push({ name: 'vacanciesList' });
+router.push({ name: 'vacanciesList' });
 
 </script>
