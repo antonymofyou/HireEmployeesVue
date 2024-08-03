@@ -693,10 +693,12 @@ const callbacks = {
             shape.height(correctHeightByScale);
             texts.forEach((text) => {
               text.width(correctWidthByScale);
-              // Чтобы текст уменьшал свою высоту и в стейте, и в канве
-              if (text.attrs.height) {
-                text.attrs.height = text.attrs.height * scaleY
+              // Чтобы текст, имеющий отступы, корректно уменьшал свою высоту
+              if (text.attrs.height && text.attrs.reducedOffsetTop) {
+                text.attrs.height = correctHeightByScale - text.attrs.reducedOffsetTop * scaleY;
                 text.height(text.attrs.height);
+              } else {
+                text.height(correctHeightByScale)
               }
             });
             break;

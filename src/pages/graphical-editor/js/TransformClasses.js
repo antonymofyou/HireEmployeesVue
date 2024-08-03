@@ -23,6 +23,7 @@ export class TransformerEditor {
           
           reducedOffsetTop += prevText.y ? prevText.fontSize + prevText.y :  prevText.fontSize;
           text.y = reducedOffsetTop;
+          text.reducedOffsetTop = reducedOffsetTop;
           text.height = correctConfig.height - reducedOffsetTop;
         });
       }
