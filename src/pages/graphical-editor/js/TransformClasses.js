@@ -13,6 +13,7 @@ export class TransformerEditor {
 
     // Если есть текст внутри конфига - то будем выводить его в виде стека (вертикально)
     if (Array.isArray(correctConfig.text)) {
+      // Накопительная переменная, отступ от верхней границы
       let reducedOffsetTop = 0;
 
       for (const textInfo of correctConfig.text) {
@@ -22,6 +23,7 @@ export class TransformerEditor {
           
           reducedOffsetTop += prevText.y ? prevText.fontSize + prevText.y :  prevText.fontSize;
           text.y = reducedOffsetTop;
+          text.height = correctConfig.height - reducedOffsetTop;
         });
       }
     }

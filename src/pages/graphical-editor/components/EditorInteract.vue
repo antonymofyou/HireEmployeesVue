@@ -672,7 +672,7 @@ const callbacks = {
         // У стрелок отдельная ветка обработки в transformend
         if (shape.attrs.type === 'arrow') return;
 
-        const { rotation, correctWidthByScale, correctHeightByScale } = getEntities();
+        const { rotation, correctWidthByScale, correctHeightByScale, scaleY } = getEntities();
 
         // Если слишком маленькие размеры у фигуры - дальше трансформировать не будем
         if (correctWidthByScale < 20 || correctHeightByScale < 20) {
@@ -693,7 +693,11 @@ const callbacks = {
             shape.height(correctHeightByScale);
             texts.forEach((text) => {
               text.width(correctWidthByScale);
-              // text.height(correctHeightByScale);
+              // Чтобы текст уменьшал свою высоту и в стейте, и в канве
+              if (text.attrs.height) {
+                text.attrs.height = text.attrs.height * scaleY
+                text.height(text.attrs.height);
+              }
             });
             break;
           }
@@ -947,6 +951,7 @@ const callbacks = {
       alignment: align,
       text: [
         {
+          height: selectedShape.value.height(),
           text,
           fontSize: 24,
           type: 'medium',
@@ -956,6 +961,11 @@ const callbacks = {
 
     isInputForEnterShapeTextVisible.value = false;
     isConfigOfTextVisible.value = false;
+
+    // После вставки текста - очищаем выбранную фигуру
+    if (selectedShape.value) {
+      konva.value.transformer.getNode().nodes([]);
+    }
   },
 
   /**

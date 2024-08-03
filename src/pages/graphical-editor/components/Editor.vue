@@ -62,8 +62,8 @@
               :ref="(el) => el !== null ? textRefs.push(el) : {}"
               :config="{
                 width: shape.width,
+                height: textRecord.height,
                 wrap: 'char',
-                // height: shape.height,
                 align: textInfo.alignment,
                 verticalAlign: shape.textVerticalAlignment,
                 ...TransformerEditor.transformTextConfigToConvaCorrect(textRecord),
@@ -200,18 +200,6 @@ const transformer = ref(null);
 const canvasWrapper = ref(null);
 const textRefs = ref([]);
 
-onMounted(() => {
-  for (const textElem of textRefs.value) {
-    // console.log(textElem)
-    const textNode = textElem.getNode();
-    const parentGroup = textNode.parent;
-
-    // console.log(parentGroup);
-    // // textNode.x(textNode._partialTextX);
-    // console.log(textNode);
-  }
-});
-
 defineExpose({
   inner: konva,
   transformer: transformer,
@@ -244,14 +232,15 @@ const helpers = {
 watchEffect((onCleanup) => {
   if (!canvasWrapper.value) return;
 
+  // @TODO для адаптива
   const resizeHandler = () => {
     const containerWidth = canvasWrapper.value.offsetWidth;
     const containerHeight = canvasWrapper.value.offsetHeight;
     
-    const scaleX = containerWidth / props.width;
-    const scaleY = containerHeight / props.height;
-    const scale = Math.min(scaleX, scaleY);
-    const stage = konva.value.getStage();
+    // const scaleX = containerWidth / props.width;
+    // const scaleY = containerHeight / props.height;
+    // const scale = Math.min(scaleX, scaleY);
+    // const stage = konva.value.getStage();
 
     // stage.width(containerWidth);
     // stage.height(containerHeight);
