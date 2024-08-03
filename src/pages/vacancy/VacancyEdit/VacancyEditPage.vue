@@ -4,13 +4,22 @@
     <SpinnerMain class="vacancy-edit__loader-spinner" />
    </div>
   <div class="content vacancy-edit" v-if="isLoaded">
-    <RouterLink :to="{ name: 'vacanciesList' }">
-      <TopSquareButton class="vacancy-edit__back-btn" :icon="iconBack" />
-    </RouterLink>
-    
     <section class="container">
+      <RouterLink :to="{ name: 'vacanciesList' }">
+        <TopSquareButton class="vacancy-edit__back-btn" :icon="iconBack" />
+      </RouterLink>
       <h2 class="vacancy-edit__title">Редактирование вакансии</h2>
-
+      <ButtonMain
+        class="vacancy-edit__save-btn"
+        @click="saveChanges"
+        :success="successSave"
+        :message="successMessage"
+        :align="'end'"
+        :isActive="saveLoad"
+      >
+        <template v-slot:text>Сохранить</template>
+        <template v-slot:icon><SaveIcon width="20px" height="20px"class="vacancy-edit__icon-button"/></template>
+      </ButtonMain>
       <div class="vacancy-edit__main">
         <InputSimple
           v-model="formData.name"
@@ -118,18 +127,6 @@
           {{ errorMessageQuestion }}
         </div>
       </div>
-
-      <ButtonMain
-        class="vacancy-edit__save-btn"
-        @click="saveChanges"
-        :success="successSave"
-        :message="successMessage"
-        :align="'end'"
-        :isActive="saveLoad"
-      >
-        <template v-slot:text>Сохранить</template>
-        <template v-slot:icon><SaveIcon width="20px" height="20px"class="vacancy-edit__icon-button"/></template>
-      </ButtonMain>
 
     </section>
   </div>
@@ -440,7 +437,7 @@ const copyToClipboard = async () => {
 }
 
 .vacancy-edit__title {
-  margin-bottom: 80px;
+  margin-bottom: 20px;
   text-align: center;
 }
 
@@ -546,11 +543,11 @@ const copyToClipboard = async () => {
 }
 
 .vacancy-edit__save-btn {
-  position: absolute;
-  top: 0;
-  right: 0;
-  transform: translateY(100%);
+  position: sticky;
+  top: 20px;
+  right: 20px;
   z-index: 10;
+  margin: 0 0 20px;
 }
 
 .vacancy-edit__back-btn {

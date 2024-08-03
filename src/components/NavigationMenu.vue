@@ -56,14 +56,9 @@ const emits = defineEmits({
     transition: opacity 0.2s;
 }
 
-.navigation-menu__text {
-    margin-right: 8px;
-}
-
 .navigation-menu__icon {
     width: 16px;
     height: 16px;
-    transform: translateY(2px);
     fill: currentColor;
 }
 

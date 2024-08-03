@@ -52,6 +52,17 @@ const listNavigation = [
     gap: 16px;
 }
 
+.navigation-menu:deep(.navigation-menu__link) {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.navigation-menu:deep(.navigation-menu__icon) {
+    width: 32px;
+    height: 32px;
+}
+
 @media (max-width: 575.98px) {
     .container {
         max-width: 100%;

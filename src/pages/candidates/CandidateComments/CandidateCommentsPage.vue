@@ -1,14 +1,14 @@
 <template>
   <section v-if="isLoaded" class="comments-page">
-    <div class="heading">
-      <RouterLink
+    <RouterLink
         :to="{
           name: 'candidates',
           query: { vacancyId: respondData.vacancyId },
         }"
       >
         <TopSquareButton class="comments-page__back-btn" :icon="backIcon" />
-      </RouterLink>
+    </RouterLink>
+    <div class="heading">
       <h1>Отклик на вакансию</h1>
     </div>
 
