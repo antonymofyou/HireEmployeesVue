@@ -65,7 +65,7 @@ const listNavigation = [
     height: 32px;
 }
 
-@media (max-width: 575.98px) {
+@media (max-width: 576px) {
     .container {
         max-width: 100%;
         padding: 16px;
