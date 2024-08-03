@@ -2,7 +2,7 @@
   <div class="select-box-main" :class="{ active: openSelect }" v-click-outside="closeSelect">
     <!-- Компонент плавного открытия селекта -->
     <Transition>
-    <div class="options-container-main" :style="optionsContainerStyle" v-if="openSelect">
+    <div ref="isOpened" class="options-container-main" :style="optionsContainerStyle" v-if="openSelect">
       <div class="option-main"
         
         v-for="option in options"
@@ -34,7 +34,7 @@
 </template>
 
 <script setup>
-import { ref, computed, watchEffect } from 'vue';
+import { ref, reactive, computed, watchEffect, onMounted } from 'vue';
 
 const props = defineProps({
   // Модель для обновления, опции селекта
@@ -56,8 +56,29 @@ const emit = defineEmits(['update:modelValue']);
 const openSelect = ref(false);
 // Выбранная опция
 const selected = ref(null);
+// Проверка открытия списка
+const isOpened = ref(null);
+// Состояние упирается ли список в правую границу экрана
+const state = reactive({
+  isAtRightEdge: false,
+})
 // Цвет текста опций по умолчанию
 const defaultColor = 'var(--mine-shaft)';
+
+const checkIfAtRightEdge = () => {
+  if (isOpened.value) {
+    const rect = isOpened.value.getBoundingClientRect();
+    state.isAtRightEdge = rect.right >= window.innerWidth;
+    console.log('Упирается в правую границу:', state.isAtRightEdge);
+
+    if (state.isAtRightEdge) {
+      isOpened.value.style.left = ''
+      isOpened.value.style.right = '0'
+    } else {
+
+    }
+  }
+};
 
 // Установка выбранной опции
 const setSelected = (option) => {
@@ -107,6 +128,15 @@ const vClickOutside = {
     document.removeEventListener("click", el.clickOutsideEvent);
   },
 };
+
+onMounted(() => {
+  // Проверка при монтировании компонента
+  checkIfAtRightEdge();
+  
+  // Опционально: добавить обработчик события resize
+  window.addEventListener('resize', checkIfAtRightEdge);
+});
+
 </script>
 
 <style scoped>
@@ -163,6 +193,11 @@ const vClickOutside = {
   color: var(--white);
   background-color: var(--shark);
   border: 2px solid var(--tundora);
+}
+
+.arrow {
+  min-width: 10px;
+  min-height: 10px;
 }
 
 .active .arrow {
