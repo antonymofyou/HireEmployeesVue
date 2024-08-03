@@ -1,8 +1,8 @@
 <template>
-  <div class="select-box-main" :class="{ active: openSelect }" v-click-outside="closeSelect">
+  <div ref="coords" class="select-box-main" :class="{ active: openSelect }" v-click-outside="closeSelect">
     <!-- Компонент плавного открытия селекта -->
     <Transition>
-    <div ref="isOpened" class="options-container-main" :style="optionsContainerStyle" v-if="openSelect">
+    <div ref="isOpened" :class="{'options-container-main': !state.isAtRightEdge, 'options-container-main2': state.isAtRightEdge}" :style="optionsContainerStyle" v-if="openSelect">
       <div class="option-main"
         
         v-for="option in options"
@@ -58,6 +58,8 @@ const openSelect = ref(false);
 const selected = ref(null);
 // Проверка открытия списка
 const isOpened = ref(null);
+// Координаты селекта
+const coords = ref(null);
 // Состояние упирается ли список в правую границу экрана
 const state = reactive({
   isAtRightEdge: false,
@@ -70,13 +72,6 @@ const checkIfAtRightEdge = () => {
     const rect = isOpened.value.getBoundingClientRect();
     state.isAtRightEdge = rect.right >= window.innerWidth;
     console.log('Упирается в правую границу:', state.isAtRightEdge);
-
-    if (state.isAtRightEdge) {
-      isOpened.value.style.left = ''
-      isOpened.value.style.right = '0'
-    } else {
-
-    }
   }
 };
 
@@ -100,8 +95,10 @@ const toggleSelect = () => {
 // Дополнительные стили для контейнера (для корректного отображения скролла)
 const optionsContainerStyle = computed(() => {
   const maxHeight = props.options.length > 5 ? '200px' : 'none';
+  const selectRect = -coords.value.getBoundingClientRect().right + 'px';
   return {
     maxHeight: maxHeight,
+    selectRect: selectRect,
   };
 });
 
@@ -160,6 +157,26 @@ onMounted(() => {
   position: absolute;
   top: 25px;
   left: 0;
+
+  z-index: 999;
+  border: 1px solid var(--cornflower-blue);
+  color: var(--mine-shaft);
+  font-size: 14px;
+
+  overflow-x: hidden;
+}
+.options-container-main2 {
+  color: var(--cornflower-blue);
+  min-width: fit-content;
+  width: 100%;
+  transition: all 0.4s;
+  border-radius: 8px;
+  overflow-y: auto;
+  background-color: var(--white);
+  order: 1;
+  position: absolute;
+  top: 25px;
+  right: v-bind(selectRect);
 
   z-index: 999;
   border: 1px solid var(--cornflower-blue);
