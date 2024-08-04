@@ -1,6 +1,6 @@
 <template>
   <div class="manager-list__box">
-    <div>
+    <div class="manager-list__header">
       Менеджеры вакансии: {{ managerList.length || "менеджеры не заданы" }}
     </div>
     <div class="manager-list__items-box">
@@ -109,5 +109,8 @@ const vClickOutside = {
   display: flex;
   flex-wrap: wrap;
   gap: 10px;
+}
+.manager-list__header{
+  font-weight: bold;
 }
 </style>

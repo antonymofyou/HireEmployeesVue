@@ -18,6 +18,7 @@
       :managerMod
       :indicators
       :managerList="managerList.unassignedManagers"
+      :managerListAssigned="managerList.assignedManagers"
       :requestManagersModification
       :request
       :errorMessage
@@ -175,5 +176,6 @@ watch(
 .manager-list__header{
   margin-top: 40px;
   user-select: none;
+  font-weight: bold; 
 }
 </style>
