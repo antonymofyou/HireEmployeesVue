@@ -26,7 +26,6 @@ const props = defineProps({
   border-radius: 13px;
   color: white;
   padding: 7px 16px;
-  cursor: default;
   user-select: none;
   width: fit-content;
   font-size: 14px;
