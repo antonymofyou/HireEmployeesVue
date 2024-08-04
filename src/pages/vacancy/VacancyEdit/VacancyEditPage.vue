@@ -55,6 +55,7 @@
         />
       </div>
 
+      <VacancyManagers :vacancyId />
       <VacancyStatus :vacancyId />
 
       <div class="vacancy-edit__questions-block">
@@ -167,6 +168,7 @@ import SpinnerMain from "@/components/SpinnerMain.vue";
 import SaveIcon from '@/assets/icons/save.svg?component';
 import PlusIcon from '@/assets/icons/add.svg?component';
 import VacancyStatus from './components/VacancyStatus/VacancyStatus.vue';
+import VacancyManagers from './components/VacancyManagers/VacancyManagers.vue';
 import ButtonIcon from '@/components/ButtonIcon.vue';
 import CopyIcon from '@/assets/icons/copy.svg?component';
 

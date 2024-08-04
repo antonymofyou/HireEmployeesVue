@@ -112,3 +112,15 @@ export class VacanciesModifyVacancyStatus extends MainRequestClass {
   
     toStatusName = ''; // название статуса, перевод в который нужно создать/удалить
   }
+
+export class VacanciesAccessGetManagerAccessVacancy  extends MainRequestClass {
+    vacancyId = ''; // ID вакансии, для которой нужно получить менеджеров
+    permissionType = ''; // Тип прав, информацию о которых необходимо получить 
+}
+export class VacanciesAccessSetManagerAccessVacancy   extends MainRequestClass {
+    vacancyId = ''; // ID вакансии, для которой нужно получить менеджеров
+    permissionType = ''; // Тип прав, информацию о которых необходимо получить 
+    action = ""; //Действие которое нужно сделать с менеджером (добавить/удалить)
+    statusName = ''; //название статуса, на который нужно добавить менеджера
+    managerId = '' // id менеджера
+}
