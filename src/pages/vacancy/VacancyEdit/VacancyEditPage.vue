@@ -45,6 +45,9 @@
       <p class="vacancy-edit__link-copy-message vacancy-edit__link-copy-message--error" v-else-if="isCopiedError">Не удалось скопировать текст!</p>
     </div>
 
+    <VacancyManagers :vacancyId />
+    <VacancyStatus :vacancyId />
+
 
       <div class="vacancy-edit__description">
         <TextEditor
@@ -54,9 +57,6 @@
           id="0"
         />
       </div>
-
-      <VacancyManagers :vacancyId />
-      <VacancyStatus :vacancyId />
 
       <div class="vacancy-edit__questions-block">
         <h2 class="vacancy-edit__questions-title">Вопросы вакансии</h2>
