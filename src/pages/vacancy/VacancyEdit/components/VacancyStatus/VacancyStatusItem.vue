@@ -2,6 +2,7 @@
   <div class="statuslist__list-items">
     <div
         class="statuslist__list-status"
+        :ref="`status-${status.statusName}`"
         @click="toggleStatus(status, 'handlers')"
     >
       <div class="status-container" :style="{ backgroundColor: status.statusColor }">
@@ -41,10 +42,12 @@
     <div
         v-if="statusList.transferStatuses[status.statusName].length"
         class="statuslist__list-transfers"
+        :ref="`transfers-${status.statusName}`"
     >
       <div
           class="statuslist__list-transfers-box"
           v-for="transfer in statusList.transferStatuses[status.statusName]"
+          :key="transfer"
       >
         <div
             class="statuslist__list-transfers-item"
@@ -53,7 +56,7 @@
                   (s) => s.statusName === transfer
                 ).statusColor,
               }"
-            @click="toggleStatus(status, 'transfer')"
+            @click="() => { toggleStatus(status, 'transfer'); setActiveTransfer(status.statusName, transfer); }"
         >
           <StatusColored
               :statusText="transfer"
@@ -61,6 +64,7 @@
               class="status-colored-full-width"
           />
           <ButtonIcon
+              v-if="statusMod.activeTransfer === transfer && statusMod.name === status.statusName"
               class="statuslist__list-btn"
               @click="
                   handleModification(
@@ -110,6 +114,7 @@
 </template>
 
 <script setup>
+import { ref, onMounted, onUnmounted } from 'vue';
 import ButtonIcon from '@/components/ButtonIcon.vue';
 import StatusColored from '@/components/StatusColored.vue';
 import IconEdit from '@/assets/icons/edit.svg?component';
@@ -145,7 +150,10 @@ const props = defineProps({
     required: true,
   },
 });
-// Функция для редактирования статуса
+
+const statusRefs = ref({});
+const transferRefs = ref({});
+
 const editStatus = (status) => {
   props.indicators.isEdit = true;
   Object.assign(props.statusMod, {
@@ -182,16 +190,60 @@ const toggleStatus = (status, type) => {
     }
   }
   props.statusMod.name = status.statusName;
+  updateRefs();
+  document.addEventListener('click', handleOutsideClick);
 };
-// Функция для обработки клика трансфера
+// Обрабатывает клики вне области статусов и трансферов.
+const handleOutsideClick = (event) => {
+  const isClickOutside = (element) => element && !element.contains(event.target);
+
+  const allStatusClickedOutside = Object.values(statusRefs.value).every(isClickOutside);
+  const allTransferClickedOutside = Object.values(transferRefs.value).every(isClickOutside);
+
+  if (allStatusClickedOutside && allTransferClickedOutside) {
+    props.indicators.activeHandlers = false;
+    props.indicators.activeTransfer = false;
+    props.statusMod.activeTransfer = '';
+    document.removeEventListener('click', handleOutsideClick);
+  }
+};
+// Обрабатывает клики по статусу, переключая отображение трансферов.
 const handleStatusClick = (status) => {
   if (props.indicators.isTransfer && props.statusMod.name !== status.statusName) {
     props.statusMod.name = status.statusName;
   } else {
     props.indicators.isTransfer = !props.indicators.isTransfer;
     props.statusMod.name = status.statusName;
+    props.statusMod.activeTransfer = '';
+    updateRefs();
+    document.addEventListener('click', handleOutsideClick);
   }
 };
+// Устанавливает активный трансфер для указанного статуса.
+const setActiveTransfer = (statusName, transfer) => {
+  props.statusMod.name = statusName;
+  props.statusMod.activeTransfer = transfer;
+};
+// Обновляет ссылки на элементы статусов и трансферов в DOM.
+const updateRefs = () => {
+  statusRefs.value = Object.fromEntries(
+      Array.from(document.querySelectorAll('.statuslist__list-status'))
+          .map(el => [el.querySelector('.status-container').innerText.trim(), el])
+  );
+
+  transferRefs.value = Object.fromEntries(
+      Array.from(document.querySelectorAll('.statuslist__list-transfers'))
+          .map(el => [el.parentElement.querySelector('.status-container').innerText.trim(), el])
+  );
+};
+
+onMounted(() => {
+  updateRefs();
+});
+
+onUnmounted(() => {
+  document.removeEventListener('click', handleOutsideClick);
+});
 </script>
 
 <style scoped>
