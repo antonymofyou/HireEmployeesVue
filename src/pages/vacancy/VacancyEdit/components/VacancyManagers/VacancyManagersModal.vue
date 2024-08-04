@@ -13,6 +13,9 @@
           indicators.isAdd ? "Добавить менеджера вакансии" : "Удалить менеджера"
         }}
       </div>
+      <p v-if="indicators.isDelete">
+        {{ managerName(managerMod.managerId) }}
+      </p>
     </template>
 
     <template v-slot:body>
@@ -62,6 +65,10 @@ const props = defineProps({
     type: Array,
     required: true,
   },
+  managerListAssigned: {
+    type: Array,
+    required: true,
+  },
 
   //Функция Добавления менеджера
   requestManagersModification: {
@@ -84,6 +91,14 @@ const props = defineProps({
     required: true,
   },
 });
+
+const managerName = (managerId) => {
+  const manager = props.managerListAssigned.find(
+    (manager) => manager.id === managerId
+  );
+  console.log(props.managerListAssigned)
+  return manager ? `${manager.name}?` : "";
+};
 </script>
 
 <style scoped>
@@ -96,7 +111,7 @@ const props = defineProps({
 }
 .manager-edit__modal-btn-add {
   align-self: center;
-  margin-top: 20px;
+  margin-top: 15px;
   align-items: center;
 }
 </style>

@@ -59,9 +59,6 @@ const handleManagerDeleteClick = () => {
 .manager-item__box {
   display: flex;
   user-select: none;
-  padding: 7px 13px;
-  border: 1px solid gray;
-  border-radius: 20px;
   display: flex;
   cursor: pointer;
   align-items: center;
