@@ -214,6 +214,7 @@ onMounted(() => {
   border-radius: 8px;
   color: var(--cornflower-blue);
   position: relative;
+  width: fit-content;
 
   order: 0;
   display: flex;
