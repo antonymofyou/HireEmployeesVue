@@ -153,8 +153,7 @@ onMounted(() => {
 
 .options-container-main {
   color: var(--cornflower-blue);
-  min-width: fit-content;
-  width: 100%;
+  width: fit-content;
   transition: all 0.4s;
   border-radius: 8px;
   overflow-y: auto;
@@ -261,7 +260,7 @@ onMounted(() => {
 }
 
 .option-main {
-  min-width: 82px;
+  min-width: fit-content;
   max-width: 380px;
   word-wrap: break-word;
   cursor: pointer;
