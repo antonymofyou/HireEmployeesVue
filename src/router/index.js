@@ -45,6 +45,11 @@ const router = createRouter({
       path: "/candidate",
       name: "candidate",
       component: CandidateCommentsPage,
+    },
+    {
+      path: '/graphical-editor',
+      name: 'graphical-editor',
+      component: () => import('@/pages/graphical-editor/GraphicalEditor.vue'),
     }
   ],
 });
