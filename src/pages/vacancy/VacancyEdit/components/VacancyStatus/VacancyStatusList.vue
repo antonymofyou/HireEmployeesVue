@@ -21,7 +21,6 @@
           @dragenter="onDragEnter(index)"
           @drop="onDrop"
           @dragend="onDragEnd"
-          @dragleave="onDragLeave"
       />
     </div>
   </div>
@@ -77,9 +76,6 @@ const onDragEnter = (index) => {
     dragOverIndex.value = index;
 };
 
-const onDragLeave = () => {
-  dragOverIndex.value = null; 
-}
 
 const onDrop = () => {
   if (dragIndex.value !== dragOverIndex.value) {
