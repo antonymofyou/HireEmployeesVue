@@ -38,6 +38,9 @@ const router = createRouter({
       path: "/vacancy",
       name: 'vacancy',
       component: VacancyPage,
+      redirect: {
+        name: 'vacanciesList',
+      },
       children: [
         {
           path: 'list',

@@ -9,10 +9,5 @@
 
 import TheHeader from '@/components/TheHeader.vue';
 import { RouterView } from 'vue-router';
-import { useRouter } from 'vue-router';
-
-const router = useRouter();
-
-router.push({ name: 'vacanciesList' });
 
 </script>

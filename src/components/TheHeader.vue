@@ -61,8 +61,8 @@ const listNavigation = [
 }
 
 .navigation-menu:deep(.navigation-menu__icon) {
-    width: 32px;
-    height: 32px;
+    width: 24px;
+    height: 24px;
 }
 
 @media (max-width: 576px) {
@@ -77,11 +77,6 @@ const listNavigation = [
 
     .navigation-menu:deep(.navigation-menu__text) {
         display: none;
-    }
-
-    .navigation-menu:deep(.navigation-menu__icon) {
-        width: 24px;
-        height: 24px;
     }
 }
 </style>
