@@ -10,6 +10,9 @@ import { defineProps, computed, onBeforeUnmount } from 'vue';
 import { useEditor, EditorContent } from '@tiptap/vue-3'
 import StarterKit from '@tiptap/starter-kit'
 import Underline from '@tiptap/extension-underline'
+import TextAlign from '@tiptap/extension-text-align'
+import { Color } from '@tiptap/extension-color'
+import TextStyle from '@tiptap/extension-text-style'
 
 const props = defineProps({
     params: {
@@ -38,7 +41,17 @@ const rectangleStyles = computed(() => {
 });
 const editor = useEditor({
     content: props.params.text,
-    extensions: [StarterKit, Underline],
+    extensions: [
+        StarterKit, 
+        Underline,
+        TextStyle,
+        TextAlign.configure({
+            types: ['paragraph'],
+        }),
+        Color.configure({
+            types: ['textStyle'],
+        })
+    ],
     onUpdate: () => {
         emits('updateText', {
             id: props.params.id,
@@ -50,7 +63,7 @@ const editor = useEditor({
     }
 });
 onBeforeUnmount(() => {
-    editor.destroy()
+    editor.value.destroy();
 });
 
 </script>

@@ -1,7 +1,29 @@
 <template>
-    <button @click="editor?.chain().focus().toggleBold().run()">
-        Toggle bold
-    </button>
+    <div class="control-buttons">
+        <button @click="editor?.chain().focus().toggleBold().run()">
+            Bold
+        </button>
+        <button @click="editor?.chain().focus().toggleItalic().run()">
+            Italic
+        </button>
+        <button @click="editor?.chain().focus().toggleUnderline().run()">
+            Underline
+        </button>
+        <button @click="editor?.chain().focus().setTextAlign('left').run();">
+            Left
+        </button>
+        <button @click="editor?.chain().focus().setTextAlign('center').run();">
+            Center
+        </button>
+        <button @click="editor?.chain().focus().setTextAlign('right').run();">
+            Right
+        </button>
+        <input
+          type="color"
+          @input="editor?.chain().focus().setColor($event.target.value).run()"
+          :value="editor?.getAttributes('textStyle').color"
+        >
+    </div>
     <template v-for="shape of shapes" :key="shape.id">
         <TheRectangle :params="shape" @update-text="updateTextHandler" @active-editor="activeEditorHandler" />
     </template>
@@ -124,7 +146,6 @@ const shapes = [
         "borderWidth": 5
     }
 ];
-
 let editor = undefined;
 
 function updateTextHandler(event) {
@@ -137,3 +158,12 @@ function activeEditorHandler(event) {
 }
 
 </script>
+
+<style scoped>
+
+.control-buttons .is-active {
+    background-color: #000;
+    color: #fff;
+}
+
+</style>
