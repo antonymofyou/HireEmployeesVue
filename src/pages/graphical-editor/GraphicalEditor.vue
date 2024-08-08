@@ -1,4 +1,7 @@
 <template>
+    <button @click="editor?.chain().focus().toggleBold().run()">
+        Toggle bold
+    </button>
     <template v-for="shape of shapes" :key="shape.id">
         <TheRectangle :params="shape" @update-text="updateTextHandler" @active-editor="activeEditorHandler" />
     </template>
@@ -122,13 +125,15 @@ const shapes = [
     }
 ];
 
+let editor = undefined;
+
 function updateTextHandler(event) {
     const { id, text } = event;
     console.log(id, text);
 }
 
-function activeEditorHandler(editor) {
-    console.log(editor);
+function activeEditorHandler(event) {
+    editor = event;
 }
 
 </script>

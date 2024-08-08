@@ -6,7 +6,7 @@
 
 <script setup>
 
-import { defineProps, computed } from 'vue';
+import { defineProps, computed, onBeforeUnmount } from 'vue';
 import { useEditor, EditorContent } from '@tiptap/vue-3'
 import StarterKit from '@tiptap/starter-kit'
 import Underline from '@tiptap/extension-underline'
@@ -48,6 +48,9 @@ const editor = useEditor({
     onFocus: () => {
         emits('activeEditor', editor);
     }
+});
+onBeforeUnmount(() => {
+    editor.destroy()
 });
 
 </script>
