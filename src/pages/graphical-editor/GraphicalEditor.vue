@@ -1,23 +1,12 @@
 <template>
-    <ul class="control-buttons">
-        <li v-for="button of controlButtons" :key="button.key">
-            <button @pointerdown="button.handler" @keydown.enter.space="handler" class="control-buttons__button">
-                <component :is="button.icon" />
-            </button>
-        </li>
-    </ul>
     <template v-for="shape of shapes" :key="shape.id">
-        <TheRectangle @editor-active="editorActiveHandler" :params="shape" />
+        <TheRectangle :params="shape" @update-text="updateTextHandler" @active-editor="activeEditorHandler" />
     </template>
 </template>
 
 <script setup>
 
 import TheRectangle from './components/TheRectangle.vue';
-
-import BoldIcon from 'vue-material-design-icons/FormatBold.vue'
-import ItalicIcon from 'vue-material-design-icons/FormatItalic.vue'
-import UnderlineIcon from 'vue-material-design-icons/FormatUnderline.vue'
 
 const shapes = [
     {
@@ -132,58 +121,14 @@ const shapes = [
         "borderWidth": 5
     }
 ];
-let editor = undefined;
-const controlButtons = [
-    {
-        key: 'bold',
-        icon: BoldIcon,
-        handler() {
-            editor?.chain().focus().toggleBold().run();
-        }
-    },
-    {
-        key: 'italic',
-        icon: ItalicIcon,
-        handler() {
-            editor?.chain().focus().toggleItalic().run();
-        }
-    },
-    {
-        key: 'underline',
-        icon: UnderlineIcon,
-        handler() {
-            editor?.chain().focus().toggleUnderline().run();
-        }
-    }
-];
 
-function editorActiveHandler(event) {
-    editor = event;
+function updateTextHandler(event) {
+    const { id, text } = event;
+    console.log(id, text);
+}
+
+function activeEditorHandler(editor) {
+    console.log(editor);
 }
 
 </script>
-
-<style scoped>
-
-.control-buttons {
-    display: flex;
-    flex-wrap: wrap;
-    list-style: none;
-}
-
-.control-buttons__button {
-  background: var(--milk);
-  border-radius: 0.5rem;
-  border: none;
-  color: var(--shark);
-  font-family: inherit;
-  font-size: .875rem;
-  font-weight: 500;
-  line-height: 1.15;
-  margin: 0;
-  cursor: pointer;
-  transition: all .2s cubic-bezier(.65,.05,.36,1);
-}
-
-
-</style>
