@@ -19,7 +19,6 @@
           @dragstart="onDragStart(index)"
           @dragover.prevent
           @dragenter="onDragEnter(index)"
-          @drop="onDrop"
           @dragend="onDragEnd"
       />
     </div>
@@ -68,29 +67,33 @@ const props = defineProps({
 const dragIndex = ref(null);
 const dragOverIndex = ref(null);
 
+const dragIndexServer = ref(null);
+const dragOverIndexServer = ref(null);
+
 const onDragStart = (index) => {
   dragIndex.value = index;
+  dragIndexServer.value = index;
 };
 
 const onDragEnter = (index) => {
+  dragOverIndexServer.value = index
+  // Проверяем, изменился ли индекс, и только тогда выполняем перемещение
+  if (dragOverIndex.value !== index) {
     dragOverIndex.value = index;
-};
 
-
-const onDrop = () => {
-  if (dragIndex.value !== dragOverIndex.value) {
-    const draggedStatus = props.statusList.statuses.splice(dragIndex.value, 1)[0];
+    const draggedStatus = props.statusList.statuses[dragIndex.value];
+    props.statusList.statuses.splice(dragIndex.value, 1);
     props.statusList.statuses.splice(dragOverIndex.value, 0, draggedStatus);
+    
+    dragIndex.value = dragOverIndex.value
   }
 };
 
 const onDragEnd = () => {
-  if (dragIndex.value !== null && dragOverIndex.value !== null) {
-    
+  if (dragIndexServer.value !== null && dragOverIndexServer.value !== null) {
     // Вычисляем направление (разница в индексах)
-    const direction = dragOverIndex.value - dragIndex.value;
-    const movedStatusName = props.statusList.statuses[dragOverIndex.value].statusName;
-
+    const direction = dragOverIndexServer.value - dragIndexServer.value;
+    const movedStatusName = props.statusList.statuses[dragOverIndexServer.value].statusName;
     // Если элемент переместился
     if (direction !== 0) {
       // Отправляем запрос на сервер для изменения порядка
@@ -101,6 +104,10 @@ const onDragEnd = () => {
   // Сбрасываем индексы
   dragIndex.value = null;
   dragOverIndex.value = null;
+
+  // Сбрасываем индексы
+  dragIndexServer.value = null;
+  dragOverIndexServer.value = null;
 };
 
 
@@ -120,12 +127,9 @@ const onDragEnd = () => {
   gap: 5px;
 }
 .drag-over {
-  outline: 2px dashed #000000;
-  background-color: #ecf0f1;
+  visibility: hidden;
 }
-
 .dragging {
   opacity: 0.5;
 }
-
 </style>

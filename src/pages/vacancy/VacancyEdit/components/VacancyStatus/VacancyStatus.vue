@@ -89,7 +89,6 @@ const statusMod = ref({
   toName: '',
   comment: '',
   color: '#a3a3a2',
-  activeTransfer: '',
 });
 // Флаг запроса
 const request = ref(false);
