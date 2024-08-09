@@ -14,7 +14,10 @@
       :statusList
       :statusMod
       :indicators
+      :status="statusList"
       :handleModification
+      :vacancyId="vacancyId"
+      :requestSortVacancyStatus="requestSortVacancyStatus"
     />
 
     <!-- Кнопка добавления статуса -->
@@ -49,6 +52,7 @@ import {
   VacanciesGetVacancyStatuses,
   VacanciesModifyVacancyStatus,
   VacanciesSetVacancyStatusTransfer,
+  VacanciesSortVacancyStatus
 } from '../../js/ApiClassesVacancyEdit.js';
 import { onMounted, ref, watch } from 'vue';
 import ButtonIcon from '@/components/ButtonIcon.vue';
@@ -187,6 +191,33 @@ const requestStatusTransfer = () => {
       indicators.value.isTransfer = false;
       // Обновляем данные статусов
       requestVacancyStatuses();
+    },
+    (err) => {
+      request.value = false;
+      errorMessage.value = err;
+    }
+  );
+};
+const requestSortVacancyStatus = (vacancyId, statusName, direction) => {
+  const requestInstance = new VacanciesSortVacancyStatus();
+  requestInstance.vacancyId = vacancyId;
+  requestInstance.statusName = statusName;
+  requestInstance.direction = direction;
+
+  request.value = true;
+  errorMessage.value = '';
+
+  requestInstance.request(
+    '/vacancies/sort_vacancy_status.php',
+    'manager',
+    (response) => {
+      // После успешного запроса обновляем данные статусов
+      if (response.success === "1"){
+        requestVacancyStatuses();
+        request.value = false;
+      } else {
+        errorMessage.value += ' '+response.message+'.'
+      }
     },
     (err) => {
       request.value = false;

@@ -5,6 +5,12 @@
         :ref="`status-${status.statusName}`"
         @click="toggleStatus(status, 'handlers')"
     >
+    <div class="status-item__arrows">
+      <button @click.stop="moveStatus('up')" :disabled="isFirst" class="arrow top" :class="{ 'disabled-class': isFirst }">
+      </button>
+      <button @click.stop="moveStatus('down')" :disabled="isLast" class="arrow bottom" :class="{ 'disabled-class': isLast }">
+      </button>
+    </div>
       <div class="status-container" :style="{ backgroundColor: status.statusColor }">
         <StatusColored
             :statusText="status.statusName"
@@ -114,7 +120,7 @@
 </template>
 
 <script setup>
-import { ref, onMounted, onUnmounted } from 'vue';
+import { ref, onMounted, onUnmounted, computed } from 'vue';
 import ButtonIcon from '@/components/ButtonIcon.vue';
 import StatusColored from '@/components/StatusColored.vue';
 import IconEdit from '@/assets/icons/edit.svg?component';
@@ -147,6 +153,16 @@ const props = defineProps({
   // Обработчик изменения статуса
   handleModification: {
     type: Function,
+    required: true,
+  },
+  // Функция для обновления статусов
+  requestSortVacancyStatus: {
+    type: Function,
+    required: true,
+  },
+  // Id вакансии
+  vacancyId: {
+    type: String,
     required: true,
   },
 });
@@ -219,6 +235,20 @@ const handleStatusClick = (status) => {
     document.addEventListener('click', handleOutsideClick);
   }
 };
+
+const isLast = computed(() =>{
+  return props.statusList.statuses[props.statusList.statuses.length - 1].statusName === props.status.statusName
+})
+
+const isFirst = computed(() =>{
+  return props.statusList.statuses[0].statusName === props.status.statusName
+})
+
+const moveStatus = (direction) =>{
+  const movement = direction === "up" ? -1 : 1
+
+  props.requestSortVacancyStatus(props.vacancyId, props.status.statusName, movement);
+}
 // Устанавливает активный трансфер для указанного статуса.
 const setActiveTransfer = (statusName, transfer) => {
   props.statusMod.name = statusName;
@@ -268,6 +298,40 @@ onUnmounted(() => {
   cursor: pointer;
 }
 
+.arrow{
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  border: solid black;
+  border-width: 0 3px 3px 0;
+  display: inline-block;
+  padding: 3px;
+  opacity: 0.5;
+}
+.disabled-class{
+  display: none;
+}
+.top{
+  transform: rotate(-135deg);
+  -webkit-transform: rotate(-135deg);
+}
+.bottom{
+  transform: rotate(45deg);
+  -webkit-transform: rotate(45deg);
+}
+.top:hover{
+  opacity: 1;
+  cursor: pointer;
+}
+.bottom:hover{
+  opacity: 1;
+  cursor: pointer;
+}
+.status-item__arrows{
+  display: flex;
+  flex-direction: column;
+  margin: 6px 10px;
+}
 .statuslist__list-transfers {
   display: flex;
   gap: 5px;
