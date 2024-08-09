@@ -116,7 +116,6 @@
 </template>
 
 <script setup>
-import { computed } from 'vue';
 import ButtonIcon from '@/components/ButtonIcon.vue';
 import StatusColored from '@/components/StatusColored.vue';
 import IconEdit from '@/assets/icons/edit.svg?component';
