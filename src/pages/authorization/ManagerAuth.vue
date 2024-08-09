@@ -1,5 +1,6 @@
 <template>
-    <div class="wrapAuth">
+    <main>
+        <div class="wrapAuth">
         <h1>CRM для найма сотрудников</h1>
         <div class="auth">
             <h2 class="auth__header">Войдите как менеджер</h2>
@@ -9,6 +10,7 @@
             </div>
         </div>
     </div>
+    </main>
 </template>
 
 <script setup>
