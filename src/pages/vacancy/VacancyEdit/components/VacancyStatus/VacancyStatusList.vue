@@ -10,6 +10,7 @@
           :indicators="indicators"
           :statusMod="statusMod"
           :handleModification="handleModification"
+          @startUpdate="onVacancyStatusItemUpdate"
       />
     </div>
   </div>
@@ -40,6 +41,15 @@ const props = defineProps({
     required: true,
   },
 });
+const emit = defineEmits(['itemStartUpdate']);
+
+/**
+ * Обработчик постановки статуса на апдейт
+ * @param {Object} status - Статус
+ */
+const onVacancyStatusItemUpdate = (status) => {
+  emit('itemStartUpdate', status);
+};
 </script>
 
 <style scoped>

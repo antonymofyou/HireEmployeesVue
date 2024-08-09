@@ -53,11 +53,20 @@
         <span class="status-entity__title">Менеджеры:</span>
 
         <div class="status-entity__body">
-          <ul class="managers-list">
-            <li class="managers-list__item">Менеджер 1</li>
-            <li class="managers-list__item">Менеджер 2</li>
-            <li class="managers-list__item">Менеджер 3</li>
-          </ul>
+          <template v-if="props.managersInList.length > 0">
+            <ul class="managers-list">
+              <li
+                class="managers-list__item"
+                v-for="manager in props.managersInList"
+                :key="manager.id"
+                @click="onManagerDelete(manager.id)"
+              >
+                {{ manager.name }}
+              </li>
+            </ul>
+          </template>
+
+          <span v-else class="status-entity__notifier">Менеджеры отсутствуют</span>
         </div>
         
         <div class="entity-actions">
@@ -67,19 +76,11 @@
 
           <div class="entity-actions__body">
             <SelectMain
-              :options="[
-                {
-                  name: 'Manager 1',
-                  id: '123',
-                },
-                {
-                  name: 'Manager 2',
-                  id: '123123',
-                }
-              ]"
+              v-model="managerToAddId"
+              :options="props.managersInSelect"
             />
   
-            <ButtonMain>
+            <ButtonMain @click="onManagerAdd">
               <template v-slot:text>
                 Добавить
               </template>
@@ -107,6 +108,8 @@
 </template>
 
 <script setup>
+import { ref, watch } from 'vue';
+
 import Modal from '@/components/Modal.vue';
 import InputSimple from '@/components/InputSimple.vue';
 import ButtonMain from '@/components/ButtonMain.vue';
@@ -142,8 +145,40 @@ const props = defineProps({
   request: {
     type: Boolean,
     default: false
-  }
+  },
+  // Менеджеры (для списка)
+  managersInList: {
+    type: Array,
+    required: false,
+    default: [],
+  },
+  // Менеджеры (для селекта)
+  managersInSelect: {
+    type: Array,
+    required: false,
+    default: [],
+  },
 });
+const emit = defineEmits(['managerAdd', 'managerDelete']);
+
+// ID менеджера, которого хотим добавить к статусу
+const managerToAddId = ref(null);
+
+/**
+ * Обработчик клика по кнопке добавления менеджера
+ */
+const onManagerAdd = () => {
+  emit('managerAdd', managerToAddId.value);
+  managerToAddId.value = null;
+};
+
+/**
+ * Обработчик клика по менеджеру, его удаления
+ * @param {Number} managerId - ID менеджера
+ */
+const onManagerDelete = (managerId) => {
+  emit('managerDelete', managerId);
+};
 </script>
 
 <style scoped>
@@ -179,6 +214,12 @@ const props = defineProps({
   display: block;
 }
 
+.status-entity__notifier {
+  text-decoration: underline;
+  font-size: 13px;
+  color: gray;
+}
+
 .entity-actions {
   margin-top: 10px;
   padding-top: 10px;
@@ -193,7 +234,8 @@ const props = defineProps({
 
 .entity-actions__body {
   display: flex;
-  align-items: center
+  align-items: center;
+  column-gap: 10px;
 }
 
 /* Список менеджеров */
@@ -201,7 +243,7 @@ const props = defineProps({
   display: flex;
   list-style-type: none;
   column-gap: 10px;
-  row-gap: 20px;
+  row-gap: 5px;
   flex-wrap: wrap;
   margin: 0;
   padding: 0;

@@ -15,6 +15,7 @@
       :statusMod
       :indicators
       :handleModification
+      @itemStartUpdate="onStatusItemStartUpdate"
     />
 
     <!-- Кнопка добавления статуса -->
@@ -40,6 +41,10 @@
         :handleModification="handleModification"
         :request="request"
         :errorMessage="errorMessage"
+        :managersInList="currentStatusManagers.list"
+        :managersInSelect="currentStatusManagers.select"
+        @managerAdd="onManagerAddToCurrentStatus"
+        @managerDelete="onManagerDeleteFromCurrentStatus"
     />
   </Teleport>
 </template>
@@ -49,6 +54,8 @@ import {
   VacanciesGetVacancyStatuses,
   VacanciesModifyVacancyStatus,
   VacanciesSetVacancyStatusTransfer,
+  VacanciesAccessGetManagerAccessVacancy,
+  VacanciesAccessSetManagerAccessVacancy,
 } from '../../js/ApiClassesVacancyEdit.js';
 import { onMounted, ref, watch } from 'vue';
 import ButtonIcon from '@/components/ButtonIcon.vue';
@@ -86,6 +93,11 @@ const statusMod = ref({
   comment: '',
   color: '#a3a3a2',
   activeTransfer: '',
+});
+// Менеджеры текущего выбранного статуса
+const currentStatusManagers = ref({
+  list: [], // Отобразим в списке
+  select: [], // Отобразим в селекте
 });
 // Флаг запроса
 const request = ref(false);
@@ -212,6 +224,86 @@ const handleModification = (statusName, method, transfer, toStatus) => {
     requestStatusTransfer();
   } else requestStatusModification();
 };
+
+/**
+ * Запросить всех менеджеров текущего выбранного статуса
+ */
+const requestCurrentStatusManagers = () => {
+  const requestInstance = new VacanciesAccessGetManagerAccessVacancy();
+
+  requestInstance.vacancyId = props.vacancyId;
+  requestInstance.statusName = statusMod.value.name;
+  requestInstance.permissionType = 'STATUS_PERMISSION';
+
+  requestInstance.request(
+    '/vacancies/access/get_managers_access_vacancy.php',
+    'manager',
+    (response) => {
+      currentStatusManagers.value.list = response.assignedManagers;
+      currentStatusManagers.value.select = response.unassignedManagers;
+    }
+  );
+};
+
+/**
+ * Обработчик начала изменения статуса в списке
+ */
+const onStatusItemStartUpdate = (status) => {
+  statusMod.value = {
+    action: 'update',
+    name: status.statusName,
+    comment: status.statusComment,
+    color: status.statusColor
+  };
+};
+
+/**
+ * Обработчик добавления менеджера к текущему статусу
+ * @param {Number} managerId - ID менеджера
+ */
+const onManagerAddToCurrentStatus = (managerId) => {
+  const requestInstance = new VacanciesAccessSetManagerAccessVacancy();
+
+  requestInstance.vacancyId = props.vacancyId;
+  requestInstance.statusName = statusMod.value.name;
+  requestInstance.managerId = managerId;
+  requestInstance.action = 'create';
+  requestInstance.permissionType = 'STATUS_PERMISSION';
+
+  requestInstance.request(
+    '/vacancies/access/set_manager_access_vacancy.php',
+    'manager',
+    () => {
+      requestCurrentStatusManagers();
+    },
+  );
+};
+
+/**
+ * Обработчик удаления менеджера от текущего статуса
+ * @param {Number} managerId - ID менеджера
+ */
+const onManagerDeleteFromCurrentStatus = (managerId) => {
+  const requestInstance = new VacanciesAccessSetManagerAccessVacancy();
+
+  requestInstance.vacancyId = props.vacancyId;
+  requestInstance.statusName = statusMod.value.name;
+  requestInstance.managerId = managerId;
+  requestInstance.action = 'delete';
+  requestInstance.permissionType = 'STATUS_PERMISSION';
+
+  requestInstance.request(
+    '/vacancies/access/set_manager_access_vacancy.php',
+    'manager',
+    () => {
+      requestCurrentStatusManagers();
+    },
+  );
+};
+
+// При изменение выбранного статуса - перезапрашиваем всех менеджеров
+watch(statusMod, () => requestCurrentStatusManagers());
+
 const openAddStatusModal = () => {
   indicators.value.isAdd = true;
   resetStatusMod();

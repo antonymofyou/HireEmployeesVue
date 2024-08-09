@@ -150,18 +150,14 @@ const props = defineProps({
     required: true,
   },
 });
+const emit = defineEmits(['startUpdate']);
 
 const statusRefs = ref({});
 const transferRefs = ref({});
 
 const editStatus = (status) => {
   props.indicators.isEdit = true;
-  Object.assign(props.statusMod, {
-    action: 'update',
-    name: status.statusName,
-    comment: status.statusComment,
-    color: status.statusColor
-  });
+  emit('startUpdate', status);
 };
 // Функция для получения класса иконки
 const getIconClass = (status, type) => {
