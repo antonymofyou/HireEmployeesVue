@@ -45,6 +45,9 @@
       <p class="vacancy-edit__link-copy-message vacancy-edit__link-copy-message--error" v-else-if="isCopiedError">Не удалось скопировать текст!</p>
     </div>
 
+    <VacancyManagers :vacancyId />
+    <VacancyStatus :vacancyId />
+
 
       <div class="vacancy-edit__description">
         <TextEditor
@@ -54,8 +57,6 @@
           id="0"
         />
       </div>
-
-      <VacancyStatus :vacancyId />
 
       <div class="vacancy-edit__questions-block">
         <h2 class="vacancy-edit__questions-title">Вопросы вакансии</h2>
@@ -97,6 +98,7 @@
             <SpinnerMain class="vacancy-edit__loader-spinner"/>
           </div>
           <ButtonMain
+            v-if="isAdmin()"
             buttonColor="var(--cinnabar)"
             type="button"
             @click="showModalOnRemoveVacancy = true"
@@ -151,7 +153,7 @@ import VacancyQuestion from './components/VacancyQuestion.vue';
 import { ref, computed, onMounted, watch, reactive } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
 
-import { isManager } from '@/js/AuthFunctions';
+import { isAdmin, isManager } from '@/js/AuthFunctions';
 import { VacanciesGetAllVacancyById, 
   VacanciesQuestionsCreateVacancyQuestion,
   VacanciesQuestionsDeleteVacancyQuestion,
@@ -166,6 +168,7 @@ import SpinnerMain from "@/components/SpinnerMain.vue";
 import SaveIcon from '@/assets/icons/save.svg?component';
 import PlusIcon from '@/assets/icons/add.svg?component';
 import VacancyStatus from './components/VacancyStatus/VacancyStatus.vue';
+import VacancyManagers from './components/VacancyManagers/VacancyManagers.vue';
 import ButtonIcon from '@/components/ButtonIcon.vue';
 import CopyIcon from '@/assets/icons/copy.svg?component';
 

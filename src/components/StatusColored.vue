@@ -23,11 +23,11 @@ const props = defineProps({
 
 <style scoped>
 .colored_status {
-  border-radius: 10px;
+  border-radius: 13px;
   color: white;
-  padding: 7px 14px;
-  cursor: default;
+  padding: 7px 16px;
   user-select: none;
   width: fit-content;
+  font-size: 14px;
 }
 </style>

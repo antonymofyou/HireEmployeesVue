@@ -21,15 +21,13 @@
           @update:modelValue="updateVacancyId"
         />
       </div>
-      <div class="candidates__filter-title">
-        <div v-if="vacancyId && dataFetched">Статус:</div>
-        <SelectMain
-          v-if="vacancyId !== '' && dataFetched"
-          v-model="status"
-          :options="candidateStatus"
-          @update:modelValue="updateStatus"
-        />
-      </div>
+    </div>
+    <div class="status_main">
+      <CandidateStatus
+        v-model="status"
+        :options="candidateStatus"
+        @update:modelValue="updateStatus"
+      />
     </div>
 
     <div class="candidates__description" v-if="vacancyId !== ''">
@@ -75,6 +73,7 @@ import SelectMain from '@/components/SelectMain.vue';
 import SpinnerMain from '@/components/SpinnerMain.vue';
 import TopSquareButton from '@/components/TopSquareButton.vue';
 import iconBack from '@/assets/icons/back.svg';
+import CandidateStatus from '@/pages/candidates/CandidatesList/components/CandidateStatus.vue';
 
 const router = useRouter();
 const route = useRoute();
@@ -90,7 +89,7 @@ const vacanciesIds = ref([]); // список id вакансий
 const candidates = ref([]); // список кандидатов
 const vacancyId = ref(''); // ID вакансии
 const status = ref(initialStatusValue); // Статус кандидата
-const candidateStatus = ref([{ name: 'Все', id: 'Все', color: 'gray' }, {name:'New', id: 'New', color: 'gray'}]); // Статусы кандидатов
+const candidateStatus = ref([{ name: 'Все', id: 'Все', color: 'gray' }, {name:'New', id: 'New', color: 'gray', count: 0}]); // Статусы кандидатов
 
 //Флаги загрузки данных
 const dataFetched = ref(false);
@@ -165,6 +164,7 @@ function getVacancyStatuses() {
   let requestClass = new VacanciesGetVacancyStatuses();
   requestClass.vacancyId = vacancyId.value;
   requestClass.withTransfers = '0';
+  requestClass.withCountOtklikov = "1"
 
   //Получение статусов
   if (vacancyId.value) {
@@ -172,15 +172,26 @@ function getVacancyStatuses() {
       '/vacancies/get_vacancy_statuses.php',
       'manager',
       function (response) {
+        if (response.statuses && response.statuses.length > 0){
         //успешный результат
-        candidateStatus.value = [{ name: 'Все', id: 'Все', color: 'gray'}];
+        candidateStatus.value = [{ name: 'Все', id: 'Все', color: 'gray', count: 0}];
         response.statuses.map((status) => {
+          let count = isNaN((status.countOtklikov)) ? 0 : (status.countOtklikov);
           candidateStatus.value.push({
             name: status.statusName,
             id: status.statusName,
-            color: status.statusColor
+            color: status.statusColor,
+            count: count,
           });
+          candidateStatus.value[0].count = response.statuses.reduce((sum, status) => { //Считывает кол-во всех заявок 
+            count = isNaN(Number(status.countOtklikov)) ? 0 : Number(status.countOtklikov);
+            return sum + count;
+          }, 0);
         });
+      } else {
+        candidateStatus.value = [{ name: 'Все', id: 'Все', color: 'gray', count: 0}];
+        status.value = "Все"
+      }
       },
       function (err) {
         //неуспешный результат
@@ -269,6 +280,10 @@ watch(
   align-items: center;
   gap: 5px;
   flex-wrap: wrap;
+}
+
+.status_main{
+  margin-top: 20px;
 }
 
 .candidates__description {

@@ -2,7 +2,7 @@
   <div class="select-box-main" :class="{ active: openSelect }" v-click-outside="closeSelect">
     <!-- Компонент плавного открытия селекта -->
     <Transition>
-    <div class="options-container-main" :style="optionsContainerStyle" v-if="openSelect">
+    <div ref="openSelect" class="options-container-main" :style="[optionsContainerStyle, styles]" v-if="openSelect">
       <div class="option-main"
         
         v-for="option in options"
@@ -34,7 +34,7 @@
 </template>
 
 <script setup>
-import { ref, computed, watchEffect } from 'vue';
+import { ref, reactive, computed, watchEffect, onMounted, nextTick } from 'vue';
 
 const props = defineProps({
   // Модель для обновления, опции селекта
@@ -56,8 +56,30 @@ const emit = defineEmits(['update:modelValue']);
 const openSelect = ref(false);
 // Выбранная опция
 const selected = ref(null);
+// Начальные значения стилей для выпадающего списка
+const styles = ref({
+  right: '',
+  left: '0px'
+});
+// Состояние упирается ли список в правую границу экрана
+const state = reactive({
+  isAtRightEdge: false,
+});
 // Цвет текста опций по умолчанию
 const defaultColor = 'var(--mine-shaft)';
+
+// Проверка упирается ли список в правую границу экрана
+const checkIfAtRightEdge = () => {
+  if (openSelect.value) {
+    const rect = openSelect.value.getBoundingClientRect(); 
+    state.isAtRightEdge = rect.right >= window.innerWidth;
+    if (state.isAtRightEdge) {
+      styles.value.right = '0px';
+      styles.value.left = '';
+      window.removeEventListener('resize', checkIfAtRightEdge);
+    }
+  }  
+};
 
 // Установка выбранной опции
 const setSelected = (option) => {
@@ -74,6 +96,11 @@ const closeSelect = () => {
 // Переключатель открытия селекта
 const toggleSelect = () => {
   openSelect.value = !openSelect.value;
+  if (openSelect.value) {
+    nextTick(() => { // Для проверки после отрисовки
+      checkIfAtRightEdge();
+    })
+  }
 };
 
 // Дополнительные стили для контейнера (для корректного отображения скролла)
@@ -107,20 +134,26 @@ const vClickOutside = {
     document.removeEventListener("click", el.clickOutsideEvent);
   },
 };
+
+onMounted(() => {
+  // Опционально: добавить обработчик события resize
+  window.addEventListener('resize', checkIfAtRightEdge);
+});
+
 </script>
 
 <style scoped>
 .select-box-main {
   display: flex;
-  width: max-content;
+  width: 100%;
   flex-direction: column;
   position: relative;
+  flex: 1;
 }
 
 .options-container-main {
   color: var(--cornflower-blue);
-  min-width: fit-content;
-  width: 100%;
+  width: fit-content;
   transition: all 0.4s;
   border-radius: 8px;
   overflow-y: auto;
@@ -128,7 +161,6 @@ const vClickOutside = {
   order: 1;
   position: absolute;
   top: 25px;
-  left: 0;
 
   z-index: 999;
   border: 1px solid var(--cornflower-blue);
@@ -164,6 +196,11 @@ const vClickOutside = {
   border: 2px solid var(--tundora);
 }
 
+.arrow {
+  min-width: 10px;
+  min-height: 10px;
+}
+
 .active .arrow {
   transform: rotate(180deg);
 }
@@ -176,12 +213,15 @@ const vClickOutside = {
   border-radius: 8px;
   color: var(--cornflower-blue);
   position: relative;
+  width: fit-content;
 
   order: 0;
   display: flex;
   align-items: center;
   justify-content: space-between;
   padding-left: 5px;
+  word-break: break-all;
+
 
   cursor: pointer;
   padding: 5px 5px;
@@ -192,6 +232,12 @@ const vClickOutside = {
   position: relative;
 }
 
+@media (max-width: 620px) {
+  .options-container-main {
+    max-width: 80%; 
+    word-break: break-all;
+  }
+}
 
 .dark .selected-main {
   color: var(--white);
@@ -214,6 +260,9 @@ const vClickOutside = {
 }
 
 .option-main {
+  min-width: fit-content;
+  max-width: 380px;
+  word-wrap: break-word;
   cursor: pointer;
   padding: 5px 10px;
   transition: 0.1s ease;
