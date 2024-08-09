@@ -43,17 +43,17 @@ const router = createRouter({
       },
       children: [
         {
-          path: 'list',
+          path: 'vacancies_list',
           name: 'vacanciesList',
           component: VacanciesListPage,
         },
         {
-          path: 'edit/:id',
+          path: 'vacancy_edit/:id',
           name: 'vacancy_edit',
           component: VacancyEditPage,
         },
         {
-          path: 'candidates',
+          path: 'candidates_list',
           name: 'candidates',
           component: CandidatesListPage,
         },

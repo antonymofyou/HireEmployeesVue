@@ -43,7 +43,7 @@ const listNavigation = [
 .container {
     max-width: 90%;
     margin: 0 auto;
-    padding: 32px 16px;
+    padding: 16px;
 }
 
 .navigation-menu:deep(.navigation-menu__list) {
@@ -68,7 +68,6 @@ const listNavigation = [
 @media (max-width: 576px) {
     .container {
         max-width: 100%;
-        padding: 16px;
     }
 
     .navigation-menu:deep(.navigation-menu__list) {
