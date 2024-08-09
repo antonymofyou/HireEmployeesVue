@@ -120,7 +120,7 @@
 </template>
 
 <script setup>
-import { computed, ref } from 'vue';
+import { computed, ref, watch } from 'vue';
 
 import Modal from '@/components/Modal.vue';
 import InputSimple from '@/components/InputSimple.vue';
@@ -192,12 +192,17 @@ const isAddManagerBtnDisabled = computed(() => {
   return !managerToAddId.value;
 });
 
+// Будем сбрасывать выбранного менеджера по истечению загрузки на удаление / добавление
+watch([() => props.isDeletingManagerRequestNow], () => {
+  if (props.isDeletingManagerRequestNow || props.isAddingManagerRequestNow) return;
+  managerToAddId.value = 0;
+});
+
 /**
  * Обработчик клика по кнопке добавления менеджера
  */
 const onManagerAdd = () => {
   emit('managerAdd', managerToAddId.value);
-  // managerToAddId.value = 0;
 };
 
 /**
