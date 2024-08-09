@@ -249,6 +249,7 @@ const requestCurrentStatusManagers = () => {
  * Обработчик начала изменения статуса в списке
  */
 const onStatusItemStartUpdate = (status) => {
+  console.log(status);
   statusMod.value = {
     action: 'update',
     name: status.statusName,
@@ -302,7 +303,11 @@ const onManagerDeleteFromCurrentStatus = (managerId) => {
 };
 
 // При изменение выбранного статуса - перезапрашиваем всех менеджеров
-watch(statusMod, () => requestCurrentStatusManagers());
+watch(statusMod, () => {
+  // Исполняем запрос, только если выбран статус
+  if (!statusMod.value.name) return;
+  requestCurrentStatusManagers()
+});
 
 const openAddStatusModal = () => {
   indicators.value.isAdd = true;

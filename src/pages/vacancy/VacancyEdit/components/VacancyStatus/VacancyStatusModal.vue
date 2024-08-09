@@ -49,7 +49,10 @@
         </select>
       </div>
 
-      <div class="status-entity">
+      <div
+        v-if="statusMod.action === 'update'"
+        class="status-entity"
+      >
         <span class="status-entity__title">Менеджеры:</span>
 
         <div class="status-entity__body">
@@ -80,7 +83,10 @@
               :options="props.managersInSelect"
             />
   
-            <ButtonMain @click="onManagerAdd">
+            <ButtonMain
+              :isDisabled="isAddManagerBtnDisabled"
+              @click="onManagerAdd"
+            >
               <template v-slot:text>
                 Добавить
               </template>
@@ -108,7 +114,7 @@
 </template>
 
 <script setup>
-import { ref, watch } from 'vue';
+import { computed, ref } from 'vue';
 
 import Modal from '@/components/Modal.vue';
 import InputSimple from '@/components/InputSimple.vue';
@@ -162,14 +168,19 @@ const props = defineProps({
 const emit = defineEmits(['managerAdd', 'managerDelete']);
 
 // ID менеджера, которого хотим добавить к статусу
-const managerToAddId = ref(null);
+const managerToAddId = ref(0);
+
+// Задизейблена ли кнопка добавления менеджера
+const isAddManagerBtnDisabled = computed(() => {
+  return !managerToAddId.value;
+});
 
 /**
  * Обработчик клика по кнопке добавления менеджера
  */
 const onManagerAdd = () => {
   emit('managerAdd', managerToAddId.value);
-  managerToAddId.value = null;
+  managerToAddId.value = 0;
 };
 
 /**
@@ -242,8 +253,7 @@ const onManagerDelete = (managerId) => {
 .managers-list {
   display: flex;
   list-style-type: none;
-  column-gap: 10px;
-  row-gap: 5px;
+  gap: 3px;
   flex-wrap: wrap;
   margin: 0;
   padding: 0;
