@@ -43,6 +43,8 @@
         :errorMessage="errorMessage"
         :managersInList="currentStatusManagers.list"
         :managersInSelect="currentStatusManagers.select"
+        :isAddingManagerRequestNow="isAddingManagerToStatusNow"
+        :isDeletingManagerRequestNow="isDeletingManagerFromStatusNow"
         @managerAdd="onManagerAddToCurrentStatus"
         @managerDelete="onManagerDeleteFromCurrentStatus"
     />
@@ -101,6 +103,10 @@ const currentStatusManagers = ref({
 });
 // Флаг запроса
 const request = ref(false);
+// Идёт ли запрос на добавление менеджера к текущему статусу сейчас
+const isAddingManagerToStatusNow = ref(false);
+// Идёт ли запрос на удаление менеджера из текущего статуса сейчас
+const isDeletingManagerFromStatusNow = ref(false);
 // Сообщение об ошибке
 const errorMessage = ref('');
 // Очистка statusMod после создания/изменения
@@ -249,7 +255,6 @@ const requestCurrentStatusManagers = () => {
  * Обработчик начала изменения статуса в списке
  */
 const onStatusItemStartUpdate = (status) => {
-  console.log(status);
   statusMod.value = {
     action: 'update',
     name: status.statusName,
@@ -263,6 +268,8 @@ const onStatusItemStartUpdate = (status) => {
  * @param {Number} managerId - ID менеджера
  */
 const onManagerAddToCurrentStatus = (managerId) => {
+  isAddingManagerToStatusNow.value = true;
+
   const requestInstance = new VacanciesAccessSetManagerAccessVacancy();
 
   requestInstance.vacancyId = props.vacancyId;
@@ -276,7 +283,9 @@ const onManagerAddToCurrentStatus = (managerId) => {
     'manager',
     () => {
       requestCurrentStatusManagers();
+      isAddingManagerToStatusNow.value = false;
     },
+    () => isAddingManagerToStatusNow.value = false,
   );
 };
 
@@ -285,6 +294,8 @@ const onManagerAddToCurrentStatus = (managerId) => {
  * @param {Number} managerId - ID менеджера
  */
 const onManagerDeleteFromCurrentStatus = (managerId) => {
+  isDeletingManagerFromStatusNow.value = true;
+
   const requestInstance = new VacanciesAccessSetManagerAccessVacancy();
 
   requestInstance.vacancyId = props.vacancyId;
@@ -298,7 +309,9 @@ const onManagerDeleteFromCurrentStatus = (managerId) => {
     'manager',
     () => {
       requestCurrentStatusManagers();
+      isDeletingManagerFromStatusNow.value = false;
     },
+    () => isDeletingManagerFromStatusNow.value = false,
   );
 };
 
