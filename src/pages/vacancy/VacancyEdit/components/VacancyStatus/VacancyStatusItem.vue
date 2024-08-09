@@ -120,8 +120,7 @@
 </template>
 
 <script setup>
-import { computed } from 'vue';
-import { ref, onMounted, onUnmounted } from 'vue';
+import { ref, onMounted, onUnmounted, computed } from 'vue';
 import ButtonIcon from '@/components/ButtonIcon.vue';
 import StatusColored from '@/components/StatusColored.vue';
 import IconEdit from '@/assets/icons/edit.svg?component';
