@@ -77,8 +77,9 @@ const props = defineProps({
   },
   // Сообщение об ошибке
   errorMessage: {
-    type: Object,
-    required: true,
+    type: [Object, String],
+    required: false,
+    default: {}
   },
   // Флаг запроса
   request: {
@@ -88,7 +89,7 @@ const props = defineProps({
   //Данные с SelectMain
   formData: {
     type: Object,
-    required: true,
+    required: false,
   },
 });
 

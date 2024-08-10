@@ -57,10 +57,13 @@
   <Teleport to="body">
     <!-- Вывод модалки для добавления и изменения менеджера -->
     <VacancyManagersModal
-      :show="indicatorsManagers.isDelete"
+      :show="indicators.isDelete"
       :managerMod="managerMod"
-      :indicators="indicatorsManagers"
+      :indicators="indicators"
       :errorMessage="errorMessage"
+      :managerList="currentStatusManagers.select"
+      :managerListAssigned="currentStatusManagers.list"
+      :requestManagersModification="requestManagersModification"
     />
   </Teleport>
 </template>
@@ -98,17 +101,11 @@ const props = defineProps({
 const indicators = ref({
   isAdd: false,
   isEdit: false,
+  isDelete: false,
   isTransfer: false,
   activeHandlers: false,
   activeTransfer: false,
 });
-// Индикаторы менеджера
-const indicatorsManagers= ref({
-  isDelete: false,
-});
-watchEffect(() => {
-  console.log('IsDelete:', indicatorsManagers.value.isDelete);
-})
 // Доступные статусы - общие, трансферные, для селекта
 const statusList = ref({
   statuses: [],
@@ -142,10 +139,6 @@ const managerMod = ref({
   action: '',
   permissionType: 'STATUS_PERMISSION',
   managerId: '',
-});
-
-watchEffect(() => {
-  console.log(managerMod.value.action);
 });
 
 // Очистка statusMod после создания/изменения
@@ -193,6 +186,7 @@ const requestVacancyStatuses = () => {
     }
   );
 };
+
 // Запрос на создание/изменение/удаление статуса
 const requestStatusModification = () => {
   const requestInstance = new VacanciesModifyVacancyStatus();
@@ -298,6 +292,24 @@ const handleModification = (statusName, method, transfer, toStatus) => {
 };
 
 /**
+ * Запрос на добавление/удаление менеджера
+ * @param {'create'|'delete'} action - Строка с действием, которое необходимо выполнить
+ * @param {Number}  managerId - ID менеджера
+ */
+const requestManagersModification = (action, managerId) => {
+  switch (action) {
+    case 'create': {
+      onManagerAddToCurrentStatus(managerId);
+      break;
+    }
+    case 'delete': {
+      onManagerDeleteFromCurrentStatus(managerId);
+      indicators.value.isDelete = false;
+    }
+  }
+};
+
+/**
  * Запросить всех менеджеров текущего выбранного статуса
  */
 const requestCurrentStatusManagers = () => {
@@ -311,7 +323,6 @@ const requestCurrentStatusManagers = () => {
     '/vacancies/access/get_managers_access_vacancy.php',
     'manager',
     (response) => {
-      console.log(response);
       // Успех - устанавливаем менеджеров к текущему статусу на отображение
       if (response.success === '1') {
         currentStatusManagers.value.list = response.assignedManagers;
@@ -351,7 +362,7 @@ const onManagerAddToCurrentStatus = (managerId) => {
   requestInstance.vacancyId = props.vacancyId;
   requestInstance.statusName = statusMod.value.name;
   requestInstance.managerId = managerId;
-  requestInstance.action = managerMod.value.action;
+  requestInstance.action = 'create';
   requestInstance.permissionType = managerMod.value.permissionType;
 
   requestInstance.request(
@@ -388,7 +399,7 @@ const onManagerDeleteFromCurrentStatus = (managerId) => {
   requestInstance.vacancyId = props.vacancyId;
   requestInstance.statusName = statusMod.value.name;
   requestInstance.managerId = managerId;
-  requestInstance.action = 'delete'; // @TODO
+  requestInstance.action = 'delete';
   requestInstance.permissionType = managerMod.value.permissionType;
 
   requestInstance.request(
