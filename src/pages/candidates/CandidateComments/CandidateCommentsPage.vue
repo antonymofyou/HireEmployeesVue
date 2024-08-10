@@ -1,14 +1,15 @@
 <template>
   <section v-if="isLoaded" class="comments-page">
-    <div class="heading">
-      <RouterLink
+    <RouterLink
+    class="comments-page__back-link"
         :to="{
           name: 'candidates',
           query: { vacancyId: respondData.vacancyId },
         }"
       >
         <TopSquareButton class="comments-page__back-btn" :icon="backIcon" />
-      </RouterLink>
+    </RouterLink>
+    <div class="heading">
       <h1>Отклик на вакансию</h1>
     </div>
 
@@ -206,7 +207,7 @@ const getVacancyInfo = (successCallback, errorCallback) => {
 .comments-page {
   max-width: 925px;
   margin: 0 auto;
-  margin-top: 55px;
+  margin-top: 20px;
   padding-bottom: 20px ;
 }
 
@@ -229,10 +230,15 @@ const getVacancyInfo = (successCallback, errorCallback) => {
   text-align: center;
 }
 
+.comments-page__back-link {
+  display: inline-block;
+}
+
 .comments-page__back-btn {
-  position: fixed;
+  position: sticky;
   top: 20px;
   left: 20px;
+  width: 40px;
 }
 
 @media screen and (max-width: 350px) {
