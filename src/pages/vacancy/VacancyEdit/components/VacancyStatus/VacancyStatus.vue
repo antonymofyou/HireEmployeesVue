@@ -276,8 +276,18 @@ const requestCurrentStatusManagers = () => {
     '/vacancies/access/get_managers_access_vacancy.php',
     'manager',
     (response) => {
-      currentStatusManagers.value.list = response.assignedManagers;
-      currentStatusManagers.value.select = response.unassignedManagers;
+      console.log(response);
+      // Успех - устанавливаем менеджеров к текущему статусу на отображение
+      if (response.success === '1') {
+        currentStatusManagers.value.list = response.assignedManagers;
+        currentStatusManagers.value.select = response.unassignedManagers;
+      } else {
+        errorMessage.value = response.message;
+      }
+    },
+    (err) => {
+      // Обработка ошибки при запросе
+      errorMessage.value = err;
     }
   );
 };
@@ -312,11 +322,22 @@ const onManagerAddToCurrentStatus = (managerId) => {
   requestInstance.request(
     '/vacancies/access/set_manager_access_vacancy.php',
     'manager',
-    () => {
-      requestCurrentStatusManagers();
+    (response) => {
+      // Успех
+      if (response.success === '1') {
+        requestCurrentStatusManagers();
+      } else {
+        errorMessage.value = response.message;
+      }
+
+      // Общие действия
       isAddingManagerToStatusNow.value = false;
     },
-    () => isAddingManagerToStatusNow.value = false,
+    (err) => {
+      // Обработка ошибки при запросе
+      errorMessage.value = err;
+      isAddingManagerToStatusNow.value = false;
+    }
   );
 };
 
@@ -338,11 +359,23 @@ const onManagerDeleteFromCurrentStatus = (managerId) => {
   requestInstance.request(
     '/vacancies/access/set_manager_access_vacancy.php',
     'manager',
-    () => {
-      requestCurrentStatusManagers();
+    (response) => {
+      // Успех
+      if (response.success === '1') {
+        requestCurrentStatusManagers();
+      } else {
+        // Ошибка
+        errorMessage.value = response.message;
+      }
+      
+      // Общие действия
       isDeletingManagerFromStatusNow.value = false;
     },
-    () => isDeletingManagerFromStatusNow.value = false,
+    (err) => {
+      // Обработка ошибки при запросе
+      errorMessage.value = err;
+      isDeletingManagerFromStatusNow.value = false;
+    }
   );
 };
 
