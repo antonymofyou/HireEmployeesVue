@@ -13,6 +13,7 @@ import Underline from '@tiptap/extension-underline'
 import TextAlign from '@tiptap/extension-text-align'
 import { Color } from '@tiptap/extension-color'
 import TextStyle from '@tiptap/extension-text-style'
+import FontSize from 'tiptap-extension-font-size';
 
 const props = defineProps({
     params: {
@@ -45,6 +46,7 @@ const editor = useEditor({
         StarterKit, 
         Underline,
         TextStyle,
+        FontSize,
         TextAlign.configure({
             types: ['paragraph'],
         }),
@@ -87,9 +89,7 @@ onBeforeUnmount(() => {
 }
 
 .text-editor:deep(.tiptap) {
-    max-height: 100%;
     height: 100%;
-    overflow: auto;
 }
 
 </style>

@@ -1,44 +1,86 @@
 <template>
     <div class="control-buttons">
-        <button @click="editor?.chain().focus().toggleBold().run()">
-            Bold
-        </button>
-        <button @click="editor?.chain().focus().toggleItalic().run()">
-            Italic
-        </button>
-        <button @click="editor?.chain().focus().toggleUnderline().run()">
-            Underline
-        </button>
-        <button @click="editor?.chain().focus().setTextAlign('left').run();">
-            Left
-        </button>
-        <button @click="editor?.chain().focus().setTextAlign('center').run();">
-            Center
-        </button>
-        <button @click="editor?.chain().focus().setTextAlign('right').run();">
-            Right
-        </button>
-        <input
-          type="color"
-          @input="editor?.chain().focus().setColor($event.target.value).run()"
-          :value="editor?.getAttributes('textStyle').color"
-        >
+        <div class="control-buttons__text">
+            <ControlButton 
+                class="control-buttons__button" 
+                :disabled="!activeShape.editor"
+                :active="activeShape.editor?.isActive('bold')"
+                @click="activeShape.editor?.chain().focus().toggleBold().run()"
+            >
+                <BoldIcon />
+            </ControlButton>
+            <ControlButton 
+                class="control-buttons__button" 
+                :disabled="!activeShape.editor"
+                :active="activeShape.editor?.isActive('italic')"
+                @click="activeShape.editor?.chain().focus().toggleItalic().run()"
+            >
+                <ItalicIcon />
+            </ControlButton>
+            <ControlButton 
+                class="control-buttons__button" 
+                :disabled="!activeShape.editor"
+                :active="activeShape.editor?.isActive('underline')"
+                @click="activeShape.editor?.chain().focus().toggleUnderline().run()"
+            >
+                <UnderlineIcon />
+            </ControlButton>
+            <ControlButton 
+                class="control-buttons__button" 
+                :disabled="!activeShape.editor"
+                :active="activeShape.editor?.isActive({'textAlign': 'left'})"
+                @click="activeShape.editor?.chain().focus().setTextAlign('left').run()"
+            >
+                <AlignLeftIcon />
+            </ControlButton>
+            <ControlButton 
+                class="control-buttons__button" 
+                :disabled="!activeShape.editor"
+                :active="activeShape.editor?.isActive({'textAlign': 'center'})"
+                @click="activeShape.editor?.chain().focus().setTextAlign('center').run()"
+            >
+                <AlignCenterIcon />
+            </ControlButton>
+            <ControlButton 
+                class="control-buttons__button" 
+                :disabled="!activeShape.editor"
+                :active="activeShape.editor?.isActive({'textAlign': 'right'})"
+                @click="activeShape.editor?.chain().focus().setTextAlign('right').run()"
+            >
+                <AlignRightIcon />
+            </ControlButton>
+            <ColorPicker
+                class="control-buttons__color-picker"
+                :disabled="!activeShape.editor"
+                :color="activeShape.editor?.getAttributes('textStyle').color || '#000'"
+                @update:color="activeShape.editor?.chain().focus().setColor($event).run()"
+            />
+        </div>
     </div>
     <template v-for="shape of shapes" :key="shape.id">
-        <TheRectangle :params="shape" @update-text="updateTextHandler" @active-editor="activeEditorHandler" />
+        <TheRectangle :params="shape" @active-editor="activeEditorHandler" />
     </template>
 </template>
 
 <script setup>
 
 import TheRectangle from './components/TheRectangle.vue';
+import ControlButton from './components/ControlButton.vue';
+import ColorPicker from './components/ColorPicker.vue';
+import BoldIcon from 'vue-material-design-icons/FormatBold.vue'
+import ItalicIcon from 'vue-material-design-icons/FormatItalic.vue'
+import UnderlineIcon from 'vue-material-design-icons/FormatUnderline.vue'
+import AlignCenterIcon from 'vue-material-design-icons/FormatAlignCenter.vue'
+import AlignLeftIcon from 'vue-material-design-icons/FormatAlignLeft.vue'
+import AlignRightIcon from 'vue-material-design-icons/FormatAlignRight.vue'
+import { reactive } from 'vue';
 
 const shapes = [
     {
         "id": 1,
         "type": "rectangle",
         "x": 170,
-        "y": 100,
+        "y": 200,
         "width": 200,
         "height": 100,
         "color": "#FF5733",
@@ -53,7 +95,7 @@ const shapes = [
         "id": 2,
         "type": "rectangle",
         "x": 300,
-        "y": 30,
+        "y": 130,
         "width": 300,
         "height": 100,
         "color": "#F73",
@@ -135,7 +177,7 @@ const shapes = [
         "id": 3,
         "type": "rectangle",
         "x": 230,
-        "y": 177,
+        "y": 277,
         "width": 200,
         "height": 100,
         "color": "#F33",
@@ -146,24 +188,38 @@ const shapes = [
         "borderWidth": 5
     }
 ];
-let editor = undefined;
+let activeShape = reactive({
+    editor: undefined,
+});
 
-function updateTextHandler(event) {
-    const { id, text } = event;
-    console.log(id, text);
-}
-
-function activeEditorHandler(event) {
-    editor = event;
+function activeEditorHandler(editor) {
+    activeShape.editor = editor;
 }
 
 </script>
 
 <style scoped>
 
-.control-buttons .is-active {
-    background-color: #000;
-    color: #fff;
+.control-buttons__text {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.control-buttons__button span{
+    display: block;
+    width: 24px;
+    height: 24px;
+}
+
+.control-buttons__button svg {
+    width: 100%;
+    height: 100%;
+}
+
+.control-buttons__color-picker {
+    width: 40px;
+    height: 40px;
 }
 
 </style>
