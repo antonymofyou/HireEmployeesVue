@@ -71,7 +71,7 @@ const listNavigation = [
     }
 
     .navigation-menu:deep(.navigation-menu__list) {
-        justify-content: space-between;
+        justify-content: space-evenly;
     }
 
     .navigation-menu:deep(.navigation-menu__text) {
