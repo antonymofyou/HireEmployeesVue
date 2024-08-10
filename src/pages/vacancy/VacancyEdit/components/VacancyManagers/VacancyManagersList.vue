@@ -32,6 +32,7 @@ import VacancyManagersItem from "./VacancyManagersItem.vue";
 import IconAdd from "@/assets/icons/add.svg?component";
 import ButtonIcon from "@/components/ButtonIcon.vue";
 import { isAdmin } from '@/js/AuthFunctions'; 
+import { watch } from "vue";
 
 const props = defineProps({
   // Массив менеджеров

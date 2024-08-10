@@ -1,11 +1,8 @@
 <template>
   <Modal
-      class="vacancy-edit__modal"
-      :show="indicators.isAdd || indicators.isEdit"
-      @click.self="
-        indicators.isAdd = false;
-        indicators.isEdit = false;
-      "
+    class="vacancy-edit__modal"
+    :show="props.show"
+    @click.self="resetAddAndSetIndicators"
   >
     <template v-slot:header>
       <div class="vacancy-edit__modal__title">
@@ -70,13 +67,11 @@
                 v-for="manager in props.managersInList"
                 :key="manager.id"
               >
-                <button
-                  class="managers-list__item-button"
-                  :disabled="props.isDeletingManagerRequestNow"
-                  @click="onManagerDelete(manager.id)"
-                >
-                  {{ manager.name }}
-                </button>
+                <VacancyManagersItem
+                  :manager="manager"
+                  :managerMod="managerMod"
+                  :indicators="indicators"
+                />
               </li>
             </ul>
 
@@ -91,7 +86,7 @@
 
           <div class="entity-actions__body">
             <SelectMain
-              v-model="managerToAddId"
+              v-model="props.managerMod.managerId"
               :options="props.managersInSelect"
             />
   
@@ -135,7 +130,14 @@ import ButtonMain from '@/components/ButtonMain.vue';
 import SelectMain from '@/components/SelectMain.vue';
 import SpinnerMain from '@/components/SpinnerMain.vue';
 
+import VacancyManagersItem from '../VacancyManagers/VacancyManagersItem.vue';
+
 const props = defineProps({
+  // Открыта ли модалка
+  show: {
+    type: Boolean,
+    required: true,
+  },
   // Создаваемый/изменяемый статус
   statusMod: {
     type: Object,
@@ -189,6 +191,11 @@ const props = defineProps({
     required: false,
     default: false,
   },
+  // Информация об изменяемом менеджере
+  managerMod: {
+    type: Object,
+    required: true,
+  },
 });
 const emit = defineEmits(['managerAdd', 'managerDelete']);
 
@@ -197,35 +204,34 @@ const isRequestingNow = computed(() => {
   return props.isAddingManagerRequestNow || props.isDeletingManagerRequestNow;
 });
 
-// const isRequestingNow = true;
-
-// ID менеджера, которого хотим добавить к статусу
-const managerToAddId = ref(0);
-
 // Задизейблена ли кнопка добавления менеджера
 const isAddManagerBtnDisabled = computed(() => {
-  return !managerToAddId.value;
+  return !props.managerMod.managerId;
 });
 
 // Будем сбрасывать выбранного менеджера по истечению загрузки на удаление / добавление
 watch([() => props.isDeletingManagerRequestNow], () => {
   if (props.isDeletingManagerRequestNow || props.isAddingManagerRequestNow) return;
-  managerToAddId.value = 0;
+  props.managerMod.managerId = 0;
 });
 
 /**
  * Обработчик клика по кнопке добавления менеджера
  */
 const onManagerAdd = () => {
-  emit('managerAdd', managerToAddId.value);
+  props.managerMod.action = 'create';
+
+  emit('managerAdd', props.managerMod.managerId);
+
+  props.managerMod.managerId = '';
 };
 
 /**
- * Обработчик клика по менеджеру, его удаления
- * @param {Number} managerId - ID менеджера
+ * Сброс индикаторов на добавление и редактирование
  */
-const onManagerDelete = (managerId) => {
-  emit('managerDelete', managerId);
+const resetAddAndSetIndicators = () => {
+  props.indicators.isAdd = false;
+  props.indicators.isEdit = false;
 };
 </script>
 

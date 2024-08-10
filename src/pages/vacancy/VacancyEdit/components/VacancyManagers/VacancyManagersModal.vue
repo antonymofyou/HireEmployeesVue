@@ -1,11 +1,7 @@
 <template>
   <Modal
-    :show="indicators.isAdd || indicators.isDelete"
-    @click.self="
-      indicators.isAdd = false;
-      indicators.isDelete = false;
-      errorMessage.error = '';
-    "
+    :show="props.show"
+    @click.self="resetIndicatorsAndErrors"
   >
     <template v-slot:header>
       <div>
@@ -50,6 +46,10 @@ import ButtonMain from "@/components/ButtonMain.vue";
 import SelectMain from "@/components/SelectMain.vue";
 
 const props = defineProps({
+  show: {
+    type: Boolean,
+    required: true,
+  },
   // Создаваемый/изменяемый статус
   managerMod: {
     type: Object,
@@ -93,11 +93,19 @@ const props = defineProps({
 });
 
 const managerName = (managerId) => {
-  const manager = props.managerListAssigned.find(
+  const manager = props.managerListAssigned?.find(
     (manager) => manager.id === managerId
   );
-  console.log(props.managerListAssigned)
   return manager ? `${manager.name}?` : "";
+};
+
+/**
+ * Сброс индикаторов и сообщения об ошибке
+ */
+const resetIndicatorsAndErrors = () => {
+  props.indicators.isAdd = false;
+  props.indicators.isDelete = false;
+  props.errorMessage.error = '';
 };
 </script>
 

@@ -37,24 +37,44 @@
   <Teleport to="body">
     <!-- Вывод модалки для добавления и изменения статуса -->
     <VacancyStatusModal
-        :show="indicators.isAdd || indicators.isEdit"
-        :statusMod="statusMod"
-        :indicators="indicators"
-        :colors="colors"
-        :handleModification="handleModification"
-        :request="request"
-        :errorMessage="errorMessage"
-        :managersInList="currentStatusManagers.list"
-        :managersInSelect="currentStatusManagers.select"
-        :isAddingManagerRequestNow="isAddingManagerToStatusNow"
-        :isDeletingManagerRequestNow="isDeletingManagerFromStatusNow"
-        @managerAdd="onManagerAddToCurrentStatus"
-        @managerDelete="onManagerDeleteFromCurrentStatus"
+      :show="indicators.isAdd || indicators.isEdit"
+      :statusMod="statusMod"
+      :indicators="indicators"
+      :colors="colors"
+      :handleModification="handleModification"
+      :request="request"
+      :errorMessage="errorMessage"
+      :managersInList="currentStatusManagers.list"
+      :managerMod="managerMod"
+      :managersInSelect="currentStatusManagers.select"
+      :isAddingManagerRequestNow="isAddingManagerToStatusNow"
+      :isDeletingManagerRequestNow="isDeletingManagerFromStatusNow"
+      @managerAdd="onManagerAddToCurrentStatus"
+      @managerDelete="onManagerDeleteFromCurrentStatus"
+    />
+  </Teleport>
+
+  <Teleport to="body">
+    <!-- Вывод модалки для добавления и изменения менеджера -->
+    <VacancyManagersModal
+      :show="indicatorsManagers.isDelete"
+      :managerMod="managerMod"
+      :indicators="indicatorsManagers"
+      :errorMessage="errorMessage"
     />
   </Teleport>
 </template>
 
 <script setup>
+import { onMounted, ref, watch, watchEffect } from 'vue';
+
+import ButtonIcon from '@/components/ButtonIcon.vue';
+import SpinnerMain from '@/components/SpinnerMain.vue';
+
+import VacancyStatusList from './VacancyStatusList.vue';
+import VacancyStatusModal from './VacancyStatusModal.vue';
+import VacancyManagersModal from '../VacancyManagers/VacancyManagersModal.vue';
+
 import {
   VacanciesGetVacancyStatuses,
   VacanciesModifyVacancyStatus,
@@ -63,13 +83,10 @@ import {
   VacanciesAccessGetManagerAccessVacancy,
   VacanciesAccessSetManagerAccessVacancy,
 } from '../../js/ApiClassesVacancyEdit.js';
-import { onMounted, ref, watch } from 'vue';
-import ButtonIcon from '@/components/ButtonIcon.vue';
-import IconAdd from '@/assets/icons/add.svg?component';
 import { colors } from '../../js/statusColors.js';
-import VacancyStatusList from './VacancyStatusList.vue';
-import SpinnerMain from '@/components/SpinnerMain.vue';
-import VacancyStatusModal from './VacancyStatusModal.vue';
+
+import IconAdd from '@/assets/icons/add.svg?component';
+
 const props = defineProps({
   // Id вакансии
   vacancyId: {
@@ -77,7 +94,7 @@ const props = defineProps({
     required: true,
   },
 });
-// Индикаторы
+// Индикаторы статуса
 const indicators = ref({
   isAdd: false,
   isEdit: false,
@@ -85,6 +102,13 @@ const indicators = ref({
   activeHandlers: false,
   activeTransfer: false,
 });
+// Индикаторы менеджера
+const indicatorsManagers= ref({
+  isDelete: false,
+});
+watchEffect(() => {
+  console.log('IsDelete:', indicatorsManagers.value.isDelete);
+})
 // Доступные статусы - общие, трансферные, для селекта
 const statusList = ref({
   statuses: [],
@@ -113,6 +137,17 @@ const isAddingManagerToStatusNow = ref(false);
 const isDeletingManagerFromStatusNow = ref(false);
 // Сообщение об ошибке
 const errorMessage = ref('');
+// Информация об изменяемом менеджере
+const managerMod = ref({
+  action: '',
+  permissionType: 'STATUS_PERMISSION',
+  managerId: '',
+});
+
+watchEffect(() => {
+  console.log(managerMod.value.action);
+});
+
 // Очистка statusMod после создания/изменения
 const resetStatusMod = () => {
   statusMod.value = {
@@ -316,8 +351,8 @@ const onManagerAddToCurrentStatus = (managerId) => {
   requestInstance.vacancyId = props.vacancyId;
   requestInstance.statusName = statusMod.value.name;
   requestInstance.managerId = managerId;
-  requestInstance.action = 'create';
-  requestInstance.permissionType = 'STATUS_PERMISSION';
+  requestInstance.action = managerMod.value.action;
+  requestInstance.permissionType = managerMod.value.permissionType;
 
   requestInstance.request(
     '/vacancies/access/set_manager_access_vacancy.php',
@@ -353,8 +388,8 @@ const onManagerDeleteFromCurrentStatus = (managerId) => {
   requestInstance.vacancyId = props.vacancyId;
   requestInstance.statusName = statusMod.value.name;
   requestInstance.managerId = managerId;
-  requestInstance.action = 'delete';
-  requestInstance.permissionType = 'STATUS_PERMISSION';
+  requestInstance.action = 'delete'; // @TODO
+  requestInstance.permissionType = managerMod.value.permissionType;
 
   requestInstance.request(
     '/vacancies/access/set_manager_access_vacancy.php',

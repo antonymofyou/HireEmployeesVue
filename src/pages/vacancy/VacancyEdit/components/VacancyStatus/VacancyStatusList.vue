@@ -27,8 +27,7 @@
 </template>
 
 <script setup>
-import { computed, onMounted, ref, watch } from 'vue';
-
+import { ref } from 'vue';
 
 import VacancyStatusItem from './VacancyStatusItem.vue'
 
