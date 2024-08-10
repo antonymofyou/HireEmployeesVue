@@ -364,8 +364,8 @@ onUnmounted(() => {
   position: absolute;
   z-index: 1;
   margin: 0;
-  margin-top: -70px;
-  margin-left: -3px;
+  margin-top: 0px;
+  margin-left: 30px;
   max-width: 200px;
   max-height: 100px;
   display: block;
