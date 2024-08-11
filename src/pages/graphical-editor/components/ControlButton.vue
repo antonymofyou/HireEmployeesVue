@@ -44,6 +44,7 @@ const activeClass = computed(() => {
     opacity: 1;
     transition-property: opacity, background;
     transition-duration: .2s;
+    color: var(--mine-shaft);
 }
 
 .control-button:disabled {

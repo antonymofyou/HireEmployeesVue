@@ -55,6 +55,12 @@
                 :color="activeShape.editor?.getAttributes('textStyle').color || '#000'"
                 @update:color="activeShape.editor?.chain().focus().setColor($event).run()"
             />
+            <FontSizePicker 
+                class="control-buttons__font-size-picker"
+                :disabled="!activeShape.editor"
+                :font-size="activeShape.editor?.getAttributes('textStyle').fontSize || 16"
+                @update:font-size="activeShape.editor?.chain().focus().setFontSize($event + 'px').run()"            
+            />
         </div>
     </div>
     <template v-for="shape of shapes" :key="shape.id">
@@ -64,16 +70,19 @@
 
 <script setup>
 
+import { reactive } from 'vue';
+
 import TheRectangle from './components/TheRectangle.vue';
 import ControlButton from './components/ControlButton.vue';
 import ColorPicker from './components/ColorPicker.vue';
+import FontSizePicker from './components/FontSizePicker.vue';
+
 import BoldIcon from 'vue-material-design-icons/FormatBold.vue'
 import ItalicIcon from 'vue-material-design-icons/FormatItalic.vue'
 import UnderlineIcon from 'vue-material-design-icons/FormatUnderline.vue'
 import AlignCenterIcon from 'vue-material-design-icons/FormatAlignCenter.vue'
 import AlignLeftIcon from 'vue-material-design-icons/FormatAlignLeft.vue'
 import AlignRightIcon from 'vue-material-design-icons/FormatAlignRight.vue'
-import { reactive } from 'vue';
 
 const shapes = [
     {
@@ -220,6 +229,11 @@ function activeEditorHandler(editor) {
 .control-buttons__color-picker {
     width: 40px;
     height: 40px;
+}
+
+.control-buttons__font-size-picker {
+    width: 70px;
+    font-size: 20px;
 }
 
 </style>

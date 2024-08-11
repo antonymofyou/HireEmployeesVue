@@ -1,11 +1,12 @@
 <template>
-    <input 
-        :value='color' 
-        @input="emits('update:color', $event.target.value)" 
+    <input
+        :value="parseInt(fontSize)"
+        @change="emits('update:fontSize', $event.target.value)"
         :disabled="props.disabled" 
-        name="color" 
-        type="color" 
-        class="color-picker"
+        name="font-size" 
+        type="number"
+        min="0" 
+        class="font-size-picker"
     >
 </template>
 
@@ -16,32 +17,32 @@ const props = defineProps({
         type: Boolean,
         default: false,
     },
-    color: {
+    fontSize: {
         type: String,
         required: true,
     }
 });
 const emits = defineEmits({
-    'update:color': null,
+    'update:fontSize': null,
 })
 
 </script>
 
 <style scoped>
 
-.color-picker {
-    background-color: transparent;
-    padding: 0;
+.font-size-picker {
+    background-color: var(--milk);
+    padding: 8px;
     margin: 0;
-    outline: none;
     border: 0;
+    outline: 0;
     border-radius: 8px;
-    cursor: pointer;
+    color: var(--mine-shaft);
     transition-property: opacity;
     transition-duration: .2s;
 }
 
-.color-picker:disabled {
+.font-size-picker:disabled {
     opacity: 0.5;
 }
 
