@@ -86,7 +86,9 @@ const props = defineProps({
   errorMessage: {
     type: [Object, String],
     required: false,
-    default: {}
+    default() {
+      return {};
+    },
   },
   // Флаг запроса
   request: {
