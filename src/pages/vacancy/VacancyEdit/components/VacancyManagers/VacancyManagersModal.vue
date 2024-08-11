@@ -5,11 +5,7 @@
   >
     <template v-slot:header>
       <div>
-        <!-- props.title будет перебивать все остальные условия -->
-        {{
-          props.title ? props.title :
-          indicators.isAdd ? "Добавить менеджера вакансии" : "Удалить менеджера"
-        }}
+        {{ modalTitle }}
       </div>
       <p v-if="indicators.isDelete">
         {{ managerName(managerMod.managerId) }}
@@ -43,6 +39,8 @@
 </template>
 
 <script setup>
+import { computed } from "vue";
+
 import Modal from "@/components/Modal.vue";
 import ButtonMain from "@/components/ButtonMain.vue";
 import SelectMain from "@/components/SelectMain.vue";
@@ -102,6 +100,22 @@ const props = defineProps({
   },
 });
 
+// Заголовок модалки
+const modalTitle = computed(() => {
+  // props.title имеет приоритет над иными вычисляемыми значениями
+  if (props.title) return props.title;
+  else {
+    if (props.indicators.isAdd)
+      return 'Добавить менеджера вакансии';
+    else if (props.indicators.isDelete)
+      return 'Удалить менеджера'
+  }
+});
+
+/**
+ * Функция поиска имени менеджера по его ID
+ * @param {Number} managerId - ID менеджера
+ */
 const managerName = (managerId) => {
   const manager = props.managerListAssigned?.find(
     (manager) => manager.id === managerId
