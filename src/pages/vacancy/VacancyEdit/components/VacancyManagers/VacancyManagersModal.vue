@@ -104,12 +104,12 @@ const props = defineProps({
 const modalTitle = computed(() => {
   // props.title имеет приоритет над иными вычисляемыми значениями
   if (props.title) return props.title;
-  else {
-    if (props.indicators.isAdd)
-      return 'Добавить менеджера вакансии';
-    else if (props.indicators.isDelete)
-      return 'Удалить менеджера'
-  }
+
+  // Вычисляем заголовок исходя из индикаторов
+  if (props.indicators.isAdd)
+    return 'Добавить менеджера вакансии';
+  else if (props.indicators.isDelete)
+    return 'Удалить менеджера'
 });
 
 /**
