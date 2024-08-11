@@ -49,7 +49,7 @@
       <div
         class="status-entity"
       >
-        <span class="status-entity__title">Менеджеры:</span>
+        <span class="status-entity__title">Менеджеры статуса:</span>
 
         <div
           ref="listNode"
@@ -67,7 +67,7 @@
               :indicators="props.indicators"
             />
 
-            <span v-else class="status-entity__notifier">Менеджеры отсутствуют</span>
+            <span v-else class="status-entity__notifier">Менеджеры статуса отсутствуют</span>
           </template>
         </div>
         
@@ -114,7 +114,7 @@
 </template>
 
 <script setup>
-import { ref, computed, watch, onMounted, watchEffect } from 'vue';
+import { ref, computed, watch } from 'vue';
 
 import Modal from '@/components/Modal.vue';
 import InputSimple from '@/components/InputSimple.vue';
@@ -123,6 +123,8 @@ import SelectMain from '@/components/SelectMain.vue';
 import SpinnerMain from '@/components/SpinnerMain.vue';
 
 import VacancyStatusManagersList from './VacancyStatusManagersList.vue';
+
+import useResizer from '../../js/composables/useResizer';
 
 const props = defineProps({
   // Открыта ли модалка
@@ -226,39 +228,17 @@ const resetAddAndSetIndicators = () => {
   props.indicators.isEdit = false;
 };
 
+// Реф на дом-ноду списка менеджеров
 const listNode = ref(null);
-const observer = ref(null);
-const minWidth = ref(250);
-const minHeight = ref(35);
-const bindMinWidth = computed(() => {
-  return minWidth.value + 'px';
-});
-const bindMinHeight = computed(() => {
-  return minHeight.value + 'px';
+// Настройки списка менеджеров
+const options = ref({
+  initMinWidth: 250,
+  initMinHeight: 35,
+  items: computed(() => props.managersInList),
 });
 
-let prevItems = props.managersInList;
-
-watchEffect(() => {
-  if (!listNode.value) return;
-
-  // Если количество уменьшается - даём браузеру самому пересчитать размер
-  if (prevItems.length > props.managersInList.length) {
-    // Сбрасываем на изначальное значение
-    minWidth.value = 250;
-    minHeight.value = 35;
-  }
-
-  observer.value = new ResizeObserver((entries) => {
-    const listNodeRect = entries[0].contentRect;
-    minWidth.value = listNodeRect.width;
-    minHeight.value = listNodeRect.height;
-
-    prevItems = props.managersInList;
-  });
-
-  observer.value.observe(listNode.value);
-});
+// Используем в css для динамической привязки min-width и min-height
+const { bindMinWidth, bindMinHeight } = useResizer(listNode, options);
 </script>
 
 <style scoped>

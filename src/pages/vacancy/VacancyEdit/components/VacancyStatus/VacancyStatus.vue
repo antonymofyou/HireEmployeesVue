@@ -57,6 +57,7 @@
   <Teleport to="body">
     <!-- Вывод модалки для добавления и изменения менеджера -->
     <VacancyManagersModal
+      title="Удалить менеджера статуса?"
       :show="indicators.isDelete"
       :managerMod="managerMod"
       :indicators="indicators"

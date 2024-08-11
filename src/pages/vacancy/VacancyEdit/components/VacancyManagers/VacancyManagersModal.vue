@@ -5,7 +5,9 @@
   >
     <template v-slot:header>
       <div>
+        <!-- props.title будет перебивать все остальные условия -->
         {{
+          props.title ? props.title :
           indicators.isAdd ? "Добавить менеджера вакансии" : "Удалить менеджера"
         }}
       </div>
@@ -46,9 +48,16 @@ import ButtonMain from "@/components/ButtonMain.vue";
 import SelectMain from "@/components/SelectMain.vue";
 
 const props = defineProps({
+  // Показывать ли модалку
   show: {
     type: Boolean,
     required: true,
+  },
+  // Заголовок модалки
+  title: {
+    type: String,
+    required: false,
+    default: null,
   },
   // Создаваемый/изменяемый статус
   managerMod: {
