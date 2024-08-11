@@ -233,7 +233,7 @@ const listNode = ref(null);
 // Настройки списка менеджеров
 const options = ref({
   initMinWidth: 250,
-  initMinHeight: 35,
+  initMinHeight: 25,
   items: computed(() => props.managersInList),
 });
 
