@@ -1,12 +1,12 @@
 <template>
   <section class="candidates">
+    <RouterLink class="candidates__back-link" :to="{ name: 'vacanciesList' }">
+      <TopSquareButton
+        class="candidates__back-btn"
+        :icon="iconBack"
+      />
+    </RouterLink>
     <div class="candidates__title">
-      <RouterLink :to="{ name: 'vacanciesList' }">
-        <TopSquareButton
-          class="candidates__back-btn"
-          :icon="iconBack"
-        />
-      </RouterLink>
       <h1>Кандидаты вакансии</h1>
     </div>
 
@@ -256,10 +256,9 @@ watch(
 
 <style scoped>
 .candidates {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
   padding-bottom: 80px;
+  max-width: 925px;
+  margin: 20px auto 0;
 }
 
 .candidates__title {
@@ -300,14 +299,20 @@ watch(
   margin-top: 40px;
   width: 100%;
   max-width: 95%;
+  margin: 40px auto 0;
   :nth-child(n) {
     max-width: 700px;
   }
 }
 
+.candidates__back-link {
+  display: inline-block;
+}
+
 .candidates__back-btn {
-  position: fixed;
+  position: sticky;
   top: 20px;
+  width: 40px;
 }
 
 @media screen and (max-width: 350px) {
