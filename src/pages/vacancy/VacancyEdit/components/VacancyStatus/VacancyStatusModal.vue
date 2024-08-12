@@ -55,20 +55,31 @@
           ref="listNode"
           class="status-entity__body"
         >
-          <div v-if="isRequestingNow" class="status-entity__spinner-wrapper">
+          <div
+            class="status-entity__spinner-wrapper"
+            :class="{
+              'by-visible-toggler': true,
+              'visible': isRequestingNow
+            }"
+          >
             <SpinnerMain width="30" />
           </div>
 
-          <template v-else>
+          <div
+            :class="{
+              'by-visible-toggler': true,
+              'visible': !isRequestingNow
+            }"
+          >
             <VacancyStatusManagersList
               v-if="props.managersInList.length > 0"
               :managers="props.managersInList"
               :managerMod="props.managerMod"
               :indicators="props.indicators"
             />
-
+  
             <span v-else class="status-entity__notifier">Менеджеры статуса отсутствуют</span>
-          </template>
+          </div>
         </div>
         
         <div class="entity-actions">
@@ -115,8 +126,6 @@
 
 <script setup>
 import { ref, computed, watch } from 'vue';
-
-import useResizer from '@/composables/useResizer';
 
 import Modal from '@/components/Modal.vue';
 import InputSimple from '@/components/InputSimple.vue';
@@ -227,18 +236,6 @@ const resetAddAndSetIndicators = () => {
   props.indicators.isAdd = false;
   props.indicators.isEdit = false;
 };
-
-// Реф на дом-ноду списка менеджеров
-const listNode = ref(null);
-// Настройки списка менеджеров
-const options = ref({
-  initMinWidth: 250,
-  initMinHeight: 25,
-  items: computed(() => props.managersInList),
-});
-
-// Используем в css для динамической привязки min-width и min-height
-const { bindMinWidth, bindMinHeight } = useResizer(listNode, options);
 </script>
 
 <style scoped>
@@ -281,16 +278,17 @@ const { bindMinWidth, bindMinHeight } = useResizer(listNode, options);
 }
 
 .status-entity__body {
-  min-width: v-bind(bindMinWidth);
-  min-height: v-bind(bindMinHeight);
   display: flex;
   flex-direction: column;
+  position: relative;
 }
 
+/* Обёртка спиннера */
 .status-entity__spinner-wrapper {
-  display: flex;
-  justify-content: center;
-  flex-grow: 1;
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  transform: translate(-50%, -50%);
 }
 
 .entity-actions {
@@ -309,5 +307,14 @@ const { bindMinWidth, bindMinHeight } = useResizer(listNode, options);
   display: flex;
   align-items: center;
   column-gap: 10px;
+}
+
+/* Переключатели прозрачности */
+.by-visible-toggler {
+  opacity: 0;
+}
+
+.visible {
+  opacity: 1;
 }
 </style>
