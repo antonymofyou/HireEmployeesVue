@@ -116,6 +116,8 @@
 <script setup>
 import { ref, computed, watch } from 'vue';
 
+import useResizer from '@/composables/useResizer';
+
 import Modal from '@/components/Modal.vue';
 import InputSimple from '@/components/InputSimple.vue';
 import ButtonMain from '@/components/ButtonMain.vue';
@@ -123,8 +125,6 @@ import SelectMain from '@/components/SelectMain.vue';
 import SpinnerMain from '@/components/SpinnerMain.vue';
 
 import VacancyStatusManagersList from './VacancyStatusManagersList.vue';
-
-import useResizer from '../../js/composables/useResizer';
 
 const props = defineProps({
   // Открыта ли модалка
