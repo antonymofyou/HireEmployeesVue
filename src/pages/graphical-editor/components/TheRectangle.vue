@@ -1,5 +1,10 @@
 <template>
-    <div :id="props.params.id" :style="rectangleStyles" class="rectangle">
+    <div 
+        @click="editor.chain().focus().run()" 
+        :id="props.params.id" 
+        :style="rectangleStyles" 
+        class="rectangle"
+    >
         <EditorContent class="text-editor" :editor="editor" />
     </div>
 </template>
@@ -22,6 +27,11 @@ const props = defineProps({
     }
 });
 const emits = defineEmits(['updateText', 'activeEditor']);
+const paramsTextVerticalAlignment = {
+    'top': 'flex-start',
+    'center': 'center',
+    'bottom': 'flex-end',
+};
 const rectangleStyles = computed(() => {
     return {
         // Geometry
@@ -38,6 +48,8 @@ const rectangleStyles = computed(() => {
         borderWidth: props.params.borderWidth + 'px',
         borderStyle: props.params.borderStyle,
         borderColor: props.params.borderColor,
+        // Text vertical align
+        justifyContent: paramsTextVerticalAlignment[props.params.textVerticalAlignment],
     }
 });
 const editor = useEditor({
@@ -74,11 +86,12 @@ onBeforeUnmount(() => {
 
 .rectangle {
     position: absolute;
+    display: flex;
+    flex-direction: column;
 }
 
 .text-editor {
     width: 100%;
-    height: 100%;
 }
 
 .text-editor * {
@@ -86,10 +99,6 @@ onBeforeUnmount(() => {
     padding: 0;
     outline: none;
     border: 0;
-}
-
-.text-editor:deep(.tiptap) {
-    height: 100%;
 }
 
 </style>

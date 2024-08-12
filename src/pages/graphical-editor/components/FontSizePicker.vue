@@ -1,6 +1,6 @@
 <template>
     <input
-        :value="parseInt(fontSize)"
+        :value="fontSize"
         @change="emits('update:fontSize', $event.target.value)"
         :disabled="props.disabled" 
         name="font-size" 
@@ -18,7 +18,7 @@ const props = defineProps({
         default: false,
     },
     fontSize: {
-        type: String,
+        type: Number,
         required: true,
     }
 });
