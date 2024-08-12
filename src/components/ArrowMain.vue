@@ -1,47 +1,64 @@
 <template>
-  <svg :width="size" :height="size" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-  <g :transform="props.direction === 'up' ? `rotate(${Number(props.angle)} 12 12)` : `rotate( ${Number(props.angle) + 90} 12 12)`"> 
-    <path d="M12 1V23M12 1L7 6M12 1L17 6" :stroke="color" :stroke-width="thickness" stroke-linecap="round" stroke-linejoin="round"/>
-  </g>
-</svg>
+  <svg  :width="props.direction === 'up' || props.direction === 'down' ? height : width" :height="props.direction === 'up' || props.direction === 'down' ? width: height">  
+    <marker class="marker" id="arrowhead" markerWidth="12" markerHeight="7"refX="9" refY="3.5" orient="auto"> 
+      <line  :x1="props.direction === 'left' || props.direction === 'down' ? 14 : 4" y1="0" x2="9" y2="3.5" :stroke="color"  stroke-linecap="round"/> 
+      <line  :x1="props.direction === 'left' || props.direction === 'down'  ? 14 : 4" y1="7" x2="9" y2="3.5" :stroke="color"  stroke-linecap="round"/> 
+    </marker>
+    <line :x1="props.direction === 'up' || props.direction === 'down' ? props.width / 4 : 0"
+          :y1="props.direction === 'up' || props.direction === 'down' ? props.width  : props.height / 2"
+          :x2="props.direction === 'up' || props.direction === 'down' ? props.height / 2 : props.width "
+          :y2="props.direction === 'up' || props.direction === 'down' ? 0 : props.height / 2"
+          :stroke-width="thickness"  :stroke="color" 
+          :marker-start="direction === 'down' || direction === 'left' ? 'url(#arrowhead)' : ''"
+          :marker-end="direction === 'right' || direction === 'up' ? 'url(#arrowhead)' : ''"  />
+  </svg> 
 </template>
 
 <script setup>
+import {ref, watch} from 'vue'
+
 const props = defineProps({
   // Начальное направление up, right
     direction: {
       type: String,
-      default: 'up'
+      default: 'right'
     },
 
   // Размер
-    size: {
+    width: {
       type: String,
-      default: 50,
+      default: 100,
+    },
+    height: {
+      type: String,
+      default: 100,
     },
   // Толщина
     thickness: {
       type: String,
-      default: 5,
+      default: 1.5,
     },
   // Цвет
     color: {
       type: String,
-      default: '#000',
+      default: 'black',
     },
   // Угол поворота
     angle: {
       type: String,
       default: 0,
-    },
-
+    }
 })
+
 
 </script>
 
 <style scoped>
 svg {
   display: block;
+  overflow: visible;
+}
+.marker{
   overflow: visible;
 }
 </style>
