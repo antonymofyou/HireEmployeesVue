@@ -13,10 +13,16 @@ import { computed, ref, watchEffect } from 'vue';
  */
 
 /**
- * Composable для удержания размеров ноды от постоянных дёрганий
+ * @typedef {Object} IBindSizes - Размеры для привязки в css
+ * @property {String} bindMinWidth - Ширина для привязки в css
+ * @property {String} bindMinHeight - Высота для привязки в css
+ */
+
+/**
+ * Composable для удержания размеров ноды от постоянных изменений
  * @param {Ref<HTMLElement>} domNode - Ref на дом-ноду
  * @param {Ref<IOptions>} options - Настройки
- * @returns {Object} - minWidth и minHeight для биндинга в css
+ * @returns {IBindSizes} - minWidth и minHeight для биндинга в css
  */
 export default function useResizer(domNode, options) {
   const minWidth = ref(options.value.initMinWidth);
@@ -50,6 +56,7 @@ export default function useResizer(domNode, options) {
     }
   
     observer.value = new ResizeObserver((entries) => {
+      // Берём текущие размеры дом-ноды
       const listNodeRect = entries[0].contentRect;
 
       // Устанавливаем нужные размеры

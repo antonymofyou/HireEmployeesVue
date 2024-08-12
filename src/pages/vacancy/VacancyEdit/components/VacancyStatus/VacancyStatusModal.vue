@@ -207,7 +207,7 @@ const isAddManagerBtnDisabled = computed(() => {
 });
 
 // Будем сбрасывать выбранного менеджера по истечению загрузки на удаление / добавление
-watch([() => props.isDeletingManagerRequestNow], () => {
+watch(() => props.isDeletingManagerRequestNow, () => {
   if (props.isDeletingManagerRequestNow || props.isAddingManagerRequestNow) return;
   managerAddId.value = 0;
 });

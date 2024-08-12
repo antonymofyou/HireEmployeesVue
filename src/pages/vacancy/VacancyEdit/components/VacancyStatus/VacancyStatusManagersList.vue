@@ -1,8 +1,5 @@
 <template>
-  <ul
-    ref="listNode"
-    class="managers-list"
-  >
+  <ul class="managers-list">
     <li
       class="managers-list__item"
       v-for="manager in props.managers"
@@ -21,6 +18,7 @@
 import VacancyManagersItem from '../VacancyManagers/VacancyManagersItem.vue';
 
 const props = defineProps({
+  // Массив менеджеров
   managers: {
     type: Array,
     required: true
