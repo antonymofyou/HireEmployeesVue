@@ -1,12 +1,17 @@
 <template>
     <header class="header">
         <div class="container">
-            <ControlButtons :active-shape="activeShape" />
+            <ControlButtons :active-shape="activeShape" @update-shape="updateShape" />
         </div>
     </header>
-    <main>
-        <template v-for="shape of shapes" :key="shape.id">
-            <TheRectangle @click="activeShape.id = shape.id" :params="shape" @active-editor="activeEditorHandler" />
+    <main class="canvas">
+        <template v-for="shape of formattedShapes" :key="shape.id">
+            <TheRectangle 
+                :params="shape" 
+                @active-editor="editorActiveHandler" 
+                @update-shape="updateShape" 
+                @pointerdown="shapeActiveHandler(shape.id)" 
+            />
         </template>
     </main>
 </template>
@@ -18,8 +23,8 @@ import { reactive, computed } from 'vue';
 import TheRectangle from './components/TheRectangle.vue';
 import ControlButtons from './components/ControlButtons.vue';
 
-const shapes = [
-    {
+const formattedShapes = reactive({
+    1: {
         "id": 1,
         "type": "rectangle",
         "x": 170,
@@ -32,10 +37,9 @@ const shapes = [
         "zIndex": 1,
         "cornerRadius": 5,
         "borderWidth": 5,
-        "rotation": 90,
         "textVerticalAlignment": "top",
     },
-    {
+    2: {
         "id": 2,
         "type": "rectangle",
         "x": 500,
@@ -94,6 +98,12 @@ const shapes = [
                                 },
                                 {
                                     "type": "underline"
+                                },
+                                {
+                                    'type': 'textStyle',
+                                    'attrs': {
+                                        'color': '#849438',
+                                    }
                                 }
                             ],
                             "text": "fkldkfdl"
@@ -117,7 +127,7 @@ const shapes = [
         },
         "borderWidth": 5
     },
-    {
+    3: {
         "id": 3,
         "type": "rectangle",
         "x": 230,
@@ -131,18 +141,25 @@ const shapes = [
         "textVerticalAlignment": "bottom",
         "borderWidth": 5
     }
-];
+});
 let activeShape = reactive({
     id: undefined,
     editor: undefined,
     shape: computed(() => {
-        return shapes.filter(shape => shape.id == activeShape.id)[0];
+        return formattedShapes[activeShape.id];
     }),
-    
 });
 
-function activeEditorHandler(editor) {
+function editorActiveHandler(editor) {
     activeShape.editor = editor;
+}
+
+function shapeActiveHandler(id) {
+    activeShape.id = id;
+}
+
+function updateShape(id, key, value) {
+    formattedShapes[id][key] = value;
 }
 
 </script>
@@ -163,6 +180,10 @@ function activeEditorHandler(editor) {
     display: flex;
     gap: 16px;
     justify-content: center;
+}
+
+.canvas {
+    position: relative;
 }
 
 </style>

@@ -20,13 +20,15 @@ import { Color } from '@tiptap/extension-color'
 import TextStyle from '@tiptap/extension-text-style'
 import FontSize from 'tiptap-extension-font-size';
 
+import { convertTo } from '../assets/js/convert';
+
 const props = defineProps({
     params: {
         type: Object,
         required: true,
     }
 });
-const emits = defineEmits(['updateText', 'activeEditor']);
+const emits = defineEmits(['updateShape', 'activeEditor']);
 const paramsTextVerticalAlignment = {
     'top': 'flex-start',
     'center': 'center',
@@ -67,10 +69,11 @@ const editor = useEditor({
         })
     ],
     onUpdate: () => {
-        emits('updateText', {
-            id: props.params.id,
-            text: editor.value.getJSON(),
-        });
+        const json = editor.value.getJSON();
+
+        emits('updateShape', props.params.id , 'text' , json);
+
+        console.log(convertTo(json.content));
     },
     onFocus: () => {
         emits('activeEditor', editor);

@@ -52,6 +52,7 @@
             class="control-buttons__button" 
             :disabled="disabled"
             :active="props.activeShape.shape?.textVerticalAlignment == 'bottom'"
+            @click="emits('updateShape', props.activeShape.id, 'textVerticalAlignment', 'bottom')"
         >
             <VerticalAlignBottom />
         </ControlButton>
@@ -59,6 +60,7 @@
             class="control-buttons__button" 
             :disabled="disabled"
             :active="props.activeShape.shape?.textVerticalAlignment == 'center'"
+            @click="emits('updateShape', props.activeShape.id, 'textVerticalAlignment', 'center')"
         >
             <VerticalAlignCenter />
         </ControlButton>
@@ -66,6 +68,7 @@
             class="control-buttons__button" 
             :disabled="disabled"
             :active="props.activeShape.shape?.textVerticalAlignment == 'top'"
+            @click="emits('updateShape', props.activeShape.id, 'textVerticalAlignment', 'top')"
         >
             <VerticalAlignTop />
         </ControlButton>
@@ -86,7 +89,7 @@
 
 <script setup>
 
-import { defineProps, computed } from 'vue';
+import { defineProps, defineEmits, computed } from 'vue';
 
 import ControlButton from './ControlButton.vue';
 import ColorPicker from './ColorPicker.vue';
@@ -108,6 +111,9 @@ const props = defineProps({
         required: true,
     }
 });
+const emits = defineEmits({
+    updateShape: null
+})
 
 const disabled = computed(() => {
     return !props.activeShape.editor;
