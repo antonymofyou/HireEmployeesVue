@@ -51,80 +51,36 @@ const formattedShapes = reactive({
         "borderStyle": 'solid',
         "zIndex": 2,
         "textVerticalAlignment": "center",
-        "text": {
-            "type": "doc",
-            "content": [
-                {
-                    "type": "paragraph",
-                    "content": [
-                        {
-                            "type": "text",
-                            "text": "testo3920fkdl"
-                        }
-                    ]
-                },
-                {
-                    "type": "paragraph",
-                    "content": [
-                        {
-                            "type": "text",
-                            "marks": [
-                                {
-                                    "type": "bold"
-                                }
-                            ],
-                            "text": "fkldkfdl"
-                        },
-                        {
-                            "type": "text",
-                            "marks": [
-                                {
-                                    "type": "bold"
-                                },
-                                {
-                                    "type": "italic"
-                                }
-                            ],
-                            "text": "fkldfkld"
-                        },
-                        {
-                            "type": "text",
-                            "marks": [
-                                {
-                                    "type": "bold"
-                                },
-                                {
-                                    "type": "italic"
-                                },
-                                {
-                                    "type": "underline"
-                                },
-                                {
-                                    'type': 'textStyle',
-                                    'attrs': {
-                                        'color': '#849438',
-                                    }
-                                }
-                            ],
-                            "text": "fkldkfdl"
-                        },
-                        {
-                            "type": "text",
-                            "text": "fdkllfkd"
-                        }
-                    ]
-                },
-                {
-                    "type": "paragraph",
-                    "content": [
-                        {
-                            "type": "text",
-                            "text": "aaaaaaaaa"
-                        }
-                    ]
-                }
-            ]
-        },
+        "text": [
+            {
+                "alignment": "left",
+                "text": [
+                    {
+                        "text": "Hello",
+                        "type": ["bold", "italic", "underline"],
+                    },
+                    {
+                        "text": " This is a test text.",
+                        "fontSize": 18,
+                    }
+                ]
+            },
+            {
+                "alignment": "right",
+                "text": [
+                    {
+                        "text": "Hello",
+                        "type": ["bold"],
+                        "fontColor": "#333333"
+                    },
+                    {
+                        "text": " This is a test text.",
+                        "fontSize": 18,
+                        "fontColor": "#333333"
+                    }
+                ]
+            }
+        ],
         "borderWidth": 5
     },
     3: {

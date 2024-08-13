@@ -1,41 +1,92 @@
 // Tiptap (text) -> Наш (text)
 
-export function convertTo(array) {
-    return array.map((paragraph) => {
-        const alignment = paragraph.attrs.textAlign;
-        const text = paragraph.content?.map(({ text, marks = [] }) => {
+export function convertTo(text) {
+    const { content } = text;
+
+    return content.map((paragraph) => {
+        const { attrs , content = [] } = paragraph;
+
+        const text = content.map(({ text, marks = [] }) => {
             const finalText = {
-                text,
+                text: text,
+            };
+            const primitiveHandler = function({ type }) {
+                finalText.type = finalText.type || [];
+
+                finalText.type.push(type);
+            }
+            const typeHandlers = {
+                'bold': primitiveHandler,
+                'italic': primitiveHandler,
+                'underline': primitiveHandler,
+                'textStyle': function({ attrs }) {
+                    let { color: fontColor, fontSize } = attrs;
+
+                    fontColor && (finalText.fontColor = fontColor);
+
+                    fontSize && (finalText.fontSize = parseInt(fontSize));
+                }
             };
 
-            // todo : ref
+            marks.forEach((mark) => {
+                const { type } = mark;
+                const handler = typeHandlers[type];
 
-            marks.forEach(({ type, attrs }) => {
-                const types = ['bold', 'italic', 'underline'];
-
-                if (types.some(item => item == type)) {
-                    finalText.type = finalText.type || [];
-
-                    finalText.type.push(type);
-
-                    return;
-                }
-
-                if (type == 'textStyle' && attrs) {
-                    attrs.color && (finalText.fontColor = attrs.color);
-
-                    attrs.fontSize && (finalText.fontSize = parseInt(attrs.fontSize));
-
-                    return;
-                }
+                handler(mark);
             });
     
             return finalText;
-        }) || [];
+        });
         
         return {
-            alignment,
-            text
+            'alignment': attrs.textAlign,
+            'text': text,
         };
     });
+}
+
+// Наш (text) -> Tiptap (text)
+
+export function convertFrom(array = []) {
+    const content = array.map(({ alignment , text = [] }) => {
+        const textContent = text.map((item) => {
+            const { text , type = [] , fontColor = null, fontSize = null } = item;
+            const finalText = {
+                "type": "text",
+                "marks": [],
+                "text": text,
+            };
+
+            finalText.marks.push(...type.map((item) => {
+                return {
+                    "type": item,
+                }
+            }));
+
+            if (fontColor || fontSize) {
+                finalText.marks.push({
+                    "type": "textStyle",
+                    "attrs": {
+                        color: fontColor,
+                        fontSize: fontSize && (fontSize + "px"),
+                    }
+                });
+            }
+
+            return finalText;
+        });
+
+        return {
+            "type" : "paragraph",
+            "attrs": {
+                "textAlign": alignment
+            },
+            "content": textContent,
+        };
+    });
+
+    return {
+        "type": "doc",
+        "content": content,
+    }
 }

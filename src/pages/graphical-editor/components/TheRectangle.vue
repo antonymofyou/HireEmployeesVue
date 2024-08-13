@@ -20,7 +20,7 @@ import { Color } from '@tiptap/extension-color'
 import TextStyle from '@tiptap/extension-text-style'
 import FontSize from 'tiptap-extension-font-size';
 
-import { convertTo } from '../assets/js/convert';
+import { convertTo, convertFrom } from '../assets/js/convert';
 
 const props = defineProps({
     params: {
@@ -55,7 +55,7 @@ const rectangleStyles = computed(() => {
     }
 });
 const editor = useEditor({
-    content: props.params.text,
+    content: convertFrom(props.params.text),
     extensions: [
         StarterKit, 
         Underline,
@@ -71,9 +71,7 @@ const editor = useEditor({
     onUpdate: () => {
         const json = editor.value.getJSON();
 
-        emits('updateShape', props.params.id , 'text' , json);
-
-        console.log(convertTo(json.content));
+        emits('updateShape', props.params.id , 'text' , convertTo(json));
     },
     onFocus: () => {
         emits('activeEditor', editor);
