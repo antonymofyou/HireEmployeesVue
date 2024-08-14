@@ -42,6 +42,7 @@ const emits = defineEmits(['updateShape', 'activeEditor', 'select-shape']);
 const isDragging = ref(false);
 const isSelected = ref(false);
 const isResizing = ref(false);
+const isRotating = ref(false);
 const offsetX = ref(0);
 const offsetY = ref(0);
 const startX = ref(0);
@@ -108,6 +109,7 @@ const handles = [
   { position: 'right', cursor: 'ew-resize' },
   { position: 'top', cursor: 'ns-resize' },
   { position: 'bottom', cursor: 'ns-resize' },
+  { position: 'rotate', cursor: 'grab', isRotateHandle: true },
 ];
 
 // Выбор объекта
@@ -119,7 +121,7 @@ const selectRectangle = () => {
   }
 };
 
-// Функции для перемещения блока
+// Начало перемещения
 const startDragging = (event) => {
   isDragging.value = true;
   offsetX.value = event.clientX - props.params.x;
@@ -129,6 +131,7 @@ const startDragging = (event) => {
   document.addEventListener('mouseup', stopDragging);
 };
 
+// Функция для перемещения
 const onDragging = (event) => {
   if (isDragging.value) {
     const newX = event.clientX - offsetX.value;
@@ -139,6 +142,7 @@ const onDragging = (event) => {
   }
 };
 
+// Завершение процесса перемещения
 const stopDragging = () => {
   isDragging.value = false;
   document.removeEventListener('mousemove', onDragging);
@@ -147,6 +151,9 @@ const stopDragging = () => {
 
 // Начало изменения размера
 const startResizing = (handle) => {
+  if (handle.isRotateHandle) {
+    startRotating(event);
+  } else {
   isResizing.value = true;
   startX.value = props.params.x;
   startY.value = props.params.y;
@@ -157,9 +164,10 @@ const startResizing = (handle) => {
 
   document.addEventListener('mousemove', onResizing(handle));
   document.addEventListener('mouseup', stopResizing);
+  }
 };
 
-// Изменение размера объекта
+//Функция для изменения размера
 const onResizing = (handle) => (event) => {
   if (isResizing.value) {
     let newWidth = startWidth.value;
@@ -209,10 +217,44 @@ const onResizing = (handle) => (event) => {
   }
 };
 
+// Завершение процесса изменения размера
 const stopResizing = () => {
   isResizing.value = false;
   document.removeEventListener('mousemove', onResizing);
   document.removeEventListener('mouseup', stopResizing);
+}
+
+// Начало вращения
+const startRotating = (event) => {
+  isRotating.value = true;
+  startX.value = event.clientX;
+  startY.value = event.clientY;
+
+  document.addEventListener('mousemove', onRotating);
+  document.addEventListener('mouseup', stopRotating);
+};
+
+// Функция для вращения
+const onRotating = (event) => {
+  if (isRotating.value) {
+    const centerX = props.params.x + props.params.width / 2;
+    const centerY = props.params.y + props.params.height / 2;
+    let angle = Math.atan2(event.clientY - centerY, event.clientX - centerX) * (180 / Math.PI);
+
+    // Привязка углов вращения, если зажата клавиша Shift
+    if (event.shiftKey) {
+      angle = Math.round(angle / 15) * 15;
+    }
+
+    emits('updateShape', props.params.id, 'rotation', angle);
+  }
+};
+
+// Завершение процесса вращения объекта
+const stopRotating = () => {
+  isRotating.value = false;
+  document.removeEventListener('mousemove', onRotating);
+  document.removeEventListener('mouseup', stopRotating);
 };
 
 onMounted(() => {
@@ -221,20 +263,17 @@ onMounted(() => {
 
 onBeforeUnmount(() => {
   document.removeEventListener('mousedown', handleClickOutside);
+  editor.value.destroy();
+  stopDragging();
+  stopResizing();
 });
 
+// Обработчик кликов вне объекта для снятия выделения
 const handleClickOutside = (event) => {
-  // Используем правильный селектор с кавычками
   if (!event.target.closest(`[id="${props.params.id}"]`)) {
     isSelected.value = false;
   }
 };
-onBeforeUnmount(() => {
-    editor.value.destroy();
-    stopDragging();
-    stopResizing();
-});
-
 </script>
 
 <style scoped>
@@ -243,7 +282,7 @@ onBeforeUnmount(() => {
     position: absolute;
     display: flex;
     flex-direction: column;
-    cursor: grab;
+    cursor: move;
     user-select: none;
 }
 
@@ -253,7 +292,9 @@ onBeforeUnmount(() => {
   height: 100%;
   top: 0;
   left: 0;
-  pointer-events: none;
+  right: 0;
+  bottom: 0;
+  border: 1px dashed gray;
 }
 
 .handle {
@@ -274,6 +315,13 @@ onBeforeUnmount(() => {
 .handle.right { top: calc(50% - 5px); right: -5px; cursor: ew-resize; }
 .handle.top { top: -5px; left: calc(50% - 5px); cursor: ns-resize; }
 .handle.bottom { bottom: -5px; left: calc(50% - 5px); cursor: ns-resize; }
+
+.handle.rotate {
+  top: -20px;
+  left: 50%;
+  transform: translateX(-50%);
+  cursor: grab;
+}
 
 .text-editor {
     width: 100%;

@@ -107,24 +107,28 @@ let activeShape = reactive({
     }),
 });
 
+// Функция для обработки активации редактора
 function editorActiveHandler(editor) {
     activeShape.editor = editor;
 }
 
+// Функция для обработки активации формы
 function shapeActiveHandler(id) {
     activeShape.id = id;
 }
 
+// Функция для обновления свойств формы
 function updateShape(id, key, value) {
     formattedShapes[id][key] = value;
 }
 
+// Функция для обработки выбора формы
 function handleSelectShape(id) {
   activeShape.id = id;
 }
 
+// Функция для обработки клика на холсте
 function handleCanvasClick(event) {
-  // Проверяем, что клик был за пределами активного shape
   if (!event.target.closest('.rectangle')) {
     activeShape.id = undefined;
   }
