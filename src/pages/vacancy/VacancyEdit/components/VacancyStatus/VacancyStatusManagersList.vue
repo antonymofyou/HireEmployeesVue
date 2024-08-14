@@ -13,27 +13,17 @@
     </li>
 
     <li class="item-action">
-      <ButtonIcon
-        v-if="isAdmin() && props.managers.length > 0"
-        @click="showModalAddManager"
-        class="item-action__button"
-      >
-        <template #icon>
-          <IconAdd class="item-action__icon" />
-        </template>
-      </ButtonIcon>
+      <VacancyStatusAddManagerBtn
+        v-if="props.renderAddBtn"
+        @click="handleClickAdd"
+      />
     </li>
   </ul>
 </template>
 
 <script setup>
-import ButtonIcon from '@/components/ButtonIcon.vue';
-
-import { isAdmin } from '@/js/AuthFunctions';
-
-import IconAdd from "@/assets/icons/add.svg?component";
-
 import VacancyManagersItem from '../VacancyManagers/VacancyManagersItem.vue';
+import VacancyStatusAddManagerBtn from './VacancyStatusAddManagerBtn.vue';
 
 const props = defineProps({
   // Массив менеджеров
@@ -51,13 +41,20 @@ const props = defineProps({
     type: Object,
     required: true,
   },
+  renderAddBtn: {
+    type: Boolean,
+    required: false,
+    default: false,
+  }
 });
 
+const emit = defineEmits(['addNewManager']);
+
 /**
- * Показать модалку с добавлением менеджера
+ * Обработка клика по кнопке добавления
  */
- const showModalAddManager = () => {
-  props.indicators.isManagerAdd = true;
+const handleClickAdd = () => {
+  emit('addNewManager');
 };
 </script>
 
@@ -77,18 +74,5 @@ const props = defineProps({
   display: flex;
   justify-content: center;
   align-items: center;
-}
-
-.item-action__button:hover {
-  opacity: 0.7;
-}
-
-.item-action__button:active {
-  opacity: 0.3;
-}
-
-.item-action__icon {
-  width: 25px;
-  height: 25px;
 }
 </style>

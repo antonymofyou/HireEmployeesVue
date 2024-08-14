@@ -48,6 +48,7 @@
       </div>
 
       <div
+        v-if="statusMod.action === 'update'"
         class="status-entity"
       >
         <span class="status-entity__title">
@@ -79,11 +80,20 @@
               :managers="props.managersInList"
               :managerMod="props.managerMod"
               :indicators="props.indicators"
+              :renderAddBtn="isAdmin() && props.managersInSelect.length > 0"
+              @addNewManager="showModalAddManager"
             />
   
             <span v-else class="status-entity__notifier">
               Менеджеры статуса отсутствуют
             </span>
+
+            <div class="action-wrapper">
+              <VacancyStatusAddManagerBtn
+                v-if="props.managersInList.length === 0"
+                @click="showModalAddManager"
+              />
+            </div>
           </div>
         </div>
       </div>
@@ -115,6 +125,9 @@ import ButtonMain from '@/components/ButtonMain.vue';
 import SpinnerMain from '@/components/SpinnerMain.vue';
 
 import VacancyStatusManagersList from './VacancyStatusManagersList.vue';
+import VacancyStatusAddManagerBtn from './VacancyStatusAddManagerBtn.vue';
+
+import { isAdmin } from '@/js/AuthFunctions';
 
 const props = defineProps({
   // Открыта ли модалка
@@ -204,6 +217,13 @@ const resetAddAndSetIndicators = () => {
   props.indicators.isAdd = false;
   props.indicators.isEdit = false;
 };
+
+/**
+ * Показать модалку с выбором менеджера
+ */
+const showModalAddManager = () => {
+  props.indicators.isManagerAdd = true;
+};
 </script>
 
 <style scoped>
@@ -268,5 +288,13 @@ const resetAddAndSetIndicators = () => {
 .visible {
   opacity: 1;
   pointer-events: all;
+}
+
+/* Контейнер с кнопкой */
+.action-wrapper {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding-top: 5px;
 }
 </style>

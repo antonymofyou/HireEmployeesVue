@@ -363,6 +363,7 @@ const requestCurrentStatusManagers = () => {
 const onStatusItemStartUpdate = (status) => {
   statusMod.value = {
     action: 'update',
+    toName: '',
     name: status.statusName,
     comment: status.statusComment,
     color: status.statusColor
