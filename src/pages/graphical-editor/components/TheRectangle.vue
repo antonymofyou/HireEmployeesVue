@@ -1,12 +1,22 @@
 <template>
     <div
         @mousedown="startDragging"
-        @click="editor.chain().focus().run()"
+        @click="selectRectangle"
         :id="props.params.id"
         :style="rectangleStyles"
-        class="rectangle"
+        :class="['rectangle', { selected: isSelected }]"
     >
-        <EditorContent class="text-editor" :editor="editor" />
+        <EditorContent v-if="editor" class="text-editor" :editor="editor" />
+
+    <!-- Показать манипуляторы только если объект выбран -->
+    <div v-if="isSelected" class="resize-handles">
+      <div
+          v-for="handle in handles"
+          :key="handle.position"
+          :class="['handle', handle.position]"
+          @mousedown.stop="startResizing(handle)"
+      ></div>
+    </div>
     </div>
 </template>
 
@@ -30,8 +40,14 @@ const props = defineProps({
 });
 const emits = defineEmits(['updateShape', 'activeEditor']);
 const isDragging = ref(false);
+const isSelected = ref(false);
+const isResizing = ref(false);
 const offsetX = ref(0);
 const offsetY = ref(0);
+const startX = ref(0);
+const startY = ref(0);
+const startWidth = ref(0);
+const startHeight = ref(0);
 
 const paramsTextVerticalAlignment = {
     'top': 'flex-start',
@@ -82,6 +98,26 @@ const editor = useEditor({
     }
 });
 
+// Список манипуляторов
+const handles = [
+  { position: 'top-left', cursor: 'nwse-resize' },
+  { position: 'top-right', cursor: 'nesw-resize' },
+  { position: 'bottom-left', cursor: 'nesw-resize' },
+  { position: 'bottom-right', cursor: 'nwse-resize' },
+  { position: 'left', cursor: 'ew-resize' },
+  { position: 'right', cursor: 'ew-resize' },
+  { position: 'top', cursor: 'ns-resize' },
+  { position: 'bottom', cursor: 'ns-resize' },
+];
+
+// Выбор объекта
+const selectRectangle = () => {
+  isSelected.value = true;
+  if (editor && editor.chain) {
+    editor.chain().focus().run();
+  }
+};
+
 // Функции для перемещения блока
 const startDragging = (event) => {
   isDragging.value = true;
@@ -108,9 +144,80 @@ const stopDragging = () => {
   document.removeEventListener('mouseup', stopDragging);
 };
 
+// Начало изменения размера
+const startResizing = (handle) => {
+  isResizing.value = true;
+  startX.value = props.params.x;
+  startY.value = props.params.y;
+  startWidth.value = props.params.width;
+  startHeight.value = props.params.height;
+  offsetX.value = event.clientX;
+  offsetY.value = event.clientY;
+
+  document.addEventListener('mousemove', onResizing(handle));
+  document.addEventListener('mouseup', stopResizing);
+};
+
+// Изменение размера объекта
+const onResizing = (handle) => (event) => {
+  if (isResizing.value) {
+    let newWidth = startWidth.value;
+    let newHeight = startHeight.value;
+    let newX = startX.value;
+    let newY = startY.value;
+
+    // Обработка изменения размера по горизонтали
+    if (handle.position.includes('left')) {
+      newWidth = startWidth.value - (event.clientX - offsetX.value);
+      if (newWidth > 0) {
+        newX = startX.value + (event.clientX - offsetX.value);
+      } else {
+        newX = startX.value + startWidth.value;
+        newWidth = Math.abs(newWidth);
+      }
+    } else if (handle.position.includes('right')) {
+      newWidth = startWidth.value + (event.clientX - offsetX.value);
+      if (newWidth < 0) {
+        newX = startX.value + newWidth;
+        newWidth = Math.abs(newWidth);
+      }
+    }
+
+    // Обработка изменения размера по вертикали
+    if (handle.position.includes('top')) {
+      newHeight = startHeight.value - (event.clientY - offsetY.value);
+      if (newHeight > 0) {
+        newY = startY.value + (event.clientY - offsetY.value);
+      } else {
+        newY = startY.value + startHeight.value;
+        newHeight = Math.abs(newHeight);
+      }
+    } else if (handle.position.includes('bottom')) {
+      newHeight = startHeight.value + (event.clientY - offsetY.value);
+      if (newHeight < 0) {
+        newY = startY.value + newHeight;
+        newHeight = Math.abs(newHeight);
+      }
+    }
+
+    // Обновляем свойства фигуры
+    emits('updateShape', props.params.id, 'width', newWidth);
+    emits('updateShape', props.params.id, 'height', newHeight);
+    emits('updateShape', props.params.id, 'x', newX);
+    emits('updateShape', props.params.id, 'y', newY);
+  }
+};
+
+const stopResizing = () => {
+  isResizing.value = false;
+  document.removeEventListener('mousemove', onResizing);
+  document.removeEventListener('mouseup', stopResizing);
+};
+
 onBeforeUnmount(() => {
     editor.value.destroy();
     stopDragging();
+    stopResizing();
 });
 
 </script>
@@ -124,6 +231,34 @@ onBeforeUnmount(() => {
     cursor: grab;
     user-select: none;
 }
+
+.resize-handles {
+  position: absolute;
+  width: 100%;
+  height: 100%;
+  top: 0;
+  left: 0;
+  pointer-events: none;
+}
+
+.handle {
+  position: absolute;
+  width: 10px;
+  height: 10px;
+  background-color: white;
+  border: 1px solid black;
+  pointer-events: all;
+  cursor: pointer;
+}
+
+.handle.top-left { top: -5px; left: -5px; cursor: nwse-resize; }
+.handle.top-right { top: -5px; right: -5px; cursor: nesw-resize; }
+.handle.bottom-left { bottom: -5px; left: -5px; cursor: nesw-resize; }
+.handle.bottom-right { bottom: -5px; right: -5px; cursor: nwse-resize; }
+.handle.left { top: calc(50% - 5px); left: -5px; cursor: ew-resize; }
+.handle.right { top: calc(50% - 5px); right: -5px; cursor: ew-resize; }
+.handle.top { top: -5px; left: calc(50% - 5px); cursor: ns-resize; }
+.handle.bottom { bottom: -5px; left: calc(50% - 5px); cursor: ns-resize; }
 
 .text-editor {
     width: 100%;
