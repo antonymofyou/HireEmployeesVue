@@ -1,9 +1,9 @@
 <template>
   <ul class="managers-list">
     <li
-      class="managers-list__item"
       v-for="manager in props.managers"
       :key="manager.id"
+      class="managers-list__item"
     >
       <VacancyManagersItem
         :manager="manager"

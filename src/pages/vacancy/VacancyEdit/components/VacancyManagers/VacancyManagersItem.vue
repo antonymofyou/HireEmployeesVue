@@ -1,12 +1,14 @@
 <template>
   <div>
-    <div @click="handleManagerClick(manager)" class="manager-item__box">
+    <div
+      @click="handleManagerClick"
+      class="manager-item__box"
+    >
       <ManagerAssigned :ManagerText="manager.name" class="manager-item__name" />
       <ButtonIcon
-  
-        class="manager-item__btn"
         v-if="indicators.isHandled && props.managerMod.managerId === manager.id && isAdmin()"
         @click="handleManagerDeleteClick"
+        class="manager-item__btn"
       >
         <template v-slot:icon>
           <IconDelete class="manager-item__icon" />
@@ -21,7 +23,6 @@ import ManagerAssigned from "@/components/ManagerAssigned.vue";
 import ButtonIcon from "@/components/ButtonIcon.vue";
 import IconDelete from "@/assets/icons/close.svg?component";
 import { isAdmin } from '@/js/AuthFunctions'; 
-
 
 const props = defineProps({
   // менеджер
@@ -40,13 +41,17 @@ const props = defineProps({
     required: true,
   },
 });
-//Отображение крестика для удаления
-const handleManagerClick = (manager) => {
-  props.indicators.isHandled === true &&
-  props.managerMod.managerId !== manager.id
-    ? (props.managerMod.managerId = manager.id)
-    : (props.indicators.isHandled = !props.indicators.isHandled);
-  props.managerMod.managerId = manager.id;
+
+// Отображение крестика для удаления
+const handleManagerClick = () => {
+  // Если манипулируем менеджером и текущий модифицируемый не равен тому, что в компоненте
+  if (props.indicators.isHandled && props.managerMod.managerId !== props.manager.id)
+    // Меняем модифицируемого менеджера
+    props.managerMod.managerId = props.manager.id;
+  else
+    props.indicators.isHandled = !props.indicators.isHandled;
+
+  props.managerMod.managerId = props.manager.id;
 };
 
 // Открытие попапа для удаления

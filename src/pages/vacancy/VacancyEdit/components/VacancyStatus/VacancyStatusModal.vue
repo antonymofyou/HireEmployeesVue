@@ -3,6 +3,7 @@
     class="vacancy-edit__modal"
     :show="props.show"
     @click.self="resetAddAndSetIndicators"
+    @click.self.capture="managerMod.managerId = ''"
   >
     <template v-slot:header>
       <div class="vacancy-edit__modal__title">
@@ -49,7 +50,9 @@
       <div
         class="status-entity"
       >
-        <span class="status-entity__title">Менеджеры статуса:</span>
+        <span class="status-entity__title">
+          Менеджеры статуса: {{ props.managersInList.length || '' }}
+        </span>
 
         <div
           ref="listNode"
@@ -78,30 +81,21 @@
               :indicators="props.indicators"
             />
   
-            <span v-else class="status-entity__notifier">Менеджеры статуса отсутствуют</span>
-          </div>
-        </div>
-        
-        <div class="entity-actions">
-          <span class="entity-actions__title">
-            Добавить менеджера:
-          </span>
+            <span v-else class="status-entity__notifier">
+              Менеджеры статуса отсутствуют
+            </span>
 
-          <div class="entity-actions__body">
-            <SelectMain
-              v-model="managerAddId"
-              :options="props.managersInSelect"
-            />
-  
-            <ButtonMain
-              :isDisabled="isAddManagerBtnDisabled"
-              :isActive="props.isAddingManagerRequestNow"
-              @click="onManagerAdd"
-            >
-              <template v-slot:text>
-                Добавить
-              </template>
-            </ButtonMain>
+            <div class="item-action">
+              <ButtonIcon
+                v-if="isAdmin() && props.managersInSelect.length > 0"
+                @click="showModalAddManager"
+                class="item-action__button"
+              >
+                <template #icon>
+                  <IconAdd class="item-action__icon" />
+                </template>
+              </ButtonIcon>
+            </div>
           </div>
         </div>
       </div>
@@ -130,10 +124,13 @@ import { ref, computed, watch } from 'vue';
 import Modal from '@/components/Modal.vue';
 import InputSimple from '@/components/InputSimple.vue';
 import ButtonMain from '@/components/ButtonMain.vue';
-import SelectMain from '@/components/SelectMain.vue';
 import SpinnerMain from '@/components/SpinnerMain.vue';
+import ButtonIcon from '@/components/ButtonIcon.vue';
 
 import VacancyStatusManagersList from './VacancyStatusManagersList.vue';
+import { isAdmin } from '@/js/AuthFunctions';
+
+import IconAdd from "@/assets/icons/add.svg?component";
 
 const props = defineProps({
   // Открыта ли модалка
@@ -210,11 +207,6 @@ const isRequestingNow = computed(() => {
   return props.isAddingManagerRequestNow || props.isDeletingManagerRequestNow;
 });
 
-// Задизейблена ли кнопка добавления менеджера
-const isAddManagerBtnDisabled = computed(() => {
-  return !managerAddId.value;
-});
-
 // Будем сбрасывать выбранного менеджера по истечению загрузки на удаление / добавление
 watch(() => props.isDeletingManagerRequestNow, () => {
   if (props.isDeletingManagerRequestNow || props.isAddingManagerRequestNow) return;
@@ -222,11 +214,10 @@ watch(() => props.isDeletingManagerRequestNow, () => {
 });
 
 /**
- * Обработчик клика по кнопке добавления менеджера
+ * Показать модалку с добавлением менеджера
  */
-const onManagerAdd = () => {
-  emit('managerAdd', managerAddId.value);
-  managerAddId.value = '';
+ const showModalAddManager = () => {
+  props.indicators.isManagerAdd = true;
 };
 
 /**
@@ -291,30 +282,35 @@ const resetAddAndSetIndicators = () => {
   transform: translate(-50%, -50%);
 }
 
-.entity-actions {
-  margin-top: 10px;
-  padding-top: 10px;
-  border-top: 1px solid var(--cornflower-blue);
-  display: flex;
-  flex-direction: column;
-}
-
-.entity-actions__title {
-  margin-bottom: 10px;
-}
-
-.entity-actions__body {
-  display: flex;
-  align-items: center;
-  column-gap: 10px;
-}
-
 /* Переключатели прозрачности */
 .by-visible-toggler {
   opacity: 0;
+  pointer-events: none;
 }
 
 .visible {
   opacity: 1;
+  pointer-events: all;
+}
+
+/* Элемент с действием */
+.item-action {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding-top: 5px;
+}
+
+.item-action__button:hover {
+  opacity: 0.7;
+}
+
+.item-action__button:active {
+  opacity: 0.3;
+}
+
+.item-action__icon {
+  width: 25px;
+  height: 25px;
 }
 </style>
