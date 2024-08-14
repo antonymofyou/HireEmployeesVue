@@ -3,7 +3,7 @@
     class="vacancy-edit__modal"
     :show="props.show"
     @click.self="resetAddAndSetIndicators"
-    @click.self.capture="managerMod.managerId = ''"
+    @click.self.capture="resetCurrentModManager"
   >
     <template v-slot:header>
       <div class="vacancy-edit__modal__title">
@@ -12,106 +12,112 @@
     </template>
 
     <template v-slot:body>
-      <InputSimple
-          v-if="indicators.isAdd"
-          v-model="statusMod.name"
-          id="statusEdit"
-          inputType="input"
-          placeholder="Название статуса"
-      />
-      <InputSimple
-          v-model="statusMod.comment"
-          id="statusEdit"
-          inputType="textarea"
-          placeholder="Комментарий"
-      />
-
       <div
-          v-if="statusMod.action !== 'delete'"
-          class="vacancy-edit__modal-select"
+        @click.capture="resetCurrentModManager"
+        class="modal-body"
       >
-        <div>Цвет:</div>
-        <select
-            v-model="statusMod.color"
-            class="vacancy-edit__modal-select-color"
-            :style="{ backgroundColor: statusMod.color }"
-        >
-          <option
-              v-for="color in colors"
-              :key="color.value"
-              :value="color.value"
-              :style="{ backgroundColor: color.value }"
-          >
-            {{ color.value }}
-          </option>
-        </select>
-      </div>
+        <InputSimple
+            v-if="indicators.isAdd"
+            v-model="statusMod.name"
+            id="statusEdit"
+            inputType="input"
+            placeholder="Название статуса"
+        />
 
-      <div
-        v-if="statusMod.action === 'update'"
-        class="status-entity"
-      >
-        <span class="status-entity__title">
-          Менеджеры статуса: {{ props.managersInList.length || '' }}
-        </span>
+        <InputSimple
+            v-model="statusMod.comment"
+            id="statusEdit"
+            inputType="textarea"
+            placeholder="Комментарий"
+        />
 
         <div
-          ref="listNode"
-          class="status-entity__body"
+            v-if="statusMod.action !== 'delete'"
+            class="vacancy-edit__modal-select"
         >
-          <div
-            class="status-entity__spinner-wrapper"
-            :class="{
-              'by-visible-toggler': true,
-              'visible': isRequestingNow
-            }"
+          <div>Цвет:</div>
+          <select
+              v-model="statusMod.color"
+              class="vacancy-edit__modal-select-color"
+              :style="{ backgroundColor: statusMod.color }"
           >
-            <SpinnerMain width="30" />
-          </div>
+            <option
+                v-for="color in colors"
+                :key="color.value"
+                :value="color.value"
+                :style="{ backgroundColor: color.value }"
+            >
+              {{ color.value }}
+            </option>
+          </select>
+        </div>
+
+        <div
+          v-if="statusMod.action === 'update'"
+          class="status-entity"
+        >
+          <span class="status-entity__title">
+            Менеджеры статуса: {{ props.managersInList.length || '' }}
+          </span>
 
           <div
-            :class="{
-              'by-visible-toggler': true,
-              'visible': !isRequestingNow
-            }"
+            ref="listNode"
+            class="status-entity__body"
           >
-            <VacancyStatusManagersList
-              v-if="props.managersInList.length > 0"
-              :managers="props.managersInList"
-              :managerMod="props.managerMod"
-              :indicators="props.indicators"
-              :renderAddBtn="isAdmin() && props.managersInSelect.length > 0"
-              @addNewManager="showModalAddManager"
-            />
-  
-            <span v-else class="status-entity__notifier">
-              Менеджеры статуса отсутствуют
-            </span>
+            <div
+              class="status-entity__spinner-wrapper"
+              :class="{
+                'by-visible-toggler': true,
+                'visible': isRequestingNow
+              }"
+            >
+              <SpinnerMain width="30" />
+            </div>
 
-            <div class="action-wrapper">
-              <VacancyStatusAddManagerBtn
-                v-if="props.managersInList.length === 0"
-                @click="showModalAddManager"
+            <div
+              :class="{
+                'by-visible-toggler': true,
+                'visible': !isRequestingNow
+              }"
+            >
+              <VacancyStatusManagersList
+                v-if="props.managersInList.length > 0"
+                :managers="props.managersInList"
+                :managerMod="props.managerMod"
+                :indicators="props.indicators"
+                :renderAddBtn="isAdmin() && props.managersInSelect.length > 0"
+                @addNewManager="showModalAddManager"
               />
+    
+              <span v-else class="status-entity__notifier">
+                Менеджеры статуса отсутствуют
+              </span>
+
+              <div class="action-wrapper">
+                <VacancyStatusAddManagerBtn
+                  v-if="props.managersInList.length === 0"
+                  @click="showModalAddManager"
+                />
+              </div>
             </div>
           </div>
         </div>
-      </div>
 
-      <ButtonMain
-          class="vacancy-edit__modal-btn-add"
-          @click="
-            indicators.isAdd
-              ? handleModification(statusMod.name, 'create')
-              : handleModification(statusMod.name, 'update')
-          "
-          :isActive="request"
-          :message="errorMessage"
-      >
-        <template v-slot:text>{{
-            indicators.isAdd ? 'Добавить' : 'Изменить'
-          }}</template>
-      </ButtonMain>
+        <ButtonMain
+            class="vacancy-edit__modal-btn-add"
+            @click="
+              indicators.isAdd
+                ? handleModification(statusMod.name, 'create')
+                : handleModification(statusMod.name, 'update')
+            "
+            :isActive="request"
+            :message="errorMessage"
+        >
+          <template v-slot:text>{{
+              indicators.isAdd ? 'Добавить' : 'Изменить'
+            }}</template>
+        </ButtonMain>
+      </div>
     </template>
   </Modal>
 </template>
@@ -224,6 +230,13 @@ const resetAddAndSetIndicators = () => {
 const showModalAddManager = () => {
   props.indicators.isManagerAdd = true;
 };
+
+/**
+ * Сбросить текущего модифицируемого менеджера
+ */
+const resetCurrentModManager = () => {
+  props.managerMod.managerId = '';
+};
 </script>
 
 <style scoped>
@@ -296,5 +309,10 @@ const showModalAddManager = () => {
   justify-content: center;
   align-items: center;
   padding-top: 5px;
+}
+
+/* Тело модалки */
+.modal-body {
+  display: contents;
 }
 </style>
