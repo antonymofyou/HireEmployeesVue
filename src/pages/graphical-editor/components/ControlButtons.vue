@@ -75,7 +75,7 @@
         <ColorPicker
             class="control-buttons__color-picker"
             :disabled="disabled"
-            :color="props.activeShape.editor?.getAttributes('textStyle').color || '#000'"
+            :color="props.activeShape.editor?.getAttributes('textStyle').color || '#000000'"
             @update:color="props.activeShape.editor?.chain().focus().setColor($event).run()"
         />
         <FontSizePicker 
