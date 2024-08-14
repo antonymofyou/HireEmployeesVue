@@ -1,19 +1,20 @@
 <template>
-    <header class="header">
-        <div class="container">
-            <ControlButtons :active-shape="activeShape" @update-shape="updateShape" />
-        </div>
-    </header>
-    <main class="canvas">
-        <template v-for="shape of formattedShapes" :key="shape.id">
-            <TheRectangle 
-                :params="shape" 
-                @active-editor="editorActiveHandler" 
-                @update-shape="updateShape" 
-                @pointerdown="shapeActiveHandler(shape.id)" 
-            />
-        </template>
-    </main>
+  <header class="header">
+    <div class="container">
+      <ControlButtons :active-shape="activeShape" @update-shape="updateShape" />
+    </div>
+  </header>
+  <main class="canvas" @mousedown="handleCanvasClick">
+    <template v-for="shape of formattedShapes" :key="shape.id">
+      <TheRectangle
+          :params="shape"
+          @active-editor="editorActiveHandler"
+          @update-shape="updateShape"
+          @select-shape="handleSelectShape"
+          @pointerdown="shapeActiveHandler(shape.id)"
+      />
+    </template>
+  </main>
 </template>
 
 <script setup>
@@ -118,6 +119,16 @@ function updateShape(id, key, value) {
     formattedShapes[id][key] = value;
 }
 
+function handleSelectShape(id) {
+  activeShape.id = id;
+}
+
+function handleCanvasClick(event) {
+  // Проверяем, что клик был за пределами активного shape
+  if (!event.target.closest('.rectangle')) {
+    activeShape.id = undefined;
+  }
+}
 </script>
 
 <style scoped>

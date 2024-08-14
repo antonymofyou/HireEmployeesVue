@@ -21,7 +21,7 @@
 </template>
 
 <script setup>
-import { defineProps, computed, onBeforeUnmount, ref } from 'vue';
+import { defineProps, computed, onBeforeUnmount, ref, onMounted } from 'vue';
 import { useEditor, EditorContent } from '@tiptap/vue-3'
 import StarterKit from '@tiptap/starter-kit'
 import Underline from '@tiptap/extension-underline'
@@ -38,7 +38,7 @@ const props = defineProps({
         required: true,
     }
 });
-const emits = defineEmits(['updateShape', 'activeEditor']);
+const emits = defineEmits(['updateShape', 'activeEditor', 'select-shape']);
 const isDragging = ref(false);
 const isSelected = ref(false);
 const isResizing = ref(false);
@@ -112,6 +112,7 @@ const handles = [
 
 // Выбор объекта
 const selectRectangle = () => {
+  emits('select-shape', props.params.id);
   isSelected.value = true;
   if (editor && editor.chain) {
     editor.chain().focus().run();
@@ -214,6 +215,20 @@ const stopResizing = () => {
   document.removeEventListener('mouseup', stopResizing);
 };
 
+onMounted(() => {
+  document.addEventListener('mousedown', handleClickOutside);
+});
+
+onBeforeUnmount(() => {
+  document.removeEventListener('mousedown', handleClickOutside);
+});
+
+const handleClickOutside = (event) => {
+  // Используем правильный селектор с кавычками
+  if (!event.target.closest(`[id="${props.params.id}"]`)) {
+    isSelected.value = false;
+  }
+};
 onBeforeUnmount(() => {
     editor.value.destroy();
     stopDragging();
