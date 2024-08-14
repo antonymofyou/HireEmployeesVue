@@ -61,7 +61,7 @@
       :show="isManagersModalVisible"
       :managerMod="managerMod"
       :indicators="indicators"
-      :errorMessage="errorMessage.error"
+      :errorMessage="errorMessage"
       :managerList="currentStatusManagers.select"
       :managerListAssigned="currentStatusManagers.list"
       :requestManagersModification="requestManagersModification"

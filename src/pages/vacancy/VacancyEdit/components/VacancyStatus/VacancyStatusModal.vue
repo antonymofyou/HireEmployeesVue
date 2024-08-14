@@ -84,18 +84,6 @@
             <span v-else class="status-entity__notifier">
               Менеджеры статуса отсутствуют
             </span>
-
-            <div class="item-action">
-              <ButtonIcon
-                v-if="isAdmin() && props.managersInSelect.length > 0"
-                @click="showModalAddManager"
-                class="item-action__button"
-              >
-                <template #icon>
-                  <IconAdd class="item-action__icon" />
-                </template>
-              </ButtonIcon>
-            </div>
           </div>
         </div>
       </div>
@@ -125,12 +113,8 @@ import Modal from '@/components/Modal.vue';
 import InputSimple from '@/components/InputSimple.vue';
 import ButtonMain from '@/components/ButtonMain.vue';
 import SpinnerMain from '@/components/SpinnerMain.vue';
-import ButtonIcon from '@/components/ButtonIcon.vue';
 
 import VacancyStatusManagersList from './VacancyStatusManagersList.vue';
-import { isAdmin } from '@/js/AuthFunctions';
-
-import IconAdd from "@/assets/icons/add.svg?component";
 
 const props = defineProps({
   // Открыта ли модалка
@@ -214,13 +198,6 @@ watch(() => props.isDeletingManagerRequestNow, () => {
 });
 
 /**
- * Показать модалку с добавлением менеджера
- */
- const showModalAddManager = () => {
-  props.indicators.isManagerAdd = true;
-};
-
-/**
  * Сброс индикаторов на добавление и редактирование
  */
 const resetAddAndSetIndicators = () => {
@@ -291,26 +268,5 @@ const resetAddAndSetIndicators = () => {
 .visible {
   opacity: 1;
   pointer-events: all;
-}
-
-/* Элемент с действием */
-.item-action {
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  padding-top: 5px;
-}
-
-.item-action__button:hover {
-  opacity: 0.7;
-}
-
-.item-action__button:active {
-  opacity: 0.3;
-}
-
-.item-action__icon {
-  width: 25px;
-  height: 25px;
 }
 </style>
