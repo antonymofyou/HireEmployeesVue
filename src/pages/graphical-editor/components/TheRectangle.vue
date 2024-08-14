@@ -1,8 +1,9 @@
 <template>
-    <div 
-        @click="editor.chain().focus().run()" 
-        :id="props.params.id" 
-        :style="rectangleStyles" 
+    <div
+        @mousedown="startDragging"
+        @click="editor.chain().focus().run()"
+        :id="props.params.id"
+        :style="rectangleStyles"
         class="rectangle"
     >
         <EditorContent class="text-editor" :editor="editor" />
@@ -10,8 +11,7 @@
 </template>
 
 <script setup>
-
-import { defineProps, computed, onBeforeUnmount } from 'vue';
+import { defineProps, computed, onBeforeUnmount, ref } from 'vue';
 import { useEditor, EditorContent } from '@tiptap/vue-3'
 import StarterKit from '@tiptap/starter-kit'
 import Underline from '@tiptap/extension-underline'
@@ -29,6 +29,10 @@ const props = defineProps({
     }
 });
 const emits = defineEmits(['updateShape', 'activeEditor']);
+const isDragging = ref(false);
+const offsetX = ref(0);
+const offsetY = ref(0);
+
 const paramsTextVerticalAlignment = {
     'top': 'flex-start',
     'center': 'center',
@@ -77,8 +81,36 @@ const editor = useEditor({
         emits('activeEditor', editor);
     }
 });
+
+// Функции для перемещения блока
+const startDragging = (event) => {
+  isDragging.value = true;
+  offsetX.value = event.clientX - props.params.x;
+  offsetY.value = event.clientY - props.params.y;
+
+  document.addEventListener('mousemove', onDragging);
+  document.addEventListener('mouseup', stopDragging);
+};
+
+const onDragging = (event) => {
+  if (isDragging.value) {
+    const newX = event.clientX - offsetX.value;
+    const newY = event.clientY - offsetY.value;
+
+    emits('updateShape', props.params.id, 'x', newX);
+    emits('updateShape', props.params.id, 'y', newY);
+  }
+};
+
+const stopDragging = () => {
+  isDragging.value = false;
+  document.removeEventListener('mousemove', onDragging);
+  document.removeEventListener('mouseup', stopDragging);
+};
+
 onBeforeUnmount(() => {
     editor.value.destroy();
+    stopDragging();
 });
 
 </script>
@@ -89,6 +121,8 @@ onBeforeUnmount(() => {
     position: absolute;
     display: flex;
     flex-direction: column;
+    cursor: grab;
+    user-select: none;
 }
 
 .text-editor {
