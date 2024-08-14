@@ -3,7 +3,6 @@
     class="vacancy-edit__modal"
     :show="props.show"
     @click.self="resetAddAndSetIndicators"
-    @click.self.capture="resetCurrentModManager"
   >
     <template v-slot:header>
       <div class="vacancy-edit__modal__title">
@@ -189,6 +188,7 @@ const props = defineProps({
     required: false,
     default: false,
   },
+  // Идёт ли сейчас добавление менеджера
   isDeletingManagerRequestNow: {
     type: Boolean,
     required: false,

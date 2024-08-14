@@ -66,7 +66,7 @@
       :managerListAssigned="currentStatusManagers.list"
       :requestManagersModification="requestManagersModification"
       :formData="formData"
-      :request="isAddingManagerToStatusNow"
+      :request="isAddingManagerToStatusNow || isDeletingManagerFromStatusNow"
     />
   </Teleport>
 </template>
@@ -323,7 +323,7 @@ const requestManagersModification = (action, managerId) => {
     }
     case 'delete': {
       onManagerDeleteFromCurrentStatus(managerId);
-      indicators.value.isDelete = false;
+      break;
     }
   }
 };
@@ -392,20 +392,21 @@ const onManagerAddToCurrentStatus = (managerId) => {
       // Успех
       if (response.success === '1') {
         requestCurrentStatusManagers();
-        indicators.value.isManagerAdd = false;
         formData.value.id = '';
         errorMessage.value.error = '';
       } else {
         errorMessage.value.error = response.message;
       }
-
+      
       // Общие действия
       isAddingManagerToStatusNow.value = false;
+      indicators.value.isManagerAdd = false;
     },
     (err) => {
       // Обработка ошибки при запросе
       errorMessage.value.error = err;
       isAddingManagerToStatusNow.value = false;
+      indicators.value.isManagerAdd = false;
     }
   );
 };
@@ -440,11 +441,13 @@ const onManagerDeleteFromCurrentStatus = (managerId) => {
       
       // Общие действия
       isDeletingManagerFromStatusNow.value = false;
+      indicators.value.isDelete = false;
     },
     (err) => {
       // Обработка ошибки при запросе
       errorMessage.value.error = err;
       isDeletingManagerFromStatusNow.value = false;
+      indicators.value.isDelete = false;
     }
   );
 };
