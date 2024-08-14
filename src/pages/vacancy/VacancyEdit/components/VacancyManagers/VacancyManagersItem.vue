@@ -1,5 +1,5 @@
 <template>
-  <div>
+  <div ref="domNodeStatusManager">
     <div
       @click="handleManagerClick"
       class="manager-item__box"
@@ -19,6 +19,8 @@
 </template>
 
 <script setup>
+import { ref } from 'vue';
+
 import ManagerAssigned from "@/components/ManagerAssigned.vue";
 import ButtonIcon from "@/components/ButtonIcon.vue";
 import IconDelete from "@/assets/icons/close.svg?component";
@@ -40,6 +42,14 @@ const props = defineProps({
     type: Object,
     required: true,
   },
+});
+
+// Дом-нода менеджера статуса
+const domNodeStatusManager = ref(null);
+
+// Получим через ref доступ к дом-ноде компонента
+defineExpose({
+  domNode: domNodeStatusManager
 });
 
 // Отображение крестика для удаления

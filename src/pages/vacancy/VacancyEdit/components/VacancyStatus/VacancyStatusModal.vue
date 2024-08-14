@@ -12,7 +12,7 @@
 
     <template v-slot:body>
       <div
-        @click.capture="resetCurrentModManager"
+        v-click-outside="resetCurrentModManager"
         class="modal-body"
       >
         <InputSimple
@@ -85,6 +85,7 @@
                 :managerMod="props.managerMod"
                 :indicators="props.indicators"
                 :renderAddBtn="isAdmin() && props.managersInSelect.length > 0"
+                :fillItOnRender="setOfDomNodesStatusManagers"
                 @addNewManager="showModalAddManager"
               />
     
@@ -200,10 +201,12 @@ const props = defineProps({
     required: true,
   },
 });
-const emit = defineEmits(['managerAdd', 'managerDelete']);
 
 // ID выбранного на добавление менеджера
 const managerAddId = ref('');
+
+// Множество с дом-нодами менеджеров статуса
+const setOfDomNodesStatusManagers = ref(new Set());
 
 // Идёт ли сейчас запрос
 const isRequestingNow = computed(() => {
@@ -236,6 +239,34 @@ const showModalAddManager = () => {
  */
 const resetCurrentModManager = () => {
   props.managerMod.managerId = '';
+};
+
+// Директива, позволяющая выполнить функцию по клику вне дом-ноды
+const vClickOutside = {
+  mounted(el, binding) {
+    el.clickListener = (e) => {
+      // Достаём дом-ноду по координатам клика
+      const domNode = document.elementFromPoint(e.clientX, e.clientY);
+      // Флаг - кликнули ли мы внутри этой ноды
+      let isClickedInsideDomNode = false;
+
+      for (const statusDomNode of setOfDomNodesStatusManagers.value) {
+        if (statusDomNode?.contains(domNode)) isClickedInsideDomNode = true;
+      }
+
+      // Кликнули внутри - ничего не делаем
+      if (isClickedInsideDomNode) return;
+
+      // Т.к. работает с дом-нодами - ставим в очередь, чтобы все остальные, кто полагается на изменяемые значение - успешно завершились
+      requestIdleCallback(() =>  binding.value?.());
+    };
+
+    window.addEventListener('click', el.clickListener, { capture: true });
+  },
+
+  unmounted(el) {
+    window.removeEventListener('click', el.clickListener, { capture: true });
+  },
 };
 </script>
 

@@ -49,8 +49,6 @@
       :managersInSelect="currentStatusManagers.select"
       :isAddingManagerRequestNow="isAddingManagerToStatusNow"
       :isDeletingManagerRequestNow="isDeletingManagerFromStatusNow"
-      @managerAdd="onManagerAddToCurrentStatus"
-      @managerDelete="onManagerDeleteFromCurrentStatus"
     />
   </Teleport>
 

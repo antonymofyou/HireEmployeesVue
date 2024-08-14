@@ -9,6 +9,7 @@
         :manager="manager"
         :managerMod="props.managerMod"
         :indicators="props.indicators"
+        :ref="handleManagerItemRef"
       />
     </li>
 
@@ -41,11 +42,18 @@ const props = defineProps({
     type: Object,
     required: true,
   },
+  // Рендерить ли кнопку добавления нового менеджера
   renderAddBtn: {
     type: Boolean,
     required: false,
     default: false,
-  }
+  },
+  // Множество, которое будем заполнять в процессе рендера
+  fillItOnRender: {
+    type: Set,
+    required: false,
+    default: () => new Set(),
+  },
 });
 
 const emit = defineEmits(['addNewManager']);
@@ -55,6 +63,15 @@ const emit = defineEmits(['addNewManager']);
  */
 const handleClickAdd = () => {
   emit('addNewManager');
+};
+
+/**
+ * Обработка рефа менеджера
+ * @param {Object | null} managerRef - реф менеджера
+ */
+const handleManagerItemRef = (managerRef) => {
+  if (!managerRef) return;
+  props.fillItOnRender.add(managerRef.domNode);
 };
 </script>
 
