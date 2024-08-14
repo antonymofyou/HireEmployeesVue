@@ -7,7 +7,6 @@ import VacancyIdPage from "@/pages/vacancy/VacancyIdPage/VacancyIdPage.vue";
 import VacancyEditPage from "@/pages/vacancy/VacancyEdit/VacancyEditPage.vue";
 import CandidateCommentsPage from "@/pages/candidates/CandidateComments/CandidateCommentsPage.vue";
 import CandidatesListPage from "@/pages/candidates/CandidatesList/CandidatesListPage.vue";
-import GraphicalEditor from "@/pages/graphical-editor/GraphicalEditor.vue";
 
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
@@ -46,11 +45,6 @@ const router = createRouter({
       path: "/candidate",
       name: "candidate",
       component: CandidateCommentsPage,
-    },
-    {
-      path: '/graphical-editor',
-      name: 'graphical-editor',
-      component: GraphicalEditor,
     }
   ],
 });

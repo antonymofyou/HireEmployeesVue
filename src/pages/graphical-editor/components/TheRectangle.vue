@@ -22,12 +22,24 @@ import FontSize from 'tiptap-extension-font-size';
 
 import { convertTo, convertFrom } from '../assets/js/convert';
 
+/**
+ * 
+ * Объект с параметрами фигуры { width: 100, height: 200 ... }
+ * 
+ */
 const props = defineProps({
     params: {
         type: Object,
         required: true,
     }
 });
+/**
+ * 
+ * activeEditor(editor) - передает экземпляр редактора при его активации (focus)
+ * 
+ * updateShape(ид-фигуры, обновляемый ключ , json) - передает содержимое редактора (json) при обновлении
+ * 
+ */
 const emits = defineEmits(['updateShape', 'activeEditor']);
 const paramsTextVerticalAlignment = {
     'top': 'flex-start',

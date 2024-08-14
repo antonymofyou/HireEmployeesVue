@@ -105,12 +105,22 @@ import VerticalAlignBottom from 'vue-material-design-icons/FormatVerticalAlignBo
 import VerticalAlignCenter from 'vue-material-design-icons/FormatVerticalAlignCenter.vue'
 import VerticalAlignTop from 'vue-material-design-icons/FormatVerticalAlignTop.vue'
 
+/**
+ * 
+ * Объект с параметрами активной фигуры (id фигуры, экземпляр редактора (editor) , объект с параметрами фигуры)
+ * 
+ */
 const props = defineProps({
     activeShape: {
         type: Object,
         required: true,
     }
 });
+/**
+ * 
+ * updateShape(ид-фигуры, обновляемый ключ , значение)
+ * 
+ */
 const emits = defineEmits({
     updateShape: null
 })
