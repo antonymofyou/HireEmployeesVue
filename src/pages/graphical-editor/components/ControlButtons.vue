@@ -84,6 +84,7 @@
             :font-size="parseInt(props.activeShape.editor?.getAttributes('textStyle').fontSize) || 16"
             @update:font-size="props.activeShape.editor?.chain().focus().setFontSize($event + 'px').run()"            
         />
+      <slot></slot>
     </div>
 </template>
 

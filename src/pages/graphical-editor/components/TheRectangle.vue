@@ -266,6 +266,7 @@ onBeforeUnmount(() => {
   editor.value.destroy();
   stopDragging();
   stopResizing();
+  stopRotating();
 });
 
 // Обработчик кликов вне объекта для снятия выделения

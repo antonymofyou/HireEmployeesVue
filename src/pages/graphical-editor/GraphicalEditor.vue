@@ -1,7 +1,9 @@
 <template>
   <header class="header">
     <div class="container">
-      <ControlButtons :active-shape="activeShape" @update-shape="updateShape" />
+      <ControlButtons :active-shape="activeShape" @update-shape="updateShape">
+        <button class="add-rectangle" @click="addNewRectangle">Add New Rectangle</button>
+      </ControlButtons>
     </div>
   </header>
   <main class="canvas" @mousedown="handleCanvasClick">
@@ -107,6 +109,32 @@ let activeShape = reactive({
     }),
 });
 
+// Функция для генерации уникального ID для новой формы
+function generateUniqueId() {
+  return Math.max(...Object.keys(formattedShapes).map(id => Number(id))) + 1;
+}
+
+// Функция для добавления нового прямоугольника
+function addNewRectangle() {
+  const newId = generateUniqueId();
+
+  formattedShapes[newId] = {
+    id: newId,
+    type: 'rectangle',
+    x: 100,
+    y: 100,
+    width: 150,
+    height: 100,
+    color: '#6aa1f3',
+    borderColor: '#000000',
+    borderStyle: 'solid',
+    zIndex: newId,
+    textVerticalAlignment: 'center',
+    borderWidth: 2
+  };
+
+  activeShape.id = newId;
+}
 // Функция для обработки активации редактора
 function editorActiveHandler(editor) {
     activeShape.editor = editor;
@@ -151,6 +179,12 @@ function handleCanvasClick(event) {
     display: flex;
     gap: 16px;
     justify-content: center;
+}
+
+.add-rectangle {
+  padding: 8px 16px;
+  font-size: 14px;
+  cursor: pointer;
 }
 
 .canvas {
