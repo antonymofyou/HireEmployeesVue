@@ -251,34 +251,6 @@ const showModalDeleteManager = () => {
 const resetIsHandled = () => {
   props.indicators.isHandled = false;
 };
-
-// Директива, позволяющая выполнить функцию по клику вне дом-ноды
-const vClickOutside = {
-  mounted(el, binding) {
-    el.clickListener = (e) => {
-      // Достаём дом-ноду по координатам клика
-      const domNode = document.elementFromPoint(e.clientX, e.clientY);
-      // Флаг - кликнули ли мы внутри этой ноды
-      let isClickedInsideDomNode = false;
-
-      for (const statusDomNode of setOfDomNodesStatusManagers.value) {
-        if (statusDomNode?.contains(domNode)) isClickedInsideDomNode = true;
-      }
-
-      // Кликнули внутри - ничего не делаем
-      if (isClickedInsideDomNode) return;
-
-      // Т.к. работает с дом-нодами - ставим в очередь, чтобы все остальные, кто полагается на изменяемые значение - успешно завершились
-      requestIdleCallback(() =>  binding.value?.());
-    };
-
-    window.addEventListener('click', el.clickListener, { capture: true });
-  },
-
-  unmounted(el) {
-    window.removeEventListener('click', el.clickListener, { capture: true });
-  },
-};
 </script>
 
 <style scoped>

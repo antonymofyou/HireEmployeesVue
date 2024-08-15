@@ -10,6 +10,7 @@
       />
 
       <ButtonIcon
+        v-if="props.isRenderDeleteButton"
         @click="handleManagerDeleteClick"
         class="manager-item__btn"
       >
@@ -43,6 +44,12 @@ const props = defineProps({
   managerMod: {
     type: Object,
     required: true,
+  },
+  // Рендерить ли кнопку удаления
+  isRenderDeleteButton: {
+    type: Boolean,
+    required: false,
+    default: false,
   },
 });
 
