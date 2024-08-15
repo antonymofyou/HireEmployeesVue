@@ -480,7 +480,6 @@ watch(
   display: flex;
   flex-direction: column;
   gap: 15px;
-  margin-top: 50px;
 }
 
 .spinner__svg {

@@ -243,7 +243,6 @@ onMounted(() => {
       // Загрузка завершена успешно
       isLoaded.value = true;
       if (!errorMessage.value) {
-        console.log(errorMessage.value);
         isSuccessfulLoad.value = true;
       }
     });

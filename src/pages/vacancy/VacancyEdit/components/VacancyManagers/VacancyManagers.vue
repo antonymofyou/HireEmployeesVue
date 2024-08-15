@@ -2,14 +2,17 @@
   <div v-if="request === true" class="manager-list__header">
       Менеджеры вакансии:
   </div>
+
   <SpinnerMain v-if="request" class="manager-list__status-spinner" />
+
   <VacancyManagersList
-    v-if="!request"
     :managerList="managerList.assignedManagers"
-    :requestManagersModification
-    :indicators
-    :managerMod
-  ></VacancyManagersList>
+    :indicators="indicators"
+    :managerMod="managerMod"
+    :renderAddBtn="isAdmin()"
+    @clickAdd="openAddManagersModal"
+    @clickDelete="openDeleteManagerModal"
+  />
 
   <Teleport to="body">
     <!-- Вывод модалки для добавления и изменения статуса -->
@@ -28,15 +31,18 @@
 </template>
 
 <script setup>
+import { onMounted, watch, ref } from "vue";
+
 import SpinnerMain from "@/components/SpinnerMain.vue";
+
 import VacancyManagersModal from "./VacancyManagersModal.vue";
+import VacancyManagersList from "./VacancyManagersList.vue";
 
 import {
   VacanciesAccessGetManagerAccessVacancy,
   VacanciesAccessSetManagerAccessVacancy,
 } from "../../js/ApiClassesVacancyEdit";
-import { onMounted, watch, ref } from "vue";
-import VacancyManagersList from "./VacancyManagersList.vue";
+import { isAdmin } from "@/js/AuthFunctions";
 
 const props = defineProps({
   // Id вакансии
@@ -138,6 +144,20 @@ const requestManagersModification = (action, managerId) => {
       errorMessage.value.error = err;
     }
   );
+};
+
+/**
+ * Открыть модалку добавления менеджера
+ */
+const openAddManagersModal = () => {
+  indicators.value.isAdd = true;
+};
+
+/**
+ * Открыть модалку удаления менеджера
+ */
+const openDeleteManagerModal = () => {
+  indicators.value.isDelete = true;
 };
 
 //при загрузке делаем запрос к серверу

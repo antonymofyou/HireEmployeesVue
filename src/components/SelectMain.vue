@@ -284,6 +284,9 @@ onMounted(() => {
 .v-enter-active,
 .v-leave-active {
   transition: opacity 0.5s ease;
+}
+
+.v-leave-active {
   pointer-events: none;
 }
 

@@ -45,8 +45,13 @@
       <p class="vacancy-edit__link-copy-message vacancy-edit__link-copy-message--error" v-else-if="isCopiedError">Не удалось скопировать текст!</p>
     </div>
 
-    <VacancyManagers :vacancyId />
-    <VacancyStatus :vacancyId />
+    <div class="vacancy-edit__row">
+      <VacancyManagers :vacancyId />
+    </div>
+    
+    <div class="vacancy-edit__row">
+      <VacancyStatus :vacancyId />
+    </div>
 
 
       <div class="vacancy-edit__description">
@@ -625,5 +630,9 @@ const copyToClipboard = async () => {
 
 .vacancy-edit__link-copy-message--error {
   color: var(--cinnabar);
+}
+
+.vacancy-edit__row {
+  margin-top: 40px;
 }
 </style>

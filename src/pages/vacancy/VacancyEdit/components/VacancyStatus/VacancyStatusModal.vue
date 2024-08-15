@@ -12,7 +12,6 @@
 
     <template v-slot:body>
       <div
-        v-click-outside="resetCurrentModManager"
         class="modal-body"
       >
         <InputSimple
@@ -78,14 +77,25 @@
                 'by-visible-toggler': true,
                 'visible': !isRequestingNow
               }"
+              class="status-entity__list-wrapper"
             >
-              <VacancyStatusManagersList
+              <!-- <VacancyStatusManagersList
                 :managers="props.managersInList"
                 :managerMod="props.managerMod"
                 :indicators="props.indicators"
                 :renderAddBtn="isAdmin() && props.managersInSelect.length > 0"
                 :fillItOnRender="setOfDomNodesStatusManagers"
                 @addNewManager="showModalAddManager"
+              /> -->
+
+              <VacancyManagersList
+                :managerList="props.managersInList"
+                :managerMod="props.managerMod"
+                :indicators="props.indicators"
+                :isShowTitle="false"
+                :renderAddBtn="isAdmin() && props.managersInSelect.length > 0"
+                @clickAdd="showModalAddManager"
+                @clickDelete="showModalDeleteManager"
               />
 
             </div>
@@ -119,8 +129,7 @@ import InputSimple from '@/components/InputSimple.vue';
 import ButtonMain from '@/components/ButtonMain.vue';
 import SpinnerMain from '@/components/SpinnerMain.vue';
 
-import VacancyStatusManagersList from './VacancyStatusManagersList.vue';
-import VacancyStatusAddManagerBtn from './VacancyStatusAddManagerBtn.vue';
+import VacancyManagersList from '../VacancyManagers/VacancyManagersList.vue';
 
 import { isAdmin } from '@/js/AuthFunctions';
 
@@ -224,6 +233,13 @@ const showModalAddManager = () => {
 };
 
 /**
+ * Показать модалку с подтверждением удаления менеджера
+ */
+const showModalDeleteManager = () => {
+  props.indicators.isDelete = true;
+};
+
+/**
  * Сбросить текущего модифицируемого менеджера
  */
 const resetCurrentModManager = () => {
@@ -302,6 +318,10 @@ const vClickOutside = {
   display: flex;
   flex-direction: column;
   position: relative;
+}
+
+.status-entity__list-wrapper {
+  max-width: 300px;
 }
 
 /* Обёртка спиннера */

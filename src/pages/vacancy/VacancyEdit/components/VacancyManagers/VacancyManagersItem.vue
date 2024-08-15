@@ -44,6 +44,8 @@ const props = defineProps({
   },
 });
 
+const emit = defineEmits(['clickDelete']);
+
 // Дом-нода менеджера статуса
 const domNodeStatusManager = ref(null);
 
@@ -64,9 +66,11 @@ const handleManagerClick = () => {
   props.managerMod.managerId = props.manager.id;
 };
 
-// Открытие попапа для удаления
+/**
+ * Обработчик клика по кнопке удаления
+ */
 const handleManagerDeleteClick = () => {
-  props.indicators.isDelete = true;
+  emit('clickDelete');
 };
 </script>
 
