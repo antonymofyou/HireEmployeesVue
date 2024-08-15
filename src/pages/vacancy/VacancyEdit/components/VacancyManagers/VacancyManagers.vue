@@ -10,8 +10,10 @@
     :indicators="indicators"
     :managerMod="managerMod"
     :renderAddBtn="isAdmin()"
+    @clickManager="setHandledManager"
     @clickAdd="openAddManagersModal"
     @clickDelete="openDeleteManagerModal"
+    @resetHandled="resetIsHandled"
   />
 
   <Teleport to="body">
@@ -147,6 +149,21 @@ const requestManagersModification = (action, managerId) => {
 };
 
 /**
+ * Установка менеджера, которым манипулируем в данный момент
+ * @param {Number} managerId - ID менеджера, на которого кликнули
+ */
+const setHandledManager = (managerId) => {
+  // Если манипулируем менеджером и текущий модифицируемый не равен тому, что в компоненте
+  if (indicators.value.isHandled && managerMod.value.managerId !== managerId)
+    // Меняем модифицируемого менеджера
+    managerMod.value.managerId = managerId;
+  else
+    indicators.value.isHandled = !indicators.value.isHandled;
+
+  managerMod.value.managerId = managerId;
+};
+
+/**
  * Открыть модалку добавления менеджера
  */
 const openAddManagersModal = () => {
@@ -158,6 +175,13 @@ const openAddManagersModal = () => {
  */
 const openDeleteManagerModal = () => {
   indicators.value.isDelete = true;
+};
+
+/**
+ * Сброс индикатора обработки
+ */
+const resetIsHandled = () => {
+  indicators.value.isHandled = false;
 };
 
 //при загрузке делаем запрос к серверу

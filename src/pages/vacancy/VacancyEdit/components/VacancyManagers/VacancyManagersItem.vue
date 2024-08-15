@@ -4,9 +4,12 @@
       @click="handleManagerClick"
       class="manager-item__box"
     >
-      <ManagerAssigned :ManagerText="manager.name" class="manager-item__name" />
+      <ManagerAssigned
+        :managerText="manager.name"
+        class="manager-item__name"
+      />
+
       <ButtonIcon
-        v-if="indicators.isHandled && props.managerMod.managerId === manager.id && isAdmin()"
         @click="handleManagerDeleteClick"
         class="manager-item__btn"
       >
@@ -19,12 +22,11 @@
 </template>
 
 <script setup>
-import { ref } from 'vue';
+import { onMounted, ref } from 'vue';
 
 import ManagerAssigned from "@/components/ManagerAssigned.vue";
 import ButtonIcon from "@/components/ButtonIcon.vue";
 import IconDelete from "@/assets/icons/close.svg?component";
-import { isAdmin } from '@/js/AuthFunctions'; 
 
 const props = defineProps({
   // менеджер
@@ -44,26 +46,14 @@ const props = defineProps({
   },
 });
 
-const emit = defineEmits(['clickDelete']);
+const emit = defineEmits(['clickManager', 'clickDelete', 'onRender']);
 
 // Дом-нода менеджера статуса
 const domNodeStatusManager = ref(null);
 
-// Получим через ref доступ к дом-ноде компонента
-defineExpose({
-  domNode: domNodeStatusManager
-});
-
-// Отображение крестика для удаления
+// Обработка клика по менеджеру
 const handleManagerClick = () => {
-  // Если манипулируем менеджером и текущий модифицируемый не равен тому, что в компоненте
-  if (props.indicators.isHandled && props.managerMod.managerId !== props.manager.id)
-    // Меняем модифицируемого менеджера
-    props.managerMod.managerId = props.manager.id;
-  else
-    props.indicators.isHandled = !props.indicators.isHandled;
-
-  props.managerMod.managerId = props.manager.id;
+  emit('clickManager', props.manager.id);
 };
 
 /**
@@ -72,6 +62,10 @@ const handleManagerClick = () => {
 const handleManagerDeleteClick = () => {
   emit('clickDelete');
 };
+
+onMounted(() => {
+  emit('onRender', domNodeStatusManager.value);
+});
 </script>
 
 <style scoped>

@@ -1,13 +1,13 @@
 <template>
   <div class="manager_item">
-    {{ ManagerText }}
+    {{ props.managerText }}
   </div>
 </template>
 
 <script setup>
 const props = defineProps({
   // Имя менеджера
-  ManagerText: {
+  managerText: {
     type: String,
     required: true,
   },

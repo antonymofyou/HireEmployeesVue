@@ -6,15 +6,21 @@
     >
       Менеджеры вакансии: {{ managerList.length || "менеджеры не заданы" }}
     </div>
-    <div class="manager-list__items-box" v-click-outside>
+    <div
+      v-click-outside="handleReset"
+      class="manager-list__items-box"
+    >
       <div class="manager-list__item-box">
         <VacancyManagersItem
           v-for="manager in managerList"
           :key="manager.id"
-          :manager
-          :indicators
-          :managerMod
+          :manager="manager"
+          :indicators="props.indicators"
+          :managerMod="props.managerMod"
+          :isRenderDeleteButton="props.indicators.isHandled && props.managerMod.managerId === manager.id && isAdmin()"
+          @clickManager="handleClickManager"
           @clickDelete="handleClickDelete"
+          @onRender="handleVacancyManagerItemRender"
         />
 				<ButtonIcon
           @click="handleClickAddBtn"
@@ -30,9 +36,12 @@
 </template>
 
 <script setup>
+import { ref } from "vue";
+
 import VacancyManagersItem from "./VacancyManagersItem.vue";
 import IconAdd from "@/assets/icons/add.svg?component";
 import ButtonIcon from "@/components/ButtonIcon.vue";
+import { isAdmin } from "@/js/AuthFunctions";
 
 const props = defineProps({
   // Массив менеджеров
@@ -57,8 +66,18 @@ const props = defineProps({
     default: true,
   },
 });
+const emit = defineEmits(['clickManager', 'clickAdd', 'clickDelete', 'resetHandled']);
 
-const emit = defineEmits(['clickAdd', 'clickDelete']);
+// Множество с дом-нодами менеджеров статуса
+const setOfDomNodesStatusManagers = ref(new Set());
+
+/**
+ * Обработка клика по менеджеру в списке
+ * @param {Number} managerId - ID менеджера, на которого кликнули
+ */
+const handleClickManager = (managerId) => {
+  emit('clickManager', managerId);
+};
 
 /**
  * Обработка клика по кнопке добавления
@@ -74,25 +93,46 @@ const handleClickDelete = () => {
   emit('clickDelete');
 };
 
-// Директива для закрытия крестика удаления по клику снаружи
+/**
+ * Сброс обработки
+ */
+const handleReset = () => {
+  emit('resetHandled');
+};
+
+/**
+ * Обработка рендера менеджера
+ * @param {HTMLElement} domNode - DOM-элемент менеджера
+ */
+const handleVacancyManagerItemRender = (domNode) => {
+  setOfDomNodesStatusManagers.value.add(domNode);
+};
+
+// Директива, позволяющая выполнить функцию по клику вне дом-ноды
 const vClickOutside = {
-  beforeMount(el) {
-    el.clickOutsideEvent = function (event) {
-      // Проверка местоположения элемента
-      if (
-        !(el == event.target || el.contains(event.target)) &&
-        props.indicators.isHandled === true
-      ) {
-        // Вызываем метод после срабатывания клика снаружи
-        props.indicators.isHandled = false;
+  mounted(el, binding) {
+    el.clickListener = (e) => {
+      // Достаём дом-ноду по координатам клика
+      const domNode = document.elementFromPoint(e.clientX, e.clientY);
+
+      // Флаг - кликнули ли мы внутри этой ноды
+      let isClickedInsideDomNode = false;
+
+      for (const statusDomNode of setOfDomNodesStatusManagers.value) {
+        if (statusDomNode?.contains(domNode)) isClickedInsideDomNode = true;
       }
+
+      // Кликнули внутри - ничего не делаем
+      if (isClickedInsideDomNode) return;
+
+      // Т.к. работаем с дом-нодами - ставим в очередь, чтобы все остальные, кто полагается на изменяемые значение - успешно завершились
+      requestIdleCallback(() =>  binding.value?.());
     };
-    // Добавляем обработчик нажатия
-    document.addEventListener("click", el.clickOutsideEvent);
+    window.addEventListener('click', el.clickListener, { capture: true });
   },
+
   unmounted(el) {
-    // Удаляем обработчик при размонтировании
-    document.removeEventListener("click", el.clickOutsideEvent);
+    window.removeEventListener('click', el.clickListener, { capture: true });
   },
 };
 </script>

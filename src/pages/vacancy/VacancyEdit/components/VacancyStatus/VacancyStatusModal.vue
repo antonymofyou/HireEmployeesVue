@@ -79,24 +79,16 @@
               }"
               class="status-entity__list-wrapper"
             >
-              <!-- <VacancyStatusManagersList
-                :managers="props.managersInList"
-                :managerMod="props.managerMod"
-                :indicators="props.indicators"
-                :renderAddBtn="isAdmin() && props.managersInSelect.length > 0"
-                :fillItOnRender="setOfDomNodesStatusManagers"
-                @addNewManager="showModalAddManager"
-              /> -->
-
               <VacancyManagersList
                 :managerList="props.managersInList"
                 :managerMod="props.managerMod"
                 :indicators="props.indicators"
                 :isShowTitle="false"
+                @clickManager="setHandledManager"
                 @clickAdd="showModalAddManager"
                 @clickDelete="showModalDeleteManager"
+                @resetHandled="resetIsHandled"
               />
-
             </div>
           </div>
         </div>
@@ -225,6 +217,21 @@ const resetAddAndSetIndicators = () => {
 };
 
 /**
+ * Установка менеджера, которым манипулируем в данный момент
+ * @param {Number} managerId - ID менеджера, на которого кликнули
+ */
+const setHandledManager = (managerId) => {
+  // Если манипулируем менеджером и текущий модифицируемый не равен тому, что в компоненте
+  if (props.indicators.isHandled && props.managerMod.managerId !== managerId)
+    // Меняем модифицируемого менеджера
+    props.managerMod.managerId = managerId;
+  else
+    props.indicators.isHandled = !props.indicators.isHandled;
+
+  props.managerMod.managerId = managerId;
+};
+
+/**
  * Показать модалку с выбором менеджера
  */
 const showModalAddManager = () => {
@@ -239,10 +246,10 @@ const showModalDeleteManager = () => {
 };
 
 /**
- * Сбросить текущего модифицируемого менеджера
+ * Сброс индикатора обработки
  */
-const resetCurrentModManager = () => {
-  props.managerMod.managerId = '';
+const resetIsHandled = () => {
+  props.indicators.isHandled = false;
 };
 
 // Директива, позволяющая выполнить функцию по клику вне дом-ноды
