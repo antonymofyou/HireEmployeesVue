@@ -88,11 +88,6 @@
                 @addNewManager="showModalAddManager"
               />
 
-              <div class="action-wrapper">
-                <VacancyStatusAddManagerBtn
-                  @click="showModalAddManager"
-                />
-              </div>
             </div>
           </div>
         </div>
