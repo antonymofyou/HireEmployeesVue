@@ -17,7 +17,6 @@
           @clickDelete="handleClickDelete"
         />
 				<ButtonIcon
-          v-if="props.renderAddBtn"
           @click="handleClickAddBtn"
           class="manager-list__add-btn"
         >
@@ -56,12 +55,6 @@ const props = defineProps({
     type: Boolean,
     required: false,
     default: true,
-  },
-  // Рендерить ли кнопку добавления нового менеджера
-  renderAddBtn: {
-    type: Boolean,
-    required: false,
-    default: false,
   },
 });
 

@@ -93,7 +93,6 @@
                 :managerMod="props.managerMod"
                 :indicators="props.indicators"
                 :isShowTitle="false"
-                :renderAddBtn="isAdmin() && props.managersInSelect.length > 0"
                 @clickAdd="showModalAddManager"
                 @clickDelete="showModalDeleteManager"
               />
