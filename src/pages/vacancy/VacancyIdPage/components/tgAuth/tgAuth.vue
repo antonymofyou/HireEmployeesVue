@@ -42,14 +42,19 @@ const isError = ref(false);
 const getCandidateToken = (user) => {
   let requestClass = new AuthGetCandidateToken();
   requestClass.telegramData = user;
-    
   requestClass.request(
     '/auth/get_candidate_token.php',
     'first',
     function(response) {  // успешный результат
-      localStorage.setItem(configData.SEEKER_TOK_NAME, response.candidateToken);
-      localStorage.setItem(configData.SEEKER_DEVICE_NAME, response.device);
-      emit('update:isLoggedIn', !props.isLoggedIn);
+      if (response.success === '23') { //Проверка задан ли Username в телеграме пользователя
+        isError.value = true
+        errorMessage.value = response.message;
+      } else {
+        isError.value = false; // Сбросьте ошибку, если нет ошибки
+        localStorage.setItem(configData.SEEKER_TOK_NAME, response.candidateToken);
+        localStorage.setItem(configData.SEEKER_DEVICE_NAME, response.device);
+        emit('update:isLoggedIn', !props.isLoggedIn);
+      }
     },
     (err) => {  // неуспешный результат
       isError.value = true;
