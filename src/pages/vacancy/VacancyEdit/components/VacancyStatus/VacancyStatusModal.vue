@@ -80,7 +80,6 @@
               }"
             >
               <VacancyStatusManagersList
-                v-if="props.managersInList.length > 0"
                 :managers="props.managersInList"
                 :managerMod="props.managerMod"
                 :indicators="props.indicators"
@@ -88,14 +87,9 @@
                 :fillItOnRender="setOfDomNodesStatusManagers"
                 @addNewManager="showModalAddManager"
               />
-    
-              <span v-else class="status-entity__notifier">
-                Менеджеры статуса отсутствуют
-              </span>
 
               <div class="action-wrapper">
                 <VacancyStatusAddManagerBtn
-                  v-if="props.managersInList.length === 0"
                   @click="showModalAddManager"
                 />
               </div>
