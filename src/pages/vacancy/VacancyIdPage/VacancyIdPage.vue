@@ -1,40 +1,46 @@
 <template>
-  <tgAuth v-if="!isLoggedIn" v-model:isLoggedIn="isLoggedIn"/>
+  <tgAuth v-if="!isLoggedIn" v-model:isLoggedIn="isLoggedIn" />
   <div v-else-if="isLoaded && isSuccessfulLoad" class="content vacancy">
     <header class="vacancy__header">
       <div class="vacancy__auth">
         <div class="vacancy__auth-info">
-          <img class="vacancy__tg-logo" src="./assets/icons/tg.svg">
-          <span class="vacancy__auth-nick">{{ candidateData.user.nickname }}</span>
+          <img class="vacancy__tg-logo" src="./assets/icons/tg.svg" />
+          <span class="vacancy__auth-nick">{{
+            candidateData.user.nickname
+          }}</span>
         </div>
         <ButtonMain
           class="vacancy__header-btn"
-          :buttonColor="'var(--cinnabar)'"
+          :button-color="'var(--cinnabar)'"
           @click="logOutSeeker"
         >
-          <template v-slot:text>Выйти</template>
-          <template v-slot:icon><LogOutIcon  width="20px" height="20px"/></template>
+          <template #text> Выйти </template>
+          <template #icon>
+            <LogOutIcon width="20px" height="20px" />
+          </template>
         </ButtonMain>
       </div>
 
       <ButtonMain
         v-if="statusData.isAnswering"
         class="vacancy__header-btn"
-        :isActive="isActiveSave"
+        :is-active="isActiveSave"
         :success="successSave"
         :message="messageSave"
         @click="handleSave"
       >
-        <template v-slot:text>Сохранить</template>
-        <template v-slot:icon><SaveIcon width="20px" height="20px"/></template>
+        <template #text> Сохранить </template>
+        <template #icon>
+          <SaveIcon width="20px" height="20px" />
+        </template>
       </ButtonMain>
 
       <Teleport to="body">
         <ModalConfirmation
           v-model:show="showModalOnSave"
-          confirmText="Сохранить"
+          confirm-text="Сохранить"
           text="Вы уже сохранили ответы на другом устройстве. При повторном сохранении, предыдущие данные будут утеряны."
-          :requestObject="forceSaveAnswersRequestObject"
+          :request-object="forceSaveAnswersRequestObject"
         />
       </Teleport>
     </header>
@@ -42,32 +48,40 @@
       <h2 class="vacancy__title">Заполните вопросы вакансии</h2>
 
       <div class="vacancy__info-block">
-        <h3>Вакансия: <span class="vacancy__name">{{ candidateData.vacancy.name }}</span></h3> 
-        <span class="vacancy__status" :class="statusData.class">{{ statusData.text }}</span>
-        <div class="vacancy__description" v-html="candidateData.vacancy.description"></div>
+        <h3>
+          Вакансия:
+          <span class="vacancy__name">{{ candidateData.vacancy.name }}</span>
+        </h3>
+        <span class="vacancy__status" :class="statusData.class">{{
+          statusData.text
+        }}</span>
+        <div
+          class="vacancy__description"
+          v-html="candidateData.vacancy.description"
+        />
       </div>
 
       <div class="vacancy__questions-block">
         <div class="vacancy__questions-list">
           <InputSimple
-            :modelValue="candidateData.user.fio"
-            @update:modelValue="updateUserFIO"
             id="fio"
-            labelName="ФИО"
-            inputType="input"
-            :isLabelBold=true
+            :model-value="candidateData.user.fio"
+            label-name="ФИО"
+            input-type="input"
+            :is-label-bold="true"
             placeholder="Введите ваше ФИО..."
             :disabled="!statusData.isAnswering"
+            @update:model-value="updateUserFIO"
           />
           <VacancyIdQuestion
             v-for="(question, index) in candidateData.vacancy.questions"
-            :title="`Вопрос №${index + 1}`"
             :key="question.id"
+            :title="`Вопрос №${index + 1}`"
             :question="question.question"
             :answer="question.answer"
-            @updateAnswer="updateAnswerText(index, $event)"
             class="list-item"
             :disabled="!statusData.isAnswering"
+            @update-answer="updateAnswerText(index, $event)"
           />
         </div>
       </div>
@@ -75,26 +89,28 @@
       <ButtonMain
         v-if="statusData.isAnswering"
         class="vacancy__send-btn"
-        :isActive="isActiveSend"
+        :is-active="isActiveSend"
         :success="successSend"
         :message="messageSend"
         :align="'end'"
         @click="handleSend"
       >
-        <template v-slot:text>Отправить</template>
-        <template v-slot:icon><SendIcon width="20px" height="20px"/></template>
+        <template #text> Отправить </template>
+        <template #icon>
+          <SendIcon width="20px" height="20px" />
+        </template>
       </ButtonMain>
 
       <ModalConfirmation
         v-model:show="showModalOnSend"
-        confirmText="Отправить"
+        confirm-text="Отправить"
         text="Вы точно хотите отправить ответы? Веденные данные нельзя будет изменить."
-        :requestObject="submitAnswersRequestObject"
+        :request-object="submitAnswersRequestObject"
       />
     </section>
   </div>
   <div v-else-if="!isLoaded" class="spinner">
-    <SpinnerMain/>
+    <SpinnerMain />
   </div>
 
   <!-- Встраивание элемента в DOM дерево -->
@@ -102,7 +118,6 @@
     <!-- Вывод сообщения о ошибке -->
     <ErrorNotification v-if="errorMessage" :message="errorMessage" />
   </Teleport>
-
 </template>
 
 <script setup>
@@ -111,18 +126,19 @@ import { useRoute } from 'vue-router';
 
 import tgAuth from './components/tgAuth/tgAuth.vue';
 
-import { isSeeker, logOut } from "@/js/AuthFunctions";
+import { isSeeker, logOut } from '@/js/AuthFunctions';
 
-import { VacanciesGetVacancyById, 
-    CandidatesSendCandidateAnswers, 
-    CandidatesGetCandidateUserInfo,
-    } from "./js/ApiClassesVacancy.js"; 
+import {
+  VacanciesGetVacancyById,
+  CandidatesSendCandidateAnswers,
+  CandidatesGetCandidateUserInfo,
+} from './js/ApiClassesVacancy.js';
 import VacancyIdQuestion from './components/VacancyIdQuestion.vue';
 import ButtonMain from '@/components/ButtonMain.vue';
 import InputSimple from '@/components/InputSimple.vue';
 import ModalConfirmation from '@/components/ModalConfirmation.vue';
 import SpinnerMain from '@/components/SpinnerMain.vue';
-import ErrorNotification from "@/components/ErrorNotification.vue";
+import ErrorNotification from '@/components/ErrorNotification.vue';
 import SaveIcon from '@/assets/icons/save.svg?component';
 import SendIcon from '@/assets/icons/send.svg?component';
 import LogOutIcon from './assets/icons/logOut.svg?component';
@@ -140,7 +156,7 @@ const isLoggedIn = ref(false);
 const logOutSeeker = () => {
   logOut('seeker');
   isLoggedIn.value = false;
-}
+};
 
 // Получение из роута id текущей вакансии
 const route = useRoute();
@@ -152,7 +168,7 @@ const errorMessage = ref('');
 // Данные кандидата: пользователь (ник, фио) и вакансия (название, опиание, статус, вопросы)
 const candidateData = ref({
   user: {
-    nickname:'',
+    nickname: '',
     fio: '',
   },
   vacancy: {
@@ -160,7 +176,7 @@ const candidateData = ref({
     description: '',
     status: '',
     questions: [],
-  }
+  },
 });
 
 // Обновление ФИО пользователя
@@ -170,47 +186,50 @@ const updateUserFIO = (value) => {
 
 //Заполнение vacancyData данными с сервера
 const fetchCandidateData = (callback) => {
-  getVacancyDataSeeker((vacResp) => {
-    // Получение данных о вакансии (название, описание, статус) и массива вопросов
-    const { vacancy, questions } = vacResp;
+  getVacancyDataSeeker(
+    (vacResp) => {
+      // Получение данных о вакансии (название, описание, статус) и массива вопросов
+      const { vacancy, questions } = vacResp;
 
-    getCandidateFromServer((userResp) => {
-      // Получение ника и ФИО пользователя
-      const { tgNickname, fio } = userResp;
+      getCandidateFromServer(
+        (userResp) => {
+          // Получение ника и ФИО пользователя
+          const { tgNickname, fio } = userResp;
 
-      // Формирование объекта со всеми данными по кандидату (вакансии и пользователе)
-      const dataFromServer = {
-        user: {
-          nickname: tgNickname,
-          fio: fio,
+          // Формирование объекта со всеми данными по кандидату (вакансии и пользователе)
+          const dataFromServer = {
+            user: {
+              nickname: tgNickname,
+              fio: fio,
+            },
+            vacancy: {
+              name: vacancy.name,
+              description: vacancy.description,
+              status: vacancy.status,
+              questions: questions,
+            },
+          };
+
+          // успешно, передаём данные
+          callback(dataFromServer);
         },
-        vacancy: {
-          name: vacancy.name,
-          description: vacancy.description,
-          status: vacancy.status,
-          questions: questions,
+        // если возникла ошибка
+        (err) => {
+          // Загрузка завершена неуспешно
+          isLoaded.value = true;
+          isSuccessfulLoad.value = false;
+          errorMessage.value = err;
         },
-      };
-
-        // успешно, передаём данные
-        callback(dataFromServer);
-      },
-      // если возникла ошибка
-      (err) => {
-        // Загрузка завершена неуспешно
-        isLoaded.value = true;
-        isSuccessfulLoad.value = false;
-        errorMessage.value = err;
-      }
-    );
-  },
-  // если возникла ошибка
-  (err) => {
-    // Загрузка завершена неуспешно
-    isLoaded.value = true;
-    isSuccessfulLoad.value = false;
-    errorMessage.value = err;
-  });
+      );
+    },
+    // если возникла ошибка
+    (err) => {
+      // Загрузка завершена неуспешно
+      isLoaded.value = true;
+      isSuccessfulLoad.value = false;
+      errorMessage.value = err;
+    },
+  );
 };
 
 // Обновление данных кандидата (вакансии и пользователя)
@@ -235,6 +254,7 @@ watch(isLoggedIn, (newValue) => {
 // Проверка состояния при монтировании компонента и загрузка данных при необходимости
 onMounted(() => {
   isLoggedIn.value = isSeeker();
+  console.log(isLoggedIn.value);
 
   if (isLoggedIn.value) {
     fetchCandidateData((dataFromServer) => {
@@ -257,8 +277,8 @@ const statusData = computed(() => {
       isAnswering: true,
       text: 'Вы еще не откликались на эту вакансию',
       class: 'vacancy__status--warning',
-    }
-  } 
+    };
+  }
   return {
     isAnswering: false,
     text: 'Ваши ответы успешно записаны',
@@ -273,18 +293,20 @@ const updateAnswerText = (index, value) => {
 
 // Получение данных по текущей вакансии с сервера
 const getVacancyDataSeeker = (successCallback, errorCallback) => {
-  let requestClass = new VacanciesGetVacancyById()
+  let requestClass = new VacanciesGetVacancyById();
   requestClass.vacancyId = vacancyId.value;
 
   requestClass.request(
     '/vacancies/get_vacancy_by_id.php',
     'seeker',
-    function(response) {  // успешный результат
+    function (response) {
+      // успешный результат
       successCallback(response);
     },
-    function(err) { // неуспешный результат
+    function (err) {
+      // неуспешный результат
       errorCallback(err);
-    }
+    },
   );
 };
 
@@ -295,44 +317,54 @@ const getCandidateFromServer = (successCallback, errorCallback) => {
   requestClass.request(
     '/candidates/get_candidate_user_info.php',
     'seeker',
-    function(response) { // успешный результат
+    function (response) {
+      // успешный результат
       successCallback(response.userInfo);
     },
-    function(err) { // неуспешный результат
+    function (err) {
+      // неуспешный результат
       errorCallback(err);
-    }
+    },
   );
 };
 
 // Функция для сохранения и отправки ответов
-const submitAnswers = (successCallback, errorCallback, { force = 0, finish = 0 } = {}) => {
+const submitAnswers = (
+  successCallback,
+  errorCallback,
+  { force = 0, finish = 0 } = {},
+) => {
   // Формирование объекта с ответами для отправки изменений на сервер
-  const formattedAnswers = candidateData.value.vacancy.questions.reduce((acc, item) => {
-    // Ключ - id вопроса, значение - ответ
-    acc[item.id] = item.answer; 
-    return acc;
-  }, {});
+  const formattedAnswers = candidateData.value.vacancy.questions.reduce(
+    (acc, item) => {
+      // Ключ - id вопроса, значение - ответ
+      acc[item.id] = item.answer;
+      return acc;
+    },
+    {},
+  );
 
-    // Ответы пользователя, данные пользователя, принудительное сохранение, изменение статуса отклика
-    let requestClass = new CandidatesSendCandidateAnswers();
-    requestClass.answers = formattedAnswers;
-    requestClass.userInfo = {
-      fio: candidateData.value.user.fio,
-    };
-    requestClass.forceSave = force;
-    requestClass.finish = finish;
+  // Ответы пользователя, данные пользователя, принудительное сохранение, изменение статуса отклика
+  let requestClass = new CandidatesSendCandidateAnswers();
+  requestClass.answers = formattedAnswers;
+  requestClass.userInfo = {
+    fio: candidateData.value.user.fio,
+  };
+  requestClass.forceSave = force;
+  requestClass.finish = finish;
 
-    requestClass.request(
-      '/candidates/send_candidate_answers.php',
-      'seeker',
-      function(response) { // успешный результат
-        successCallback(response);
-      },
-      function(err) { // неуспешный результат
-        errorCallback(err);
-      }
-    );
-
+  requestClass.request(
+    '/candidates/send_candidate_answers.php',
+    'seeker',
+    function (response) {
+      // успешный результат
+      successCallback(response);
+    },
+    function (err) {
+      // неуспешный результат
+      errorCallback(err);
+    },
+  );
 };
 
 // Объект для отправки отклика, передающийся в модальное окно: функция отправки, флаг, указывающий на завершение заполнения вакансии, коллбэк, выполняющийся после запроса
@@ -340,15 +372,17 @@ const submitAnswersRequestObject = reactive({
   fetch: submitAnswers,
   dataArg: { finish: 1 },
   callback: (response) => {
-      // получаем данные о статусе и сообщении
-      const { message: resMessage, success: resSuccess } = response;
-      // Если данные успешно отправились, обновляем данные кандидата
-      if (resSuccess === '1') {
-        fetchCandidateData((dataFromServer) => updateCandidateData(dataFromServer));
-      } else {
-        errorHandleSend(resMessage);
-      }
-    },
+    // получаем данные о статусе и сообщении
+    const { message: resMessage, success: resSuccess } = response;
+    // Если данные успешно отправились, обновляем данные кандидата
+    if (resSuccess === '1') {
+      fetchCandidateData((dataFromServer) =>
+        updateCandidateData(dataFromServer),
+      );
+    } else {
+      errorHandleSend(resMessage);
+    }
+  },
 });
 
 /*  Логика сохранения ответов  */
@@ -362,48 +396,54 @@ const successSave = ref('');
 const messageSave = ref('');
 
 // При изменении полей сообщение о сохранении стирается
-watch(candidateData, (newValue) => {
-  if (newValue) {
-    messageSave.value = '';
-  }
-}, { deep: true });
-
+watch(
+  candidateData,
+  (newValue) => {
+    if (newValue) {
+      messageSave.value = '';
+    }
+  },
+  { deep: true },
+);
 
 // Обработка возникновения ошибки при запросе
 const errorHandleSave = (errMessage) => {
   successSave.value = '0';
   messageSave.value = `Ошибка: ${errMessage}`;
   isActiveSave.value = false;
-}
+};
 
 // Обработчик нажатия кнопки сохранения
 const handleSave = () => {
   isActiveSave.value = true;
-  submitAnswers((response) => {
-    // получаем данные о статусе и сообщении
-    const { message: resMessage, success: resSuccess } = response;
+  submitAnswers(
+    (response) => {
+      // получаем данные о статусе и сообщении
+      const { message: resMessage, success: resSuccess } = response;
 
-    // Если уже было сохранение на другом устройстве, октрываем модальное окно с подтверждение
-    if (resSuccess === "22") {
-      isActiveSave.value = false;
-      showModalOnSave.value = true;
-    } else {
+      // Если уже было сохранение на другом устройстве, октрываем модальное окно с подтверждение
+      if (resSuccess === '22') {
+        isActiveSave.value = false;
+        showModalOnSave.value = true;
+      } else {
         // Заполняем данными из ответа
         successSave.value = resSuccess;
         if (resSuccess === '1') {
-           messageSave.value = 'Данные успешно сохранены';
+          messageSave.value = 'Данные успешно сохранены';
         } else {
           messageSave.value = resMessage;
         }
 
         // Кнопка переводится в неактивное состояние
         isActiveSave.value = false;
-    }
-  },
-  // Возникла ошибка
-  (err) => {
-    errorHandleSave(err);
-  }, { force: 0, finish: 0 }, );
+      }
+    },
+    // Возникла ошибка
+    (err) => {
+      errorHandleSave(err);
+    },
+    { force: 0, finish: 0 },
+  );
 };
 
 // Объект для отправки отклика, передающийся в модальное окно: функция отправки, флаг, указывающий на принудительное сохранение, коллбэк, выполняющийся после запроса
@@ -411,19 +451,18 @@ const forceSaveAnswersRequestObject = reactive({
   fetch: submitAnswers,
   dataArg: { force: 1, finish: 0 },
   callback: (response) => {
-      // получаем данные о статусе и сообщении
-      const { message: resMessage, success: resSuccess } = response;
+    // получаем данные о статусе и сообщении
+    const { message: resMessage, success: resSuccess } = response;
 
-      // Заполняем данными из ответа
-      successSave.value = resSuccess;
-      if (resSuccess === '1') {
-        messageSave.value = 'Данные успешно сохранены';
-      } else {
-        messageSave.value = resMessage;
-      }
-    },
+    // Заполняем данными из ответа
+    successSave.value = resSuccess;
+    if (resSuccess === '1') {
+      messageSave.value = 'Данные успешно сохранены';
+    } else {
+      messageSave.value = resMessage;
+    }
+  },
 });
-
 
 /*  Логика отправки ответов  */
 // Показ модального окна при отправке
@@ -440,7 +479,7 @@ const errorHandleSend = (errMessage) => {
   successSend.value = '0';
   messageSend.value = `Ошибка: ${errMessage}`;
   isActiveSend.value = false;
-}
+};
 
 // Обработчик нажатия кнопки сохранения
 const handleSend = () => {
@@ -462,7 +501,7 @@ const handleSend = () => {
 .spinner {
   max-width: 15vh;
   height: 100vh;
-  
+
   display: flex;
   align-items: center;
   margin: 0 auto;
@@ -539,8 +578,10 @@ const handleSend = () => {
   width: 100%;
 
   background-color: var(--white);
-  
-  box-shadow: 0 3px 6px rgba(0,0,0,0.02), 0 3px 6px rgba(0,0,0,0.05);
+
+  box-shadow:
+    0 3px 6px rgba(0, 0, 0, 0.02),
+    0 3px 6px rgba(0, 0, 0, 0.05);
 }
 
 .vacancy__auth {

@@ -2,7 +2,7 @@
   <div class="candidate-answers">
     <div class="candidate-answers__header">
       <h2 class="candidate-answers__title">Ответы кандидата</h2>
-      <ButtonIcon  @click="showQuestions">
+      <ButtonIcon @click="showQuestions">
         <template #icon>
           <ArrowIcon
             :class="[
@@ -23,14 +23,23 @@
             :key="question.questionId"
           >
             <div class="questions-universal__question-text">
-              <div class="candidate-answers__question-header"><b>Вопрос №{{index + 1}}:</b></div>
-              <div class="questions-universal__answer-text" v-html="question.question"></div>
+              <div class="candidate-answers__question-header">
+                <b>Вопрос №{{ index + 1 }}:</b>
+              </div>
+              <div
+                class="questions-universal__answer-text"
+                v-html="question.question"
+              ></div>
             </div>
             <div class="questions-universal__question-text answer-block">
-              <div class="candidate-answers__question-header"><b>Ответ:</b></div>
-              <div class="questions-universal__answer-text">{{ question.answer }}</div>
+              <div class="candidate-answers__question-header">
+                <b>Ответ:</b>
+              </div>
+              <div class="questions-universal__answer-text">
+                {{ question.answer }}
+              </div>
             </div>
-            <hr class="questions-universal__hr-divider"/>
+            <hr class="questions-universal__hr-divider" />
           </div>
         </template>
         <p v-else>Нет данных</p>
@@ -68,22 +77,20 @@ const showQuestions = () => {
 
 .candidate-answers__header {
   display: flex;
-  justify-content: space-between;
   align-items: center;
+  justify-content: space-between;
   height: 32px;
 }
 
 .candidate-answers__title {
+  margin: 0;
   font-size: 16px;
   font-weight: 600;
-
-  margin: 0;
 }
 
 .candidate-answers__list {
   margin-top: 15px;
 }
-
 
 .questions-universal__question {
   margin-top: 30px;
@@ -101,38 +108,30 @@ const showQuestions = () => {
 }
 
 .candidate-answers__question-header {
+  margin: 0;
   font-size: 14px;
   font-weight: 600;
   color: var(--cornflower-blue);
-  margin: 0;
 }
 
 .candidate-answers__header-arrowicon {
-  transition: all 0.3s ease;
   width: 30px;
   height: 30px;
+  transition: all 0.3s ease;
 }
 
-.questions-universal__question-text.answer-block{
+.questions-universal__question-text.answer-block {
   margin-top: 20px;
-}
-
-@media screen and (max-width: 425px) {
-  .candidate-answers__header-arrowicon {
-    width: 25px;
-    height: 25px;
-  }
 }
 
 .candidate-answers__header-arrowicon--active {
   transform: rotateX(180deg);
 }
 
-
-.questions-universal__answer-text{
-  white-space: pre-wrap;
-  font-size: 13px;
+.questions-universal__answer-text {
   margin-top: 10px;
+  font-size: 13px;
+  white-space: pre-wrap;
 }
 
 /* Transition */
@@ -144,5 +143,12 @@ const showQuestions = () => {
 .v-enter-from,
 .v-leave-to {
   opacity: 0;
+}
+
+@media screen and (width <= 425px) {
+  .candidate-answers__header-arrowicon {
+    width: 25px;
+    height: 25px;
+  }
 }
 </style>

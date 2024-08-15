@@ -19,11 +19,9 @@
 </template>
 
 <script setup>
-
 const props = defineProps({
   show: Boolean,
 });
-
 </script>
 
 <style scoped>

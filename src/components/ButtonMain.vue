@@ -1,19 +1,22 @@
 <template>
   <div class="button" :class="alignClass">
-    <button
-      class="button__control"
-      :disabled="isActive"
-    >
-      <span v-if="isActive" class="button__spinner"></span>
-      <div class="button__icon" v-if="$slots['icon'] && !isActive" >
-        <slot name="icon"></slot>
+    <button class="button__control" :disabled="isActive">
+      <span v-if="isActive" class="button__spinner" />
+      <div v-if="$slots['icon'] && !isActive" class="button__icon">
+        <slot name="icon" />
       </div>
       <span class="button__text" :class="{ 'button__text--bold': isBold }">
-        <slot name="text"></slot>
+        <slot name="text" />
       </span>
     </button>
-    <span v-if="success === '1'" class="button__feedback button__feedback--success">{{ message }}</span>
-    <span v-else class="button__feedback button__feedback--warning">{{ message }}</span>
+    <span
+      v-if="success === '1'"
+      class="button__feedback button__feedback--success"
+      >{{ message }}</span
+    >
+    <span v-else class="button__feedback button__feedback--warning">{{
+      message
+    }}</span>
   </div>
 </template>
 
@@ -59,7 +62,7 @@ const props = defineProps({
     type: String,
     default: 'start',
     required: false,
-  }
+  },
 });
 
 // Выравнивание расположения кнопки и сообщения о выполнении
@@ -85,20 +88,24 @@ const alignClass = computed(() => ({
 }
 
 .button__control {
+  cursor: pointer;
+
   position: relative;
 
   display: flex;
-  justify-content: center;
-  align-items: center;
   gap: 5px;
+  align-items: center;
+  justify-content: center;
 
   padding: 10px 15px;
-  cursor: pointer;
+
+  color: v-bind(textcolor);
+
+  background-color: v-bind(buttonColor);
   border: none;
   border-radius: 10px;
   outline: none;
-  color: v-bind(textColor);
-  background-color: v-bind(buttonColor);
+
   transition: all 0.5s ease-out;
 }
 
@@ -107,8 +114,8 @@ const alignClass = computed(() => ({
 }
 
 .button__control:disabled {
-  opacity: 0.5;
   cursor: default;
+  opacity: 0.5;
 }
 
 .button__icon {
@@ -126,13 +133,16 @@ const alignClass = computed(() => ({
 
 .button__spinner {
   display: inline-block;
+
   width: 10px;
   height: 10px;
-  border: 3px solid v-bind(textColor);
+  margin-right: 5px;
+
+  border: 3px solid v-bind(textcolor);
   border-top: 3px solid transparent;
   border-radius: 50%;
+
   animation: spin 0.6s linear infinite;
-  margin-right: 5px;
 }
 
 @keyframes spin {

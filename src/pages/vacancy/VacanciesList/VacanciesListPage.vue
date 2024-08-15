@@ -25,7 +25,11 @@
   <!-- Встраивание компонента Modal в DOM -->
   <Teleport to="body">
     <!-- Открытие модального окна добавления вакансии -->
-    <Modal :show="showModal" v-if="!modalSuccess" @click.self="showModal = false">
+    <Modal
+      :show="showModal"
+      v-if="!modalSuccess"
+      @click.self="showModal = false"
+    >
       <template #header>
         <div class="modal__close">
           <button class="modal__close-btn" @click="showModal = false">
@@ -48,17 +52,14 @@
       </template>
       <template #footer-control-buttons>
         <div class="modal__submit">
-          <ButtonMain
-            class="vacancy__add-create-btn"
-            @click="createVacancy"
-          >
+          <ButtonMain class="vacancy__add-create-btn" @click="createVacancy">
             <template v-slot:text>Создать</template>
           </ButtonMain>
         </div>
       </template>
     </Modal>
     <!-- Открытие модального окна успешного создания вакансии -->
-    <Modal :show="modalSuccess"  @click.self="modalSuccess = false">
+    <Modal :show="modalSuccess" @click.self="modalSuccess = false">
       <template #header v-if="!isLoading">
         <h3>Вакансия создана!</h3>
       </template>
@@ -68,7 +69,7 @@
         <div class="modal__success" v-if="!isLoading">
           <!-- Кнопка перехода к созданной вакансии и закрытия модального окна. Происходит обращение к глобальному объекту refs, который содержит ссылки на ref карточек vacancy_id. через $el(ключ DOM элемента).scrollIntoView происходит переход к созданной вакансии -->
           <ButtonMain
-            buttonColor = "var(--cinnabar)"
+            buttonColor="var(--cinnabar)"
             @click="
               modalSuccess = false;
               $refs[`vacancy_${createdVacancyId}`][0].$el.scrollIntoView({
@@ -97,23 +98,23 @@
 </template>
 
 <script setup>
-import { onMounted, ref, watch } from "vue";
-import { useRouter } from "vue-router";
-import { MainRequestClass } from "@/js/RootClasses";
-import { isManager } from "@/js/AuthFunctions";
-import VacancyCard from "./components/VacancyCard.vue";
-import plusIcon from "@/assets/icons/plus.svg";
-import Modal from "@/components/Modal.vue";
-import InputSimple from "@/components/InputSimple.vue";
-import ButtonMain from "@/components/ButtonMain.vue";
-import TopSquareButton from "@/components/TopSquareButton.vue";
-import ErrorNotification from "@/components/ErrorNotification.vue";
-import SpinnerMain from "@/components/SpinnerMain.vue";
+import { onMounted, ref, watch } from 'vue';
+import { useRouter } from 'vue-router';
+import { MainRequestClass } from '@/js/RootClasses';
+import { isManager } from '@/js/AuthFunctions';
+import VacancyCard from './components/VacancyCard.vue';
+import plusIcon from '@/assets/icons/plus.svg';
+import Modal from '@/components/Modal.vue';
+import InputSimple from '@/components/InputSimple.vue';
+import ButtonMain from '@/components/ButtonMain.vue';
+import TopSquareButton from '@/components/TopSquareButton.vue';
+import ErrorNotification from '@/components/ErrorNotification.vue';
+import SpinnerMain from '@/components/SpinnerMain.vue';
 
 const router = useRouter();
 
 //Проверка авторизации пользователя
-if (!isManager()) router.push({ name: "managerAuth" });
+if (!isManager()) router.push({ name: 'managerAuth' });
 
 // Отображение ошибки
 const errorMessage = ref('');
@@ -133,9 +134,9 @@ const modalSuccess = ref(false);
 
 // Данные вакансии: название, описание, статус публикации
 const formData = ref({
-  name: "",
-  description: "",
-  published: "0",
+  name: '',
+  description: '',
+  published: '0',
 });
 
 // получение всех вакансий
@@ -144,8 +145,8 @@ function getAllVacanciesManager() {
 
   isLoading.value = true;
   requestClass.request(
-    "/vacancies/get_all_vacancies.php",
-    "manager",
+    '/vacancies/get_all_vacancies.php',
+    'manager',
     function (response) {
       //успешный результат
       vacancies.value = response.vacancies;
@@ -156,7 +157,7 @@ function getAllVacanciesManager() {
       //неуспешный результат
       errorMessage.value = err;
       isLoading.value = false;
-    }
+    },
   );
 }
 
@@ -172,8 +173,8 @@ function createVacancy() {
 
   isLoading.value = true;
   requestClass.request(
-    "/vacancies/create_vacancy.php",
-    "manager",
+    '/vacancies/create_vacancy.php',
+    'manager',
     function (response) {
       //успешный результат
 
@@ -181,9 +182,9 @@ function createVacancy() {
       createdVacancyId.value = response.vacancy.id;
 
       //сброс формы
-      formData.value.name = "";
-      formData.value.description = "";
-      formData.value.published = "";
+      formData.value.name = '';
+      formData.value.description = '';
+      formData.value.published = '';
 
       //закрытие модального окна создания и открытие модального окна успешного создания"
       showModal.value = false;
@@ -199,7 +200,7 @@ function createVacancy() {
       showModal.value = false;
       errorMessage.value = err;
       isLoading.value = false;
-    }
+    },
   );
 }
 
@@ -210,11 +211,12 @@ onMounted(() => {
 
 //Отслеживание флагов модальных окон для сокрытия скролла
 watch(
-  ()=> [showModal.value, modalSuccess.value],
-  ()=> {
-    document.body.style.overflow = showModal.value || modalSuccess.value ? "hidden" : "unset"
-  }
-)
+  () => [showModal.value, modalSuccess.value],
+  () => {
+    document.body.style.overflow =
+      showModal.value || modalSuccess.value ? 'hidden' : 'unset';
+  },
+);
 </script>
 
 <style scoped>

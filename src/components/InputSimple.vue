@@ -1,11 +1,7 @@
 <template>
   <div class="input">
-    <label v-if="labelName"
-      class="input__label" 
-      :class="labelClass"
-      :for="id"
-    >
-      {{ labelName }}: 
+    <label v-if="labelName" class="input__label" :class="labelClass" :for="id">
+      {{ labelName }}:
     </label>
     <component
       :is="inputType"
@@ -77,13 +73,13 @@ const inputClass = computed(() => ({
   'input__field--bold': props.isTextBold,
   'input__field--medium': props.size === 'medium',
   'input__field--extra-medium': props.size === 'extra-medium',
-  'input__field--big':  props.size === 'big',
+  'input__field--big': props.size === 'big',
 }));
 
 // Опциональные классы для лейбла
 const labelClass = computed(() => ({
   'input__label--bold': props.isLabelBold,
-}))
+}));
 </script>
 
 <style scoped>
@@ -110,7 +106,7 @@ const labelClass = computed(() => ({
 }
 
 .input__field:focus {
-  outline: 2px solid rgba(0, 0, 252, .6);
+  outline: 2px solid rgba(0, 0, 252, 0.6);
 }
 
 .input__field:disabled {
