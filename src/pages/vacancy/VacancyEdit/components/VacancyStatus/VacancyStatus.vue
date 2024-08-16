@@ -454,6 +454,7 @@ const onManagerDeleteFromCurrentStatus = (managerId) => {
     comment: status.statusComment,
     color: status.statusColor
   };
+  indicators.value.isEdit = true;
 };
 
 /**

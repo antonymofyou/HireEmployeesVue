@@ -85,8 +85,8 @@
                 :indicators="props.indicators"
                 :isShowTitle="false"
                 @clickManager="setHandledManager"
-                @clickAdd="showModalAddManager"
-                @clickDelete="showModalDeleteManager"
+                @clickAdd="startProcessManagerAdd"
+                @clickDelete="startProcessManagerDelete"
                 @resetHandled="resetIsHandled"
               />
             </div>
@@ -237,16 +237,16 @@ const setHandledManager = (managerId) => {
 };
 
 /**
- * Показать модалку с выбором менеджера
+ * Обработка добавления менеджера
  */
-const showModalAddManager = () => {
+const startProcessManagerAdd = () => {
   emit('startManagerAdd');
 };
 
 /**
- * Показать модалку с подтверждением удаления менеджера
+ * Обработка удаления менеджера
  */
-const showModalDeleteManager = () => {
+const startProcessManagerDelete = () => {
   emit('startManagerDelete');
 };
 

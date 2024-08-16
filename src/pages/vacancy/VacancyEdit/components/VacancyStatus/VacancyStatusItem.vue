@@ -18,8 +18,8 @@
             class="status-colored-full-width"
         />
         <ButtonIcon
-            class="statuslist__list-btn"
-            @click="editStatus(status)"
+          class="statuslist__list-btn"
+          @click="onEditButtonClick"
         >
           <template v-slot:icon
           ><IconEdit
@@ -171,10 +171,13 @@ const emit = defineEmits(['startUpdate']);
 const statusRefs = ref({});
 const transferRefs = ref({});
 
-const editStatus = (status) => {
-  props.indicators.isEdit = true;
-  emit('startUpdate', status);
+/**
+ * Обработка клика по кнопке изменения статуса
+ */
+const onEditButtonClick = () => {
+  emit('startUpdate', props.status);
 };
+
 // Функция для получения класса иконки
 const getIconClass = (status, type) => {
   const isActive = type === 'transfer'
