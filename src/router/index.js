@@ -10,6 +10,7 @@ import CandidatesListPage from "@/pages/candidates/CandidatesList/CandidatesList
 import EmployeesPage from "@/pages/employees/EmployeesPage.vue";
 import StandardsPage from "@/pages/standards/StandardsPage.vue";
 import VacancyPage from "@/pages/vacancy/VacancyPage.vue";
+import EmployeesListPage from "@/pages/employees/EmployeesList/EmployeesListPage.vue";
 
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
@@ -27,7 +28,17 @@ const router = createRouter({
     {
       path: "/employees",
       name: "employees",
-      component: EmployeesPage
+      component: EmployeesPage,
+      redirect: {
+        name: 'employeesList',
+      },
+      children: [
+        {
+          path: 'employees_list',
+          name: 'employeesList',
+          component: EmployeesListPage,
+        },
+      ]
     },
     {
       path: "/standards",
