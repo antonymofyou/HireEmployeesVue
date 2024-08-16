@@ -1,5 +1,6 @@
 <template>
-  <div class="question">
+ <transition-group name="move" tag="div" class="question">
+  <div :key="props.id">
     <TextEditor
       :modelValue="text"
       @update:modelValue="updateText"
@@ -27,6 +28,7 @@
       </button>
     </div>
   </div>
+</transition-group>
 </template>
 
 <script setup>
@@ -167,8 +169,8 @@ const updateIsPublished = (newValue) => {
   justify-content: center;
   align-items: center;
   border: solid black;
-  border-width: 0 3px 3px 0;
-  padding: 10px;
+  border-width: 0 2px 2px 0;
+  padding: 7px;
   cursor: pointer;
   opacity: 0; 
   transition: opacity 0.3s;
@@ -186,13 +188,29 @@ const updateIsPublished = (newValue) => {
 .top {
   position: absolute;
   bottom: 156px;
+  left: 20px;
   transform: rotate(-135deg);
 }
 
 .bottom {
   position: absolute;
   top: -62px;
+  left: 15px;
   transform: rotate(45deg);
+}
+
+.move-enter-active, .move-leave-active, .move-move{
+  transition: all 0.5s ease
+}
+
+.move-enter, .move-leave-to{
+  opacity: 0;
+  transform: (translateY(30px));
+}
+
+.move-enter-to, .move-leave{
+  opacity: 1;
+  transform: (translateY(0));
 }
 
 @media (max-width: 1120px) {
@@ -201,7 +219,8 @@ const updateIsPublished = (newValue) => {
     justify-content: end;
     width: 100%;
     z-index: 1;
-    bottom: -5.5px;
+    bottom: 7px;
+    z-index: -1;
   }
 
   .arrow {
@@ -210,7 +229,7 @@ const updateIsPublished = (newValue) => {
   }
   .bottom{
     position: relative;
-    top: -13px;
+    top: -10px;
   }
   .top{
     position: relative;
