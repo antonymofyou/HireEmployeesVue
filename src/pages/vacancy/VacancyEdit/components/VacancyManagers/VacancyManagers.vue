@@ -1,11 +1,15 @@
 <template>
-  <div v-if="request === true" class="manager-list__header">
+  <div v-if="request" class="manager-list__header">
       Менеджеры вакансии:
   </div>
 
-  <SpinnerMain v-if="request" class="manager-list__status-spinner" />
+  <SpinnerMain
+    v-if="request"
+    class="manager-list__status-spinner"
+  />
 
   <VacancyManagersList
+    v-else
     :managerList="managerList.assignedManagers"
     :indicators="indicators"
     :managerMod="managerMod"
