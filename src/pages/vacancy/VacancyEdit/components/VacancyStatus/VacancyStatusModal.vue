@@ -66,7 +66,7 @@
               class="status-entity__spinner-wrapper"
               :class="{
                 'by-visible-toggler': true,
-                'visible': isRequestingNow
+                'visible': props.isLoading
               }"
             >
               <SpinnerMain width="30" />
@@ -75,7 +75,7 @@
             <div
               :class="{
                 'by-visible-toggler': true,
-                'visible': !isRequestingNow
+                'visible': !props.isLoading
               }"
               class="status-entity__list-wrapper"
             >
@@ -166,14 +166,8 @@ const props = defineProps({
     required: false,
     default: [],
   },
-  // Идёт ли сейчас добавление менеджера
-  isAddingManagerRequestNow: {
-    type: Boolean,
-    required: false,
-    default: false,
-  },
-  // Идёт ли сейчас добавление менеджера
-  isDeletingManagerRequestNow: {
+  // Состояние загрузки
+  isLoading: {
     type: Boolean,
     required: false,
     default: false,
@@ -196,11 +190,6 @@ const emit = defineEmits([
 
 // ID выбранного на добавление менеджера
 const managerAddId = ref('');
-
-// Идёт ли сейчас запрос
-const isRequestingNow = computed(() => {
-  return props.isAddingManagerRequestNow || props.isDeletingManagerRequestNow;
-});
 
 // Текст в главной кнопке
 const mainActionButtonText = computed(() => {

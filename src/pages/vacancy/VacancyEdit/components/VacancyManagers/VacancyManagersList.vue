@@ -122,29 +122,23 @@ const handleVacancyManagerItemRender = (domNode) => {
 
 // Директива, позволяющая выполнить функцию по клику вне дом-ноды
 const vClickOutside = {
-  mounted(el, binding) {
-    el.clickListener = (e) => {
-      // Достаём дом-ноду по координатам клика
-      const domNode = document.elementFromPoint(e.clientX, e.clientY);
-
-      // Флаг - кликнули ли мы внутри этой ноды
-      let isClickedInsideDomNode = false;
-
-      for (const statusDomNode of setOfDomNodesStatusManagers.value) {
-        if (statusDomNode?.contains(domNode)) isClickedInsideDomNode = true;
+  beforeMount(el) {
+    el.clickOutsideEvent = function (event) {
+      // Проверка местоположения элемента
+      if (
+        !(el == event.target || el.contains(event.target)) &&
+        props.indicators.isHandled === true
+      ) {
+        // Вызываем метод после срабатывания клика снаружи
+        props.indicators.isHandled = false;
       }
-
-      // Кликнули внутри - ничего не делаем
-      if (isClickedInsideDomNode) return;
-
-      // Т.к. работаем с дом-нодами - ставим в очередь, чтобы все остальные, кто полагается на изменяемые значение - успешно завершились
-      requestIdleCallback(() =>  binding.value?.());
     };
-    window.addEventListener('click', el.clickListener, { capture: true });
+    // Добавляем обработчик нажатия
+    document.addEventListener("click", el.clickOutsideEvent);
   },
-
   unmounted(el) {
-    window.removeEventListener('click', el.clickListener, { capture: true });
+    // Удаляем обработчик при размонтировании
+    document.removeEventListener("click", el.clickOutsideEvent);
   },
 };
 </script>

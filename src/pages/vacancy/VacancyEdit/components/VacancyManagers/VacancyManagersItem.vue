@@ -53,10 +53,7 @@ const props = defineProps({
   },
 });
 
-const emit = defineEmits(['clickManager', 'clickDelete', 'onRender']);
-
-// Дом-нода менеджера статуса
-const domNodeStatusManager = ref(null);
+const emit = defineEmits(['clickManager', 'clickDelete']);
 
 // Обработка клика по менеджеру
 const handleManagerClick = () => {
@@ -69,10 +66,6 @@ const handleManagerClick = () => {
 const handleManagerDeleteClick = () => {
   emit('clickDelete');
 };
-
-onMounted(() => {
-  emit('onRender', domNodeStatusManager.value);
-});
 </script>
 
 <style scoped>

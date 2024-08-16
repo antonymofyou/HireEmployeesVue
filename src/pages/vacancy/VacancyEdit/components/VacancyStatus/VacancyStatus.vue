@@ -47,8 +47,7 @@
       :managersInList="currentStatusManagers.list"
       :managerMod="managerMod"
       :managersInSelect="currentStatusManagers.select"
-      :isAddingManagerRequestNow="isAddingManagerToStatusNow"
-      :isDeletingManagerRequestNow="isDeletingManagerFromStatusNow"
+      :isLoading="isRequestingManagers"
       @close="handleVacancyStatusModalClose"
       @startManagerAdd="handleVacancyStatusModalStartManagerAdd"
       @startManagerDelete="handleVacancyStatusModalStartManagerDelete"
@@ -70,7 +69,7 @@
       :managerListAssigned="currentStatusManagers.list"
       :requestManagersModification="requestManagersModification"
       :formData="formData"
-      :request="isAddingManagerToStatusNow || isDeletingManagerFromStatusNow"
+      :request="isRequestingManagers"
       @close="handleVacancyManagersModalClose"
     />
   </Teleport>
@@ -138,10 +137,8 @@ const currentStatusManagers = ref({
 });
 // Флаг запроса
 const request = ref(false);
-// Идёт ли запрос на добавление менеджера к текущему статусу сейчас
-const isAddingManagerToStatusNow = ref(false);
-// Идёт ли запрос на удаление менеджера из текущего статуса сейчас
-const isDeletingManagerFromStatusNow = ref(false);
+// Идёт ли запрос за сущностями менеджера (инициализация, добавление, удаление)
+const isRequestingManagers = ref(false);
 // Сообщение об ошибке
 const errorMessage = ref('');
 // Информация об изменяемом менеджере
@@ -336,6 +333,8 @@ const requestManagersModification = (action, managerId) => {
  * Запросить всех менеджеров текущего выбранного статуса
  */
 const requestCurrentStatusManagers = () => {
+  isRequestingManagers.value = true;
+
   const requestInstance = new VacanciesAccessGetManagerAccessVacancy();
 
   requestInstance.vacancyId = props.vacancyId;
@@ -353,10 +352,13 @@ const requestCurrentStatusManagers = () => {
       } else {
         errorMessage.value = response.message;
       }
+
+      isRequestingManagers.value = false;
     },
     (err) => {
       // Обработка ошибки при запросе
       errorMessage.value = err;
+      isRequestingManagers.value = false;
     }
   );
 };
@@ -366,7 +368,7 @@ const requestCurrentStatusManagers = () => {
  * @param {Number} managerId - ID менеджера
  */
 const onManagerAddToCurrentStatus = (managerId) => {
-  isAddingManagerToStatusNow.value = true;
+  isRequestingManagers.value = true;
 
   const requestInstance = new VacanciesAccessSetManagerAccessVacancy();
 
@@ -390,13 +392,13 @@ const onManagerAddToCurrentStatus = (managerId) => {
       }
       
       // Общие действия
-      isAddingManagerToStatusNow.value = false;
+      isRequestingManagers.value = false;
       indicators.value.isManagerAdd = false;
     },
     (err) => {
       // Обработка ошибки при запросе
       errorMessage.value = err;
-      isAddingManagerToStatusNow.value = false;
+      isRequestingManagers.value = false;
       indicators.value.isManagerAdd = false;
     }
   );
@@ -407,7 +409,7 @@ const onManagerAddToCurrentStatus = (managerId) => {
  * @param {Number} managerId - ID менеджера
  */
 const onManagerDeleteFromCurrentStatus = (managerId) => {
-  isDeletingManagerFromStatusNow.value = true;
+  isRequestingManagers.value = true;
 
   const requestInstance = new VacanciesAccessSetManagerAccessVacancy();
 
@@ -431,13 +433,13 @@ const onManagerDeleteFromCurrentStatus = (managerId) => {
       }
       
       // Общие действия
-      isDeletingManagerFromStatusNow.value = false;
+      isRequestingManagers.value = false;
       indicators.value.isDelete = false;
     },
     (err) => {
       // Обработка ошибки при запросе
       errorMessage.value = err;
-      isDeletingManagerFromStatusNow.value = false;
+      isRequestingManagers.value = false;
       indicators.value.isDelete = false;
     }
   );
@@ -514,7 +516,7 @@ const handleVacancyStatusModalToggleHandled = () => {
 watch(statusMod, () => {
   // Исполняем запрос, только если выбран статус
   if (!statusMod.value.name) return;
-  requestCurrentStatusManagers()
+  requestCurrentStatusManagers();
 });
 
 const openAddStatusModal = () => {
