@@ -1,8 +1,8 @@
 <template>
   <Modal
-    class="vacancy-edit__modal"
     :show="props.show"
-    @click.self="resetAddAndSetIndicators"
+    @click.self="handleModalBackClick"
+    class="vacancy-edit__modal"
   >
     <template v-slot:header>
       <div class="vacancy-edit__modal__title">
@@ -94,18 +94,14 @@
         </div>
 
         <ButtonMain
-            class="vacancy-edit__modal-btn-add"
-            @click="
-              indicators.isAdd
-                ? handleModification(statusMod.name, 'create')
-                : handleModification(statusMod.name, 'update')
-            "
-            :isActive="request"
-            :message="errorMessage"
+          :isActive="request"
+          :message="errorMessage"
+          class="vacancy-edit__modal-btn-add"
+          @click="handleMainActionButtonClick"
         >
-          <template v-slot:text>{{
-              indicators.isAdd ? 'Добавить' : 'Изменить'
-            }}</template>
+          <template #text>
+            {{ mainActionButtonText }}
+          </template>
         </ButtonMain>
       </div>
     </template>
@@ -121,8 +117,6 @@ import ButtonMain from '@/components/ButtonMain.vue';
 import SpinnerMain from '@/components/SpinnerMain.vue';
 
 import VacancyManagersList from '../VacancyManagers/VacancyManagersList.vue';
-
-import { isAdmin } from '@/js/AuthFunctions';
 
 const props = defineProps({
   // Открыта ли модалка
@@ -191,29 +185,43 @@ const props = defineProps({
   },
 });
 
+const emit = defineEmits([
+  'close',
+  'startManagerAdd',
+  'startManagerDelete',
+  'resetHandled',
+  'startManagerModify',
+  'toggleHandledIndicator',
+]);
+
 // ID выбранного на добавление менеджера
 const managerAddId = ref('');
-
-// Множество с дом-нодами менеджеров статуса
-const setOfDomNodesStatusManagers = ref(new Set());
 
 // Идёт ли сейчас запрос
 const isRequestingNow = computed(() => {
   return props.isAddingManagerRequestNow || props.isDeletingManagerRequestNow;
 });
 
-// Будем сбрасывать выбранного менеджера по истечению загрузки на удаление / добавление
-watch(() => props.isDeletingManagerRequestNow, () => {
-  if (props.isDeletingManagerRequestNow || props.isAddingManagerRequestNow) return;
-  managerAddId.value = 0;
+// Текст в главной кнопке
+const mainActionButtonText = computed(() => {
+  return props.indicators.isAdd ? 'Добавить' : 'Изменить';
 });
 
 /**
- * Сброс индикаторов на добавление и редактирование
+ * Обработка клика по главной кнопке действия в модалке
  */
-const resetAddAndSetIndicators = () => {
-  props.indicators.isAdd = false;
-  props.indicators.isEdit = false;
+const handleMainActionButtonClick = () => {
+  if (indicators.isAdd)
+    handleModification(statusMod.name, 'create')
+  else  
+    handleModification(statusMod.name, 'update')
+};
+
+/**
+ * Обработка клика по заднику модалки
+ */
+const handleModalBackClick = () => {
+  emit('close');
 };
 
 /**
@@ -222,39 +230,43 @@ const resetAddAndSetIndicators = () => {
  */
 const setHandledManager = (managerId) => {
   // Если манипулируем менеджером и текущий модифицируемый не равен тому, что в компоненте
-  if (props.indicators.isHandled && props.managerMod.managerId !== managerId)
-    // Меняем модифицируемого менеджера
-    props.managerMod.managerId = managerId;
-  else
-    props.indicators.isHandled = !props.indicators.isHandled;
+  if (!props.indicators.isHandled || props.managerMod.managerId === managerId)
+    emit('toggleHandledIndicator')
 
-  props.managerMod.managerId = managerId;
+  emit('startManagerModify', managerId);
 };
 
 /**
  * Показать модалку с выбором менеджера
  */
 const showModalAddManager = () => {
-  props.indicators.isManagerAdd = true;
+  emit('startManagerAdd');
 };
 
 /**
  * Показать модалку с подтверждением удаления менеджера
  */
 const showModalDeleteManager = () => {
-  props.indicators.isDelete = true;
+  emit('startManagerDelete');
 };
 
 /**
  * Сброс индикатора обработки
  */
 const resetIsHandled = () => {
-  props.indicators.isHandled = false;
+  emit('resetHandled');
 };
+
+// Будем сбрасывать выбранного менеджера по истечению загрузки на удаление / добавление
+watch(() => props.isDeletingManagerRequestNow, () => {
+  if (props.isDeletingManagerRequestNow || props.isAddingManagerRequestNow)
+    return;
+
+  managerAddId.value = 0;
+});
 </script>
 
 <style scoped>
-
 .vacancy-edit__modal-btn-add {
   display: flex;
   align-items: center;

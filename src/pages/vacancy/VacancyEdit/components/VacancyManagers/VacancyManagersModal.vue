@@ -1,7 +1,7 @@
 <template>
   <Modal
     :show="props.show"
-    @click.self="resetIndicatorsAndErrors"
+    @click.self="handleModalBackClick"
   >
     <template v-slot:header>
       <div>
@@ -83,11 +83,9 @@ const props = defineProps({
   },
   // Сообщение об ошибке
   errorMessage: {
-    type: [Object, String],
+    type: String,
     required: false,
-    default() {
-      return {};
-    },
+    default: '',
   },
   // Флаг запроса
   request: {
@@ -100,6 +98,8 @@ const props = defineProps({
     required: false,
   },
 });
+
+const emit = defineEmits(['close']);
 
 // Заголовок модалки
 const modalTitle = computed(() => {
@@ -148,13 +148,10 @@ const managerName = (managerId) => {
 };
 
 /**
- * Сброс индикаторов и сообщения об ошибке
+ * Обработка клика по заднику модалки
  */
-const resetIndicatorsAndErrors = () => {
-  props.indicators.isAdd = false;
-  props.indicators.isManagerAdd = false;
-  props.indicators.isDelete = false;
-  props.errorMessage.error = '';
+const handleModalBackClick = () => {
+  emit('close');
 };
 </script>
 

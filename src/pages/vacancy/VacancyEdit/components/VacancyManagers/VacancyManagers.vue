@@ -20,14 +20,15 @@
     <!-- Вывод модалки для добавления и изменения статуса -->
     <VacancyManagersModal
       :show="indicators.isAdd || indicators.isDelete"
-      :managerMod
-      :indicators
+      :managerMod="managerMod"
+      :indicators="indicators"
       :managerList="managerList.unassignedManagers"
       :managerListAssigned="managerList.assignedManagers"
-      :requestManagersModification
-      :request
-      :errorMessage
-      :formData
+      :requestManagersModification="requestManagersModification"
+      :request="request"
+      :errorMessage="errorMessage"
+      :formData="formData"
+      @close="handleVacancyManagersModalClose"
     />
   </Teleport>
 </template>
@@ -79,9 +80,7 @@ const indicators = ref({
 // Флаг запроса
 const request = ref(false);
 // Сообщение об ошибке
-const errorMessage = ref({
-  error: "",
-});
+const errorMessage = ref('');
 
 // Запрос менеджеров по id
 const requestVacancyManagers = () => {
@@ -89,7 +88,7 @@ const requestVacancyManagers = () => {
   requestInstance.vacancyId = props.vacancyId;
   requestInstance.permissionType = managerMod.value.permissionType;
   request.value = true;
-  errorMessage.value.error = "";
+  errorMessage.value = "";
     requestInstance.request(
       "/vacancies/access/get_managers_access_vacancy.php",
       "manager",
@@ -106,7 +105,7 @@ const requestVacancyManagers = () => {
       },
       (err) => {
         request.value = false;
-        errorMessage.value.error = err;
+        errorMessage.value = err;
       }
     );
 };
@@ -124,7 +123,7 @@ const requestManagersModification = (action, managerId) => {
   requestInstance.permissionType = managerMod.value.permissionType;
   requestInstance.managerId = managerMod.value.managerId;
   request.value = true;
-  errorMessage.value.error = "";
+  errorMessage.value = "";
   requestInstance.request(
     "/vacancies/access/set_manager_access_vacancy.php",
     "manager",
@@ -143,7 +142,7 @@ const requestManagersModification = (action, managerId) => {
     },
     (err) => {
       request.value = false;
-      errorMessage.value.error = err;
+      errorMessage.value = err;
     }
   );
 };
@@ -184,7 +183,16 @@ const resetIsHandled = () => {
   indicators.value.isHandled = false;
 };
 
-//при загрузке делаем запрос к серверу
+/**
+ * Обработка закрытия модалки выбора менеджера
+ */
+const handleVacancyManagersModalClose = () => {
+  indicators.value.isAdd = false;
+  indicators.value.isDelete = false;
+  errorMessage.value = '';
+};
+
+// При загрузке делаем запрос к серверу
 onMounted(() => {
   requestVacancyManagers();
 });

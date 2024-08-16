@@ -5,7 +5,7 @@
       class="manager-item__box"
     >
       <ManagerAssigned
-        :managerText="manager.name"
+        :managerName="manager.name"
         class="manager-item__name"
       />
 
@@ -15,7 +15,7 @@
         class="manager-item__btn"
       >
         <template v-slot:icon>
-          <IconDelete class="manager-item__icon" />
+          <IconDelete class="manager-item__btn-icon" />
         </template>
       </ButtonIcon>
     </div>
@@ -30,7 +30,7 @@ import ButtonIcon from "@/components/ButtonIcon.vue";
 import IconDelete from "@/assets/icons/close.svg?component";
 
 const props = defineProps({
-  // менеджер
+  // Менеджер
   manager: {
     type: Object,
     required: true,
@@ -84,15 +84,22 @@ onMounted(() => {
   align-items: center;
   position: relative;
 }
-.manager-item__icon {
+
+.manager-item__btn {
   height: 12px;
   width: 12px;
   display: block;
   position: absolute;
-  top: 4px;
-  right: 3px;
-}
-.manager-item__btn {
+  top: 2px;
+  right: 4px;
   padding: 0 0 0 1px;
+}
+
+.manager-item__btn-icon {
+  width: 100%;
+  height: 100%;
+  position: absolute;
+  left: 0;
+  top: 0;
 }
 </style>

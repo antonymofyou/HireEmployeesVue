@@ -17,7 +17,7 @@
           :manager="manager"
           :indicators="props.indicators"
           :managerMod="props.managerMod"
-          :isRenderDeleteButton="props.indicators.isHandled && props.managerMod.managerId === manager.id && isAdmin()"
+          :isRenderDeleteButton="helpers.isRenderDeleteForThisManager(manager.id)"
           @clickManager="handleClickManager"
           @clickDelete="handleClickDelete"
           @onRender="handleVacancyManagerItemRender"
@@ -66,10 +66,22 @@ const props = defineProps({
     default: true,
   },
 });
+
 const emit = defineEmits(['clickManager', 'clickAdd', 'clickDelete', 'resetHandled']);
 
 // Множество с дом-нодами менеджеров статуса
 const setOfDomNodesStatusManagers = ref(new Set());
+
+// Функции-хелперы
+const helpers = {
+  /**
+   * Нужно ли рендерить кнопку удаления для менеджера
+   * @param {Number} managerId - ID менеджера
+   */
+  isRenderDeleteForThisManager: (managerId) => {
+    return props.indicators.isHandled && props.managerMod.managerId === managerId && isAdmin()
+  },
+};
 
 /**
  * Обработка клика по менеджеру в списке
