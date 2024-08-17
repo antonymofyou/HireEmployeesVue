@@ -384,7 +384,7 @@ onUnmounted(() => {
 }
 
 .status-container:hover .statuslist__list-comment-tooltip {
-  visibility: visible;
+  /*visibility: visible;*/
 }
 
 .status-container {
