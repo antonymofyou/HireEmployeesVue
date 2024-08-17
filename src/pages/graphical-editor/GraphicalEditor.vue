@@ -1,19 +1,22 @@
 <template>
-    <header class="header">
-        <div class="container">
-            <ControlButtons :active-shape="activeShape" @update-shape="updateShape" />
-        </div>
-    </header>
-    <main class="canvas">
-        <template v-for="shape of formattedShapes" :key="shape.id">
-            <TheRectangle 
-                :params="shape" 
-                @active-editor="editorActiveHandler" 
-                @update-shape="updateShape" 
-                @pointerdown="shapeActiveHandler(shape.id)" 
-            />
-        </template>
-    </main>
+  <header class="header">
+    <div class="container">
+      <ControlButtons :active-shape="activeShape" @update-shape="updateShape">
+        <button class="add-rectangle" @click="addNewRectangle">Add New Rectangle</button>
+      </ControlButtons>
+    </div>
+  </header>
+  <main class="canvas" @mousedown="handleCanvasClick">
+    <template v-for="shape of formattedShapes" :key="shape.id">
+      <TheRectangle
+          :params="shape"
+          @active-editor="editorActiveHandler"
+          @update-shape="updateShape"
+          @select-shape="handleSelectShape"
+          @pointerdown="shapeActiveHandler(shape.id)"
+      />
+    </template>
+  </main>
 </template>
 
 <script setup>
@@ -104,14 +107,58 @@ let activeShape = reactive({
         return formattedShapes[activeShape.id];
     }),
 });
+
+// Функция для генерации уникального ID для новой формы
+function generateUniqueId() {
+  return Math.max(...Object.keys(formattedShapes).map(id => Number(id))) + 1;
+}
+
+// Функция для добавления нового прямоугольника
+function addNewRectangle() {
+  const newId = generateUniqueId();
+
+  formattedShapes[newId] = {
+    id: newId,
+    type: 'rectangle',
+    x: 100,
+    y: 100,
+    width: 150,
+    height: 100,
+    color: '#6aa1f3',
+    borderColor: '#000000',
+    borderStyle: 'solid',
+    zIndex: newId,
+    textVerticalAlignment: 'center',
+    borderWidth: 2
+  };
+
+  activeShape.id = newId;
+}
+// Функция для обработки активации редактора
 function editorActiveHandler(editor) {
     activeShape.editor = editor;
 }
+
+// Функция для обработки активации формы
 function shapeActiveHandler(id) {
     activeShape.id = id;
 }
+
+// Функция для обновления свойств формы
 function updateShape(id, key, value) {
     formattedShapes[id][key] = value;
+}
+
+// Функция для обработки выбора формы
+function handleSelectShape(id) {
+  activeShape.id = id;
+}
+
+// Функция для обработки клика на холсте
+function handleCanvasClick(event) {
+  if (!event.target.closest('.rectangle')) {
+    activeShape.id = undefined;
+  }
 }
 </script>
 
@@ -121,6 +168,19 @@ function updateShape(id, key, value) {
     margin: 0 auto;
     max-width: 90%;
 }
+
+.control-buttons {
+    display: flex;
+    gap: 16px;
+    justify-content: center;
+}
+
+.add-rectangle {
+  padding: 8px 16px;
+  font-size: 14px;
+  cursor: pointer;
+}
+
 .canvas {
     position: relative;
 }
