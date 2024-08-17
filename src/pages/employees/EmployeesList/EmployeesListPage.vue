@@ -9,21 +9,29 @@
     >
     </TopSquareButton>
     <div class="employees__box-employees">
-        <EmployeeCard  v-for="employee in employees" :key="employee.managerId"
-        :employee="employee" :ref="`employee_${employee.managerId}`" :requestEmployeesModification = "editEmployees"/>
+      <EmployeeCard
+        v-for="employee in employees"
+        :key="employee.managerId"
+        :employee="employee"
+        :requestEmployeesModification="editEmployees"
+      />
     </div>
 
-     <!-- Отображение прелоадера  -->
-     <SpinnerMain v-if="isLoading" style="width: 50px" />
+    <!-- Отображение прелоадера  -->
+    <SpinnerMain v-if="isLoading" style="width: 50px" />
     <div v-if="employees.length === 0 && !isLoading">
       На данный момент сотрудников нет
     </div>
   </section>
 
-   <!-- Встраивание компонента Modal в DOM -->
-   <Teleport to="body">
+  <!-- Встраивание компонента Modal в DOM -->
+  <Teleport to="body">
     <!-- Открытие модального окна добавления вакансии -->
-    <Modal :show="showModal" v-if="!modalSuccess" @click.self="showModal = false">
+    <Modal
+      :show="showModal"
+      v-if="!modalSuccess"
+      @click.self="showModal = false"
+    >
       <template #header>
         <div class="modal__close">
           <button class="modal__close-btn" @click="showModal = false">
@@ -52,55 +60,86 @@
           :isTextBold="true"
         />
         <h1 class="employees__SelectlabelName">Роль сотрудника:</h1>
-        <SelectMain
-          v-model="formData.type"
-          :options="SelectOptions"
-      />
+        <SelectMain v-model="formData.type" :options="SelectOptions" />
       </template>
       <template #footer-control-buttons>
         <div class="modal__submit">
-          <ButtonMain
-            class="vacancy__add-create-btn"
-            @click="handleClick"
-          >
+          <ButtonMain @click="handleClick">
             <template v-slot:text>Добавить</template>
           </ButtonMain>
         </div>
       </template>
     </Modal>
-      <!-- Вывод сообщения о ошибке -->
-      <ErrorNotification v-if="errorMessage" :message="errorMessage" />
+    <!-- Открытие модального окна успешного создания вакансии -->
+    <Modal
+      :show="modalSuccess"
+      @click.self="modalSuccess = false"
+      v-if="!errorMessage"
+    >
+      <template #header v-if="!isLoading">
+        <h3>Сотрудник создан!</h3>
+      </template>
+      <template #body>
+        <!-- Отображение прелоадера  -->
+        <SpinnerMain v-if="isLoading" style="width: 50px" />
+        <div class="modal__success" v-if="!isLoading">
+          <ButtonMain
+            buttonColor="var(--cinnabar)"
+            @click="modalSuccess = false"
+          >
+            <template v-slot:text>Закрыть</template>
+          </ButtonMain>
+
+          <!-- Кнопка перехода к редактированию созданной вакансии -->
+          <RouterLink
+            class="employees__new-employees-link"
+            :to="{
+              name: 'employeeEdit',
+              query: { employeeId: createdEmployeeId },
+            }"
+          >
+            <ButtonMain @click="modalSuccess = false">
+              <template v-slot:text>Редактировать</template>
+            </ButtonMain>
+          </RouterLink>
+        </div>
+      </template>
+    </Modal>
+    <!-- Вывод сообщения о ошибке -->
+    <ErrorNotification v-if="errorMessage" :message="errorMessage" />
   </Teleport>
 </template>
 
 <script setup>
-import { MainRequestClass } from '@/js/RootClasses';
-import { onMounted, ref, watch } from "vue";
+import { MainRequestClass } from "@/js/RootClasses";
+import { onMounted, ref } from "vue";
 import { isManager, isAdmin } from "@/js/AuthFunctions";
 import { useRouter } from "vue-router";
 import plusIcon from "@/assets/icons/plus.svg";
-import EmployeeCard from './components/EmployeeCard.vue';
-import TopSquareButton from '@/components/TopSquareButton.vue';
+import EmployeeCard from "./components/EmployeeCard.vue";
+import TopSquareButton from "@/components/TopSquareButton.vue";
 import ErrorNotification from "@/components/ErrorNotification.vue";
 import SpinnerMain from "@/components/SpinnerMain.vue";
 import ButtonMain from "@/components/ButtonMain.vue";
 import Modal from "@/components/Modal.vue";
 import InputSimple from "@/components/InputSimple.vue";
-import SelectMain from '@/components/SelectMain.vue';
-import { EmployeesSetEmployees } from './js/ApiClassesEmployees';
-
+import SelectMain from "@/components/SelectMain.vue";
+import { EmployeesSetEmployees } from "./js/ApiClassesEmployees";
 
 const router = useRouter();
 if (!isManager()) router.push({ name: "managerAuth" });
 
 // Отображение ошибки
-const errorMessage = ref('');
+const errorMessage = ref("");
 
 //Флаги загрузки данных
-const isLoading = ref(false);
+let isLoading = ref(false);
 
 // Сотрудникик
 const employees = ref([]);
+
+// Id созданной вакансии
+const createdEmployeeId = ref(null);
 
 //Флаги для модального окна
 let showModal = ref(false);
@@ -115,44 +154,38 @@ const formData = ref({
 
 // Опции для SelectMain
 const SelectOptions = [
-  { name: 'Админ', id: '1' },
-  { name: 'Менеджер', id: '2' },
-  { name: 'Сотрудник', id: '3'}
+  { name: "Админ", id: "1" },
+  { name: "Менеджер", id: "2" },
+  { name: "Сотрудник", id: "3" },
 ];
 
-//Индикаторы для открытия попапа и символа крестика
-const indicators = ref({
-  isDelete: '',
-  isAdd: '',
-  isHandled: '',
-});
-
+//Заполняем массив set данными select и input
 const fillManagerData = () => {
   const roleName = SelectOptions.find((item) => {
-    return item.id === formData.value.type ? item.name : "" // Проверяем только id
+    return item.id === formData.value.type ? item.name : ""; // Проверяем только id
   });
 
   if (roleName) {
     // Если найден, создаем новый объект с необходимыми полями
-    const result = { 
+    const result = {
       userVkId: formData.value.userVkId, // Из formData
       type: roleName.name, // id из найденного объекта
-      name: formData.value.name // Из formData
+      name: formData.value.name, // Из formData
     };
-    indicators.isAdd = 'create'
     return result;
   } else {
     // Если не найден, возвращаем пустой объект
-    console.log('Объект не найден.'); // Добавили вывод в консоль
+    console.log("Объект не найден."); // Добавили вывод в консоль
     return {};
   }
 };
 
+//Функция клика для создания нового сотрудника
 const handleClick = () => {
   const result = fillManagerData(); // Получаем объект с данными
   if (result) {
     // Если объект не пустой
-    editEmployees(indicators.isAdd, '', result);
+    editEmployees("create", "", result);
   }
 };
 
@@ -166,13 +199,12 @@ function getAllEmployeesList() {
     "manager",
     function (response) {
       //успешный результат
-      if (response.success === '1') {
-        employees.value = response.managers
+      if (response.success === "1") {
+        employees.value = response.managers;
         isLoading.value = false;
+      } else {
+        errorMessage.value = err;
       }
-      else {
-          errorMessage.value = err;
-        }
     },
     function (err) {
       //неуспешный результат
@@ -196,17 +228,23 @@ function editEmployees(action, managerId, managerData) {
     "manager",
     function (response) {
       //успешный результат
-      if (response.success === '1') {
-        getAllEmployeesList();
-        isLoading.value = false;
-        showModal = false;
+      if (response.success === "1") {
+        //получение Id созданной вакансии
+        createdEmployeeId.value = response.info.managerId;
+        //сброс формы
         formData.value.userVkId = "";
         formData.value.name = "";
         formData.value.type = "";
+        //закрытие модального окна создания и открытие модального окна успешного создания"
+        showModal.value = false;
+        modalSuccess.value = true;
+
+        isLoading.value = false;
+
+        getAllEmployeesList();
+      } else {
+        errorMessage.value = err;
       }
-      else {
-          errorMessage.value = err;
-        }
     },
     function (err) {
       //неуспешный результат
@@ -215,14 +253,10 @@ function editEmployees(action, managerId, managerData) {
     }
   );
 }
-
-
 onMounted(() => {
-    getAllEmployeesList()
+  getAllEmployeesList();
 });
-
 </script>
-
 
 <style scoped>
 .employees {
@@ -237,14 +271,14 @@ onMounted(() => {
   margin: 0;
   line-height: 42px;
 }
-.employees__box-employees{
+.employees__box-employees {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(min-content, 300px));
   justify-content: center;
   gap: 15px;
   width: 100%;
 }
-.employees__add-employees-btn{
+.employees__add-employees-btn {
   position: sticky;
   align-self: flex-end;
   top: 60px;
@@ -271,10 +305,23 @@ onMounted(() => {
 .modal__close-btn:hover {
   filter: opacity(0.6);
 }
-.employees__SelectlabelName{
+.employees__SelectlabelName {
   font-weight: 600;
   font-size: 16px;
   line-height: 22px;
+}
+.modal__submit {
+  width: 100%;
+  display: flex;
+  justify-content: center;
+}
 
+.modal__success {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+.employees__new-employees-link {
+  text-decoration: none;
 }
 </style>

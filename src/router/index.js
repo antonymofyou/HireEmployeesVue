@@ -11,6 +11,8 @@ import EmployeesPage from "@/pages/employees/EmployeesPage.vue";
 import StandardsPage from "@/pages/standards/StandardsPage.vue";
 import VacancyPage from "@/pages/vacancy/VacancyPage.vue";
 import EmployeesListPage from "@/pages/employees/EmployeesList/EmployeesListPage.vue";
+import EmployeeInfoPage from "@/pages/employees/EmployeeInfoPage/EmployeeInfoPage.vue";
+import EmployeeEditPage from "@/pages/employees/EmployeeEditPage/EmployeeEditPage.vue";
 
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
@@ -37,6 +39,16 @@ const router = createRouter({
           path: 'employees_list',
           name: 'employeesList',
           component: EmployeesListPage,
+        },
+        {
+          path: 'employee_info',
+          name: 'employeeInfo',
+          component: EmployeeInfoPage,
+        },
+        {
+          path: 'employee_edit',
+          name: 'employeeEdit',
+          component: EmployeeEditPage,
         },
       ]
     },
