@@ -93,9 +93,6 @@ const isLast = computed(() =>{
 const moveStatus = (direction) =>{
   const movement = direction === "up" ? -1 : 1
 
-  watch(() =>{
-    console.log(props.formData)
-  })
   props.requestSortVacancyStatus(props.vacancyId, props.id, movement)
 }
 
