@@ -19,6 +19,7 @@ import TextAlign from '@tiptap/extension-text-align'
 import { Color } from '@tiptap/extension-color'
 import TextStyle from '@tiptap/extension-text-style'
 import FontSize from 'tiptap-extension-font-size';
+import Highlight from '@tiptap/extension-highlight'
 
 import { convertTo, convertFrom } from '../assets/js/convert';
 
@@ -78,7 +79,8 @@ const editor = useEditor({
         }),
         Color.configure({
             types: ['textStyle'],
-        })
+        }),
+        Highlight.configure({ multicolor: true }),
     ],
     onUpdate: () => {
         const json = editor.value.getJSON();

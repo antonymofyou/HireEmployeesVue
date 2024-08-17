@@ -25,6 +25,11 @@ export function convertTo(text) {
                     fontColor && (finalText.fontColor = fontColor);
 
                     fontSize && (finalText.fontSize = parseInt(fontSize));
+                },
+                'highlight': function({ attrs }) {
+                    let { color } = attrs;
+
+                    color && (finalText.backgroundColor = color);
                 }
             };
 
@@ -50,7 +55,7 @@ export function convertTo(text) {
 export function convertFrom(array = []) {
     const content = array.map(({ alignment , text = [] }) => {
         const textContent = text.map((item) => {
-            const { text , type = [] , fontColor = null, fontSize = null } = item;
+            const { text , type = [] , fontColor = null, fontSize = null, backgroundColor = null } = item;
             const finalText = {
                 "type": "text",
                 "marks": [],
@@ -71,6 +76,15 @@ export function convertFrom(array = []) {
                         fontSize: fontSize && (fontSize + "px"),
                     }
                 });
+            }
+
+            if (backgroundColor) {
+                finalText.marks.push({
+                    "type": "highlight",
+                    "attrs": {
+                        color: backgroundColor,
+                    }
+                })
             }
 
             return finalText;

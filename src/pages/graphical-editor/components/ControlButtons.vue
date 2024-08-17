@@ -1,73 +1,98 @@
 <template>
     <div class="control-buttons">
-        <ControlButton 
-            class="control-buttons__button" 
-            :disabled="disabled"
-            :active="props.activeShape.editor?.isActive('bold')"
-            @click="props.activeShape.editor?.chain().focus().toggleBold().run()"
-        >
-            <BoldIcon />
-        </ControlButton>
-        <ControlButton 
-            class="control-buttons__button" 
-            :disabled="disabled"
-            :active="props.activeShape.editor?.isActive('italic')"
-            @click="props.activeShape.editor?.chain().focus().toggleItalic().run()"
-        >
-            <ItalicIcon />
-        </ControlButton>
-        <ControlButton 
-            class="control-buttons__button" 
-            :disabled="disabled"
-            :active="props.activeShape.editor?.isActive('underline')"
-            @click="props.activeShape.editor?.chain().focus().toggleUnderline().run()"
-        >
-            <UnderlineIcon />
-        </ControlButton>
-        <ColorPicker
-            class="control-buttons__color-picker"
-            :disabled="disabled"
-            :color="props.activeShape.editor?.getAttributes('textStyle').color || '#000'"
-            @update:color="props.activeShape.editor?.chain().focus().setColor($event).run()"
-        />
-        <FontSizePicker 
-            class="control-buttons__font-size-picker"
-            :disabled="disabled"
-            :font-size="parseInt(props.activeShape.editor?.getAttributes('textStyle').fontSize) || 16"
-            @update:font-size="props.activeShape.editor?.chain().focus().setFontSize($event + 'px').run()"            
-        />
-        <SelectMain
-            :options="optionsHorizontalAlign"
-            :model-value="currentHorizontalAlign"
-            @update:model-value="handlerHorizontalAlign"
-            :disabled='disabled'
-        >
-            <template #option="{ option }">  
-                <component :is="iconsHorizontalAlign[option.id]"></component>
-            </template>
-            <template #trigger="{ selected }">
-                <component :is="iconsHorizontalAlign[selected.id]"></component>
-            </template>
-        </SelectMain>
-        <SelectMain
-            :options="optionsVerticalAlign"
-            :model-value="currentVerticalAlign"
-            @update:model-value="handlerVerticalAlign"
-            :disabled='disabled'
-        >
-            <template #option="{ option }">  
-                <component :is="iconsVerticalAlign[option.id]"></component>
-            </template>
-            <template #trigger="{ selected }">
-                <component :is="iconsVerticalAlign[selected.id]"></component>
-            </template>
-        </SelectMain>
+        <div class="control-buttons__item control-buttons__item_main">
+            <ColorPicker 
+                v-model:color="mainColor"
+                class="control-buttons__color-picker"
+            />
+        </div>
+        <div class="control-buttons__item control-buttons__item_text">
+            <ControlButton 
+                class="control-buttons__button" 
+                :disabled="disabled"
+                :active="props.activeShape.editor?.isActive('bold')"
+                @click="props.activeShape.editor?.chain().focus().toggleBold().run()"
+            >
+                <BoldIcon />
+            </ControlButton>
+            <ControlButton 
+                class="control-buttons__button" 
+                :disabled="disabled"
+                :active="props.activeShape.editor?.isActive('italic')"
+                @click="props.activeShape.editor?.chain().focus().toggleItalic().run()"
+            >
+                <ItalicIcon />
+            </ControlButton>
+            <ControlButton 
+                class="control-buttons__button" 
+                :disabled="disabled"
+                :active="props.activeShape.editor?.isActive('underline')"
+                @click="props.activeShape.editor?.chain().focus().toggleUnderline().run()"
+            >
+                <UnderlineIcon />
+            </ControlButton>
+            <ControlButton 
+                class="control-buttons__button control-buttons__button_color" 
+                :disabled="disabled"
+                @click="props.activeShape.editor?.chain().focus().setColor(mainColor).run()"
+                :style="{ color: mainColor }"
+            >
+                <FormatText />
+            </ControlButton>
+            <ControlButton 
+                class="control-buttons__button control-buttons__button_color" 
+                :disabled="disabled"
+                @click="props.activeShape.editor?.chain().focus().setHighlight({ color: mainColor }).run()"
+                :style="{ color: mainColor }"
+            >
+                <Marker />
+            </ControlButton>
+            <ControlButton 
+                class="control-buttons__button" 
+                :disabled="disabled"
+                @click="props.activeShape.editor?.chain().focus().unsetHighlight().run()"
+            >
+                <MarkerCancel />
+            </ControlButton>
+            <FontSizePicker 
+                class="control-buttons__font-size-picker"
+                :disabled="disabled"
+                :font-size="parseInt(props.activeShape.editor?.getAttributes('textStyle').fontSize) || 16"
+                @update:font-size="props.activeShape.editor?.chain().focus().setFontSize($event + 'px').run()"            
+            />
+            <SelectMain
+                :options="optionsHorizontalAlign"
+                :model-value="currentHorizontalAlign"
+                @update:model-value="handlerHorizontalAlign"
+                :disabled='disabled'
+            >
+                <template #option="{ option }">  
+                    <component :is="iconsHorizontalAlign[option.id]"></component>
+                </template>
+                <template #trigger="{ selected }">
+                    <component :is="iconsHorizontalAlign[selected.id]"></component>
+                </template>
+            </SelectMain>
+            <SelectMain
+                :options="optionsVerticalAlign"
+                :model-value="currentVerticalAlign"
+                @update:model-value="handlerVerticalAlign"
+                :disabled='disabled'
+            >
+                <template #option="{ option }">  
+                    <component :is="iconsVerticalAlign[option.id]"></component>
+                </template>
+                <template #trigger="{ selected }">
+                    <component :is="iconsVerticalAlign[selected.id]"></component>
+                </template>
+            </SelectMain>
+        </div>
     </div>
 </template>
 
 <script setup>
 
-import { defineProps, defineEmits, computed } from 'vue';
+import { defineProps, defineEmits, computed, ref } from 'vue';
 
 import ControlButton from './ControlButton.vue';
 import ColorPicker from './ColorPicker.vue';
@@ -83,6 +108,9 @@ import AlignRightIcon from 'vue-material-design-icons/FormatAlignRight.vue'
 import VerticalAlignBottom from 'vue-material-design-icons/FormatVerticalAlignBottom.vue'
 import VerticalAlignCenter from 'vue-material-design-icons/FormatVerticalAlignCenter.vue'
 import VerticalAlignTop from 'vue-material-design-icons/FormatVerticalAlignTop.vue'
+import FormatText from 'vue-material-design-icons/FormatText.vue'
+import Marker from 'vue-material-design-icons/Marker.vue'
+import MarkerCancel from 'vue-material-design-icons/MarkerCancel.vue'
 
 const props = defineProps({
     activeShape: {
@@ -96,6 +124,7 @@ const emits = defineEmits({
 const disabled = computed(() => {
     return !props.activeShape.editor;
 });
+const mainColor = ref('#000000');
 
 // HorizontalAlign
 
@@ -191,25 +220,64 @@ function handlerVerticalAlign(id) {
 
 <style scoped>
 
-.control-buttons__button span{
+.control-buttons {
+    display: flex;
+    gap: 48px;
+}
+
+.control-buttons__item {
+    position: relative;
+    display: flex;
+    gap: 16px;
+    border-bottom: 1px solid var(--transparent-blue);
+    padding: 0 0 24px;
+}
+
+.control-buttons__item:not(:last-child)::before {
+    content: '';
+    position: absolute;
+    right: -24px;
+    top: 0;
+    width: 1px;
+    height: 100%;
+    background-color: var(--transparent-blue);
+}
+
+.control-buttons__button:deep(span){
     display: block;
     width: 24px;
     height: 24px;
 }
 
-.control-buttons__button svg {
+.control-buttons__button:deep(svg) {
     width: 100%;
     height: 100%;
+    color: var(--mine-shaft) !important;
 }
 
 .control-buttons__color-picker {
     width: 40px;
-    height: 40px;
+    height: 44px;
 }
 
 .control-buttons__font-size-picker {
     width: 70px;
     font-size: 20px;
+}
+
+.control-buttons__button_color {
+    position: relative;
+}
+
+.control-buttons__button_color::before {
+    content: '';
+    position: absolute;
+    bottom: 0;
+    right: 0;
+    width: 100%;
+    height: 6px;
+    background-color: currentColor;
+    border-radius: 0 0 8px 8px;
 }
 
 .select-box-main {
