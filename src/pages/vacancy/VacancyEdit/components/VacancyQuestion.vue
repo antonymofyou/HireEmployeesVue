@@ -174,7 +174,7 @@ const updateIsPublished = (newValue) => {
   border-width: 0 2px 2px 0;
   padding: 7px;
   cursor: pointer;
-  opacity: 1; 
+  opacity: 0; 
   transition: opacity 0.3s;
   
 }
