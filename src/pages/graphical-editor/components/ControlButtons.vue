@@ -3,8 +3,51 @@
         <div class="control-buttons__item control-buttons__item_main">
             <ColorPicker 
                 v-model:color="mainColor"
+                :disabled="disabled"
                 class="control-buttons__color-picker"
             />
+            <ControlButton 
+                class="control-buttons__button control-buttons__button_color" 
+                :disabled="disabled"
+                @click="emits('updateShape', props.activeShape.id, 'color', mainColor)"
+                :style="{ color: mainColor }"
+            >
+                <FormatPaint />
+            </ControlButton>
+            <ControlButton 
+                class="control-buttons__button control-buttons__button_color control-buttons__button_border-color" 
+                :disabled="disabled"
+                @click="emits('updateShape', props.activeShape.id, 'borderColor', mainColor)"
+                :style="{ color: mainColor }"
+            >
+                <BorderColor />
+            </ControlButton>
+            <ValuePicker
+                class="control-buttons__button control-buttons__value-picker"
+                :disabled="disabled"
+                :value="+props.activeShape.shape?.cornerRadius || 0"
+                @update:value="emits('updateShape', props.activeShape.id, 'cornerRadius', +$event)"            
+            >
+                <template #icon>
+                    <BorderRadius />
+                </template>
+                <template #units>
+                    px
+                </template>
+            </ValuePicker>
+            <ValuePicker
+                class="control-buttons__button control-buttons__value-picker"
+                :disabled="disabled"
+                :value="+props.activeShape.shape?.borderWidth || 0"
+                @update:value="emits('updateShape', props.activeShape.id, 'borderWidth', +$event)"            
+            >
+                <template #icon>
+                    <FormatLineWeight />
+                </template>
+                <template #units>
+                    px
+                </template>
+            </ValuePicker>
         </div>
         <div class="control-buttons__item control-buttons__item_text">
             <ControlButton 
@@ -54,12 +97,19 @@
             >
                 <MarkerCancel />
             </ControlButton>
-            <FontSizePicker 
-                class="control-buttons__font-size-picker"
+            <ValuePicker
+                class="control-buttons__button control-buttons__value-picker"
                 :disabled="disabled"
-                :font-size="parseInt(props.activeShape.editor?.getAttributes('textStyle').fontSize) || 16"
-                @update:font-size="props.activeShape.editor?.chain().focus().setFontSize($event + 'px').run()"            
-            />
+                :value="parseInt(props.activeShape.editor?.getAttributes('textStyle').fontSize) || 16"
+                @update:value="props.activeShape.editor?.chain().focus().setFontSize($event + 'px').run()"            
+            >
+                <template #icon>
+                    <FormatText />
+                </template>
+                <template #units>
+                    px
+                </template>
+            </ValuePicker>
             <SelectMain
                 :options="optionsHorizontalAlign"
                 :model-value="currentHorizontalAlign"
@@ -96,8 +146,10 @@ import { defineProps, defineEmits, computed, ref } from 'vue';
 
 import ControlButton from './ControlButton.vue';
 import ColorPicker from './ColorPicker.vue';
-import FontSizePicker from './FontSizePicker.vue';
+import ValuePicker from './ValuePicker.vue';
 import SelectMain from '@/components/SelectMain.vue';
+
+// Icons
 
 import BoldIcon from 'vue-material-design-icons/FormatBold.vue'
 import ItalicIcon from 'vue-material-design-icons/FormatItalic.vue'
@@ -111,6 +163,10 @@ import VerticalAlignTop from 'vue-material-design-icons/FormatVerticalAlignTop.v
 import FormatText from 'vue-material-design-icons/FormatText.vue'
 import Marker from 'vue-material-design-icons/Marker.vue'
 import MarkerCancel from 'vue-material-design-icons/MarkerCancel.vue'
+import FormatPaint from 'vue-material-design-icons/FormatPaint.vue'
+import BorderColor from 'vue-material-design-icons/BorderColor.vue';
+import BorderRadius from 'vue-material-design-icons/BorderRadius.vue';
+import FormatLineWeight from 'vue-material-design-icons/FormatLineWeight.vue';
 
 const props = defineProps({
     activeShape: {
@@ -229,7 +285,7 @@ function handlerVerticalAlign(id) {
     position: relative;
     display: flex;
     gap: 16px;
-    border-bottom: 1px solid var(--transparent-blue);
+    border-bottom: 2px solid var(--milk);
     padding: 0 0 24px;
 }
 
@@ -238,12 +294,12 @@ function handlerVerticalAlign(id) {
     position: absolute;
     right: -24px;
     top: 0;
-    width: 1px;
+    width: 2px;
     height: 100%;
-    background-color: var(--transparent-blue);
+    background-color: var(--milk);
 }
 
-.control-buttons__button:deep(span){
+.control-buttons__button:deep(.material-design-icon){
     display: block;
     width: 24px;
     height: 24px;
@@ -260,11 +316,6 @@ function handlerVerticalAlign(id) {
     height: 44px;
 }
 
-.control-buttons__font-size-picker {
-    width: 70px;
-    font-size: 20px;
-}
-
 .control-buttons__button_color {
     position: relative;
 }
@@ -273,11 +324,21 @@ function handlerVerticalAlign(id) {
     content: '';
     position: absolute;
     bottom: 0;
-    right: 0;
+    left: 0;
     width: 100%;
     height: 6px;
     background-color: currentColor;
     border-radius: 0 0 8px 8px;
+}
+
+.control-buttons__button_border-color::before {
+    width: 6px;
+    height: 100%;
+    border-radius: 8px 0 0 8px;
+}
+
+.control-buttons__value-picker:deep(input) {
+    width: 40px;
 }
 
 .select-box-main {
