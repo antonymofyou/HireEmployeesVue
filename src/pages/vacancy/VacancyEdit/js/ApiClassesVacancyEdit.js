@@ -122,6 +122,7 @@ export class VacanciesModifyVacancyStatus extends MainRequestClass {
 
 export class VacanciesAccessGetManagerAccessVacancy  extends MainRequestClass {
     vacancyId = ''; // ID вакансии, для которой нужно получить менеджеров
+    statusName = ''; //// название статуса
     permissionType = ''; // Тип прав, информацию о которых необходимо получить 
 }
 export class VacanciesAccessSetManagerAccessVacancy   extends MainRequestClass {

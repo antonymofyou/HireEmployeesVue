@@ -18,6 +18,7 @@
       :handleModification
       :vacancyId="vacancyId"
       :requestSortVacancyStatus="requestSortVacancyStatus"
+      @itemStartUpdate="onStatusItemStartUpdate"
     />
 
     <!-- Кнопка добавления статуса -->
@@ -36,31 +37,66 @@
   <Teleport to="body">
     <!-- Вывод модалки для добавления и изменения статуса -->
     <VacancyStatusModal
-        :show="indicators.isAdd || indicators.isEdit"
-        :statusMod="statusMod"
-        :indicators="indicators"
-        :colors="colors"
-        :handleModification="handleModification"
-        :request="request"
-        :errorMessage="errorMessage"
+      :show="indicators.isAdd || indicators.isEdit"
+      :statusMod="statusMod"
+      :indicators="indicators"
+      :colors="colors"
+      :handleModification="handleModification"
+      :request="request"
+      :errorMessage="errorMessage"
+      :managersInList="currentStatusManagers.list"
+      :managerMod="managerMod"
+      :managersInSelect="currentStatusManagers.select"
+      :isLoading="isRequestingManagers"
+      @close="handleVacancyStatusModalClose"
+      @startManagerAdd="handleVacancyStatusModalStartManagerAdd"
+      @startManagerDelete="handleVacancyStatusModalStartManagerDelete"
+      @resetHandled="handleVacancyStatusModalResetHandled"
+      @startManagerModify="handleVacancyStatusModalStartManagerModify"
+      @toggleHandledIndicator="handleVacancyStatusModalToggleHandled"
+    />
+  </Teleport>
+
+  <Teleport to="body">
+    <!-- Вывод модалки для добавления и изменения менеджера -->
+    <VacancyManagersModal
+      :title="managersModalTitle"
+      :show="isManagersModalVisible"
+      :managerMod="managerMod"
+      :indicators="indicators"
+      :errorMessage="errorMessage"
+      :managerList="currentStatusManagers.select"
+      :managerListAssigned="currentStatusManagers.list"
+      :requestManagersModification="requestManagersModification"
+      :formData="formData"
+      :request="isRequestingManagers"
+      @close="handleVacancyManagersModalClose"
     />
   </Teleport>
 </template>
 
 <script setup>
+import { computed, onMounted, ref, watch } from 'vue';
+
+import ButtonIcon from '@/components/ButtonIcon.vue';
+import SpinnerMain from '@/components/SpinnerMain.vue';
+
+import VacancyStatusList from './VacancyStatusList.vue';
+import VacancyStatusModal from './VacancyStatusModal.vue';
+import VacancyManagersModal from '../VacancyManagers/VacancyManagersModal.vue';
+
 import {
   VacanciesGetVacancyStatuses,
   VacanciesModifyVacancyStatus,
   VacanciesSetVacancyStatusTransfer,
-  VacanciesSortVacancyStatus
+  VacanciesSortVacancyStatus,
+  VacanciesAccessGetManagerAccessVacancy,
+  VacanciesAccessSetManagerAccessVacancy,
 } from '../../js/ApiClassesVacancyEdit.js';
-import { onMounted, ref, watch } from 'vue';
-import ButtonIcon from '@/components/ButtonIcon.vue';
-import IconAdd from '@/assets/icons/add.svg?component';
 import { colors } from '../../js/statusColors.js';
-import VacancyStatusList from './VacancyStatusList.vue';
-import SpinnerMain from '@/components/SpinnerMain.vue';
-import VacancyStatusModal from './VacancyStatusModal.vue';
+
+import IconAdd from '@/assets/icons/add.svg?component';
+
 const props = defineProps({
   // Id вакансии
   vacancyId: {
@@ -68,10 +104,13 @@ const props = defineProps({
     required: true,
   },
 });
-// Индикаторы
+// Индикаторы статуса
 const indicators = ref({
   isAdd: false,
+  isManagerAdd: false,
   isEdit: false,
+  isDelete: false,
+  isHandled: false,
   isTransfer: false,
   activeHandlers: false,
   activeTransfer: false,
@@ -91,10 +130,37 @@ const statusMod = ref({
   color: '#a3a3a2',
   activeTransfer: '',
 });
+// Менеджеры текущего выбранного статуса
+const currentStatusManagers = ref({
+  list: [], // Отобразим в списке
+  select: [], // Отобразим в селекте
+});
 // Флаг запроса
 const request = ref(false);
+// Идёт ли запрос за сущностями менеджера (инициализация, добавление, удаление)
+const isRequestingManagers = ref(false);
 // Сообщение об ошибке
 const errorMessage = ref('');
+// Информация об изменяемом менеджере
+const managerMod = ref({
+  action: '',
+  permissionType: 'STATUS_PERMISSION',
+  managerId: '',
+});
+// Данные из <MainSelect />
+const formData = ref({
+  id: "",
+});
+// Заголовок модалки с менеджером
+const managersModalTitle = computed(() => {
+  if (indicators.value.isDelete) return 'Удалить менеджера статуса?';
+  else if (indicators.value.isManagerAdd) return 'Добавить менеджера статуса';
+});
+// Видна ли модалка менеджеров
+const isManagersModalVisible = computed(() => {
+  return indicators.value.isDelete || indicators.value.isManagerAdd;
+});
+
 // Очистка statusMod после создания/изменения
 const resetStatusMod = () => {
   statusMod.value = {
@@ -140,6 +206,7 @@ const requestVacancyStatuses = () => {
     }
   );
 };
+
 // Запрос на создание/изменение/удаление статуса
 const requestStatusModification = () => {
   const requestInstance = new VacanciesModifyVacancyStatus();
@@ -243,6 +310,215 @@ const handleModification = (statusName, method, transfer, toStatus) => {
     requestStatusTransfer();
   } else requestStatusModification();
 };
+
+/**
+ * Запрос на добавление/удаление менеджера
+ * @param {'create'|'delete'} action - Строка с действием, которое необходимо выполнить
+ * @param {Number}  managerId - ID менеджера
+ */
+const requestManagersModification = (action, managerId) => {
+  switch (action) {
+    case 'create': {
+      onManagerAddToCurrentStatus(managerId);
+      break;
+    }
+    case 'delete': {
+      onManagerDeleteFromCurrentStatus(managerId);
+      break;
+    }
+  }
+};
+
+/**
+ * Запросить всех менеджеров текущего выбранного статуса
+ */
+const requestCurrentStatusManagers = () => {
+  isRequestingManagers.value = true;
+
+  const requestInstance = new VacanciesAccessGetManagerAccessVacancy();
+
+  requestInstance.vacancyId = props.vacancyId;
+  requestInstance.statusName = statusMod.value.name;
+  requestInstance.permissionType = 'STATUS_PERMISSION';
+
+  requestInstance.request(
+    '/vacancies/access/get_managers_access_vacancy.php',
+    'manager',
+    (response) => {
+      // Успех - устанавливаем менеджеров к текущему статусу на отображение
+      if (response.success === '1') {
+        currentStatusManagers.value.list = response.assignedManagers;
+        currentStatusManagers.value.select = response.unassignedManagers;
+      } else {
+        errorMessage.value = response.message;
+      }
+
+      isRequestingManagers.value = false;
+    },
+    (err) => {
+      // Обработка ошибки при запросе
+      errorMessage.value = err;
+      isRequestingManagers.value = false;
+    }
+  );
+};
+
+/**
+ * Обработчик добавления менеджера к текущему статусу
+ * @param {Number} managerId - ID менеджера
+ */
+const onManagerAddToCurrentStatus = (managerId) => {
+  isRequestingManagers.value = true;
+
+  const requestInstance = new VacanciesAccessSetManagerAccessVacancy();
+
+  requestInstance.vacancyId = props.vacancyId;
+  requestInstance.statusName = statusMod.value.name;
+  requestInstance.managerId = managerId;
+  requestInstance.action = 'create';
+  requestInstance.permissionType = managerMod.value.permissionType;
+
+  requestInstance.request(
+    '/vacancies/access/set_manager_access_vacancy.php',
+    'manager',
+    (response) => {
+      // Успех
+      if (response.success === '1') {
+        requestCurrentStatusManagers();
+        formData.value.id = '';
+        errorMessage.value = '';
+      } else {
+        errorMessage.value = response.message;
+      }
+      
+      // Общие действия
+      isRequestingManagers.value = false;
+      indicators.value.isManagerAdd = false;
+    },
+    (err) => {
+      // Обработка ошибки при запросе
+      errorMessage.value = err;
+      isRequestingManagers.value = false;
+      indicators.value.isManagerAdd = false;
+    }
+  );
+};
+
+/**
+ * Обработчик удаления менеджера от текущего статуса
+ * @param {Number} managerId - ID менеджера
+ */
+const onManagerDeleteFromCurrentStatus = (managerId) => {
+  isRequestingManagers.value = true;
+
+  const requestInstance = new VacanciesAccessSetManagerAccessVacancy();
+
+  requestInstance.vacancyId = props.vacancyId;
+  requestInstance.statusName = statusMod.value.name;
+  requestInstance.managerId = managerId;
+  requestInstance.action = 'delete';
+  requestInstance.permissionType = managerMod.value.permissionType;
+
+  requestInstance.request(
+    '/vacancies/access/set_manager_access_vacancy.php',
+    'manager',
+    (response) => {
+      // Успех
+      if (response.success === '1') {
+        requestCurrentStatusManagers();
+        errorMessage.value = '';
+      } else {
+        // Ошибка
+        errorMessage.value = response.message;
+      }
+      
+      // Общие действия
+      isRequestingManagers.value = false;
+      indicators.value.isDelete = false;
+    },
+    (err) => {
+      // Обработка ошибки при запросе
+      errorMessage.value = err;
+      isRequestingManagers.value = false;
+      indicators.value.isDelete = false;
+    }
+  );
+};
+
+/**
+ * Обработчик начала изменения статуса в списке
+ */
+ const onStatusItemStartUpdate = (status) => {
+  statusMod.value = {
+    action: 'update',
+    toName: '',
+    name: status.statusName,
+    comment: status.statusComment,
+    color: status.statusColor
+  };
+  indicators.value.isEdit = true;
+};
+
+/**
+ * Обработка закрытия модалки выбора менеджера
+ */
+const handleVacancyManagersModalClose = () => {
+  indicators.value.isManagerAdd = false;
+  indicators.value.isDelete = false;
+  errorMessage.value = '';
+};
+
+/**
+ * Обработка закрытия модалки со статусами
+ */
+const handleVacancyStatusModalClose = () => {
+  indicators.value.isAdd = false;
+  indicators.value.isEdit = false;
+};
+
+/**
+ * Обработка начала добавления менеджера к статусу в модалке статусов
+ */
+const handleVacancyStatusModalStartManagerAdd = () => {
+  indicators.value.isManagerAdd = true;
+};
+
+/**
+ * Обработка начала процесса удаления менеджера из модалки статусов
+ */
+const handleVacancyStatusModalStartManagerDelete = () => {
+  indicators.value.isDelete = true;
+};
+
+/**
+ * Сбросить индикатор обрабатываемости менеджера
+ */
+const handleVacancyStatusModalResetHandled = () => {
+  indicators.value.isHandled = false;
+};
+
+/**
+ * Обработка начала изменения менеджера
+ * @param {Number} managerId - ID менеджера
+ */
+const handleVacancyStatusModalStartManagerModify = (managerId) => {
+  managerMod.value.managerId = managerId;
+};
+
+/**
+ * Тогл индикатора изменения
+ */
+const handleVacancyStatusModalToggleHandled = () => {
+  indicators.value.isHandled = !indicators.value.isHandled;
+};
+
+// При изменение выбранного статуса - перезапрашиваем всех менеджеров
+watch(statusMod, () => {
+  // Исполняем запрос, только если выбран статус
+  if (!statusMod.value.name) return;
+  requestCurrentStatusManagers();
+});
+
 const openAddStatusModal = () => {
   indicators.value.isAdd = true;
   resetStatusMod();
@@ -266,7 +542,6 @@ watch(
   display: flex;
   flex-direction: column;
   gap: 15px;
-  margin-top: 50px;
 }
 
 .spinner__svg {

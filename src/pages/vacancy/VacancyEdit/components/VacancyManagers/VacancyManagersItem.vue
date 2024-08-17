@@ -1,15 +1,21 @@
 <template>
-  <div>
-    <div @click="handleManagerClick(manager)" class="manager-item__box">
-      <ManagerAssigned :ManagerText="manager.name" class="manager-item__name" />
+  <div ref="domNodeStatusManager">
+    <div
+      @click="handleManagerClick"
+      class="manager-item__box"
+    >
+      <ManagerAssigned
+        :managerName="manager.name"
+        class="manager-item__name"
+      />
+
       <ButtonIcon
-  
-        class="manager-item__btn"
-        v-if="indicators.isHandled && props.managerMod.managerId === manager.id && isAdmin()"
+        v-if="props.isRenderDeleteButton"
         @click="handleManagerDeleteClick"
+        class="manager-item__btn"
       >
         <template v-slot:icon>
-          <IconDelete class="manager-item__icon" />
+          <IconDelete class="manager-item__btn-icon" />
         </template>
       </ButtonIcon>
     </div>
@@ -17,14 +23,14 @@
 </template>
 
 <script setup>
+import { onMounted, ref } from 'vue';
+
 import ManagerAssigned from "@/components/ManagerAssigned.vue";
 import ButtonIcon from "@/components/ButtonIcon.vue";
 import IconDelete from "@/assets/icons/close.svg?component";
-import { isAdmin } from '@/js/AuthFunctions'; 
-
 
 const props = defineProps({
-  // менеджер
+  // Менеджер
   manager: {
     type: Object,
     required: true,
@@ -39,19 +45,26 @@ const props = defineProps({
     type: Object,
     required: true,
   },
+  // Рендерить ли кнопку удаления
+  isRenderDeleteButton: {
+    type: Boolean,
+    required: false,
+    default: false,
+  },
 });
-//Отображение крестика для удаления
-const handleManagerClick = (manager) => {
-  props.indicators.isHandled === true &&
-  props.managerMod.managerId !== manager.id
-    ? (props.managerMod.managerId = manager.id)
-    : (props.indicators.isHandled = !props.indicators.isHandled);
-  props.managerMod.managerId = manager.id;
+
+const emit = defineEmits(['clickManager', 'clickDelete']);
+
+// Обработка клика по менеджеру
+const handleManagerClick = () => {
+  emit('clickManager', props.manager.id);
 };
 
-// Открытие попапа для удаления
+/**
+ * Обработчик клика по кнопке удаления
+ */
 const handleManagerDeleteClick = () => {
-  props.indicators.isDelete = true;
+  emit('clickDelete');
 };
 </script>
 
@@ -64,15 +77,22 @@ const handleManagerDeleteClick = () => {
   align-items: center;
   position: relative;
 }
-.manager-item__icon {
+
+.manager-item__btn {
   height: 12px;
   width: 12px;
   display: block;
   position: absolute;
-  top: 4px;
-  right: 3px;
-}
-.manager-item__btn {
+  top: 2px;
+  right: 4px;
   padding: 0 0 0 1px;
+}
+
+.manager-item__btn-icon {
+  width: 100%;
+  height: 100%;
+  position: absolute;
+  left: 0;
+  top: 0;
 }
 </style>

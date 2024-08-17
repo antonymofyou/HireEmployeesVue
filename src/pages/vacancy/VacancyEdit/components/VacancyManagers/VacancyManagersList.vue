@@ -1,23 +1,31 @@
 <template>
   <div class="manager-list__box">
-    <div class="manager-list__header">
+    <div
+      v-if="props.isShowTitle"
+      class="manager-list__header"
+    >
       Менеджеры вакансии: {{ managerList.length || "менеджеры не заданы" }}
     </div>
-    <div class="manager-list__items-box">
-      <div class="manager-list__item-box" v-click-outside>
+    <div
+      v-click-outside="handleReset"
+      class="manager-list__items-box"
+    >
+      <div class="manager-list__item-box">
         <VacancyManagersItem
           v-for="manager in managerList"
           :key="manager.id"
-          :manager
-          :indicators
-          :managerMod
-        ></VacancyManagersItem>
+          :manager="manager"
+          :indicators="props.indicators"
+          :managerMod="props.managerMod"
+          :isRenderDeleteButton="helpers.isRenderDeleteForThisManager(manager.id)"
+          @clickManager="handleClickManager"
+          @clickDelete="handleClickDelete"
+          @onRender="handleVacancyManagerItemRender"
+        />
 				<ButtonIcon
-        v-if="isAdmin()"
-        @click="openAddManagersModal"
-        class="manager-list__add-btn"
-        :class="{ 'manager-list__empty-add-btn': managerList.length === 0 }"
-      >
+          @click="handleClickAddBtn"
+          class="manager-list__add-btn"
+        >
         <template v-slot:icon>
           <IconAdd class="manager-list__list-icon" />
         </template>
@@ -28,20 +36,17 @@
 </template>
 
 <script setup>
+import { ref } from "vue";
+
 import VacancyManagersItem from "./VacancyManagersItem.vue";
 import IconAdd from "@/assets/icons/add.svg?component";
 import ButtonIcon from "@/components/ButtonIcon.vue";
-import { isAdmin } from '@/js/AuthFunctions'; 
+import { isAdmin } from "@/js/AuthFunctions";
 
 const props = defineProps({
   // Массив менеджеров
   managerList: {
     type: Array,
-    required: true,
-  },
-  //Функция удаленния менеджера
-  requestManagersModification: {
-    type: Function,
     required: true,
   },
   // Индикаторы
@@ -54,14 +59,68 @@ const props = defineProps({
     type: Object,
     required: true,
   },
+  // Показывать ли заголовок
+  isShowTitle: {
+    type: Boolean,
+    required: false,
+    default: true,
+  },
 });
 
-//Открытия попапа добаления менеджеров
-const openAddManagersModal = () => {
-  props.indicators.isAdd = true;
+const emit = defineEmits(['clickManager', 'clickAdd', 'clickDelete', 'resetHandled']);
+
+// Множество с дом-нодами менеджеров статуса
+const setOfDomNodesStatusManagers = ref(new Set());
+
+// Функции-хелперы
+const helpers = {
+  /**
+   * Нужно ли рендерить кнопку удаления для менеджера
+   * @param {Number} managerId - ID менеджера
+   */
+  isRenderDeleteForThisManager: (managerId) => {
+    return props.indicators.isHandled && props.managerMod.managerId === managerId && isAdmin()
+  },
 };
 
-// Директива для закрытия крестика удаления по клику снаружи
+/**
+ * Обработка клика по менеджеру в списке
+ * @param {Number} managerId - ID менеджера, на которого кликнули
+ */
+const handleClickManager = (managerId) => {
+  emit('clickManager', managerId);
+};
+
+/**
+ * Обработка клика по кнопке добавления
+ */
+const handleClickAddBtn = () => {
+  emit('clickAdd');
+};
+
+/**
+ * Обработка события удаления менеджера
+ */
+const handleClickDelete = () => {
+  emit('clickDelete');
+};
+
+/**
+ * Сброс обработки
+ */
+const handleReset = () => {
+  emit('resetHandled');
+};
+
+/**
+ * Обработка рендера менеджера
+ * @param {HTMLElement} domNode - DOM-элемент менеджера
+ */
+const handleVacancyManagerItemRender = (domNode) => {
+  setOfDomNodesStatusManagers.value.add(domNode);
+};
+
+// Директива, позволяющая выполнить функцию по клику вне дом-ноды
 const vClickOutside = {
   beforeMount(el) {
     el.clickOutsideEvent = function (event) {
@@ -86,12 +145,10 @@ const vClickOutside = {
 
 <style scoped>
 .manager-list__box {
-  margin-top: 40px;
   user-select: none;
 }
 .manager-list__items-box {
   display: flex;
-  margin: 20px 0;
 }
 .manager-list__add-btn {
   padding: 0;
@@ -112,5 +169,6 @@ const vClickOutside = {
 }
 .manager-list__header{
   font-weight: bold;
+  margin-bottom: 20px;
 }
 </style>

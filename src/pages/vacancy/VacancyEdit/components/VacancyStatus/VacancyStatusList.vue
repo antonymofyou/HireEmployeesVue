@@ -14,20 +14,19 @@
           :requestSortVacancyStatus="requestSortVacancyStatus"
           :vacancyId="vacancyId"
           :class="{'dragging': dragIndex === index, 'drag-over': dragOverIndex === index}"
-
           :draggable="true"
           @dragstart="onDragStart(index)"
           @dragover.prevent
           @dragenter="onDragEnter(index)"
           @dragend="onDragEnd"
+          @startUpdate="onVacancyStatusItemUpdate"
       />
     </div>
   </div>
 </template>
 
 <script setup>
-import { computed, onMounted, ref, watch } from 'vue';
-
+import { ref } from 'vue';
 
 import VacancyStatusItem from './VacancyStatusItem.vue'
 
@@ -63,6 +62,7 @@ const props = defineProps({
     required: true,
   },
 });
+const emit = defineEmits(['itemStartUpdate']);
 
 const dragIndex = ref(null);
 const dragOverIndex = ref(null);
@@ -110,8 +110,13 @@ const onDragEnd = () => {
   dragOverIndexServer.value = null;
 };
 
-
-
+/**
+ * Обработчик постановки статуса на апдейт
+ * @param {Object} status - Статус
+ */
+const onVacancyStatusItemUpdate = (status) => {
+  emit('itemStartUpdate', status);
+};
 </script>
 
 <style scoped>
