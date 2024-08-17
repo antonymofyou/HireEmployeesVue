@@ -11,98 +11,94 @@
     </template>
 
     <template v-slot:body>
+      <InputSimple
+          v-if="indicators.isAdd"
+          v-model="statusMod.name"
+          id="statusEdit"
+          inputType="input"
+          placeholder="Название статуса"
+      />
+
+      <InputSimple
+          v-model="statusMod.comment"
+          id="statusEdit"
+          inputType="textarea"
+          placeholder="Комментарий"
+      />
+
       <div
-        class="modal-body"
+          v-if="statusMod.action !== 'delete'"
+          class="vacancy-edit__modal-select"
       >
-        <InputSimple
-            v-if="indicators.isAdd"
-            v-model="statusMod.name"
-            id="statusEdit"
-            inputType="input"
-            placeholder="Название статуса"
-        />
-
-        <InputSimple
-            v-model="statusMod.comment"
-            id="statusEdit"
-            inputType="textarea"
-            placeholder="Комментарий"
-        />
-
-        <div
-            v-if="statusMod.action !== 'delete'"
-            class="vacancy-edit__modal-select"
+        <div>Цвет:</div>
+        <select
+            v-model="statusMod.color"
+            class="vacancy-edit__modal-select-color"
+            :style="{ backgroundColor: statusMod.color }"
         >
-          <div>Цвет:</div>
-          <select
-              v-model="statusMod.color"
-              class="vacancy-edit__modal-select-color"
-              :style="{ backgroundColor: statusMod.color }"
+          <option
+              v-for="color in colors"
+              :key="color.value"
+              :value="color.value"
+              :style="{ backgroundColor: color.value }"
           >
-            <option
-                v-for="color in colors"
-                :key="color.value"
-                :value="color.value"
-                :style="{ backgroundColor: color.value }"
-            >
-              {{ color.value }}
-            </option>
-          </select>
-        </div>
+            {{ color.value }}
+          </option>
+        </select>
+      </div>
+
+      <ButtonMain
+        :isActive="request"
+        :message="errorMessage"
+        class="vacancy-edit__modal-btn-add"
+        @click="handleMainActionButtonClick"
+      >
+        <template #text>
+          {{ mainActionButtonText }}
+        </template>
+      </ButtonMain>
+
+      <div
+        v-if="statusMod.action === 'update'"
+        class="status-entity"
+      >
+        <span class="status-entity__title">
+          Менеджеры статуса: {{ props.managersInList.length || '' }}
+        </span>
 
         <div
-          v-if="statusMod.action === 'update'"
-          class="status-entity"
+          ref="listNode"
+          class="status-entity__body"
         >
-          <span class="status-entity__title">
-            Менеджеры статуса: {{ props.managersInList.length || '' }}
-          </span>
+          <div
+            class="status-entity__spinner-wrapper"
+            :class="{
+              'by-visible-toggler': true,
+              'visible': props.isLoading
+            }"
+          >
+            <SpinnerMain width="30" />
+          </div>
 
           <div
-            ref="listNode"
-            class="status-entity__body"
+            :class="{
+              'by-visible-toggler': true,
+              'visible': !props.isLoading
+            }"
+            class="status-entity__list-wrapper"
           >
-            <div
-              class="status-entity__spinner-wrapper"
-              :class="{
-                'by-visible-toggler': true,
-                'visible': props.isLoading
-              }"
-            >
-              <SpinnerMain width="30" />
-            </div>
-
-            <div
-              :class="{
-                'by-visible-toggler': true,
-                'visible': !props.isLoading
-              }"
-              class="status-entity__list-wrapper"
-            >
-              <VacancyManagersList
-                :managerList="props.managersInList"
-                :managerMod="props.managerMod"
-                :indicators="props.indicators"
-                :isShowTitle="false"
-                @clickManager="setHandledManager"
-                @clickAdd="startProcessManagerAdd"
-                @clickDelete="startProcessManagerDelete"
-                @resetHandled="resetIsHandled"
-              />
-            </div>
+            <VacancyManagersList
+              :managerList="props.managersInList"
+              :managerMod="props.managerMod"
+              :indicators="props.indicators"
+              :isShowTitle="false"
+              @clickManager="setHandledManager"
+              @clickAdd="startProcessManagerAdd"
+              @clickDelete="startProcessManagerDelete"
+              @resetHandled="resetIsHandled"
+            />
           </div>
         </div>
-
-        <ButtonMain
-          :isActive="request"
-          :message="errorMessage"
-          class="vacancy-edit__modal-btn-add"
-          @click="handleMainActionButtonClick"
-        >
-          <template #text>
-            {{ mainActionButtonText }}
-          </template>
-        </ButtonMain>
       </div>
     </template>
   </Modal>
@@ -200,10 +196,10 @@ const mainActionButtonText = computed(() => {
  * Обработка клика по главной кнопке действия в модалке
  */
 const handleMainActionButtonClick = () => {
-  if (indicators.isAdd)
-    handleModification(statusMod.name, 'create')
+  if (props.indicators.isAdd)
+    props.handleModification(props.statusMod.name, 'create')
   else  
-    handleModification(statusMod.name, 'update')
+    props.handleModification(props.statusMod.name, 'update')
 };
 
 /**
@@ -257,11 +253,8 @@ watch(() => props.isDeletingManagerRequestNow, () => {
 
 <style scoped>
 .vacancy-edit__modal-btn-add {
-  display: flex;
-  align-items: center;
   align-self: center;
-  width: fit-content;
-  gap: 5px;
+  margin: 10px 0;
 }
 
 .vacancy-edit__modal-select {
@@ -285,18 +278,6 @@ watch(() => props.isDeletingManagerRequestNow, () => {
 .status-entity__title {
   margin-bottom: 15px;
   display: block;
-}
-
-.status-entity__notifier {
-  text-decoration: underline;
-  font-size: 13px;
-  color: gray;
-}
-
-.status-entity__body {
-  display: flex;
-  flex-direction: column;
-  position: relative;
 }
 
 .status-entity__list-wrapper {
@@ -328,10 +309,5 @@ watch(() => props.isDeletingManagerRequestNow, () => {
   justify-content: center;
   align-items: center;
   padding-top: 5px;
-}
-
-/* Тело модалки */
-.modal-body {
-  display: contents;
 }
 </style>
