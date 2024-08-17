@@ -93,7 +93,9 @@ const isLast = computed(() =>{
 const moveStatus = (direction) =>{
   const movement = direction === "up" ? -1 : 1
 
- 
+  watch(() =>{
+    console.log(props.formData)
+  })
   props.requestSortVacancyStatus(props.vacancyId, props.id, movement)
 }
 
@@ -172,7 +174,7 @@ const updateIsPublished = (newValue) => {
   border-width: 0 2px 2px 0;
   padding: 7px;
   cursor: pointer;
-  opacity: 0; 
+  opacity: 1; 
   transition: opacity 0.3s;
   
 }
@@ -195,7 +197,7 @@ const updateIsPublished = (newValue) => {
 .bottom {
   position: absolute;
   top: -62px;
-  left: 15px;
+  left: 20px;
   transform: rotate(45deg);
 }
 
