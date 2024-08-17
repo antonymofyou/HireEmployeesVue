@@ -10,6 +10,7 @@ import CandidatesListPage from "@/pages/candidates/CandidatesList/CandidatesList
 import EmployeesPage from "@/pages/employees/EmployeesPage.vue";
 import StandardsPage from "@/pages/standards/StandardsPage.vue";
 import VacancyPage from "@/pages/vacancy/VacancyPage.vue";
+import GraphicalEditor from "@/pages/graphical-editor/GraphicalEditor.vue";
 
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
@@ -69,6 +70,11 @@ const router = createRouter({
       name: "Idvacancy",
       component: VacancyIdPage,
     },
+    {
+      path: "/graphical-editor",
+      name: 'graphical-editor',
+      component: GraphicalEditor,
+    }
   ],
 });
 
