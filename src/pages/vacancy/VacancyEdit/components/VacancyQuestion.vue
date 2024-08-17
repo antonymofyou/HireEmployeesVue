@@ -218,18 +218,17 @@ const updateIsPublished = (newValue) => {
     display: flex;
     justify-content: end;
     width: 100%;
-    z-index: 1;
     bottom: 7px;
-    z-index: -1;
+    gap: 15px;
   }
-
   .arrow {
     margin-right: 10px;
     opacity: 1; 
+    padding: 5px;
   }
   .bottom{
     position: relative;
-    top: -10px;
+    top: -7px;
   }
   .top{
     position: relative;
