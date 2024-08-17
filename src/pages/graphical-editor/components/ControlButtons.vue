@@ -1,54 +1,5 @@
 <template>
     <div class="control-buttons">
-        <div class="control-buttons__item control-buttons__item_main">
-            <ColorPicker 
-                v-model:color="mainColor"
-                :disabled="disabled"
-                class="control-buttons__color-picker"
-            />
-            <ControlButton 
-                class="control-buttons__button control-buttons__button_color" 
-                :disabled="disabled"
-                @click="emits('updateShape', props.activeShape.id, 'color', mainColor)"
-                :style="{ color: mainColor }"
-            >
-                <FormatPaint />
-            </ControlButton>
-            <ControlButton 
-                class="control-buttons__button control-buttons__button_color control-buttons__button_border-color" 
-                :disabled="disabled"
-                @click="emits('updateShape', props.activeShape.id, 'borderColor', mainColor)"
-                :style="{ color: mainColor }"
-            >
-                <BorderColor />
-            </ControlButton>
-            <ValuePicker
-                class="control-buttons__button control-buttons__value-picker"
-                :disabled="disabled"
-                :value="+props.activeShape.shape?.cornerRadius || 0"
-                @update:value="emits('updateShape', props.activeShape.id, 'cornerRadius', +$event)"            
-            >
-                <template #icon>
-                    <BorderRadius />
-                </template>
-                <template #units>
-                    px
-                </template>
-            </ValuePicker>
-            <ValuePicker
-                class="control-buttons__button control-buttons__value-picker"
-                :disabled="disabled"
-                :value="+props.activeShape.shape?.borderWidth || 0"
-                @update:value="emits('updateShape', props.activeShape.id, 'borderWidth', +$event)"            
-            >
-                <template #icon>
-                    <FormatLineWeight />
-                </template>
-                <template #units>
-                    px
-                </template>
-            </ValuePicker>
-        </div>
         <div class="control-buttons__item control-buttons__item_text">
             <ControlButton 
                 class="control-buttons__button" 
@@ -137,6 +88,63 @@
                 </template>
             </SelectMain>
         </div>
+        <div class="control-buttons__item control-buttons__item_block">
+            <ControlButton 
+                class="control-buttons__button control-buttons__button_color" 
+                :disabled="disabled"
+                @click="emits('updateShape', props.activeShape.id, 'color', mainColor)"
+                :style="{ color: mainColor }"
+            >
+                <FormatPaint />
+            </ControlButton>
+            <ControlButton 
+                class="control-buttons__button control-buttons__button_color control-buttons__button_border-color" 
+                :disabled="disabled"
+                @click="emits('updateShape', props.activeShape.id, 'borderColor', mainColor)"
+                :style="{ color: mainColor }"
+            >
+                <BorderColor />
+            </ControlButton>
+            <ValuePicker
+                class="control-buttons__button control-buttons__value-picker"
+                :disabled="disabled"
+                :value="+props.activeShape.shape?.cornerRadius || 0"
+                @update:value="emits('updateShape', props.activeShape.id, 'cornerRadius', +$event)"            
+            >
+                <template #icon>
+                    <BorderRadius />
+                </template>
+                <template #units>
+                    px
+                </template>
+            </ValuePicker>
+            <ValuePicker
+                class="control-buttons__button control-buttons__value-picker"
+                :disabled="disabled"
+                :value="+props.activeShape.shape?.borderWidth || 0"
+                @update:value="emits('updateShape', props.activeShape.id, 'borderWidth', +$event)"            
+            >
+                <template #icon>
+                    <FormatLineWeight />
+                </template>
+                <template #units>
+                    px
+                </template>
+            </ValuePicker>
+        </div>
+        <div class="control-buttons__item">
+            <ColorPicker 
+                v-model:color="mainColor"
+                :disabled="disabled"
+                class="control-buttons__color-picker"
+            />
+            <ControlButton
+                class="control-buttons__button"
+                @click="emits('addShape')"
+            >
+                <PlusIcon />
+            </ControlButton>
+        </div>
     </div>
 </template>
 
@@ -167,6 +175,7 @@ import FormatPaint from 'vue-material-design-icons/FormatPaint.vue'
 import BorderColor from 'vue-material-design-icons/BorderColor.vue';
 import BorderRadius from 'vue-material-design-icons/BorderRadius.vue';
 import FormatLineWeight from 'vue-material-design-icons/FormatLineWeight.vue';
+import PlusIcon from 'vue-material-design-icons/Plus.vue';
 
 const props = defineProps({
     activeShape: {
@@ -175,7 +184,8 @@ const props = defineProps({
     }
 });
 const emits = defineEmits({
-    updateShape: null
+    updateShape: null,
+    addShape: null,
 });
 const disabled = computed(() => {
     return !props.activeShape.editor;
@@ -278,13 +288,14 @@ function handlerVerticalAlign(id) {
 
 .control-buttons {
     display: flex;
+    justify-content: flex-end;
     gap: 48px;
 }
 
 .control-buttons__item {
     position: relative;
     display: flex;
-    gap: 16px;
+    gap: 24px;
     border-bottom: 2px solid var(--milk);
     padding: 0 0 24px;
 }

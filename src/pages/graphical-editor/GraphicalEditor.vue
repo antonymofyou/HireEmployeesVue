@@ -1,9 +1,11 @@
 <template>
   <header class="header">
     <div class="container">
-      <ControlButtons :active-shape="activeShape" @update-shape="updateShape">
-        <button class="add-rectangle" @click="addNewRectangle">Add New Rectangle</button>
-      </ControlButtons>
+      <ControlButtons 
+        :active-shape="activeShape" 
+        @update-shape="updateShape"
+        @add-shape="addShape"
+      />
     </div>
   </header>
   <main class="canvas" @mousedown="handleCanvasClick">
@@ -114,7 +116,7 @@ function generateUniqueId() {
 }
 
 // Функция для добавления нового прямоугольника
-function addNewRectangle() {
+function addShape() {
   const newId = generateUniqueId();
 
   formattedShapes[newId] = {
@@ -167,18 +169,6 @@ function handleCanvasClick(event) {
     padding: 24px 16px 0;
     margin: 0 auto;
     max-width: 90%;
-}
-
-.control-buttons {
-    display: flex;
-    gap: 16px;
-    justify-content: center;
-}
-
-.add-rectangle {
-  padding: 8px 16px;
-  font-size: 14px;
-  cursor: pointer;
 }
 
 .canvas {
