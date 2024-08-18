@@ -122,7 +122,6 @@ const fillManagerData = () => {
     return result;
   } else {
     // Если не найден, возвращаем пустой объект
-    console.log("Объект не найден."); // Добавили вывод в консоль
     return {};
   }
 };
@@ -133,7 +132,6 @@ const handleClick = () => {
   if (result) {
     // Если объект не пустой
     editEmployees("update", props.employeeInfo.managerId, result);
-    console.log(result);
   }
 };
 

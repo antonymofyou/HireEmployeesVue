@@ -55,18 +55,15 @@ function getEmployeeInfoById() {
       if (response.success === "1") {
         //успешный результат
         employeeInfo.value = response.info;
-        console.log(employeeInfo.value);
         isLoading.value = false;
       } else {
         errorMessage.value = err;
-        console.log(err);
       }
     },
     function (err) {
       //неуспешный результат
       errorMessage.value = err;
       isLoading.value = false;
-      console.log(err);
     }
   );
 }

@@ -64,33 +64,6 @@
       </template>
       <template #footer-control-buttons>
         <div class="modal__submit">
-          <ButtonMain @click="handleClick">
-            <template v-slot:text>Добавить</template>
-          </ButtonMain>
-        </div>
-      </template>
-    </Modal>
-    <!-- Открытие модального окна успешного создания вакансии -->
-    <Modal
-      :show="modalSuccess"
-      @click.self="modalSuccess = false"
-      v-if="!errorMessage"
-    >
-      <template #header v-if="!isLoading">
-        <h3>Сотрудник создан!</h3>
-      </template>
-      <template #body>
-        <!-- Отображение прелоадера  -->
-        <SpinnerMain v-if="isLoading" style="width: 50px" />
-        <div class="modal__success" v-if="!isLoading">
-          <ButtonMain
-            buttonColor="var(--cinnabar)"
-            @click="modalSuccess = false"
-          >
-            <template v-slot:text>Закрыть</template>
-          </ButtonMain>
-
-          <!-- Кнопка перехода к редактированию созданной вакансии -->
           <RouterLink
             class="employees__new-employees-link"
             :to="{
@@ -98,10 +71,10 @@
               query: { employeeId: createdEmployeeId },
             }"
           >
-            <ButtonMain @click="modalSuccess = false">
-              <template v-slot:text>Редактировать</template>
+            <ButtonMain @click="handleClick">
+              <template v-slot:text>Добавить</template>
             </ButtonMain>
-          </RouterLink>
+          </RouterLink>  
         </div>
       </template>
     </Modal>
@@ -139,7 +112,7 @@ let isLoading = ref(false);
 const employees = ref([]);
 
 // Id созданной вакансии
-const createdEmployeeId = ref(null);
+let createdEmployeeId = ref(null);
 
 //Флаги для модального окна
 let showModal = ref(false);
@@ -272,8 +245,8 @@ onMounted(() => {
   line-height: 42px;
 }
 .employees__box-employees {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(min-content, 300px));
+  display: flex;
+  flex-direction: column;
   justify-content: center;
   gap: 15px;
   width: 100%;
