@@ -21,7 +21,7 @@
 </template>
 
 <script setup>
-import { defineProps, computed, onBeforeUnmount, ref, onMounted } from 'vue';
+import { defineProps, computed, onBeforeUnmount, ref, onMounted, watch } from 'vue';
 import { useEditor, EditorContent } from '@tiptap/vue-3'
 import StarterKit from '@tiptap/starter-kit'
 import Underline from '@tiptap/extension-underline'
@@ -42,6 +42,10 @@ const props = defineProps({
     params: {
         type: Object,
         required: true,
+    },
+    mode: {
+      type: Object,
+      required: true
     }
 });
 const emits = defineEmits(['updateShape', 'activeEditor', 'select-shape']);
@@ -81,6 +85,9 @@ const rectangleStyles = computed(() => {
         justifyContent: paramsTextVerticalAlignment[props.params.textVerticalAlignment],
     }
 });
+const isTextMode = computed(() => {
+  return props.mode.value === props.mode._text;
+});
 const editor = useEditor({
     content: convertFrom(props.params.text),
     extensions: [
@@ -103,7 +110,12 @@ const editor = useEditor({
     },
     onFocus: () => {
         emits('activeEditor', editor);
-    }
+    },
+    editable: isTextMode.value,
+});
+
+watch(() => isTextMode.value, function() {
+  editor.value.setEditable(isTextMode.value);
 });
 
 // Список манипуляторов
@@ -123,8 +135,9 @@ const handles = [
 const selectRectangle = () => {
   emits('select-shape', props.params.id);
   isSelected.value = true;
-  if (editor && editor.chain) {
-    editor.chain().focus().run();
+
+  if (isTextMode.value) {
+    editor.value.chain().focus().run();
   }
 };
 

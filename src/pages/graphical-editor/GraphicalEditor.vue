@@ -2,9 +2,11 @@
   <header class="header">
     <div class="container">
       <ControlButtons 
-        :active-shape="activeShape" 
+        :active-shape="activeShape"
+        :mode="mode"
         @update-shape="updateShape"
         @add-shape="addShape"
+        @change-mode="changeModeHandler"
       />
     </div>
   </header>
@@ -12,6 +14,7 @@
     <template v-for="shape of formattedShapes" :key="shape.id">
       <TheRectangle
           :params="shape"
+          :mode="mode"
           @active-editor="editorActiveHandler"
           @update-shape="updateShape"
           @select-shape="handleSelectShape"
@@ -109,6 +112,17 @@ let activeShape = reactive({
         return formattedShapes[activeShape.id];
     }),
 });
+/**
+ * move - перемещение
+ * edit - редактирование
+ * text - текст
+ */
+let mode = reactive({
+  value: 'move',
+  _move: 'move',
+  _edit: 'edit',
+  _text: 'text',
+});
 
 // Функция для генерации уникального ID для новой формы
 function generateUniqueId() {
@@ -162,6 +176,13 @@ function handleCanvasClick(event) {
     activeShape.id = undefined;
   }
 }
+
+// Функция для обработки изменения режима
+
+function changeModeHandler(event) {
+  mode.value = event;
+}
+
 </script>
 
 <style scoped>

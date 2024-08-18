@@ -2,57 +2,57 @@
     <div class="control-buttons">
         <div class="control-buttons__item control-buttons__item_text">
             <ControlButton 
-                class="control-buttons__button" 
-                :disabled="disabled"
-                :active="props.activeShape.editor?.isActive('bold')"
-                @click="props.activeShape.editor?.chain().focus().toggleBold().run()"
+                class="control-buttons__button"
+                :disabled="!isTextMode"
+                :active="props.activeShape.editor?.isActive('bold') && isTextMode"
+                @click="controlButtonsHandlers['bold']"
             >
                 <BoldIcon />
             </ControlButton>
             <ControlButton 
-                class="control-buttons__button" 
-                :disabled="disabled"
-                :active="props.activeShape.editor?.isActive('italic')"
-                @click="props.activeShape.editor?.chain().focus().toggleItalic().run()"
+                class="control-buttons__button"
+                :disabled="!isTextMode"
+                :active="props.activeShape.editor?.isActive('italic') && isTextMode"
+                @click="controlButtonsHandlers['italic']"
             >
                 <ItalicIcon />
             </ControlButton>
             <ControlButton 
-                class="control-buttons__button" 
-                :disabled="disabled"
-                :active="props.activeShape.editor?.isActive('underline')"
-                @click="props.activeShape.editor?.chain().focus().toggleUnderline().run()"
+                class="control-buttons__button"
+                :disabled="!isTextMode"
+                :active="props.activeShape.editor?.isActive('underline') && isTextMode"
+                @click="controlButtonsHandlers['underline']"
             >
                 <UnderlineIcon />
             </ControlButton>
             <ControlButton 
-                class="control-buttons__button control-buttons__button_color" 
-                :disabled="disabled"
-                @click="props.activeShape.editor?.chain().focus().setColor(mainColor).run()"
+                class="control-buttons__button control-buttons__button_color"
+                :disabled="!isTextMode"
+                @click="controlButtonsHandlers['textColor']"
                 :style="{ color: mainColor }"
             >
                 <FormatText />
             </ControlButton>
             <ControlButton 
-                class="control-buttons__button control-buttons__button_color" 
-                :disabled="disabled"
-                @click="props.activeShape.editor?.chain().focus().setHighlight({ color: mainColor }).run()"
+                class="control-buttons__button control-buttons__button_color"
+                :disabled="!isTextMode"
+                @click="controlButtonsHandlers['highlightAdd']"
                 :style="{ color: mainColor }"
             >
                 <Marker />
             </ControlButton>
             <ControlButton 
-                class="control-buttons__button" 
-                :disabled="disabled"
-                @click="props.activeShape.editor?.chain().focus().unsetHighlight().run()"
+                class="control-buttons__button"
+                :disabled="!isTextMode"
+                @click="controlButtonsHandlers['highlightRemove']"
             >
                 <MarkerCancel />
             </ControlButton>
             <ValuePicker
                 class="control-buttons__button control-buttons__value-picker"
-                :disabled="disabled"
+                :disabled="!isTextMode"
                 :value="parseInt(props.activeShape.editor?.getAttributes('textStyle').fontSize) || 16"
-                @update:value="props.activeShape.editor?.chain().focus().setFontSize($event + 'px').run()"            
+                @update:value="controlButtonsHandlers['textSize']"            
             >
                 <template #icon>
                     <FormatText />
@@ -63,9 +63,9 @@
             </ValuePicker>
             <SelectMain
                 :options="optionsHorizontalAlign"
+                :disabled="!isTextMode"
                 :model-value="currentHorizontalAlign"
                 @update:model-value="handlerHorizontalAlign"
-                :disabled='disabled'
             >
                 <template #option="{ option }">  
                     <component :is="iconsHorizontalAlign[option.id]"></component>
@@ -76,9 +76,9 @@
             </SelectMain>
             <SelectMain
                 :options="optionsVerticalAlign"
+                :disabled="!isTextMode"
                 :model-value="currentVerticalAlign"
                 @update:model-value="handlerVerticalAlign"
-                :disabled='disabled'
             >
                 <template #option="{ option }">  
                     <component :is="iconsVerticalAlign[option.id]"></component>
@@ -90,26 +90,26 @@
         </div>
         <div class="control-buttons__item control-buttons__item_block">
             <ControlButton 
-                class="control-buttons__button control-buttons__button_color" 
-                :disabled="disabled"
-                @click="emits('updateShape', props.activeShape.id, 'color', mainColor)"
+                class="control-buttons__button control-buttons__button_color"
+                :disabled="!isEditMode"
+                @click="controlButtonsHandlers['backgroundColor']"
                 :style="{ color: mainColor }"
             >
                 <FormatPaint />
             </ControlButton>
-            <ControlButton 
-                class="control-buttons__button control-buttons__button_color control-buttons__button_border-color" 
-                :disabled="disabled"
-                @click="emits('updateShape', props.activeShape.id, 'borderColor', mainColor)"
+            <ControlButton
+                class="control-buttons__button control-buttons__button_color control-buttons__button_border-color"
+                :disabled="!isEditMode"
+                @click="controlButtonsHandlers['borderColor']"
                 :style="{ color: mainColor }"
             >
                 <BorderColor />
             </ControlButton>
             <ValuePicker
                 class="control-buttons__button control-buttons__value-picker"
-                :disabled="disabled"
+                :disabled="!isEditMode"
                 :value="+props.activeShape.shape?.cornerRadius || 0"
-                @update:value="emits('updateShape', props.activeShape.id, 'cornerRadius', +$event)"            
+                @update:value="controlButtonsHandlers['cornerRadius']"            
             >
                 <template #icon>
                     <BorderRadius />
@@ -120,9 +120,9 @@
             </ValuePicker>
             <ValuePicker
                 class="control-buttons__button control-buttons__value-picker"
-                :disabled="disabled"
+                :disabled="!isEditMode"
                 :value="+props.activeShape.shape?.borderWidth || 0"
-                @update:value="emits('updateShape', props.activeShape.id, 'borderWidth', +$event)"            
+                @update:value="controlButtonsHandlers['borderWidth']"            
             >
                 <template #icon>
                     <FormatLineWeight />
@@ -132,15 +132,35 @@
                 </template>
             </ValuePicker>
         </div>
-        <div class="control-buttons__item">
+        <div class="control-buttons__item control-buttons__item_main">
+            <ControlButton
+                class="control-buttons__button"
+                @click="controlButtonsHandlers['moveMode']"
+                :active="isMoveMode"
+            >
+                <CursorMove />
+            </ControlButton>
+            <ControlButton
+                class="control-buttons__button"
+                @click="controlButtonsHandlers['editMode']"
+                :active="isEditMode"
+            >
+                <Edit />
+            </ControlButton>
+            <ControlButton
+                class="control-buttons__button"
+                @click="controlButtonsHandlers['textMode']"
+                :active="isTextMode"
+            >
+                <FormatColorText />
+            </ControlButton>
             <ColorPicker 
                 v-model:color="mainColor"
-                :disabled="disabled"
                 class="control-buttons__color-picker"
             />
             <ControlButton
                 class="control-buttons__button"
-                @click="emits('addShape')"
+                @click="controlButtonsHandlers['addShape']"
             >
                 <PlusIcon />
             </ControlButton>
@@ -176,9 +196,16 @@ import BorderColor from 'vue-material-design-icons/BorderColor.vue';
 import BorderRadius from 'vue-material-design-icons/BorderRadius.vue';
 import FormatLineWeight from 'vue-material-design-icons/FormatLineWeight.vue';
 import PlusIcon from 'vue-material-design-icons/Plus.vue';
+import CursorMove from 'vue-material-design-icons/CursorMove.vue';
+import FormatColorText from 'vue-material-design-icons/FormatColorText.vue';
+import Edit from '@/assets/icons/edit.svg?component'
 
 const props = defineProps({
     activeShape: {
+        type: Object,
+        required: true,
+    },
+    mode: {
         type: Object,
         required: true,
     }
@@ -186,11 +213,73 @@ const props = defineProps({
 const emits = defineEmits({
     updateShape: null,
     addShape: null,
-});
-const disabled = computed(() => {
-    return !props.activeShape.editor;
+    changeMode: null,
 });
 const mainColor = ref('#000000');
+const controlButtonsHandlers = {
+    // Text
+
+    'bold': function() {
+        props.activeShape.editor?.chain().focus().toggleBold().run();
+    },
+    'italic': function() {
+        props.activeShape.editor?.chain().focus().toggleItalic().run();
+    },
+    'underline': function() {
+        props.activeShape.editor?.chain().focus().toggleUnderline().run();
+    },
+    'textColor': function() {
+        props.activeShape.editor?.chain().focus().setColor(mainColor.value).run();
+    },
+    'highlightAdd': function() {
+        props.activeShape.editor?.chain().focus().setHighlight({ color: mainColor.value }).run();
+    },
+    'highlightRemove': function() {
+        props.activeShape.editor?.chain().focus().unsetHighlight().run();
+    },
+    'textSize': function(event) {
+        props.activeShape.editor?.chain().focus().setFontSize(event + 'px').run();
+    },
+
+    // Block
+
+    'backgroundColor': function() {
+        emits('updateShape', props.activeShape.id, 'color', mainColor.value);
+    },
+    'borderColor': function() {
+        emits('updateShape', props.activeShape.id, 'borderColor', mainColor.value);
+    },
+    'cornerRadius': function(event) {
+        emits('updateShape', props.activeShape.id, 'cornerRadius', +event);
+    },
+    'borderWidth': function(event) {
+        emits('updateShape', props.activeShape.id, 'borderWidth', +event);
+    },
+
+    // Main
+
+    'addShape': function() {
+        emits('addShape');
+    },
+    'moveMode': function() {
+        emits('changeMode', props.mode._move);
+    },
+    'editMode': function() {
+        emits('changeMode', props.mode._edit);
+    },
+    'textMode': function() {
+        emits('changeMode', props.mode._text);
+    },
+};
+const isMoveMode = computed(() => {
+    return props.mode.value === props.mode._move;
+});
+const isEditMode = computed(() => {
+    return props.mode.value === props.mode._edit;
+});
+const isTextMode = computed(() => {
+    return props.mode.value === props.mode._text;
+});
 
 // HorizontalAlign
 
@@ -319,7 +408,7 @@ function handlerVerticalAlign(id) {
 .control-buttons__button:deep(svg) {
     width: 100%;
     height: 100%;
-    color: var(--mine-shaft) !important;
+    fill: currentColor;
 }
 
 .control-buttons__color-picker {
@@ -329,6 +418,10 @@ function handlerVerticalAlign(id) {
 
 .control-buttons__button_color {
     position: relative;
+}
+
+.control-buttons__button_color:deep(svg) {
+    color: var(--mine-shaft) !important;
 }
 
 .control-buttons__button_color::before {

@@ -1,7 +1,7 @@
 // Tiptap (text) -> Наш (text)
 
 export function convertTo(text) {
-    const { content } = text;
+    const { content = [] } = text;
 
     return content.map((paragraph) => {
         const { attrs , content = [] } = paragraph;
