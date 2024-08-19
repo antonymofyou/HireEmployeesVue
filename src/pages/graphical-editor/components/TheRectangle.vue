@@ -9,7 +9,7 @@
         <EditorContent v-if="editor" class="text-editor" :editor="editor" />
 
     <!-- Показать манипуляторы только если объект выбран -->
-    <div v-if="isSelected" class="resize-handles">
+    <div v-if="isSelected && isEditMode" class="resize-handles">
       <div
           v-for="handle in handles"
           :key="handle.position"
@@ -48,7 +48,7 @@ const props = defineProps({
       required: true
     }
 });
-const emits = defineEmits(['updateShape', 'activeEditor', 'select-shape']);
+const emits = defineEmits(['updateShape', 'select-shape']);
 const isDragging = ref(false);
 const isSelected = ref(false);
 const isResizing = ref(false);
@@ -65,6 +65,15 @@ const paramsTextVerticalAlignment = {
     'center': 'center',
     'bottom': 'flex-end',
 };
+const isTextMode = computed(() => {
+  return props.mode.value === props.mode._text;
+});
+const isMoveMode = computed(() => {
+  return props.mode.value === props.mode._move;
+});
+const isEditMode = computed(() => {
+  return props.mode.value === props.mode._edit;
+});
 const rectangleStyles = computed(() => {
     return {
         // Geometry
@@ -83,10 +92,9 @@ const rectangleStyles = computed(() => {
         borderColor: props.params.borderColor,
         // Text vertical align
         justifyContent: paramsTextVerticalAlignment[props.params.textVerticalAlignment],
+        // Cursor
+        cursor: isMoveMode.value || isEditMode.value ? 'move' : 'text',
     }
-});
-const isTextMode = computed(() => {
-  return props.mode.value === props.mode._text;
 });
 const editor = useEditor({
     content: convertFrom(props.params.text),
@@ -107,9 +115,6 @@ const editor = useEditor({
         const json = editor.value.getJSON();
 
         emits('updateShape', props.params.id , 'text' , convertTo(json));
-    },
-    onFocus: () => {
-        emits('activeEditor', editor);
     },
     editable: isTextMode.value,
 });
@@ -133,7 +138,11 @@ const handles = [
 
 // Выбор объекта
 const selectRectangle = () => {
-  emits('select-shape', props.params.id);
+  emits('select-shape', {
+    id: props.params.id,
+    editor,
+  });
+  
   isSelected.value = true;
 
   if (isTextMode.value) {
@@ -143,6 +152,8 @@ const selectRectangle = () => {
 
 // Начало перемещения
 const startDragging = (event) => {
+  if (!isMoveMode.value) return;
+
   isDragging.value = true;
   offsetX.value = event.clientX - props.params.x;
   offsetY.value = event.clientY - props.params.y;
@@ -303,7 +314,6 @@ const handleClickOutside = (event) => {
     position: absolute;
     display: flex;
     flex-direction: column;
-    cursor: move;
     user-select: none;
 }
 

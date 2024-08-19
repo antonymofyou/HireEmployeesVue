@@ -278,7 +278,7 @@ const isEditMode = computed(() => {
     return props.mode.value === props.mode._edit;
 });
 const isTextMode = computed(() => {
-    return props.mode.value === props.mode._text;
+    return props.mode.value === props.mode._text && !!props.activeShape.editor;
 });
 
 // HorizontalAlign

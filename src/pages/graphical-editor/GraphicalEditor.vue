@@ -15,10 +15,8 @@
       <TheRectangle
           :params="shape"
           :mode="mode"
-          @active-editor="editorActiveHandler"
           @update-shape="updateShape"
           @select-shape="handleSelectShape"
-          @pointerdown="shapeActiveHandler(shape.id)"
       />
     </template>
   </main>
@@ -150,15 +148,6 @@ function addShape() {
 
   activeShape.id = newId;
 }
-// Функция для обработки активации редактора
-function editorActiveHandler(editor) {
-    activeShape.editor = editor;
-}
-
-// Функция для обработки активации формы
-function shapeActiveHandler(id) {
-    activeShape.id = id;
-}
 
 // Функция для обновления свойств формы
 function updateShape(id, key, value) {
@@ -166,8 +155,9 @@ function updateShape(id, key, value) {
 }
 
 // Функция для обработки выбора формы
-function handleSelectShape(id) {
+function handleSelectShape({id, editor = undefined} = {}) {
   activeShape.id = id;
+  activeShape.editor = editor;
 }
 
 // Функция для обработки клика на холсте
@@ -178,7 +168,6 @@ function handleCanvasClick(event) {
 }
 
 // Функция для обработки изменения режима
-
 function changeModeHandler(event) {
   mode.value = event;
 }
