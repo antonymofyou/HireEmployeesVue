@@ -134,7 +134,6 @@ const navigateToEdit = (createdEmployeeId) => {
 const vClickOutside = {
   beforeMount(el) {
     el.clickOutsideEvent = function (event) {
-      console.log(indicators.value.isHandled);
       // Проверка местоположения элемента
       if (
         !(el == event.target || el.contains(event.target)) &&
@@ -142,7 +141,6 @@ const vClickOutside = {
       ) {
         // Вызываем метод после срабатывания клика снаружи
         indicators.value.isHandled = false;
-        console.log("asdas");
       }
     };
     // Добавляем обработчик нажатия
@@ -184,7 +182,6 @@ const fillManagerData = () => {
     return result;
   } else {
     // Если не найден, возвращаем пустой объект
-    console.log("Объект не найден."); // Добавили вывод в консоль
     return {};
   }
 };
