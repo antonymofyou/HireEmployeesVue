@@ -53,6 +53,11 @@ const props = defineProps({
   statuses: {
     type: Array,
     required: true,
+  },
+  //Функция для обновления ключа, чтобы перезагрузить комментарии
+  reload: {
+    type: Function,
+    required: false,
   }
 });
 
@@ -98,6 +103,11 @@ const updateStatuses = () => {
   )
 }
 
+//Функция обновления ключа для обновления комментариев
+const reloadKey = () => {
+  props.reload();
+}
+
 // Изменение статуса
 const changeRespondStatus = () => {
   const requestInstance = new CandidatesSetOtklikStatus();
@@ -116,6 +126,7 @@ const changeRespondStatus = () => {
         statusChanged.value = true;
         updateStatuses();
         newStatus.value = ''; 
+        reloadKey();
       } else {
         errorMessage.value = response.message;
       }

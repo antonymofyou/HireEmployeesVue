@@ -37,12 +37,14 @@
         :status="respondData.statusCurrent"
         :statusColor="respondData.statusCurrentColor"
         :statuses="respondData.statuses"
+        :reload="reloadComments"
         class="comments-page__status-block"
       />
       <CommentsBlock
         v-if="respondId && respondData.candidateId"
         :respondId
         :candidateId="respondData.candidateId"
+        :key="reloadKey"
         class="comments-page__comments-block"
       />
       <CommentsBlock
@@ -96,6 +98,14 @@ const respondData = ref({
   statusCurrentColor: '',
   statuses: [],
 });
+
+// Ключ перезагрузки комментариев при изменении статуса
+const reloadKey = ref(0);
+
+// Функция перезагрузки комментариев
+const reloadComments = () => {
+  reloadKey.value += 1;
+}
 
 // Данные вакансии: id, название, описание
 const vacancyData = ref({
