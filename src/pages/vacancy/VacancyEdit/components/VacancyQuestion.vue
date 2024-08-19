@@ -1,13 +1,14 @@
 <template>
- <transition-group name="move" tag="div" class="question">
-  <div :key="props.id">
-    <TextEditor
+  <transition-group name="move" tag="div" class="question">
+    <div :key="props.id">
+      <TextEditor
       :modelValue="text"
       @update:modelValue="updateText"
       size="medium"
       :label="labelName"
       :id="props.id"
     />
+    <span class="id_questions">Id{{ props.id }}</span>
     <div class="question__footer">
       <div class="question__select">
         <span class="question__label">Опубликован:</span>
@@ -122,13 +123,18 @@ const updateIsPublished = (newValue) => {
   z-index: 10;
 }
 
-.question:hover .arrow {
-  opacity: 1; 
-}
-
 .question__select {
   display: flex;
   align-items: baseline;
+}
+
+.id_questions{
+  position: absolute;
+  bottom: 197px;
+  left: 110px;
+  font-size: 8px;
+  font-weight: 600; 
+  color: gray;
 }
 
 .question__label {
@@ -159,21 +165,19 @@ const updateIsPublished = (newValue) => {
 .item__arrows {
   display: flex;
   position: absolute;
-  left: -50px; 
+  bottom: 7px;
+  gap: 28px;
+  right: 50px;
 }
 
 .arrow {
   background: #ffffff;
-  display: flex;
-  justify-content: center;
-  align-items: center;
   border: solid black;
   border-width: 0 2px 2px 0;
   padding: 7px;
   cursor: pointer;
-  opacity: 0; 
-  transition: opacity 0.3s;
-  
+  width: 12px;
+  height: 12px;
 }
 
 .arrow:hover {
@@ -185,16 +189,15 @@ const updateIsPublished = (newValue) => {
 }
 
 .top {
-  position: absolute;
-  bottom: 156px;
-  left: 20px;
+  position: relative;
+  top: 5px;
   transform: rotate(-135deg);
 }
 
 .bottom {
-  position: absolute;
-  top: -62px;
-  left: 20px;
+  position: relative;
+  bottom: 5px;
+  left: 2px;
   transform: rotate(45deg);
 }
 
@@ -210,28 +213,5 @@ const updateIsPublished = (newValue) => {
 .move-enter-to, .move-leave{
   opacity: 1;
   transform: (translateY(0));
-}
-
-@media (max-width: 1120px) {
-  .item__arrows {
-    display: flex;
-    justify-content: end;
-    width: 100%;
-    bottom: 7px;
-    gap: 15px;
-  }
-  .arrow {
-    margin-right: 10px;
-    opacity: 1; 
-    padding: 5px;
-  }
-  .bottom{
-    position: relative;
-    top: -7px;
-  }
-  .top{
-    position: relative;
-    top: 0;
-  }
 }
 </style>
