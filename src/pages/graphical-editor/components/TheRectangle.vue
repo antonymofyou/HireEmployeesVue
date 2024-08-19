@@ -93,7 +93,7 @@ const rectangleStyles = computed(() => {
         // Text vertical align
         justifyContent: paramsTextVerticalAlignment[props.params.textVerticalAlignment],
         // Cursor
-        cursor: isMoveMode.value || isEditMode.value ? 'move' : 'text',
+        cursor: isMoveMode.value ? 'move' : isEditMode.value ? 'pointer' : 'text',
     }
 });
 const editor = useEditor({
