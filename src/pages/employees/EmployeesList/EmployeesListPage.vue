@@ -8,12 +8,15 @@
       :icon="plusIcon"
     >
     </TopSquareButton>
-    <div class="employees__box-employees">
+    <div class="employees__box-employees" v-click-outside>
       <EmployeeCard
         v-for="employee in employees"
         :key="employee.managerId"
         :employee="employee"
         :requestEmployeesModification="editEmployees"
+        :indicators="indicators"
+        @updateIsHandled="updateIsHandled"
+        :deleteFunction="editEmployees"
       />
     </div>
 
@@ -64,17 +67,9 @@
       </template>
       <template #footer-control-buttons>
         <div class="modal__submit">
-          <RouterLink
-            class="employees__new-employees-link"
-            :to="{
-              name: 'employeeEdit',
-              query: { employeeId: createdEmployeeId },
-            }"
-          >
-            <ButtonMain @click="handleClick">
-              <template v-slot:text>Добавить</template>
-            </ButtonMain>
-          </RouterLink>  
+          <ButtonMain @click="handleClick">
+            <template v-slot:text>Добавить</template>
+          </ButtonMain>
         </div>
       </template>
     </Modal>
@@ -111,12 +106,53 @@ let isLoading = ref(false);
 // Сотрудникик
 const employees = ref([]);
 
-// Id созданной вакансии
-let createdEmployeeId = ref(null);
-
 //Флаги для модального окна
 let showModal = ref(false);
 let modalSuccess = ref(false);
+
+//Индиквтор для открытия крестика удаления
+const indicators = ref({
+  isHandled: false,
+  handledManagerId: "",
+});
+
+const updateIsHandled = (trigger) => {
+  trigger === true && indicators.value.isHandled
+    ? (indicators.value.isHandled = indicators.value.isHandled)
+    : (indicators.value.isHandled = !indicators.value.isHandled);
+};
+
+//функция перехода к редактированию только что созданного сотрудника
+const navigateToEdit = (createdEmployeeId) => {
+  router.push({
+    name: "employeeEdit",
+    query: { employeeId: createdEmployeeId },
+  });
+};
+
+// Директива для закрытия крестика удаления по клику снаружи
+const vClickOutside = {
+  beforeMount(el) {
+    el.clickOutsideEvent = function (event) {
+      console.log(indicators.value.isHandled);
+      // Проверка местоположения элемента
+      if (
+        !(el == event.target || el.contains(event.target)) &&
+        indicators.value.isHandled === true
+      ) {
+        // Вызываем метод после срабатывания клика снаружи
+        indicators.value.isHandled = false;
+        console.log("asdas");
+      }
+    };
+    // Добавляем обработчик нажатия
+    document.addEventListener("click", el.clickOutsideEvent);
+  },
+  unmounted(el) {
+    // Удаляем обработчик при размонтировании
+    document.removeEventListener("click", el.clickOutsideEvent);
+  },
+};
 
 // Данные Сотрудника: Имя, роль, id VK
 const formData = ref({
@@ -202,8 +238,6 @@ function editEmployees(action, managerId, managerData) {
     function (response) {
       //успешный результат
       if (response.success === "1") {
-        //получение Id созданной вакансии
-        createdEmployeeId.value = response.info.managerId;
         //сброс формы
         formData.value.userVkId = "";
         formData.value.name = "";
@@ -213,6 +247,11 @@ function editEmployees(action, managerId, managerData) {
         modalSuccess.value = true;
 
         isLoading.value = false;
+
+        //переход к редактированию созданного сотруника
+        if (action === "create") {
+          navigateToEdit(response.info.managerId);
+        }
 
         getAllEmployeesList();
       } else {
@@ -249,7 +288,7 @@ onMounted(() => {
   flex-direction: column;
   justify-content: center;
   gap: 15px;
-  width: 100%;
+  width: fit-content;
 }
 .employees__add-employees-btn {
   position: sticky;

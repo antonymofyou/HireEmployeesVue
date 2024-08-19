@@ -1,13 +1,21 @@
 <template>
   <div class="info__box">
     <p class="info__info-title">Общая информация:</p>
-    <div class="info__id">id: {{ employeeInfo.managerId }}</div>
-    <div class="info__name">{{ employeeInfo.name }}</div>
-    <div class="info__type">Роль: {{ employeeInfo.type }}</div>
-    <div class="info__VK">VK id: {{ employeeInfo.userVkId }}</div>
-  </div>
-  <div class="info__box">
-    <p class="info__info-title">Информация из Vk:</p>
+    <div class="info__id"><b>id:</b> {{ employeeInfo.managerId }}</div>
+    <div class="info__name"><b>Имя: </b>{{ employeeInfo.name }}</div>
+    <div class="info__type"><b>Роль: </b> {{ employeeInfo.type }}</div>
+    <div class="info__VK"><b>VK id: </b>{{ employeeInfo.userVkId }}</div>
+    <div class="info__VK">
+      <b>VK link: </b>
+      <a
+        class="employee__vk-link"
+        :href="`https://vk.com/id${employeeInfo.userVkId}`"
+        target="_blank"
+        rel="noopener noreferrer"
+      >
+        https://vk.com/id{{ employeeInfo.userVkId }}
+      </a>
+    </div>
   </div>
 </template>
 
