@@ -10,7 +10,7 @@
       />
     </div>
   </header>
-  <main class="canvas" @mousedown="handleCanvasClick">
+  <main class="canvas">
     <template v-for="shape of formattedShapes" :key="shape.id">
       <TheRectangle
           :params="shape"
@@ -123,12 +123,12 @@ let mode = reactive({
 });
 
 // Функция для генерации уникального ID для новой формы
-function generateUniqueId() {
+const generateUniqueId = () => {
   return Math.max(...Object.keys(formattedShapes).map(id => Number(id))) + 1;
 }
 
 // Функция для добавления нового прямоугольника
-function addShape() {
+const addShape = () => {
   const newId = generateUniqueId();
 
   formattedShapes[newId] = {
@@ -150,25 +150,18 @@ function addShape() {
 }
 
 // Функция для обновления свойств формы
-function updateShape(id, key, value) {
+const updateShape = (id, key, value) => {
     formattedShapes[id][key] = value;
 }
 
 // Функция для обработки выбора формы
-function handleSelectShape({id, editor = undefined} = {}) {
+const handleSelectShape = ({id, editor = undefined} = {}) => {
   activeShape.id = id;
   activeShape.editor = editor;
 }
 
-// Функция для обработки клика на холсте
-function handleCanvasClick(event) {
-  if (!event.target.closest('.rectangle')) {
-    activeShape.id = undefined;
-  }
-}
-
 // Функция для обработки изменения режима
-function changeModeHandler(event) {
+const changeModeHandler = (event) => {
   mode.value = event;
 }
 
