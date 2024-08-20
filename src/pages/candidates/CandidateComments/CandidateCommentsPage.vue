@@ -37,7 +37,7 @@
         :status="respondData.statusCurrent"
         :statusColor="respondData.statusCurrentColor"
         :statuses="respondData.statuses"
-        :reload="reloadComments"
+        @sendObject="handleObject"
         class="comments-page__status-block"
       />
       <CommentsBlock
@@ -45,6 +45,7 @@
         :respondId
         :candidateId="respondData.candidateId"
         :key="reloadKey"
+        :receivedObject="receivedObject"
         class="comments-page__comments-block"
       />
       <CommentsBlock
@@ -85,6 +86,13 @@ const route = useRoute();
 
 // ID отклика
 const respondId = route.query.otklikId;
+
+// Комментарий из статусов
+const receivedObject = ref(null);
+
+const handleObject = (object) => {
+  receivedObject.value = object;
+}
 
 // Данные отклика: id кандидата, ФИО кандидата, телеграм кандидата, ответы кандидата,
 // id вакансии, текущий статус, цвет текущего статуса, массив всех статусы

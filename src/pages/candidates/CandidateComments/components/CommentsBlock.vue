@@ -70,7 +70,7 @@
         <CommentAddition
           v-model.trim="newComment"
           :errorMessage="errorMessageCreate"
-          @create-comment="createComment({ comment: newComment })"
+           @create-comment="createComment({ comment: newComment })"
         />
       </template>
     </template>
@@ -99,6 +99,10 @@ const props = defineProps({
   candidateId: {
     type: String,
     required: true,
+  },
+  receivedObject: {
+    type: Object,
+    required: false,
   },
 });
 
@@ -233,6 +237,11 @@ const showComments = () => {
 
 // При изменении значения свойства "createdCommentId" обновляем положение скролла в конце блока
 watch(
+  () => props.receivedObject, (newComment) => {
+    if (newComment) {
+      comments.value.push(newComment);
+    }
+  },
   () => createdCommentId.value,
   () => {
     if (commentsBlock.value) {

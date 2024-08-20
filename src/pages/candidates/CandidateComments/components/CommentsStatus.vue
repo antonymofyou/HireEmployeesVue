@@ -61,6 +61,26 @@ const props = defineProps({
   }
 });
 
+const emit = defineEmits(['sendObject']);
+
+
+const sendToParent = () => {
+  const object = { 
+    id:"645",
+    managerId:"17",
+    managerName:"Nameless Sin",
+    otklikId:"43",
+    vacancyId:"181",
+    commentFor:"for_otklik",
+    comment: `Статус изменён с "${statusCurrent.value.status}" на "${newStatus.value}"`,
+    canEdit:"1",
+    canDelete:"1",
+    updatedAt:"2024-08-20 14:24:30",
+    createdAt:"2024-08-20 14:24:30",
+   };
+  emit('sendObject', object);
+}
+
 // Флаг отправки запроса
 const sendRequest = ref(false);
 // Флаг успешной смены
@@ -103,11 +123,6 @@ const updateStatuses = () => {
   )
 }
 
-//Функция обновления ключа для обновления комментариев
-const reloadKey = () => {
-  props.reload();
-}
-
 // Изменение статуса
 const changeRespondStatus = () => {
   const requestInstance = new CandidatesSetOtklikStatus();
@@ -125,8 +140,8 @@ const changeRespondStatus = () => {
       if (response.success === '1') {
         statusChanged.value = true;
         updateStatuses();
+         sendToParent(); // сюда функцию передачи
         newStatus.value = ''; 
-        reloadKey();
       } else {
         errorMessage.value = response.message;
       }
