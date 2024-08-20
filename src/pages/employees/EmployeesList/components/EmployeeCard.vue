@@ -10,7 +10,7 @@
             target="_blank"
             rel="noopener noreferrer"
           >
-            https://vk.com/id{{ employee.userVkId }}
+            vk
           </a>
         </div>
         <div class="employee__type" :style="{ color: getColor(employee.type) }">
