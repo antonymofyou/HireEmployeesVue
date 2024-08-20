@@ -15,6 +15,7 @@
       <TheRectangle
           :params="shape"
           :mode="mode"
+          :is-selected="activeShape.id == shape.id"
           @update-shape="updateShape"
           @select-shape="handleSelectShape"
       />

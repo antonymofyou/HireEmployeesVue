@@ -4,12 +4,12 @@
         @click="selectRectangle"
         :id="props.params.id"
         :style="rectangleStyles"
-        :class="['rectangle', { selected: isSelected }]"
+        class="rectangle"
     >
-        <EditorContent v-if="editor" class="text-editor" :editor="editor" />
+        <EditorContent class="text-editor" :editor="editor" />
 
     <!-- Показать манипуляторы только если объект выбран -->
-    <div v-if="isSelected && isEditMode" class="resize-handles">
+    <div v-if="props.isSelected && isEditMode" class="resize-handles">
       <div
           v-for="handle in handles"
           :key="handle.position"
@@ -46,11 +46,14 @@ const props = defineProps({
     mode: {
       type: Object,
       required: true
+    },
+    isSelected: {
+      type: Boolean,
+      required: true,
     }
 });
 const emits = defineEmits(['updateShape', 'select-shape']);
 const isDragging = ref(false);
-const isSelected = ref(false);
 const isResizing = ref(false);
 const isRotating = ref(false);
 const offsetX = ref(0);
@@ -92,8 +95,9 @@ const rectangleStyles = computed(() => {
         borderColor: props.params.borderColor,
         // Text vertical align
         justifyContent: paramsTextVerticalAlignment[props.params.textVerticalAlignment],
-        // Cursor
+        // Mode styles
         cursor: isMoveMode.value ? 'move' : isEditMode.value ? 'pointer' : 'text',
+        userSelect: isTextMode.value ? 'text' : 'none',
     }
 });
 const editor = useEditor({
@@ -142,8 +146,6 @@ const selectRectangle = () => {
     id: props.params.id,
     editor,
   });
-  
-  isSelected.value = true;
 
   if (isTextMode.value) {
     editor.value.chain().focus().run();
@@ -288,24 +290,12 @@ const stopRotating = () => {
   document.removeEventListener('mouseup', stopRotating);
 };
 
-onMounted(() => {
-  document.addEventListener('mousedown', handleClickOutside);
-});
-
 onBeforeUnmount(() => {
-  document.removeEventListener('mousedown', handleClickOutside);
   editor.value.destroy();
   stopDragging();
   stopResizing();
   stopRotating();
 });
-
-// Обработчик кликов вне объекта для снятия выделения
-const handleClickOutside = (event) => {
-  if (!event.target.closest(`[id="${props.params.id}"]`)) {
-    isSelected.value = false;
-  }
-};
 </script>
 
 <style scoped>
@@ -314,7 +304,6 @@ const handleClickOutside = (event) => {
     position: absolute;
     display: flex;
     flex-direction: column;
-    user-select: none;
 }
 
 .resize-handles {
