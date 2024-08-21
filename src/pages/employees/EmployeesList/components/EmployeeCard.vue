@@ -168,6 +168,7 @@ const removeEmployee = () => {
   justify-content: space-between;
   text-decoration: none;
   color: #111;
+  gap: 10px;
 }
 .employee__info {
   display: flex;

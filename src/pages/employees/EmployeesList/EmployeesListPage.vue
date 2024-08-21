@@ -294,6 +294,7 @@ onMounted(() => {
   right: 20px;
   transform: translateY(-100%);
   display: flex;
+  z-index: 10;
 }
 .modal__close {
   display: flex;

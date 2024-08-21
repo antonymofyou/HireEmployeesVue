@@ -1,6 +1,6 @@
 <template>
-  <div v-if="isLoading" class="vacancy-edit__loader">
-    <SpinnerMain class="vacancy-edit__loader-spinner" />
+  <div v-if="isLoading" class="employee-edit__loader">
+    <SpinnerMain class="employee-edit__loader-spinner" />
   </div>
   <section v-if="!isLoading" class="employee-edit">
     <RouterLink
@@ -14,7 +14,7 @@
     </div>
     <ButtonMain
       class="employee-edit__save-btn"
-      @click="handleClick"
+      @click="saveChanges"
       :success="successSave"
       :message="successMessage"
       :align="'end'"
@@ -54,10 +54,9 @@
       v-if="isAdmin()"
       buttonColor="var(--cinnabar)"
       type="button"
-      :align="'end'"
       @click="showModalOnRemoveEmployee = true"
     >
-      <template v-slot:text>Удалить вакансию</template>
+      <template v-slot:text>Удалить сотрудника</template>
     </ButtonMain>
     <Teleport to="body">
       <ModalConfirmation
@@ -76,7 +75,7 @@
 </template>
 
 <script setup>
-import { onMounted, ref, reactive } from "vue";
+import { onMounted, ref, reactive, watch } from "vue";
 import { useRoute, useRouter } from "vue-router";
 import { isAdmin } from "@/js/AuthFunctions";
 import { isManager } from "@/js/AuthFunctions";
@@ -101,8 +100,6 @@ const successSave = ref(""); // при значении 1 делает текс�
 const successMessage = ref(""); // текст успешного сохранения
 
 const employeeId = ref(""); // ID вакансии
-
-const employeeInfo = ref([]);
 
 // Отображение ошибки
 const errorMessage = ref("");
@@ -173,7 +170,7 @@ const fillManagerData = () => {
 };
 
 //обработка клика для обновления данных о сотруднике
-const handleClick = () => {
+const saveChanges = () => {
   const result = fillManagerData(); // Получаем объект с данными
   if (result) {
     // Если объект не пустой
@@ -209,6 +206,7 @@ const getEmployeeInfoById = (callback) => {
         isLoading.value = false;
       } else {
         errorMessage.value = err;
+        isLoading.value = false;
       }
     },
     function (err) {
@@ -221,14 +219,14 @@ const getEmployeeInfoById = (callback) => {
 
 // Создание нового / редактирование Сотрудника
 function editEmployees(action, managerId, managerData) {
-  saveLoad.value = true;
+  action === 'update' ? saveLoad.value = true: saveLoad.value;
   let requestClass = new EmployeesSetEmployees();
 
   requestClass.action = action;
   requestClass.managerId = managerId;
   requestClass.set = managerData;
 
-  isLoading.value = true;
+  action === 'delete' ? isLoading.value = true : isLoading.value;
   requestClass.request(
     "/managers/set_manager.php",
     "manager",
@@ -254,16 +252,28 @@ function editEmployees(action, managerId, managerData) {
     }
   );
 }
+
+// Скрытие сообщения о удачном сохранении, при изменении данных
+watch(formData, () => {
+  successMessage.value = '';
+}, {deep: true});
 </script>
 
 <style scoped>
 .employee-edit {
   padding-bottom: 80px;
   max-width: 925px;
+  width: 100%;
   margin: 20px auto 0;
+  display: flex;
+  flex-direction: column;
+  align-items: end;
+  position: relative;
 }
 .employee-edit__back-link {
   display: inline-block;
+  position: absolute;
+  left: 0;
 }
 .employee-edit__back-btn {
   position: sticky;
@@ -273,6 +283,7 @@ function editEmployees(action, managerId, managerData) {
 .employee-edit__title {
   width: 100%;
   text-align: center;
+  margin-top: 4cap;
 }
 .employee-edit__save-btn {
   position: sticky;
@@ -288,11 +299,20 @@ function editEmployees(action, managerId, managerData) {
   display: flex;
   flex-direction: column;
   gap: 20px;
+  width: 100%;
 }
 .employee-edit__SelectlabelName {
   margin: 0 0 8px 0;
   font-weight: 600;
   font-size: 16px;
   line-height: 22px;
+}
+.employee-edit__loader {
+  margin-top: 100px;
+  text-align: center;
+}
+
+.employee-edit__loader-spinner {
+  width: 50px;
 }
 </style>
