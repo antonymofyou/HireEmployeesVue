@@ -1,12 +1,14 @@
 <template>
-  <div class="question">
-    <TextEditor
+  <transition-group name="move" tag="div" class="question">
+    <div :key="props.id">
+      <TextEditor
       :modelValue="text"
       @update:modelValue="updateText"
       size="medium"
       :label="labelName"
       :id="props.id"
     />
+    <span class="id_questions">Id{{ props.id }}</span>
     <div class="question__footer">
       <div class="question__select">
         <span class="question__label">Опубликован:</span>
@@ -20,12 +22,19 @@
         <DeleteIcon class="icon"/>
       </button>
     </div>
+    <div class="item__arrows">
+      <button @click.stop="moveStatus('up')" :disabled="isFirst" class="arrow top" :class="{ 'disabled-class': isFirst }">
+      </button>
+      <button @click.stop="moveStatus('down')" :disabled="isLast" class="arrow bottom" :class="{ 'disabled-class': isLast }">
+      </button>
+    </div>
   </div>
+</transition-group>
 </template>
 
 <script setup>
 import SelectMain from '@/components/SelectMain.vue';
-import { ref } from 'vue';
+import { ref, computed, watch, onMounted } from 'vue';
 import TextEditor from "@/components/TextEditor.vue";
 import DeleteIcon from '@/assets/icons/delete.svg?component';
 
@@ -55,11 +64,38 @@ const props = defineProps({
     required: false,
     default: 'Вопрос',
   },
+  formData: {
+    type: Array,
+    required: true
+  },
+  requestSortVacancyStatus: {
+    type: Function,
+    required: true
+  },
+  vacancyId: {
+    type: String,
+    required: true
+  }
 });
 
 // Значения вопроса (текст и статус публикации)
 const text = ref(props.text);
 const isPublished = ref(props.isPublished);
+
+const isFirst = computed(() =>{
+  const index = props.formData.findIndex(item => item.id === props.id);
+  return index === 0
+})
+const isLast = computed(() =>{
+  const index = props.formData.findIndex(item => item.id === props.id)
+  return index === props.formData.length - 1
+})
+
+const moveStatus = (direction) =>{
+  const movement = direction === "up" ? -1 : 1
+
+  props.requestSortVacancyStatus(props.vacancyId, props.id, movement)
+}
 
 // Обновление данных в родителе
 const emit = defineEmits(['updateText', 'updateIsPublished', 'updateShowModal']);
@@ -80,10 +116,25 @@ const updateIsPublished = (newValue) => {
 </script>
 
 <style scoped>
+.question {
+  position: relative;
+  display: flex;
+  align-items: flex-start;
+  z-index: 10;
+}
+
 .question__select {
   display: flex;
   align-items: baseline;
-  gap: 10px;
+}
+
+.id_questions{
+  position: absolute;
+  bottom: 197px;
+  left: 110px;
+  font-size: 8px;
+  font-weight: 600; 
+  color: gray;
 }
 
 .question__label {
@@ -93,7 +144,6 @@ const updateIsPublished = (newValue) => {
 .question__footer {
   display: flex;
   justify-content: space-between;
-
   margin-top: 5px;
 }
 .question__remove-btn {
@@ -110,5 +160,58 @@ const updateIsPublished = (newValue) => {
 
 .question__footer .icon {
   transform: scale(2.1);
+}
+
+.item__arrows {
+  display: flex;
+  position: absolute;
+  bottom: 7px;
+  gap: 28px;
+  right: 50px;
+}
+
+.arrow {
+  background: #ffffff;
+  border: solid black;
+  border-width: 0 2px 2px 0;
+  padding: 7px;
+  cursor: pointer;
+  width: 12px;
+  height: 12px;
+}
+
+.arrow:hover {
+  opacity: 1;
+}
+
+.disabled-class {
+  display: none;
+}
+
+.top {
+  position: relative;
+  top: 5px;
+  transform: rotate(-135deg);
+}
+
+.bottom {
+  position: relative;
+  bottom: 5px;
+  left: 2px;
+  transform: rotate(45deg);
+}
+
+.move-enter-active, .move-leave-active, .move-move{
+  transition: all 0.5s ease
+}
+
+.move-enter, .move-leave-to{
+  opacity: 0;
+  transform: (translateY(30px));
+}
+
+.move-enter-to, .move-leave{
+  opacity: 1;
+  transform: (translateY(0));
 }
 </style>
