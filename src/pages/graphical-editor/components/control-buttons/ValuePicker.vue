@@ -39,9 +39,6 @@ const emits = defineEmits({
 .value-picker {
     display: flex;
     align-items: center;
-    background-color: var(--milk);
-    padding: 8px;
-    border-radius: 8px;
     transition-property: opacity;
     transition-duration: .2s;
 }
@@ -57,23 +54,13 @@ const emits = defineEmits({
     border: 0;
     outline: 0;
     color: var(--mine-shaft);
-    font-size: 20px;
+    font-size: 16px;
     text-align: center;
 }
 
 .value-picker__units {
     font-size: 12px;
     color: var(--mine-shaft);
-}
-
-.value-picker__input::-webkit-outer-spin-button,
-.value-picker__input::-webkit-inner-spin-button {
-  -webkit-appearance: none;
-  margin: 0;
-}
-
-.value-picker__input[type=number] {
-  -moz-appearance: textfield;
 }
 
 </style>

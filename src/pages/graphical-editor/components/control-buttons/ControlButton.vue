@@ -34,12 +34,9 @@ const activeClass = computed(() => {
 <style scoped>
 
 .control-button {
-    background-color: var(--milk);
-    padding: 8px;
     margin: 0;
     outline: none;
     border: 0;
-    border-radius: 8px;
     cursor: pointer;
     opacity: 1;
     transition-property: opacity, background;
@@ -52,8 +49,8 @@ const activeClass = computed(() => {
 }
 
 .control-button.active {
-    background-color: var(--transparent-blue);
-    color: var(--milk);
+    background-color: var(--transparent-blue) !important;
+    color: var(--milk) !important;
 }
 
 </style>

@@ -21,7 +21,7 @@
 </template>
 
 <script setup>
-import { defineProps, computed, onBeforeUnmount, ref, onMounted, watch } from 'vue';
+import { defineProps, computed, onBeforeUnmount, ref, watch } from 'vue';
 import { useEditor, EditorContent } from '@tiptap/vue-3'
 import StarterKit from '@tiptap/starter-kit'
 import Underline from '@tiptap/extension-underline'
@@ -31,7 +31,7 @@ import TextStyle from '@tiptap/extension-text-style'
 import FontSize from 'tiptap-extension-font-size';
 import Highlight from '@tiptap/extension-highlight'
 
-import { convertTo, convertFrom } from '../assets/js/convert';
+import { convertTo, convertFrom } from '../../assets/js/convert';
 
 /**
  * 
@@ -87,6 +87,7 @@ const rectangleStyles = computed(() => {
         // Size
         width: props.params.width + 'px',
         height: props.params.height + 'px',
+        padding: `${props.params.paddingVertical || 0}px ${props.params.paddingHorizontal || 0}px`,
         // Style
         backgroundColor: props.params.color,
         borderRadius: props.params.cornerRadius + 'px',

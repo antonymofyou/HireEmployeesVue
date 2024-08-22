@@ -1,13 +1,23 @@
 <template>
   <header class="header">
     <div class="container">
-      <ControlButtons 
-        :active-shape="activeShape"
-        :mode="mode"
-        @update-shape="updateShape"
-        @add-shape="addShape"
-        @change-mode="changeModeHandler"
-      />
+      <div class="header__control-buttons">
+        <TextControlButtons 
+          :active-shape="activeShape"
+          @update-shape="updateShape"
+        />
+        <BlockControlButtons 
+          :active-shape="activeShape"
+          @update-shape="updateShape"
+        />
+        <MainControlButtons 
+          :active-shape="activeShape"
+          :mode="mode"
+          @update-shape="updateShape"
+          @add-shape="addShape"
+          @change-mode="changeModeHandler"
+        />
+      </div>
     </div>
   </header>
   <main class="canvas">
@@ -24,9 +34,14 @@
 </template>
 
 <script setup>
+
 import { reactive, computed } from 'vue';
-import TheRectangle from './components/TheRectangle.vue';
-import ControlButtons from './components/ControlButtons.vue';
+
+import TextControlButtons from './components/control-buttons/TextControlButtons.vue';
+import BlockControlButtons from './components/control-buttons/BlockControlButtons.vue';
+import MainControlButtons from './components/control-buttons/MainControlButtons.vue';
+import TheRectangle from './components/shapes/TheRectangle.vue';
+
 const formattedShapes = reactive({
     1: {
         "id": 1,
@@ -50,7 +65,7 @@ const formattedShapes = reactive({
         "y": 230,
         "width": 300,
         "height": 100,
-        "color": "#F73",
+        "color": "#F73324",
         "borderColor": "#C70039",
         "borderStyle": 'solid',
         "zIndex": 2,
@@ -96,7 +111,7 @@ const formattedShapes = reactive({
         "y": 277,
         "width": 200,
         "height": 100,
-        "color": "#F33",
+        "color": "#F33413",
         "borderColor": "#C70039",
         "borderStyle": 'solid',
         "zIndex": 3,
@@ -175,7 +190,61 @@ const changeModeHandler = (event) => {
     max-width: 90%;
 }
 
+.header__control-buttons {
+  display: flex;
+  justify-content: flex-end;
+  gap: 48px;
+}
+
+.header__control-buttons > * {
+  position: relative;
+  display: flex;
+  gap: 24px;
+  border-bottom: 2px solid var(--milk);
+  padding: 0 0 24px;
+}
+
+.header__control-buttons > *:not(:last-child)::before {
+  content: '';
+  position: absolute;
+  right: -24px;
+  top: 0;
+  width: 2px;
+  height: 100%;
+  background-color: var(--milk);
+}
+
+.header__control-buttons:deep(.control-buttons-button),
+.header__control-buttons:deep(.control-buttons-value-picker),
+.header__control-buttons:deep(.control-buttons-color-picker) {
+  background-color: var(--milk);
+  padding: 6px;
+  border-radius: 8px;
+}
+
+.header__control-buttons:deep(.control-buttons-color-picker::before) {
+  border-radius: 0 0 8px 8px;
+}
+
+.header__control-buttons:deep(svg){
+  display: block;
+  width: 21px;
+  height: 21px;
+}
+
+.header__control-button:deep(.select-box-main){
+  flex: 0 0 32px;
+}
+
+.header__control-buttons:deep(.control-buttons-color-picker svg) {
+  fill: var(--mine-shaft) !important;
+}
+
+.header__control-buttons:deep(.control-buttons-value-picker input) {
+  width: 50px;
+}
+
 .canvas {
-    position: relative;
+  position: relative;
 }
 </style>
