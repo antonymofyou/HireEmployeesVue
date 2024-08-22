@@ -23,10 +23,12 @@
       </button>
     </div>
     <div class="item__arrows">
-      <button @click.stop="moveStatus('up')" :disabled="isFirst" class="arrow top" :class="{ 'disabled-class': isFirst }">
-      </button>
-      <button @click.stop="moveStatus('down')" :disabled="isLast" class="arrow bottom" :class="{ 'disabled-class': isLast }">
-      </button>
+      <svg @click.stop="moveStatus('up')" class="arrow-top-3" viewBox="0 0 5 9" :disabled="isFirst" :class="{ 'disabled-class': isFirst }">
+        <path d="M0.419,9.000 L0.003,8.606 L4.164,4.500 L0.003,0.394 L0.419,0.000 L4.997,4.500 L0.419,9.000 Z" />
+      </svg>
+      <svg @click.stop="moveStatus('down')" class="arrow-bottom-3" viewBox="0 0 5 9" :disabled="isLast" :class="{ 'disabled-class': isLast }">
+        <path d="M0.419,9.000 L0.003,8.606 L4.164,4.500 L0.003,0.394 L0.419,0.000 L4.997,4.500 L0.419,9.000 Z" />
+      </svg>
     </div>
   </div>
 </transition-group>
@@ -170,35 +172,29 @@ const updateIsPublished = (newValue) => {
   right: 50px;
 }
 
-.arrow {
-  background: #ffffff;
-  border: solid black;
-  border-width: 0 2px 2px 0;
-  padding: 7px;
-  cursor: pointer;
-  width: 12px;
-  height: 12px;
-}
-
-.arrow:hover {
-  opacity: 1;
+.arrow-top-3,
+.arrow-bottom-3 {
+    margin: 20px 8px;
+    width: 18px;
+    height: 18px;
+    cursor: pointer;
 }
 
 .disabled-class {
   display: none;
 }
 
-.top {
-  position: relative;
-  top: 5px;
-  transform: rotate(-135deg);
+.arrow-top-3 {
+    position: relative;
+    top: 20px;
+    transform: rotate(270deg);
 }
 
-.bottom {
-  position: relative;
-  bottom: 5px;
-  left: 2px;
-  transform: rotate(45deg);
+.arrow-bottom-3 {
+    position: relative;
+    bottom: -20px;
+    left: -3px;
+    transform: rotate(90deg);
 }
 
 .move-enter-active, .move-leave-active, .move-move{
@@ -213,5 +209,15 @@ const updateIsPublished = (newValue) => {
 .move-enter-to, .move-leave{
   opacity: 1;
   transform: (translateY(0));
+}
+
+@media (max-width: 380px) {
+  .item__arrows{
+    transition: all 0.5s;
+    right: 15px;
+  }
+  .arrow-top-3{
+    left: 20px;
+  }
 }
 </style>
