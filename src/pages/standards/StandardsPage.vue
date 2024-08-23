@@ -1,74 +1,53 @@
 <template>
   <TheHeader />
 
-  <main>
-    <h1>
-      Стандарты
+  <section class="schedule-section">
+    <h1 class="schedule-section__title">
+      График работы сотрудника
     </h1>
-  </main>
 
-  <hr>
+    <TopSquareButton
+      :icon="plusIcon"
+      class="top-button"
+      @click="handleAddButtonClick"
+    />
 
-  <div class="wrapper">
-    <div class="wrapper__inner">
-      <SpinnerMain
-        v-if="isJobsRequestNow"
-        class="spinner-loader"
-      />
-    
-      <div
-        v-else
-        class="schedule"
-      >
-        <div class="schedule__inner">
-          <ul class="schedule-list">
-            <li
-              v-for="period in jobPeriods"
-              class="schedule-list__item period"
-            >
-              <p class="period__text">
-                Дата:
-                <span class="period__highlight">
-                  {{ period.forDate }}
-                </span>
-              </p>
-              <p class="period__text">
-                Начало:
-                {{ formatTime(period.periodStart) }}
-              </p>
-              <p class="period__text">
-                Конец: 
-                {{ formatTime(period.periodStart) }}
-              </p>
-              <p class="period__text">
-                Наличие отчёта:
-                {{
-                  isExistReportForDate(period.forDate) ? 'Есть' : 'Отсутствует'
-                }}
-              </p>
-              <p
-                v-if="isExistReportForDate(period.forDate)"
-                class="period__text"
-              >
-                Текст отчёта:
-                {{
-                  dataByDate.find((d) => d.forDate === period.forDate).report
-                }}
-              </p>
-            </li>
-          </ul>
+    <div class="wrapper">
+      <div class="wrapper__inner">
+        <SpinnerMain
+          v-if="isJobsRequestNow"
+          class="spinner-loader"
+        />
+      
+        <div
+          v-else
+          class="schedule"
+        >
+          <div class="schedule__inner">
+            <ScheduleList
+              :job-periods="jobPeriods"
+              :data-by-date="dataByDate"
+              @start-edit="handleStartEditPeriod"
+              @start-delete="handleDeleteEditPeriod"
+            />
+          </div>
         </div>
       </div>
     </div>
-  </div>
+  </section>
+
 </template>
 
 <script setup>
-// @ts-check
 import { onMounted, ref } from 'vue';
 
 import TheHeader from '@/components/TheHeader.vue';
 import SpinnerMain from '@/components/SpinnerMain.vue';
+import TopSquareButton from '@/components/TopSquareButton.vue';
+
+import ScheduleList from './components/ScheduleList.vue';
+
+import plusIcon from '@/assets/icons/plus.svg';
 
 import { JobGetShedule } from './js/ApiClassesStandardsPage';
 
@@ -91,7 +70,7 @@ const dataByDate = ref([]);
 onMounted(async () => {
   isJobsRequestNow.value = true;
 
-  await new Promise((resolve) => setTimeout(resolve, 3000));
+  // await new Promise((resolve) => setTimeout(resolve, 3000));
 
   const jobGetScheduleInstance = new JobGetShedule();
 
@@ -142,30 +121,16 @@ onMounted(async () => {
   );
 });
 
-/**
- * Существует ли отчёт для заданной даты
- * @param {String} date - Дата в yyyy-mm-dd формате
- * @returns {Boolean} - Статус наличия отчёта
- */
-function isExistReportForDate(date) {
-  return Boolean(dataByDate.value.find((d) => d.forDate === date)?.haveReport);
+function handleAddButtonClick() {
+  alert('[CREATE] Under construct');
 }
 
-/**
- * Отформатировать время
- * @param {String | Date} time - Время для форматирования
- * @returns {String} - Отформатированное время
- */
-function formatTime(time) {
-  const formatter = new Intl.DateTimeFormat(
-    'RU',
-    {
-      hour: '2-digit',
-      minute: '2-digit',
-    }
-  );
+function handleStartEditPeriod(period) {
+  alert('[UPDATE] Under construct ' + period.forDate);
+}
 
-  return formatter.format(new Date(time));
+function handleDeleteEditPeriod(period) {
+  alert('[DELETE] Under construct ' + period.forDate);
 }
 </script>
 
@@ -173,6 +138,30 @@ function formatTime(time) {
 /* Spinner */
 .spinner-loader {
   width: 50px;
+}
+
+/* Section */
+.schedule-section {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  margin-top: 60px;
+  padding-bottom: 80px;
+}
+
+.schedule-section__title {
+  margin: 0;
+  line-height: 42px;
+}
+
+/* Top Button */
+.top-button {
+  position: sticky;
+  align-self: flex-end;
+  top: 60px;
+  right: 20px;
+  transform: translateY(-100%);
+  display: flex;
 }
 
 /* Wrapper */
@@ -183,25 +172,5 @@ function formatTime(time) {
 
 .wrapper__inner {
   max-width: 400px;
-}
-
-/* Schedule list */
-.schedule-list {
-  list-style: none;
-  display: flex;
-  flex-direction: column;
-  row-gap: 20px;
-}
-
-.schedule-list__item {
-  box-shadow: 0 1px 10px rgba(112, 103, 103, 0.3);
-  background: #fff;
-  padding: 10px 30px 15px;
-  border-radius: 10px;
-}
-
-/* Period */
-.period__highlight {
-  font-weight: bold;
 }
 </style>
