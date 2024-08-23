@@ -1,26 +1,39 @@
 <template>
     <div class="control-buttons-text">
-        <ControlButton 
+        <DropdownContent>
+            <template #trigger>
+                <FormatFont />
+            </template>
+            <template #content>
+                <ControlButton 
+                    class="control-buttons-button"
+                    :active="props.activeShape.editor?.isActive('bold')"
+                    @click="boldStyleHandler"
+                >
+                    <BoldIcon />
+                </ControlButton>
+                <ControlButton 
+                    class="control-buttons-button"
+                    :active="props.activeShape.editor?.isActive('italic')"
+                    @click="italicStyleHandler"
+                >
+                    <ItalicIcon />
+                </ControlButton>
+                <ControlButton 
+                    class="control-buttons-button"
+                    :active="props.activeShape.editor?.isActive('underline')"
+                    @click="underlineStyleHandler"
+                >
+                    <UnderlineIcon />
+                </ControlButton>
+            </template>
+        </DropdownContent>
+        <!-- <ControlButton 
             class="control-buttons-button"
-            :active="props.activeShape.editor?.isActive('bold')"
-            @click="boldStyleHandler"
+            @click="removeHighlightHandler"
         >
-            <BoldIcon />
-        </ControlButton>
-        <ControlButton 
-            class="control-buttons-button"
-            :active="props.activeShape.editor?.isActive('italic')"
-            @click="italicStyleHandler"
-        >
-            <ItalicIcon />
-        </ControlButton>
-        <ControlButton 
-            class="control-buttons-button"
-            :active="props.activeShape.editor?.isActive('underline')"
-            @click="underlineStyleHandler"
-        >
-            <UnderlineIcon />
-        </ControlButton>
+            <MarkerCancel />
+        </ControlButton> -->
         <ColorPicker
             class="control-buttons-button control-buttons-color-picker"
             :color="props.activeShape.editor?.getAttributes('textStyle').color || '#000000'"
@@ -39,12 +52,6 @@
                 <Marker />
             </template>
         </ColorPicker>
-        <ControlButton 
-            class="control-buttons-button"
-            @click="removeHighlightHandler"
-        >
-            <MarkerCancel />
-        </ControlButton>
         <ValuePicker
             class="control-buttons-button control-buttons-value-picker"
             :value="parseInt(props.activeShape.editor?.getAttributes('textStyle').fontSize) || 16"
@@ -92,6 +99,7 @@ import ControlButton from './ControlButton.vue';
 import ColorPicker from './ColorPicker.vue';
 import ValuePicker from './ValuePicker.vue';
 import SelectMain from '@/components/SelectMain.vue';
+import DropdownContent from '@/components/DropdownContent.vue';
 
 // Icons
 
@@ -106,7 +114,8 @@ import VerticalAlignCenter from 'vue-material-design-icons/FormatVerticalAlignCe
 import VerticalAlignTop from 'vue-material-design-icons/FormatVerticalAlignTop.vue'
 import FormatText from 'vue-material-design-icons/FormatText.vue'
 import Marker from 'vue-material-design-icons/Marker.vue'
-import MarkerCancel from 'vue-material-design-icons/MarkerCancel.vue'
+import FormatFont from 'vue-material-design-icons/FormatFont.vue';
+// import MarkerCancel from 'vue-material-design-icons/MarkerCancel.vue'
 
 const props = defineProps({
     activeShape: {
@@ -214,9 +223,9 @@ function addHighlightHandler(color) {
     props.activeShape.editor?.chain().focus().setHighlight({ color: color }).run();
 }
 
-function removeHighlightHandler() {
-    props.activeShape.editor?.chain().focus().unsetHighlight().run();
-}
+// function removeHighlightHandler() {
+//     props.activeShape.editor?.chain().focus().unsetHighlight().run();
+// }
 
 function horizontalAlignSelectHandler(id) {
     if (!props.activeShape.id) return;
@@ -258,7 +267,8 @@ function verticalAlignSelectHandler(id) {
     display: none;
 }
 
-.select-box-main:deep(.options-container-main) {
+.select-box-main:deep(.options-container-main),
+.dropdown:deep(.dropdown__content) {
     top: auto;
     bottom: 0;
     display: flex;
@@ -267,6 +277,7 @@ function verticalAlignSelectHandler(id) {
     border: none;
     background-color: var(--milk);
     padding: 6px;
+    border-radius: 8px;
 }
 
 .select-box-main:deep(.option-main) {

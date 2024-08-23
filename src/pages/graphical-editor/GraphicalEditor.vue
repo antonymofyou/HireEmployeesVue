@@ -2,11 +2,14 @@
   <header class="header">
     <div class="container">
       <div class="header__control-buttons">
-        <TextControlButtons 
+        <TextControlButtons
+          v-if="windowInnerWidth < breakpoint"
+          v-show="isTextMode"
           :active-shape="activeShape"
           @update-shape="updateShape"
         />
-        <BlockControlButtons 
+        <BlockControlButtons
+          v-show="isEditMode"
           :active-shape="activeShape"
           @update-shape="updateShape"
         />
@@ -30,16 +33,29 @@
           @select-shape="handleSelectShape"
       />
     </template>
+    <TooltipControlButtons
+      v-if="windowInnerWidth >= breakpoint"
+      :active-shape="activeShape"
+      :mode="mode"
+    >
+      <template #content>
+        <TextControlButtons 
+          :active-shape="activeShape"
+          @update-shape="updateShape"
+        />
+      </template>
+    </TooltipControlButtons>
   </main>
 </template>
 
 <script setup>
 
-import { reactive, computed } from 'vue';
+import { reactive, computed, ref, onBeforeUnmount } from 'vue';
 
 import TextControlButtons from './components/control-buttons/TextControlButtons.vue';
 import BlockControlButtons from './components/control-buttons/BlockControlButtons.vue';
 import MainControlButtons from './components/control-buttons/MainControlButtons.vue';
+import TooltipControlButtons from './components/control-buttons/TooltipControlButtons.vue';
 import TheRectangle from './components/shapes/TheRectangle.vue';
 
 const formattedShapes = reactive({
@@ -137,6 +153,47 @@ let mode = reactive({
   _edit: 'edit',
   _text: 'text',
 });
+const isEditMode = computed(() => {
+    return mode.value === mode._edit;
+});
+const isTextMode = computed(() => {
+    return mode.value === mode._text && !!activeShape.editor;
+});
+// Ширина экрана
+let windowInnerWidth = ref(window.innerWidth);
+// Ширина экрана при которой будет скрываться TooltipControlButtons
+let breakpoint = 768;
+
+// Функция для обновления ширины экрана
+const updateWindowInnerWidth = debounce(function() {
+  windowInnerWidth.value = window.innerWidth;
+}, 400);
+
+/**
+ * 
+ * Результат декоратора debounce(callback, delay) – это обёртка, которая откладывает вызовы callback, 
+ * пока не пройдёт delay миллисекунд бездействия (без вызовов), 
+ * а затем вызывает callback один раз с последними аргументами.
+ * 
+*/
+
+function debounce(callback, delay) {
+  let timer;
+
+  return function (...args) {
+    clearTimeout(timer);
+
+    timer = setTimeout(() => {
+      callback.apply(this, args);
+    }, delay);
+  };
+}
+
+window.addEventListener('resize', updateWindowInnerWidth);
+
+onBeforeUnmount(() => {
+  window.removeEventListener('resize', updateWindowInnerWidth);
+})
 
 // Функция для генерации уникального ID для новой формы
 const generateUniqueId = () => {
@@ -185,66 +242,71 @@ const changeModeHandler = (event) => {
 
 <style scoped>
 .container {
-    padding: 24px 16px 0;
+    padding: 24px 16px;
     margin: 0 auto;
     max-width: 90%;
 }
 
 .header__control-buttons {
   display: flex;
-  justify-content: flex-end;
   gap: 48px;
 }
 
 .header__control-buttons > * {
-  position: relative;
   display: flex;
-  gap: 24px;
-  border-bottom: 2px solid var(--milk);
-  padding: 0 0 24px;
+  gap: 16px;
 }
 
-.header__control-buttons > *:not(:last-child)::before {
-  content: '';
-  position: absolute;
-  right: -24px;
-  top: 0;
-  width: 2px;
-  height: 100%;
-  background-color: var(--milk);
+.control-buttons-main {
+  margin-left: auto;
 }
 
-.header__control-buttons:deep(.control-buttons-button),
-.header__control-buttons:deep(.control-buttons-value-picker),
-.header__control-buttons:deep(.control-buttons-color-picker) {
+:deep(.control-buttons-button),
+:deep(.control-buttons-value-picker),
+:deep(.control-buttons-color-picker),
+:deep(.dropdown__trigger) {
   background-color: var(--milk);
   padding: 6px;
   border-radius: 8px;
 }
 
-.header__control-buttons:deep(.control-buttons-color-picker::before) {
+:deep(.control-buttons-color-picker::before) {
   border-radius: 0 0 8px 8px;
 }
 
-.header__control-buttons:deep(svg){
+:deep(svg){
   display: block;
   width: 21px;
   height: 21px;
 }
 
-.header__control-button:deep(.select-box-main){
+:deep(.select-box-main){
   flex: 0 0 32px;
 }
 
-.header__control-buttons:deep(.control-buttons-color-picker svg) {
+:deep(.control-buttons-color-picker svg) {
   fill: var(--mine-shaft) !important;
 }
 
-.header__control-buttons:deep(.control-buttons-value-picker input) {
+:deep(.control-buttons-value-picker input) {
   width: 50px;
 }
 
 .canvas {
   position: relative;
 }
+
+.tooltip-control-buttons {
+  box-shadow: 0px 5px 10px 2px var(--milk);
+  background-color: var(--white);
+  padding: 8px;
+  border-radius: 8px;
+  z-index: 999;
+}
+
+.tooltip-control-buttons .control-buttons-text {
+  display: flex;
+  gap: 16px;
+}
+
 </style>
