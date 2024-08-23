@@ -214,10 +214,8 @@ const updateIsPublished = (newValue) => {
 @media (max-width: 380px) {
   .item__arrows{
     transition: all 0.5s;
-    right: 15px;
-  }
-  .arrow-top-3{
-    left: 20px;
+    gap: 2px;
+    right: 20px;
   }
 }
 </style>
