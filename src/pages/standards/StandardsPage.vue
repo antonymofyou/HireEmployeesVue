@@ -47,32 +47,15 @@
     </template>
 
     <template #body>
-      <form
+      <PeriodForm
+        v-model:for-date="newPeriod.forDate"
+        v-model:period-start="newPeriod.periodStart"
+        v-model:period-end="newPeriod.periodEnd"
+        v-model:report="newPeriod.report"
         id="add-period-form"
         class="modal-add-period__form"
-        @submit.prevent="addNewPeriod"
-      >
-        <InputSimple
-          v-model="newPeriod.forDate"
-          placeholder="Дата (yyyy-mm-dd)"
-          pattern="\d{4}-\d{2}-\d{2}"
-        />
-        <InputSimple
-          v-model="newPeriod.periodStart"
-          placeholder="Начало"
-          pattern="\d{2}:\d{2}"
-        />
-        <InputSimple
-          v-model="newPeriod.periodEnd"
-          placeholder="Конец"
-          pattern="\d{2}:\d{2}"
-        />
-        <InputSimple
-          v-model="newPeriod.report"
-          placeholder="Текст отчёта"
-          input-type="textarea"
-        />
-      </form>
+        @submit="addNewPeriod"
+      />
     </template>
 
     <template #footer-control-buttons>
@@ -99,38 +82,22 @@
     </template>
 
     <template #body>
-      <form
+      <PeriodForm
+        v-model:for-date="selectedPeriod.editable.forDate"
+        v-model:period-start="selectedPeriod.editable.periodStart"
+        v-model:period-end="selectedPeriod.editable.periodEnd"
+        v-model:report="selectedPeriod.editable.report"
         id="edit-period-form"
         class="modal-edit-period__form"
-        @submit.prevent="editSelectedPeriod"
-      >
-        <InputSimple
-          v-model="newPeriod.forDate"
-          placeholder="Дата (yyyy-mm-dd)"
-          pattern="\d{4}-\d{2}-\d{2}"
-        />
-        <InputSimple
-          v-model="newPeriod.periodStart"
-          placeholder="Начало"
-          pattern="\d{2}:\d{2}"
-        />
-        <InputSimple
-          v-model="newPeriod.periodEnd"
-          placeholder="Конец"
-          pattern="\d{2}:\d{2}"
-        />
-        <InputSimple
-          v-model="newPeriod.report"
-          placeholder="Текст отчёта"
-          input-type="textarea"
-        />
-      </form>
+        @submit="editSelectedPeriod"
+      />
     </template>
 
     <template #footer-control-buttons>
       <div class="modal-edit-period__footer">
         <ButtonMain
           :is-active="isEditPeriodRequestNow"
+          :is-disabled="isEditPeriodButtonDisabled"
           form="edit-period-form"
         >
           <template #text>Изменить</template>
@@ -148,7 +115,7 @@
     <template #header>
       <div class="modal-delete-period__header">
         <span>Удалить период?</span>
-        <b>{{ selectedPeriod.forDate }}</b>
+        <b>{{ selectedPeriod.default.forDate }}</b>
       </div>
     </template>
 
@@ -166,16 +133,17 @@
 </template>
 
 <script setup>
-import { computed, onMounted, ref } from 'vue';
+// @ts-check
+import { computed, onMounted, ref, watchEffect } from 'vue';
 
 import TheHeader from '@/components/TheHeader.vue';
 import SpinnerMain from '@/components/SpinnerMain.vue';
 import TopSquareButton from '@/components/TopSquareButton.vue';
 import Modal from '@/components/Modal.vue';
-import InputSimple from '@/components/InputSimple.vue';
 import ButtonMain from '@/components/ButtonMain.vue';
 
 import ScheduleList from './components/ScheduleList.vue';
+import PeriodForm from './components/PeriodForm.vue';
 
 import plusIcon from '@/assets/icons/plus.svg';
 
@@ -191,7 +159,25 @@ const isEditPeriodRequestNow = ref(false);
 const isDeletePeriodRequestNow = ref(false);
 
 /**
+ * Период
+ * @typedef {Object} Period
+ * @property {String} forDate - Дата периода
+ * @property {String} periodStart - Начало рабочего периода
+ * @property {String} periodEnd - Конец рабочего периода
+ * @property {String} report - Отчёт за период
+ */
+
+/** 
+ * Выбранный период
+ * @typedef {Object} SelectedPeriod
+ * @property {Period} default - Значения по умолчанию
+ * @property {Period} editable - Редактируемые значения
+ * 
+*/
+
+/**
  * Фабрика для нового периода. Для избежания дублирования логики сброса
+ * @returns {Period}
  */
 const createNewPeriod = () => ({
   forDate: '',
@@ -200,14 +186,24 @@ const createNewPeriod = () => ({
   report: ''
 });
 
+/**
+ * Фабрика для выбранного периода. Для избежания дублирования логики сброса
+ * @returns {SelectedPeriod}
+ */
+const createSelectedPeriod = () => ({
+    default: createNewPeriod(),
+    editable: createNewPeriod(),
+});
+
 // Новый период
 const newPeriod = ref(createNewPeriod());
 
-/** 
- * Выбранный период
- * @type {{ value: null | Object }} 
- */
-const selectedPeriod = ref(null);
+// Выбранный период
+const selectedPeriod = ref(createSelectedPeriod());
+
+watchEffect(() => {
+  console.log(selectedPeriod.value);
+});
 
 // Видна ли модалка добавления периода
 const isAddPeriodModalVisible = ref(false);
@@ -223,6 +219,23 @@ const isAddPeriodButtonDisabled = computed(() => {
   for (const key in newPeriod.value) {
     if (newPeriod.value[key].length === 0) {
       isDisabled = true;
+      break;
+    }
+  }
+
+  return isDisabled;
+});
+
+// Задизейблена ли кнопка изменения периода
+const isEditPeriodButtonDisabled = computed(() => {
+  let isDisabled = true;
+
+  // [X] Если предыдущие значения периода равны новым (ничего не изменилось) - оставляем задизейбленной
+  // Если пусто - тоже оставляем задизейбленным
+
+  for (const key in selectedPeriod.value.editable) {
+    if (selectedPeriod.value.default[key] !== selectedPeriod.value.editable[key]) {
+      isDisabled = false;
       break;
     }
   }
@@ -323,8 +336,8 @@ async function addNewPeriod() {
   // @TODO Запрос на изменение
   await new Promise((resolve) => setTimeout(resolve, 3000));
 
-  console.log('Изменяю выбранный период: ', selectedPeriod.value.forDate);
-  console.log('Поставлю значения: ', selectedPeriod.value);
+  console.log('Изменяю выбранный период: ', selectedPeriod.value.default.forDate);
+  console.log('Поставлю значения: ', selectedPeriod.value.editable);
 
   isEditPeriodRequestNow.value = false;
   closeEditPeriodModal();
@@ -339,7 +352,7 @@ async function deleteSelectedPeriod() {
   // @TODO Запрос на удаление
   await new Promise((resolve) => setTimeout(resolve, 3000));
 
-  console.log('Удаляю выбранный период: ', selectedPeriod.value.forDate);
+  console.log('Удаляю выбранный период: ', selectedPeriod.value.default.forDate);
 
   isDeletePeriodRequestNow.value = false;
   closeDeletePeriodModal();
@@ -358,7 +371,7 @@ function closeAddPeriodModal() {
  */
 function closeEditPeriodModal() {
   isEditPeriodModalVisible.value = false;
-  selectedPeriod.value = null;
+  selectedPeriod.value = createSelectedPeriod();
 }
 
 /**
@@ -366,7 +379,7 @@ function closeEditPeriodModal() {
  */
 function closeDeletePeriodModal() {
   isDeletePeriodModalVisible.value = false;
-  selectedPeriod.value = null;
+  selectedPeriod.value = createSelectedPeriod();
 }
 
 /**
@@ -381,7 +394,9 @@ function handleAddButtonClick() {
  * @param {Object} period - Объект периода
  */
 function handleStartEditPeriod(period) {
-  selectedPeriod.value = period;
+  selectedPeriod.value.default = { ...period };
+  selectedPeriod.value.editable = { ...period };
+
   isEditPeriodModalVisible.value = true;
 }
 
@@ -390,7 +405,9 @@ function handleStartEditPeriod(period) {
  * @param {Object} period - Объект периода
  */
 function handleDeleteEditPeriod(period) {
-  selectedPeriod.value = period;
+  selectedPeriod.value.default = { ...period };
+  selectedPeriod.value.editable = { ...period };
+
   isDeletePeriodModalVisible.value = true;
 }
 </script>
