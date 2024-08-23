@@ -7,7 +7,7 @@
       :start-time="formatTime(period.periodStart)"
       :end-time="formatTime(period.periodEnd)"
       :is-report-exist="isExistReportForPeriod(period)"
-      :report-text="getReportText(period)"
+      :report-text="getReportText(props.dataByDate, period)"
       @edit-click="handleEditClickPeriodItem(period)"
       @delete-click="handleDeleteClickPeriodItem(period)"
     />
@@ -16,7 +16,7 @@
 
 <script setup>
 import PeriodItem from './PeriodItem.vue';
-import { formatTime } from '../js/date-utils';
+import { formatTime, getReportText } from '../js/utils';
 
 const props = defineProps({
   // Расписание сотрудника. Содержит начало и конец рабочего периода для каждой даты
@@ -44,15 +44,6 @@ const emit = defineEmits({
  */
 function isExistReportForPeriod(period) {
   return Boolean(props.dataByDate.find((d) => d.forDate === period.forDate)?.haveReport);
-}
-
-/**
- * Получить текст репорта к определённому периоду
- * @param {Object} period - Объект периода
- * @returns {String} - Текст отчёта по периоду
- */
-function getReportText(period) {
-  return props.dataByDate.find((d) => d.forDate === period.forDate).report ?? '';
 }
 
 /**

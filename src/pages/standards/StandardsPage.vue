@@ -2,15 +2,17 @@
   <TheHeader />
 
   <section class="schedule-section">
-    <h1 class="schedule-section__title">
-      График работы сотрудника
-    </h1>
-
-    <TopSquareButton
-      :icon="plusIcon"
-      class="top-button"
-      @click="handleAddButtonClick"
-    />
+    <div class="schedule-section__header">
+      <h1 class="schedule-section__title">
+        График работы сотрудника
+      </h1>
+  
+      <TopSquareButton
+        :icon="plusIcon"
+        class="top-button"
+        @click="handleAddButtonClick"
+      />
+    </div>
 
     <div class="wrapper">
       <div class="wrapper__inner">
@@ -148,6 +150,7 @@ import PeriodForm from './components/PeriodForm.vue';
 import plusIcon from '@/assets/icons/plus.svg';
 
 import { JobGetShedule } from './js/ApiClassesStandardsPage';
+import { formatTime, getReportText } from './js/utils';
 
 // Идёт ли запрос за периодами (инициализация)
 const isJobsRequestNow = ref(false);
@@ -216,6 +219,8 @@ const isDeletePeriodModalVisible = ref(false);
 const isAddPeriodButtonDisabled = computed(() => {
   let isDisabled = false;
 
+  // [x] Если что-то пусто - оставляем задизейбленным
+
   for (const key in newPeriod.value) {
     if (newPeriod.value[key].length === 0) {
       isDisabled = true;
@@ -230,10 +235,15 @@ const isAddPeriodButtonDisabled = computed(() => {
 const isEditPeriodButtonDisabled = computed(() => {
   let isDisabled = true;
 
-  // [X] Если предыдущие значения периода равны новым (ничего не изменилось) - оставляем задизейбленной
-  // Если пусто - тоже оставляем задизейбленным
+  // [x] Если предыдущие значения периода равны новым (ничего не изменилось) - оставляем задизейбленной
+  // [x] Если что-то пусто - тоже оставляем задизейбленным
 
   for (const key in selectedPeriod.value.editable) {
+    if (selectedPeriod.value.editable[key].length === 0) {
+      isDisabled = true;
+      break;
+    }
+
     if (selectedPeriod.value.default[key] !== selectedPeriod.value.editable[key]) {
       isDisabled = false;
       break;
@@ -390,23 +400,37 @@ function handleAddButtonClick() {
 }
 
 /**
- * Обработка клика по изменению периода
+ * Клонирование и приведение в читабельный вид периода
  * @param {Object} period - Объект периода
+ * @returns {Period} - Стандартизованный объект периода
+ */
+function cloneAndPrettifyPeriod(period) {
+  return {
+    ...period,
+    periodStart: formatTime(period.periodStart),
+    periodEnd: formatTime(period.periodEnd),
+    report: getReportText(dataByDate.value, period)
+  };
+}
+
+/**
+ * Обработка клика по изменению периода
+ * @param {Period} period - Объект периода
  */
 function handleStartEditPeriod(period) {
-  selectedPeriod.value.default = { ...period };
-  selectedPeriod.value.editable = { ...period };
+  selectedPeriod.value.default = cloneAndPrettifyPeriod(period);
+  selectedPeriod.value.editable = cloneAndPrettifyPeriod(period);
 
   isEditPeriodModalVisible.value = true;
 }
 
 /**
  * Обработка клика по удаления периода
- * @param {Object} period - Объект периода
+ * @param {Period} period - Объект периода
  */
 function handleDeleteEditPeriod(period) {
-  selectedPeriod.value.default = { ...period };
-  selectedPeriod.value.editable = { ...period };
+  selectedPeriod.value.default = cloneAndPrettifyPeriod(period);
+  selectedPeriod.value.editable = cloneAndPrettifyPeriod(period);
 
   isDeletePeriodModalVisible.value = true;
 }
@@ -422,9 +446,14 @@ function handleDeleteEditPeriod(period) {
 .schedule-section {
   display: flex;
   flex-direction: column;
-  align-items: center;
   margin-top: 60px;
   padding-bottom: 80px;
+}
+
+.schedule-section__header {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
 }
 
 .schedule-section__title {
@@ -449,7 +478,8 @@ function handleDeleteEditPeriod(period) {
 }
 
 .wrapper__inner {
-  max-width: 400px;
+  max-width: 925px;
+  width: 100%;
 }
 
 /* Modal add, edit period */

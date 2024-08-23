@@ -11,12 +11,12 @@
     />
     <InputSimple
       v-model="periodStartTimeModel"
-      placeholder="Начало"
+      placeholder="Начало (II:ss)"
       pattern="\d{2}:\d{2}"
     />
     <InputSimple
       v-model="periodEndTimeModel"
-      placeholder="Конец"
+      placeholder="Конец (II:ss)"
       pattern="\d{2}:\d{2}"
     />
     <InputSimple
@@ -28,10 +28,9 @@
 </template>
 
 <script setup>
-// @ts-check
-
 import InputSimple from '@/components/InputSimple.vue';
 
+// Модели для сущностей периода для двусторонней связки
 const mainDateModel = defineModel('forDate');
 const periodStartTimeModel = defineModel('periodStart');
 const periodEndTimeModel = defineModel('periodEnd');
@@ -39,6 +38,9 @@ const periodReportModel = defineModel('report');
 
 const emit = defineEmits(['submit']);
 
+/**
+ * Обработка отправки формы
+ */
 function handleSubmit() {
   emit('submit');
 }
