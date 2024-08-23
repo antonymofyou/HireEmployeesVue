@@ -50,7 +50,7 @@
       <form
         id="add-period-form"
         class="modal-add-period__form"
-        @submit.prevent="handleAddPeriodFormSubmit"
+        @submit.prevent="addNewPeriod"
       >
         <InputSimple
           v-model="newPeriod.forDate"
@@ -60,10 +60,12 @@
         <InputSimple
           v-model="newPeriod.periodStart"
           placeholder="Начало"
+          pattern="\d{2}:\d{2}"
         />
         <InputSimple
           v-model="newPeriod.periodEnd"
           placeholder="Конец"
+          pattern="\d{2}:\d{2}"
         />
         <InputSimple
           v-model="newPeriod.report"
@@ -76,6 +78,7 @@
     <template #footer-control-buttons>
       <div class="modal-add-period__footer">
         <ButtonMain
+          :is-active="isAddNewPeriodRequestNow"
           :is-disabled="isAddPeriodButtonDisabled"
           form="add-period-form"
         >
@@ -99,7 +102,7 @@
       <form
         id="edit-period-form"
         class="modal-edit-period__form"
-        @submit.prevent="handleAddPeriodFormSubmit"
+        @submit.prevent="editSelectedPeriod"
       >
         <InputSimple
           v-model="newPeriod.forDate"
@@ -109,10 +112,12 @@
         <InputSimple
           v-model="newPeriod.periodStart"
           placeholder="Начало"
+          pattern="\d{2}:\d{2}"
         />
         <InputSimple
           v-model="newPeriod.periodEnd"
           placeholder="Конец"
+          pattern="\d{2}:\d{2}"
         />
         <InputSimple
           v-model="newPeriod.report"
@@ -125,7 +130,7 @@
     <template #footer-control-buttons>
       <div class="modal-edit-period__footer">
         <ButtonMain
-          :is-disabled="isAddPeriodButtonDisabled"
+          :is-active="isEditPeriodRequestNow"
           form="edit-period-form"
         >
           <template #text>Изменить</template>
@@ -141,12 +146,18 @@
     @click.self="closeDeletePeriodModal"
   >
     <template #header>
-      <div>Удалить период?</div>
+      <div class="modal-delete-period__header">
+        <span>Удалить период?</span>
+        <b>{{ selectedPeriod.forDate }}</b>
+      </div>
     </template>
 
     <template #body>
       <div class="modal-delete-period__footer">
-        <ButtonMain>
+        <ButtonMain
+          :is-active="isDeletePeriodRequestNow"
+          @click="deleteSelectedPeriod"
+        >
           <template #text>Удалить</template>
         </ButtonMain>
       </div>
@@ -170,16 +181,33 @@ import plusIcon from '@/assets/icons/plus.svg';
 
 import { JobGetShedule } from './js/ApiClassesStandardsPage';
 
-// Идёт ли запрос за периодами
+// Идёт ли запрос за периодами (инициализация)
 const isJobsRequestNow = ref(false);
+// Идёт ли запрос за добавлением периода
+const isAddNewPeriodRequestNow = ref(false);
+// Идёт ли запрос за изменением периода
+const isEditPeriodRequestNow = ref(false);
+// Идёт ли запрос за удалением периода
+const isDeletePeriodRequestNow = ref(false);
 
-// Новый период
-const newPeriod = ref({
+/**
+ * Фабрика для нового периода. Для избежания дублирования логики сброса
+ */
+const createNewPeriod = () => ({
   forDate: '',
   periodStart: '',
   periodEnd: '',
   report: ''
 });
+
+// Новый период
+const newPeriod = ref(createNewPeriod());
+
+/** 
+ * Выбранный период
+ * @type {{ value: null | Object }} 
+ */
+const selectedPeriod = ref(null);
 
 // Видна ли модалка добавления периода
 const isAddPeriodModalVisible = ref(false);
@@ -271,12 +299,50 @@ onMounted(async () => {
   );
 });
 
-function handleAddPeriodFormSubmit(event) {
-  const form = event.target;
+/**
+ * Добавление нового периода
+ */
+async function addNewPeriod() {
+  isAddNewPeriodRequestNow.value = true;
 
-  console.log(form.reportValidity())
+   // @TODO Запрос на добавление
+   await new Promise((resolve) => setTimeout(resolve, 3000));
 
-  console.log('Submitted: ', newPeriod.value);
+   console.log('Добавляю новый период: ', newPeriod.value);
+
+   isAddNewPeriodRequestNow.value = false;
+   closeAddPeriodModal();
+}
+
+/**
+ * Изменение выбранного периода
+ */
+ async function editSelectedPeriod() {
+  isEditPeriodRequestNow.value = true;
+
+  // @TODO Запрос на изменение
+  await new Promise((resolve) => setTimeout(resolve, 3000));
+
+  console.log('Изменяю выбранный период: ', selectedPeriod.value.forDate);
+  console.log('Поставлю значения: ', selectedPeriod.value);
+
+  isEditPeriodRequestNow.value = false;
+  closeEditPeriodModal();
+}
+
+/**
+ * Удаление выбранного периода
+ */
+async function deleteSelectedPeriod() {
+  isDeletePeriodRequestNow.value = true;
+
+  // @TODO Запрос на удаление
+  await new Promise((resolve) => setTimeout(resolve, 3000));
+
+  console.log('Удаляю выбранный период: ', selectedPeriod.value.forDate);
+
+  isDeletePeriodRequestNow.value = false;
+  closeDeletePeriodModal();
 }
 
 /**
@@ -284,6 +350,7 @@ function handleAddPeriodFormSubmit(event) {
  */
 function closeAddPeriodModal() {
   isAddPeriodModalVisible.value = false;
+  newPeriod.value = createNewPeriod();
 }
 
 /**
@@ -291,6 +358,7 @@ function closeAddPeriodModal() {
  */
 function closeEditPeriodModal() {
   isEditPeriodModalVisible.value = false;
+  selectedPeriod.value = null;
 }
 
 /**
@@ -298,6 +366,7 @@ function closeEditPeriodModal() {
  */
 function closeDeletePeriodModal() {
   isDeletePeriodModalVisible.value = false;
+  selectedPeriod.value = null;
 }
 
 /**
@@ -312,6 +381,7 @@ function handleAddButtonClick() {
  * @param {Object} period - Объект периода
  */
 function handleStartEditPeriod(period) {
+  selectedPeriod.value = period;
   isEditPeriodModalVisible.value = true;
 }
 
@@ -320,6 +390,7 @@ function handleStartEditPeriod(period) {
  * @param {Object} period - Объект периода
  */
 function handleDeleteEditPeriod(period) {
+  selectedPeriod.value = period;
   isDeletePeriodModalVisible.value = true;
 }
 </script>
@@ -378,6 +449,12 @@ function handleDeleteEditPeriod(period) {
 }
 
 /* Modal delete period */
+.modal-delete-period__header {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
 .modal-delete-period__footer {
   display: flex;
   justify-content: center;
