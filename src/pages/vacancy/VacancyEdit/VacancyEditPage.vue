@@ -4,13 +4,22 @@
     <SpinnerMain class="vacancy-edit__loader-spinner" />
    </div>
   <div class="content vacancy-edit" v-if="isLoaded">
-    <RouterLink :to="{ name: 'vacanciesList' }">
-      <TopSquareButton class="vacancy-edit__back-btn" :icon="iconBack" />
-    </RouterLink>
-    
     <section class="container">
+      <RouterLink class="vacancy-edit__back-link" :to="{ name: 'vacanciesList' }">
+        <TopSquareButton class="vacancy-edit__back-btn" :icon="iconBack" />
+      </RouterLink>
       <h2 class="vacancy-edit__title">Редактирование вакансии</h2>
-
+      <ButtonMain
+        class="vacancy-edit__save-btn"
+        @click="saveChanges"
+        :success="successSave"
+        :message="successMessage"
+        :align="'end'"
+        :isActive="saveLoad"
+      >
+        <template v-slot:text>Сохранить</template>
+        <template v-slot:icon><SaveIcon width="20px" height="20px"class="vacancy-edit__icon-button"/></template>
+      </ButtonMain>
       <div class="vacancy-edit__main">
         <InputSimple
           v-model="formData.name"
@@ -45,8 +54,13 @@
       <p class="vacancy-edit__link-copy-message vacancy-edit__link-copy-message--error" v-else-if="isCopiedError">Не удалось скопировать текст!</p>
     </div>
 
-    <VacancyManagers :vacancyId />
-    <VacancyStatus :vacancyId />
+    <div class="vacancy-edit__row">
+      <VacancyManagers :vacancyId />
+    </div>
+    
+    <div class="vacancy-edit__row">
+      <VacancyStatus :vacancyId />
+    </div>
 
 
       <div class="vacancy-edit__description">
@@ -123,18 +137,6 @@
           {{ errorMessageQuestion }}
         </div>
       </div>
-
-      <ButtonMain
-        class="vacancy-edit__save-btn"
-        @click="saveChanges"
-        :success="successSave"
-        :message="successMessage"
-        :align="'end'"
-        :isActive="saveLoad"
-      >
-        <template v-slot:text>Сохранить</template>
-        <template v-slot:icon><SaveIcon width="20px" height="20px"class="vacancy-edit__icon-button"/></template>
-      </ButtonMain>
 
     </section>
   </div>
@@ -471,17 +473,18 @@ const copyToClipboard = async () => {
 
 <style scoped>
 .content {
-  margin-top: 60px;
+  margin-top: 20px;
 }
 
 .container {
+  position: relative;
   margin: 0 auto;
   width: 100%;
   max-width: 925px;
 }
 
 .vacancy-edit__title {
-  margin-bottom: 40px;
+  margin-bottom: 20px;
   text-align: center;
 }
 
@@ -587,16 +590,22 @@ const copyToClipboard = async () => {
 }
 
 .vacancy-edit__save-btn {
-  position: fixed;
+  position: sticky;
   top: 20px;
-  right: 30px;
+  right: 20px;
   z-index: 10;
+  margin: 0 0 20px;
+}
+
+.vacancy-edit__back-link {
+  display: inline-block;
 }
 
 .vacancy-edit__back-btn {
-  position: fixed;
+  position: sticky;
   top: 20px;
   left: 20px;
+  width: 40px;
 }
 
 .vacancy-edit__loader {
@@ -664,5 +673,9 @@ const copyToClipboard = async () => {
 
 .vacancy-edit__link-copy-message--error {
   color: var(--cinnabar);
+}
+
+.vacancy-edit__row {
+  margin-top: 40px;
 }
 </style>

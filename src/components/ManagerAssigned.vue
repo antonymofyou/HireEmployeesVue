@@ -1,13 +1,13 @@
 <template>
-  <div class="manager_item">
-    {{ ManagerText }}
+  <div class="manager-item">
+    {{ props.managerName }}
   </div>
 </template>
 
 <script setup>
 const props = defineProps({
   // Имя менеджера
-  ManagerText: {
+  managerName: {
     type: String,
     required: true,
   },
@@ -15,7 +15,7 @@ const props = defineProps({
 </script>
 
 <style scoped>
-.manager_item {
+.manager-item {
   font-size: 14px;
   border: 1px solid gray;
   border-radius: 20px;

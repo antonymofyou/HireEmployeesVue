@@ -1,7 +1,7 @@
 <template>
   <Transition name="modal">
-    <div v-if="show" class="modal-mask" @click="$emit('close')">
-      <div class="modal-container" @click.stop>
+    <div v-if="show" class="modal-mask" @click.self="$emit('close')">
+      <div class="modal-container">
         <div class="modal-header">
           <slot name="header"></slot>
         </div>
