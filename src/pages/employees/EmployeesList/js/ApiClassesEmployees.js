@@ -5,3 +5,6 @@ export class EmployeesSetEmployees extends MainRequestClass {
     action = ''; // Кодовое слово для одного из действий: create, update, delete.
     set = []; // словарь с данными сотрудника для создания или обновления  userVkId, type, name.
 }
+export class ManagersGetVkId  extends MainRequestClass {
+    url = '';  //Ссылка на профиль ВК
+}

@@ -30,11 +30,7 @@
         </div>
       </div>
       <div class="employee__left-side">
-        <div class="employee__id">
-          <span :style="{ color: getColor(employee.type) }">
-            id: {{ employee.managerId }}</span
-          >
-        </div>
+        <div class="employee__id">id: {{ employee.managerId }}</div>
         <RouterLink
           :to="{
             name: 'employeeEdit',
@@ -51,7 +47,7 @@
       </div>
     </div>
     <ButtonIcon
-      class="manager-item__btn"
+      class="employee__btn-delete"
       v-if="
         props.indicators.isHandled &&
         props.indicators.handledManagerId === props.employee.managerId &&
@@ -60,7 +56,7 @@
       @click="showModalOnRemoveEmployee = true"
     >
       <template v-slot:icon>
-        <IconDelete class="manager-item__icon" />
+        <IconDelete class="employee__icon-delete" />
       </template>
     </ButtonIcon>
     <Teleport to="body">
@@ -92,9 +88,9 @@ import ButtonIcon from "@/components/ButtonIcon.vue";
 import EditIcon from "@/assets/icons/edit.svg?component";
 import IconDelete from "@/assets/icons/close.svg?component";
 import Person from "@/assets/icons/person.svg?component";
-import ModalConfirmation from "@/components/ModalConfirmation.vue";
 import ButtonMain from "@/components/ButtonMain.vue";
 import Modal from "@/components/Modal.vue";
+import InputSimple from "@/components/InputSimple.vue";
 
 const props = defineProps({
   employee: {},
@@ -110,6 +106,10 @@ const props = defineProps({
 
 // Показ модального окна при удалении вакансии
 const showModalOnRemoveEmployee = ref(false);
+
+const formData = ref({
+  userVkId: "",
+});
 
 //Выбор цвета взависимости от типа сотрудника
 const getColor = (type) => {
@@ -150,15 +150,13 @@ const removeEmployee = () => {
 
 <style scoped>
 .employee {
-  max-width: 500px;
   width: 100%;
-  margin: auto;
   position: relative;
   cursor: pointer;
 }
 .employee__box {
   padding: 10px 30px 15px;
-  height: 80px;
+  height: 70px;
   box-sizing: border-box;
   background-color: #fff;
   border-radius: 10px;
@@ -168,18 +166,19 @@ const removeEmployee = () => {
   justify-content: space-between;
   text-decoration: none;
   color: #111;
-  gap: 10px;
+  align-items: center;
 }
 .employee__info {
   display: flex;
-  flex-direction: column;
-  justify-content: space-between;
+  gap: 20px;
+  align-items: center;
 }
 .employee__id {
   margin: 0 -5% -4%;
-  font-size: 13px;
+  font-size: 11px;
   line-height: 22px;
   font-weight: 400;
+  color: gray;
 }
 .employee__name {
   overflow: hidden;
@@ -204,14 +203,9 @@ const removeEmployee = () => {
 }
 .employee__left-side {
   display: flex;
-  flex-direction: column;
   justify-content: space-between;
   align-items: end;
   gap: 10px;
-}
-.employee__btn-edit {
-  display: flex;
-  margin-right: -5%;
 }
 .employee__btn-edit-btn {
   padding: 0;
@@ -236,7 +230,7 @@ const removeEmployee = () => {
   display: flex;
   gap: 10px;
 }
-.manager-item__icon {
+.employee__icon-delete {
   height: 12px;
   width: 12px;
   display: block;
@@ -244,7 +238,7 @@ const removeEmployee = () => {
   top: 4px;
   right: 3px;
 }
-.manager-item__btn {
+.employee__btn-delete {
   padding: 0 0 0 1px;
 }
 .employee-edit__modal-btn-add {

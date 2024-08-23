@@ -54,20 +54,36 @@
           :isLabelBold="true"
           :isTextBold="true"
         />
-        <InputSimple
-          v-model="formData.userVkId"
-          id="userVkId"
-          labelName="VK-id сотрудника"
-          inputType="input"
-          :isLabelBold="true"
-          :isTextBold="true"
-        />
+        <div class="employees__vk-box">
+          <InputSimple
+            v-model="formData.userVklink"
+            id="userVklink"
+            labelName="Ссылка на VK сотрудника"
+            inputType="input"
+            :isLabelBold="true"
+            :isTextBold="true"
+          />
+          <ButtonIcon class="employees__btn-check-btn" @click="getEmployeeVkId">
+            <template v-slot:icon>
+              <CheckIcon class="employees__btn-check-icon" />
+            </template>
+          </ButtonIcon>
+        </div>
+        <a
+          v-if="handleVkId.checked"
+          class="employee__vk-link"
+          :href="`https://vk.com/id${handleVkId.userVkId}`"
+          target="_blank"
+          rel="noopener noreferrer"
+        >
+          https://vk.com/id{{ handleVkId.userVkId }}
+        </a>
         <h1 class="employees__SelectlabelName">Роль сотрудника:</h1>
         <SelectMain v-model="formData.type" :options="SelectOptions" />
       </template>
       <template #footer-control-buttons>
-        <div class="modal__submit">
-          <ButtonMain @click="handleClick">
+        <div class="modal__submit" v-if="handleVkId.checked">
+          <ButtonMain @click="handleAddEmployee">
             <template v-slot:text>Добавить</template>
           </ButtonMain>
         </div>
@@ -84,6 +100,7 @@ import { onMounted, ref } from "vue";
 import { isManager, isAdmin } from "@/js/AuthFunctions";
 import { useRouter } from "vue-router";
 import plusIcon from "@/assets/icons/plus.svg";
+import CheckIcon from "@/assets/icons/check.svg?component";
 import EmployeeCard from "./components/EmployeeCard.vue";
 import TopSquareButton from "@/components/TopSquareButton.vue";
 import ErrorNotification from "@/components/ErrorNotification.vue";
@@ -92,7 +109,11 @@ import ButtonMain from "@/components/ButtonMain.vue";
 import Modal from "@/components/Modal.vue";
 import InputSimple from "@/components/InputSimple.vue";
 import SelectMain from "@/components/SelectMain.vue";
-import { EmployeesSetEmployees } from "./js/ApiClassesEmployees";
+import {
+  EmployeesSetEmployees,
+  ManagersGetVkId,
+} from "./js/ApiClassesEmployees";
+import ButtonIcon from "@/components/ButtonIcon.vue";
 
 const router = useRouter();
 if (!isManager()) router.push({ name: "managerAuth" });
@@ -156,7 +177,12 @@ const vClickOutside = {
 const formData = ref({
   name: "",
   type: "",
+  userVklink: "",
+});
+
+const handleVkId = ref({
   userVkId: "",
+  checked: false,
 });
 
 // Опции для SelectMain
@@ -173,9 +199,8 @@ const fillManagerData = () => {
   });
 
   if (roleName) {
-    // Если найден, создаем новый объект с необходимыми полями
     const result = {
-      userVkId: formData.value.userVkId, // Из formData
+      userVkId: handleVkId.value.userVkId.toString(), // Из formData
       type: roleName.name, // id из найденного объекта
       name: formData.value.name, // Из formData
     };
@@ -187,7 +212,7 @@ const fillManagerData = () => {
 };
 
 //Функция клика для создания нового сотрудника
-const handleClick = () => {
+const handleAddEmployee = () => {
   const result = fillManagerData(); // Получаем объект с данными
   if (result) {
     // Если объект не пустой
@@ -216,6 +241,30 @@ function getAllEmployeesList() {
       //неуспешный результат
       errorMessage.value = err;
       isLoading.value = false;
+    }
+  );
+}
+
+//Получения vkid по ссылке на страницу vk
+function getEmployeeVkId() {
+  let requestClass = new ManagersGetVkId();
+
+  requestClass.url = formData.value.userVklink;
+  requestClass.request(
+    "/managers/get_vk_id.php",
+    "manager",
+    function (response) {
+      //успешный результат
+      if (response.success === "1") {
+        handleVkId.value.userVkId = response.vkInfo.vkId;
+        handleVkId.value.checked = true;
+      } else {
+        errorMessage.value = err;
+      }
+    },
+    function (err) {
+      //неуспешный результат
+      errorMessage.value = err;
     }
   );
 }
@@ -281,11 +330,13 @@ onMounted(() => {
   line-height: 42px;
 }
 .employees__box-employees {
+  width: 100%;
+  max-width: 600px;
   display: flex;
   flex-direction: column;
   justify-content: center;
   gap: 15px;
-  width: fit-content;
+  align-items: center;
 }
 .employees__add-employees-btn {
   position: sticky;
@@ -333,5 +384,12 @@ onMounted(() => {
 }
 .employees__new-employees-link {
   text-decoration: none;
+}
+.employees__btn-check-btn {
+  margin-bottom: 2px;
+}
+.employees__vk-box {
+  display: flex;
+  align-items: end;
 }
 </style>
