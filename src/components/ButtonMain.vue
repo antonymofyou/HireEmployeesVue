@@ -1,8 +1,9 @@
 <template>
   <div class="button" :class="alignClass">
     <button
-      class="button__control"
+      v-bind="$attrs"
       :disabled="isButtonDisabled"
+      class="button__control"
     >
       <span v-if="isActive" class="button__spinner"></span>
       <div class="button__icon" v-if="$slots['icon'] && !isActive" >

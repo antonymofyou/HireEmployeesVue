@@ -36,14 +36,133 @@
     </div>
   </section>
 
+  <!-- Модалка добавления периода -->
+  <Modal
+    :show="isAddPeriodModalVisible"
+    class="modal-add-period"
+    @click.self="closeAddPeriodModal"
+  >
+    <template #header>
+      <div>Добавление периода</div>
+    </template>
+
+    <template #body>
+      <form
+        id="add-period-form"
+        class="modal-add-period__form"
+        @submit.prevent="handleAddPeriodFormSubmit"
+      >
+        <InputSimple
+          v-model="newPeriod.forDate"
+          placeholder="Дата (yyyy-mm-dd)"
+          pattern="\d{4}-\d{2}-\d{2}"
+        />
+        <InputSimple
+          v-model="newPeriod.periodStart"
+          placeholder="Начало"
+        />
+        <InputSimple
+          v-model="newPeriod.periodEnd"
+          placeholder="Конец"
+        />
+        <InputSimple
+          v-model="newPeriod.report"
+          placeholder="Текст отчёта"
+          input-type="textarea"
+        />
+      </form>
+    </template>
+
+    <template #footer-control-buttons>
+      <div class="modal-add-period__footer">
+        <ButtonMain
+          :is-disabled="isAddPeriodButtonDisabled"
+          form="add-period-form"
+        >
+          <template #text>Создать</template>
+        </ButtonMain>
+      </div>
+    </template>
+  </Modal>
+
+  <!-- Модалка изменения периода -->
+  <Modal
+    :show="isEditPeriodModalVisible"
+    class="modal-edit-period"
+    @click.self="closeEditPeriodModal"
+  >
+    <template #header>
+      <div>Изменение периода</div>
+    </template>
+
+    <template #body>
+      <form
+        id="edit-period-form"
+        class="modal-edit-period__form"
+        @submit.prevent="handleAddPeriodFormSubmit"
+      >
+        <InputSimple
+          v-model="newPeriod.forDate"
+          placeholder="Дата (yyyy-mm-dd)"
+          pattern="\d{4}-\d{2}-\d{2}"
+        />
+        <InputSimple
+          v-model="newPeriod.periodStart"
+          placeholder="Начало"
+        />
+        <InputSimple
+          v-model="newPeriod.periodEnd"
+          placeholder="Конец"
+        />
+        <InputSimple
+          v-model="newPeriod.report"
+          placeholder="Текст отчёта"
+          input-type="textarea"
+        />
+      </form>
+    </template>
+
+    <template #footer-control-buttons>
+      <div class="modal-edit-period__footer">
+        <ButtonMain
+          :is-disabled="isAddPeriodButtonDisabled"
+          form="edit-period-form"
+        >
+          <template #text>Изменить</template>
+        </ButtonMain>
+      </div>
+    </template>
+  </Modal>
+
+  <!-- Модалка удаления периода -->
+  <Modal
+    :show="isDeletePeriodModalVisible"
+    class="modal-delete-period"
+    @click.self="closeDeletePeriodModal"
+  >
+    <template #header>
+      <div>Удалить период?</div>
+    </template>
+
+    <template #body>
+      <div class="modal-delete-period__footer">
+        <ButtonMain>
+          <template #text>Удалить</template>
+        </ButtonMain>
+      </div>
+    </template>
+  </Modal>
 </template>
 
 <script setup>
-import { onMounted, ref } from 'vue';
+import { computed, onMounted, ref } from 'vue';
 
 import TheHeader from '@/components/TheHeader.vue';
 import SpinnerMain from '@/components/SpinnerMain.vue';
 import TopSquareButton from '@/components/TopSquareButton.vue';
+import Modal from '@/components/Modal.vue';
+import InputSimple from '@/components/InputSimple.vue';
+import ButtonMain from '@/components/ButtonMain.vue';
 
 import ScheduleList from './components/ScheduleList.vue';
 
@@ -51,8 +170,39 @@ import plusIcon from '@/assets/icons/plus.svg';
 
 import { JobGetShedule } from './js/ApiClassesStandardsPage';
 
+// Идёт ли запрос за периодами
 const isJobsRequestNow = ref(false);
 
+// Новый период
+const newPeriod = ref({
+  forDate: '',
+  periodStart: '',
+  periodEnd: '',
+  report: ''
+});
+
+// Видна ли модалка добавления периода
+const isAddPeriodModalVisible = ref(false);
+// Видна ли модалка изменения периода
+const isEditPeriodModalVisible = ref(false);
+// Видна ли модалка удаления периода
+const isDeletePeriodModalVisible = ref(false);
+
+// Задизейблена ли кнопка добавления периода
+const isAddPeriodButtonDisabled = computed(() => {
+  let isDisabled = false;
+
+  for (const key in newPeriod.value) {
+    if (newPeriod.value[key].length === 0) {
+      isDisabled = true;
+      break;
+    }
+  }
+
+  return isDisabled;
+});
+
+// Моки
 const managerId = 1;
 const todayDate = new Date();
 const tomorrowDate = new Date(new Date(todayDate).setDate(todayDate.getDate() + 1));
@@ -121,16 +271,56 @@ onMounted(async () => {
   );
 });
 
+function handleAddPeriodFormSubmit(event) {
+  const form = event.target;
+
+  console.log(form.reportValidity())
+
+  console.log('Submitted: ', newPeriod.value);
+}
+
+/**
+ * Закрыть модалку добавления периода
+ */
+function closeAddPeriodModal() {
+  isAddPeriodModalVisible.value = false;
+}
+
+/**
+ * Закрыть модалку изменения периода
+ */
+function closeEditPeriodModal() {
+  isEditPeriodModalVisible.value = false;
+}
+
+/**
+ * Закрыть модалку удаления периода
+ */
+function closeDeletePeriodModal() {
+  isDeletePeriodModalVisible.value = false;
+}
+
+/**
+ * Обработка клика по кнопке добавления периода
+ */
 function handleAddButtonClick() {
-  alert('[CREATE] Under construct');
+  isAddPeriodModalVisible.value = true;
 }
 
+/**
+ * Обработка клика по изменению периода
+ * @param {Object} period - Объект периода
+ */
 function handleStartEditPeriod(period) {
-  alert('[UPDATE] Under construct ' + period.forDate);
+  isEditPeriodModalVisible.value = true;
 }
 
+/**
+ * Обработка клика по удаления периода
+ * @param {Object} period - Объект периода
+ */
 function handleDeleteEditPeriod(period) {
-  alert('[DELETE] Under construct ' + period.forDate);
+  isDeletePeriodModalVisible.value = true;
 }
 </script>
 
@@ -172,5 +362,25 @@ function handleDeleteEditPeriod(period) {
 
 .wrapper__inner {
   max-width: 400px;
+}
+
+/* Modal add, edit period */
+.modal-add-period__form,
+.modal-edit-period__form {
+  display: contents;
+}
+
+.modal-add-period__footer,
+.modal-edit-period__footer {
+  display: flex;
+  justify-content: center;
+  width: 100%;
+}
+
+/* Modal delete period */
+.modal-delete-period__footer {
+  display: flex;
+  justify-content: center;
+  width: 100%;
 }
 </style>
