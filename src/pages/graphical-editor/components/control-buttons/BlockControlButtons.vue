@@ -1,8 +1,8 @@
 <template>
     <div class="control-buttons-block">
         <ColorPicker
-            class="control-buttons-button control-buttons-color-picker"
             :color="props.activeShape.shape?.color || '#000000'"
+            @reset-color="updateShapeHandler('color', '#000000')"
             @update:color="updateShapeHandler('color', $event)"            
         >
             <template #icon>
@@ -10,8 +10,8 @@
             </template>
         </ColorPicker>
         <ColorPicker
-            class="control-buttons-button control-buttons-color-picker"
             :color="props.activeShape.shape?.borderColor || '#000000'"
+            @reset-color="updateShapeHandler('color', '#000000')"
             @update:color="updateShapeHandler('borderColor', $event)"            
         >
             <template #icon>
@@ -113,3 +113,14 @@ function updateShapeHandler(key, value) {
 }
 
 </script>
+
+<style scoped>
+
+.dropdown:deep(.dropdown__content) {
+    top: auto;
+    bottom: -8px;
+    left: 50%;
+    transform: translateY(100%) translateX(-50%);
+}
+
+</style>

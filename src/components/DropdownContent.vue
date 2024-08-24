@@ -1,5 +1,5 @@
 <template>
-    <div :class="{ 'active': isOpen }" class="dropdown">
+    <div v-click-outside="close" :class="{ 'active': isOpen }" class="dropdown">
         <button 
             @pointerup="toggle"
             @keydown.enter.space="toggle"
@@ -14,19 +14,39 @@
     </div>
 </template>
   
-<script>
-export default {
-    data() {
-      return {
-        isOpen: false,
-      };
-    },
-    methods: {
-      toggle() {
-        this.isOpen = !this.isOpen;
-      },
-    }
+<script setup>
+
+import { ref } from 'vue';
+
+const isOpen = ref(false);
+
+function toggle() {
+   isOpen.value = !isOpen.value;
+}
+
+function close() {
+    isOpen.value = false;
+}
+
+// Директива для закрытия селекта по клику снаружи
+const vClickOutside = {
+  beforeMount(el, binding) {
+    el.clickOutsideEvent = function (event) {
+      // Проверка местоположения элемента
+      if (!(el === event.target || el.contains(event.target))) {
+        // Вызываем метод после срабатывания клика снаружи
+        binding.value(event);
+      }
+    };
+    // Добавляем обработчик нажатия
+    document.addEventListener("click", el.clickOutsideEvent);
+  },
+  unmounted(el) {
+    // Удаляем обработчик при размонтировании
+    document.removeEventListener("click", el.clickOutsideEvent);
+  },
 };
+
 </script>
   
 <style scoped>

@@ -3,7 +3,7 @@
     <div class="container">
       <div class="header__control-buttons">
         <TextControlButtons
-          v-if="windowInnerWidth < breakpoint"
+          v-if="windowInnerWidth <= breakpoint"
           v-show="isTextMode"
           :active-shape="activeShape"
           @update-shape="updateShape"
@@ -34,7 +34,7 @@
       />
     </template>
     <TooltipControlButtons
-      v-if="windowInnerWidth >= breakpoint"
+      v-if="windowInnerWidth > breakpoint"
       :active-shape="activeShape"
       :mode="mode"
     >
@@ -263,15 +263,10 @@ const changeModeHandler = (event) => {
 
 :deep(.control-buttons-button),
 :deep(.control-buttons-value-picker),
-:deep(.control-buttons-color-picker),
 :deep(.dropdown__trigger) {
   background-color: var(--milk);
   padding: 6px;
   border-radius: 8px;
-}
-
-:deep(.control-buttons-color-picker::before) {
-  border-radius: 0 0 8px 8px;
 }
 
 :deep(svg){
@@ -280,16 +275,23 @@ const changeModeHandler = (event) => {
   height: 21px;
 }
 
+:deep(.control-buttons-value-picker input) {
+  width: 50px;
+}
+
 :deep(.select-box-main){
   flex: 0 0 32px;
 }
 
-:deep(.control-buttons-color-picker svg) {
-  fill: var(--mine-shaft) !important;
-}
-
-:deep(.control-buttons-value-picker input) {
-  width: 50px;
+:deep(.dropdown .dropdown__content),
+:deep(.select-box-main .options-container-main) {
+    display: flex;
+    gap: 8px;
+    box-shadow: 0px 2.5px 5px 1px rgba(34, 60, 80, 0.2);
+    border: none;
+    background-color: var(--milk);
+    padding: 6px;
+    border-radius: 8px;
 }
 
 .canvas {

@@ -28,15 +28,9 @@
                 </ControlButton>
             </template>
         </DropdownContent>
-        <!-- <ControlButton 
-            class="control-buttons-button"
-            @click="removeHighlightHandler"
-        >
-            <MarkerCancel />
-        </ControlButton> -->
         <ColorPicker
-            class="control-buttons-button control-buttons-color-picker"
             :color="props.activeShape.editor?.getAttributes('textStyle').color || '#000000'"
+            @reset-color="colorTextHandler('#000000')"
             @update:color="colorTextHandler"            
         >
             <template #icon>
@@ -44,8 +38,8 @@
             </template>
         </ColorPicker>
         <ColorPicker
-            class="control-buttons-button control-buttons-color-picker"
             :color="props.activeShape.editor?.getAttributes('highlight').color || '#000000'"
+            @reset-color="removeHighlightHandler"
             @update:color="addHighlightHandler"            
         >
             <template #icon>
@@ -115,7 +109,6 @@ import VerticalAlignTop from 'vue-material-design-icons/FormatVerticalAlignTop.v
 import FormatText from 'vue-material-design-icons/FormatText.vue'
 import Marker from 'vue-material-design-icons/Marker.vue'
 import FormatFont from 'vue-material-design-icons/FormatFont.vue';
-// import MarkerCancel from 'vue-material-design-icons/MarkerCancel.vue'
 
 const props = defineProps({
     activeShape: {
@@ -223,9 +216,9 @@ function addHighlightHandler(color) {
     props.activeShape.editor?.chain().focus().setHighlight({ color: color }).run();
 }
 
-// function removeHighlightHandler() {
-//     props.activeShape.editor?.chain().focus().unsetHighlight().run();
-// }
+function removeHighlightHandler() {
+    props.activeShape.editor?.chain().focus().unsetHighlight().run();
+}
 
 function horizontalAlignSelectHandler(id) {
     if (!props.activeShape.id) return;
@@ -269,15 +262,18 @@ function verticalAlignSelectHandler(id) {
 
 .select-box-main:deep(.options-container-main),
 .dropdown:deep(.dropdown__content) {
-    top: auto;
-    bottom: 0;
-    display: flex;
-    box-shadow: 0px 2.5px 5px 1px rgba(34, 60, 80, 0.2);
-    transform: translateY(100%);
-    border: none;
-    background-color: var(--milk);
-    padding: 6px;
-    border-radius: 8px;
+    top: -8px;
+    left: 50% !important;
+    transform: translateY(-100%) translateX(-50%);
+}
+
+@media (max-width: 768px) {
+    .select-box-main:deep(.options-container-main),
+    .dropdown:deep(.dropdown__content) {
+        top: auto;
+        bottom: -8px;
+        transform: translateY(100%) translateX(-50%);
+    }
 }
 
 .select-box-main:deep(.option-main) {
