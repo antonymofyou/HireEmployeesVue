@@ -11,7 +11,7 @@
         </ColorPicker>
         <ColorPicker
             :color="props.activeShape.shape?.borderColor || '#000000'"
-            @reset-color="updateShapeHandler('color', '#000000')"
+            @reset-color="updateShapeHandler('borderColor', '#000000')"
             @update:color="updateShapeHandler('borderColor', $event)"            
         >
             <template #icon>
@@ -108,7 +108,6 @@ const emits = defineEmits({
 // Handlers
 
 function updateShapeHandler(key, value) {
-    console.log(key, value);
     emits('updateShape', props.activeShape.id, key, value);
 }
 

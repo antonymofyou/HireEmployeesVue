@@ -25,13 +25,31 @@ const isTextMode = computed(() => {
 const isActive = computed(() => {
     return props.activeShape.id && props.activeShape.editor && isTextMode.value;
 });
-const styleTooltips = computed(() => {
-    let x = props.activeShape.shape?.x + props.activeShape.shape?.width / 2;
-    let y = props.activeShape.shape?.y;
+const positionTooltips = computed(() => {
+    let rotation = Math.round(Math.abs(props.activeShape.shape?.rotation));
+    const centerX = props.activeShape.shape?.x + props.activeShape.shape?.width / 2;
+    const centerY = props.activeShape.shape?.y + props.activeShape.shape?.height / 2;
+    const initialX = props.activeShape.shape?.x;
+    const initialY = props.activeShape.shape?.y;
+    let x = centerX;
+    let y = initialY;
+
+    if (rotation) {
+        rotation = rotation >= 90 ? 180 - rotation : rotation;
+        const radians = rotation * (Math.PI / 180);
+
+        y = Math.sin(radians) * (initialX - centerX) + Math.cos(radians) * (initialY - centerY) + centerY;
+    }
 
     return {
-        top: y + 'px',
-        left: x + 'px',
+        x,
+        y
+    }
+});
+const styleTooltips = computed(() => {
+    return {
+        top: positionTooltips.value.y + 'px',
+        left: positionTooltips.value.x + 'px',
     }
 });
 
