@@ -23,10 +23,10 @@
       </button>
     </div>
     <div class="item__arrows">
-      <svg @click.stop="moveStatus('up')" class="arrow-top-3" viewBox="0 0 5 9" :disabled="isFirst" :class="{ 'disabled-class': isFirst }">
+      <svg @click.stop="moveStatus('up')" class="arrow-top" viewBox="0 0 5 9" :disabled="isFirst" :class="{ 'disabled-class': isFirst }">
         <path d="M0.419,9.000 L0.003,8.606 L4.164,4.500 L0.003,0.394 L0.419,0.000 L4.997,4.500 L0.419,9.000 Z" />
       </svg>
-      <svg @click.stop="moveStatus('down')" class="arrow-bottom-3" viewBox="0 0 5 9" :disabled="isLast" :class="{ 'disabled-class': isLast }">
+      <svg @click.stop="moveStatus('down')" class="arrow-bottom" viewBox="0 0 5 9" :disabled="isLast" :class="{ 'disabled-class': isLast }">
         <path d="M0.419,9.000 L0.003,8.606 L4.164,4.500 L0.003,0.394 L0.419,0.000 L4.997,4.500 L0.419,9.000 Z" />
       </svg>
     </div>
@@ -122,7 +122,7 @@ const updateIsPublished = (newValue) => {
   position: relative;
   display: flex;
   align-items: flex-start;
-  z-index: 10;
+  z-index: 1;
 }
 
 .question__select {
@@ -172,8 +172,8 @@ const updateIsPublished = (newValue) => {
   right: 50px;
 }
 
-.arrow-top-3,
-.arrow-bottom-3 {
+.arrow-top,
+.arrow-bottom {
     margin: 20px 8px;
     width: 18px;
     height: 18px;
@@ -184,13 +184,13 @@ const updateIsPublished = (newValue) => {
   display: none;
 }
 
-.arrow-top-3 {
+.arrow-top {
     position: relative;
     top: 20px;
     transform: rotate(270deg);
 }
 
-.arrow-bottom-3 {
+.arrow-bottom {
     position: relative;
     bottom: -20px;
     left: -3px;
