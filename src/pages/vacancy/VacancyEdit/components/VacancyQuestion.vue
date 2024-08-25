@@ -18,19 +18,23 @@
           :options="options"
         />
       </div>
+      <div class="item__arrows">
+        <button type="button" class="question__up" @click.stop="moveStatus('up')" :disabled="isFirst" :class="{ 'disabled-class': isFirst }">
+          <svg class="arrow-top" viewBox="0 0 5 9">
+            <path d="M0.419,9.000 L0.003,8.606 L4.164,4.500 L0.003,0.394 L0.419,0.000 L4.997,4.500 L0.419,9.000 Z" />
+          </svg>
+        </button>
+        <button type="button" class="question__bottom" @click.stop="moveStatus('down')" :disabled="isLast" :class="{ 'disabled-class': isLast }">
+          <svg class="arrow-bottom" viewBox="0 0 5 9">
+            <path d="M0.419,9.000 L0.003,8.606 L4.164,4.500 L0.003,0.394 L0.419,0.000 L4.997,4.500 L0.419,9.000 Z" />
+          </svg>
+        </button>
+      </div>
       <button type="button" class="question__remove-btn" title="Удалить вопрос" @click="emit('updateShowModal', props.id)">
         <DeleteIcon class="icon"/>
       </button>
     </div>
-    <div class="item__arrows">
-      <svg @click.stop="moveStatus('up')" class="arrow-top" viewBox="0 0 5 9" :disabled="isFirst" :class="{ 'disabled-class': isFirst }">
-        <path d="M0.419,9.000 L0.003,8.606 L4.164,4.500 L0.003,0.394 L0.419,0.000 L4.997,4.500 L0.419,9.000 Z" />
-      </svg>
-      <svg @click.stop="moveStatus('down')" class="arrow-bottom" viewBox="0 0 5 9" :disabled="isLast" :class="{ 'disabled-class': isLast }">
-        <path d="M0.419,9.000 L0.003,8.606 L4.164,4.500 L0.003,0.394 L0.419,0.000 L4.997,4.500 L0.419,9.000 Z" />
-      </svg>
     </div>
-  </div>
 </transition-group>
 </template>
 
@@ -141,11 +145,13 @@ const updateIsPublished = (newValue) => {
 
 .question__label {
   font-weight: 600;
+  z-index: 99999;
 }
 
 .question__footer {
   display: flex;
   justify-content: space-between;
+  align-items: center;
   margin-top: 5px;
 }
 .question__remove-btn {
@@ -164,17 +170,22 @@ const updateIsPublished = (newValue) => {
   transform: scale(2.1);
 }
 
+.question__up,
+.question__bottom{
+  background-color: transparent;
+  border: none;
+}
+
 .item__arrows {
   display: flex;
-  position: absolute;
-  bottom: 7px;
+  justify-content: end;
+  margin-left: auto;
+  margin-right: 30px;
   gap: 28px;
-  right: 50px;
 }
 
 .arrow-top,
 .arrow-bottom {
-    margin: 20px 8px;
     width: 18px;
     height: 18px;
     cursor: pointer;
@@ -185,15 +196,10 @@ const updateIsPublished = (newValue) => {
 }
 
 .arrow-top {
-    position: relative;
-    top: 20px;
     transform: rotate(270deg);
 }
 
 .arrow-bottom {
-    position: relative;
-    bottom: -20px;
-    left: -3px;
     transform: rotate(90deg);
 }
 
@@ -211,11 +217,4 @@ const updateIsPublished = (newValue) => {
   transform: (translateY(0));
 }
 
-@media (max-width: 380px) {
-  .item__arrows{
-    transition: all 0.5s;
-    gap: 2px;
-    right: 20px;
-  }
-}
 </style>
