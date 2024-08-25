@@ -5,7 +5,7 @@
     @click.self="$emit('close')"
   >
     <template #header>
-      <div>Добавление дня</div>
+      <div>{{ props.title }}</div>
     </template>
 
     <template #body>
@@ -29,7 +29,7 @@
           </label>
         </div>
         <InputSimple
-          v-model="newDay.spentTime"
+          v-model="newDay.workTime"
           :disabled="isRestDisabled"
           placeholder="Рабочий день (в минутах)"
           pattern="\d+"
@@ -56,7 +56,7 @@
           :is-disabled="isSubmitButtonDisabled"
           form="add-day-form"
         >
-          <template #text>Создать</template>
+          <template #text>{{ props.buttonText }}</template>
         </ButtonMain>
       </div>
     </template>
@@ -64,7 +64,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref, computed } from 'vue';
+import { ref, computed, watch } from 'vue';
 
 import Modal from '@/components/Modal.vue';
 import ButtonMain from '@/components/ButtonMain.vue';
@@ -80,24 +80,66 @@ const props = defineProps({
     required: false,
     default: false
   },
+  title: {
+    type: String,
+    required: true
+  },
+  buttonText: {
+    type: String,
+    required: false,
+    default: 'Подтвердить'
+  },
+  // Значения по умолчанию
+  defaultDay: {
+    type: Object,
+    required: false
+  }
 });
 
 const emit = defineEmits(['submit', 'close']);
 
-const newDay = ref({
-  date: '',
-  isWeekend: false,
-  spentTime: '',
-  report: '',
-  comment: ''
+// Фабрика для нового дня
+const initNewDay = () => ({
+  date: props.defaultDay?.date ?? '',
+  isWeekend: props.defaultDay?.isWeekend ?? false,
+  workTime: String(props.defaultDay?.workTime ?? ''),
+  report: props.defaultDay?.report ?? '',
+  comment: props.defaultDay?.comment ?? ''
+});
+
+// Новый день для заполнения
+const newDay = ref(initNewDay());
+
+// Следим за props.isShow, т.к. иначе - defaultDay всегда будет пустым
+watch(() => props.isShow, () => {
+  newDay.value = initNewDay();
 });
 
 // Заблокирована ли кнопка отправки формы
 const isSubmitButtonDisabled = computed(() => {
   let result = false;
 
+  // [x] Если дата пуста при выходном дне - дизейбл
+  // [x] Если все значения пусты при не выходном дне - дизейбл
+  // [x] Если все значения равны значениям по умолчанию - дизейбл
+
   if (newDay.value.isWeekend) {
     result = newDay.value.date.length === 0;
+  } else if (props.defaultDay) {
+    result = true;
+
+    for (const key in newDay.value) {
+      const newValue = newDay.value[key];
+      const oldValue = props.defaultDay[key];
+
+      console.log(newValue, oldValue);
+
+      // Обязательно "!=", не опечатка
+      if (newValue != oldValue) {
+        result = false;
+        break;
+      }
+    }
   } else {
     for (const key in newDay.value) {
       const value = newDay.value[key];

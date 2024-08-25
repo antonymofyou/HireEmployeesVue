@@ -69,8 +69,21 @@
    <ModalDay
     :is-show="isAddDayModalVisible"
     :is-loading="isAddDayRequestNow"
+    title="Добавление дня"
+    button-text="Добавить"
     @submit="daysActions.addNewDay"
     @close="modalsActions.closeAddDayModal"
+   />
+
+   <!-- Модалка изменения рабочего дня -->
+   <ModalDay
+    :is-show="isEditDayModalVisible"
+    :is-loading="isEditDayRequestNow"
+    :default-day="activeDayFromStore"
+    title="Изменение дня"
+    button-text="Изменить"
+    @submit="daysActions.editActiveDay"
+    @close="modalsActions.closeEditDayModal"
    />
 
   <!-- Модалка удаления рабочего дня -->
@@ -85,7 +98,7 @@
 </template>
 
 <script setup>
-import { onMounted, onUnmounted, ref } from 'vue';
+import { computed, onMounted, onUnmounted, ref, watch } from 'vue';
 
 import TheHeader from '@/components/TheHeader.vue';
 import SpinnerMain from '@/components/SpinnerMain.vue';
@@ -105,6 +118,8 @@ const isJobsRequestNow = ref(false);
 
 // Идёт ли запрос за добавлением дня
 const isAddDayRequestNow = ref(false);
+// Идёт ли запрос за измененим дня
+const isEditDayRequestNow = ref(false);
 // Идёт ли запрос за удалением дня
 const isDeleteDayRequestNow = ref(false);
 
@@ -120,6 +135,8 @@ const isDeletePeriodModalVisible = ref(false);
 
 // Видна ли модалка добавления рабочего дня
 const isAddDayModalVisible = ref(false);
+// Видна ли модалка изменения рабочего дня
+const isEditDayModalVisible = ref(false);
 // Видна ли модалка удаления рабочего дня
 const isDeleteDayModalVisible = ref(false);
 
@@ -155,6 +172,16 @@ const initializators = {
 
 // Активный день
 const activeDay = ref(initializators.initActiveDay());
+// Активный день из состояния
+const activeDayFromStore = computed(() => {
+  return days.value.find((d) => {
+    return d.dayId === activeDay.value.dayId;
+  });
+});
+
+watch(activeDayFromStore, (newVal) => {
+  console.log(newVal);
+});
 
 // Активный период
 const activePeriod = ref(initializators.initActivePeriod());
@@ -188,7 +215,8 @@ const callbacks = {
    * @param {Number} dayId - ID дня
    */
   handleDayEditDaysList(dayId) {
-    alert('[EDIT]: ' + dayId);
+    activeDay.value.dayId = dayId;
+    isEditDayModalVisible.value = true;
   },
 
   /**
@@ -395,10 +423,32 @@ const daysActions = {
 
     // @TODO Запрос за добавлением дня
     await new Promise((resolve) => setTimeout(resolve, 3000));
+    console.group('Добавление дня');
     console.log('Добавляю новый день: ', newDay);
+    console.groupEnd();
 
     isAddDayRequestNow.value = false;
     modalsActions.closeAddDayModal();
+  },
+
+  /**
+   * Изменение выбранного дня
+   * @param {Object} editedDay - изменённый день
+   */
+  async editActiveDay(editedDay) {
+    isEditDayRequestNow.value = true;
+
+    // @TODO Запрос за изменением дня
+    await new Promise((resolve) => setTimeout(resolve, 3000));
+    console.group('Изменение дня');
+    console.log('Меняю день: ', activeDay.value.dayId);
+    console.log('Старые значения: ', activeDayFromStore.value);
+    console.log('Новые значения: ', editedDay);
+    console.groupEnd();
+
+    isEditDayRequestNow.value = false;
+    modalsActions.closeEditDayModal();
+    activeDay.value = initializators.initActiveDay();
   },
 
   /**
@@ -409,7 +459,9 @@ const daysActions = {
 
     // @TODO запрос за удалением
     await new Promise((resolve) => setTimeout(resolve, 3000));
+    console.group('Удаление дня');
     console.log('Удаляю: ', activeDay.value.dayId);
+    console.groupEnd();
 
     isDeleteDayRequestNow.value = false;
 
@@ -421,6 +473,7 @@ const daysActions = {
     delete periodsTimes[activeDay.value.dayId];
 
     modalsActions.closeDeleteDayModal();
+    activeDay.value = initializators.initActiveDay();
   }
 };
 
@@ -488,6 +541,13 @@ const modalsActions = {
    */
   closeAddDayModal() {
     isAddDayModalVisible.value = false;
+  },
+
+  /**
+   * Закрыть модалку редактирования дня
+   */
+  closeEditDayModal() {
+    isEditDayModalVisible.value = false;
   },
 
   /**
