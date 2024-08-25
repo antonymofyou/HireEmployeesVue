@@ -12,8 +12,12 @@
       <div class="day__periods">
         <PeriodItem
           v-for="period in props.periods"
+          :period-id="period.periodId"
           :start="formatTime(period.periodStart)"
           :end="formatTime(period.periodEnd)"
+          :is-active="props.activePeriodId === period.periodId"
+          @select="handleSelectPeriodItem"
+          @delete="handleDeletePeriodItem"
         />
 
         <AddButton />
@@ -78,23 +82,30 @@ const props = defineProps({
     type: Array,
     required: false,
     default: () => []
+  },
+  activePeriodId: {
+    type: Number,
+    required: false,
+    default: null
   }
 });
 
-const emit = defineEmits(['editClick', 'deleteClick']);
+const emit = defineEmits(['periodSelect', 'periodDelete']);
 
 /**
- * Обработка клика по кнопке редактирования
+ * Обработка выделения периода
+ * @param {Object} periodEmitted - Период
  */
-function handleEditButtonClick() {
-  emit('editClick');
+function handleSelectPeriodItem(periodEmitted) {
+  emit('periodSelect', periodEmitted);
 }
 
 /**
- * Обработка клика по кнопке удаления
+ * Обработка удаления периода
+ * @param {Object} periodEmitted - Период
  */
-function handleDeleteButtonClick() {
-  emit('deleteClick');
+function handleDeletePeriodItem(periodEmitted) {
+  emit('periodDelete', periodEmitted);
 }
 </script>
 

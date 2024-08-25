@@ -33,8 +33,9 @@
             <DaysList
               :days="days"
               :periods="periodsTimes"
-              @start-edit="handleStartEditPeriod"
-              @start-delete="handleDeleteEditPeriod"
+              :active-period-id="activePeriod.id"
+              @period-select="handlePeriodSelectDaysList"
+              @period-delete="handlePeriodDeleteDaysList"
             />
           </div>
         </div>
@@ -139,7 +140,7 @@
 </template>
 
 <script setup>
-import { computed, onMounted, ref, watchEffect } from 'vue';
+import { computed, onMounted, onUnmounted, ref, watch, watchEffect } from 'vue';
 
 import TheHeader from '@/components/TheHeader.vue';
 import SpinnerMain from '@/components/SpinnerMain.vue';
@@ -163,6 +164,47 @@ const isAddNewPeriodRequestNow = ref(false);
 const isEditPeriodRequestNow = ref(false);
 // Идёт ли запрос за удалением периода
 const isDeletePeriodRequestNow = ref(false);
+
+// Активный период (ID и действие над ним)
+const activePeriod = ref({
+  id: null,
+  action: null
+});
+
+function resetActivePeriod() {
+  if (!activePeriod.value) return;
+
+  activePeriod.value = {
+    id: null,
+    action: null
+  };
+}
+
+watch(activePeriod, () => {
+  console.log(activePeriod.value, '<<< active period');
+})
+
+function handlePeriodSelectDaysList(periodEmitted) {
+  activePeriod.value = {
+    id: periodEmitted.id,
+    action: null
+  };
+}
+
+function handlePeriodDeleteDaysList(periodEmitted) {
+  activePeriod.value = {
+    id: periodEmitted.id,
+    action: periodEmitted.action
+  };
+}
+
+onMounted(() => {
+  document.addEventListener('click', resetActivePeriod);
+});
+
+onUnmounted(() => {
+  document.removeEventListener('click', resetActivePeriod);
+});
 
 /**
  * Период

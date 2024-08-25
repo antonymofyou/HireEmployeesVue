@@ -2,6 +2,7 @@
   <div class="actions-buttons">
     <ButtonIcon
       class="button-icon"
+      @click.stop="$emit('delete')"
     >
       <template #icon>
         <IconCrossDelete class="button-icon__icon" />

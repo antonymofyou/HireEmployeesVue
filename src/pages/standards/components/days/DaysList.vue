@@ -10,6 +10,9 @@
       :is-weekend="day.isWeekend"
       :comment="day.comment"
       :periods="props.periods[day.dayId]"
+      :active-period-id="props.activePeriodId"
+      @period-select="handlePeriodSelectDayItem"
+      @period-delete="handlePeriodDeleteDayItem"
       @edit-click="handleEditClickPeriodItem(period)"
       @delete-click="handleDeleteClickPeriodItem(period)"
     />
@@ -30,28 +33,32 @@ const props = defineProps({
   periods: {
     type: Array,
     required: true
+  },
+
+  // ID выбранного периода
+  activePeriodId: {
+    type: Number,
+    required: false,
+    default: null
   }
 });
 
-const emit = defineEmits({
-  startEdit: (payload) => typeof payload === 'object' && payload !== null,
-  startDelete: (payload) => typeof payload === 'object' && payload !== null
-});
+const emit = defineEmits(['periodSelect', 'periodDelete']);
 
 /**
- * Обработка клика по редактированию периода
- * @param {Object} period - Объект периода
+ * Обработка события выделения периода
+ * @param {Object} periodEmitted - Период
  */
-function handleEditClickPeriodItem(period) {
-  emit('startEdit', period);
+function handlePeriodSelectDayItem(periodEmitted) {
+  emit('periodSelect', periodEmitted);
 }
 
 /**
- * Обработка клика по удалению периода
- * @param {Object} period - Объект периода
+ * Обработка события удаления периода
+ * @param {Object} periodEmitted - Период
  */
-function handleDeleteClickPeriodItem(period) {
-  emit('startDelete', period);
+function handlePeriodDeleteDayItem(periodEmitted) {
+  emit('periodDelete', periodEmitted);
 }
 </script>
 
