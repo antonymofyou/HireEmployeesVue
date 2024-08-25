@@ -73,9 +73,10 @@ function handlePeriodSelectDayItem(periodEmitted) {
 
 /**
  * Обработка события добавления периода
+ * @param {Object} periodEmitted - Период
  */
-function handlePeriodAddDayItem() {
-  emit('periodAdd');
+function handlePeriodAddDayItem(periodEmitted) {
+  emit('periodAdd', periodEmitted);
 }
 
 /**

@@ -10,6 +10,7 @@
       <TopSquareButton
         :icon="plusIcon"
         class="top-button"
+        @click="callbacks.startAddNewDay"
       />
     </div>
 
@@ -45,48 +46,42 @@
     </div>
   </section>
 
+  <!-- Модалка добавления периода -->
   <ModalAddPeriod
-    v-if="days[0]"
     :is-show="isAddPeriodModalVisible"
     :is-loading="isAddNewPeriodRequestNow"
-    :for-day="days[0]"
+    :for-day="helpers.getDayById(activePeriod.dayId) ?? {}"
     @close="modalsActions.closeAddPeriodModal"
     @period-add="periodsActions.addNewPeriod"
   />
 
   <!-- Модалка удаления периода -->
-  <Modal
-    :show="isDeletePeriodModalVisible"
-    class="modal-delete-period"
-    @click.self="modalsActions.closeDeletePeriodModal"
-  >
-    <template #header>
-      <div class="modal-delete-period__header">
-        <span>Удалить период?</span>
-      </div>
-    </template>
+  <ModalConfirm
+    :is-show="isDeletePeriodModalVisible"
+    :is-loading="isDeletePeriodRequestNow"
+    title="Удалить период?"
+    button-text="Удалить"
+    @confirm="periodsActions.deleteSelectedPeriod"
+    @close="modalsActions.closeDeletePeriodModal"
+  />
 
-    <template #body>
-      <div class="modal-delete-period__footer">
-        <ButtonMain
-          :is-active="isDeletePeriodRequestNow"
-          @click="periodsActions.deleteSelectedPeriod"
-        >
-          <template #text>Удалить</template>
-        </ButtonMain>
-      </div>
-    </template>
-  </Modal>
+  <!-- Модалка удаления рабочего дня -->
+   <ModalConfirm
+    :is-show="isDeleteDayModalVisible"
+    :is-loading="isDeleteDayRequestNow"
+    title="Удалить рабочий день?"
+    button-text="Удалить"
+    @confirm="daysActions.deleteSelectedDay"
+    @close="modalsActions.closeDeleteDayModal"
+   />
 </template>
 
 <script setup>
-import { onMounted, onUnmounted, ref } from 'vue';
+import { onMounted, onUnmounted, ref, watch } from 'vue';
 
 import TheHeader from '@/components/TheHeader.vue';
 import SpinnerMain from '@/components/SpinnerMain.vue';
 import TopSquareButton from '@/components/TopSquareButton.vue';
-import Modal from '@/components/Modal.vue';
-import ButtonMain from '@/components/ButtonMain.vue';
 
 import DaysList from './components/days/DaysList.vue';
 
@@ -94,9 +89,14 @@ import plusIcon from '@/assets/icons/plus.svg';
 
 import { JobGetShedule } from './js/ApiClassesStandardsPage';
 import ModalAddPeriod from './components/modals/ModalAddPeriod.vue';
+import ModalConfirm from './components/modals/ModalConfirm.vue';
 
 // Идёт ли запрос за периодами (инициализация)
 const isJobsRequestNow = ref(false);
+
+// Идёт ли запрос за удалением дня
+const isDeleteDayRequestNow = ref(false);
+
 // Идёт ли запрос за добавлением периода
 const isAddNewPeriodRequestNow = ref(false);
 // Идёт ли запрос за удалением периода
@@ -106,6 +106,9 @@ const isDeletePeriodRequestNow = ref(false);
 const isAddPeriodModalVisible = ref(false);
 // Видна ли модалка удаления периода
 const isDeletePeriodModalVisible = ref(false);
+
+// Видна ли модалка удаления рабочего дня
+const isDeleteDayModalVisible = ref(false);
 
 // Информация о днях работы
 const days = ref([]);
@@ -125,11 +128,27 @@ const initializators = {
       dayId: null,
       action: null
     };
-  } 
+  },
+
+  /**
+   * Инициализация активного дня
+   */
+  initActiveDay() {
+    return {
+      dayId: null
+    };
+  }
 };
+
+// Активный день
+const activeDay = ref(initializators.initActiveDay());
 
 // Активный период
 const activePeriod = ref(initializators.initActivePeriod());
+
+watch(activePeriod, (newVal) => {
+  console.log(newVal)
+})
 
 // Вспомогательные функции
 const helpers = {
@@ -148,7 +167,8 @@ const helpers = {
    * @param {Number} id - ID дня
    */
   getDayById(id) {
-    return days.value.find((d) => d.id === id);
+    const result = days.value.find((d) => d.dayId === id);
+    return result;
   }
 };
 
@@ -167,7 +187,8 @@ const callbacks = {
    * @param {Number} dayId - ID дня
    */
   handleDayDeleteDaysList(dayId) {
-    alert('[DELETE]: ' + dayId);
+    activeDay.value.dayId = dayId;
+    isDeleteDayModalVisible.value = true;
   },
 
   /**
@@ -184,8 +205,11 @@ const callbacks = {
 
   /**
    * Обработка события добавления периода
+   * @param {Object} periodEmitted - Период
    */
-  handlePeriodAddDaysList() {
+  handlePeriodAddDaysList(periodEmitted) {
+    console.log('Period = ', periodEmitted)
+    activePeriod.value.dayId = periodEmitted.dayId;
     isAddPeriodModalVisible.value = true;
   },
 
@@ -201,6 +225,13 @@ const callbacks = {
       dayId: periodEmitted.dayId,
       action: periodEmitted.action
     };
+  },
+
+  /**
+   * Начать процесс добавления нового дня
+   */
+  startAddNewDay() {
+    alert('[ADD]');
   }
 };
 
@@ -248,11 +279,53 @@ onMounted(async () => {
           reportId: 1,
           isWeekend: 0,
           comment: 'Comment about this date'
-        }
+        },
+        {
+          dayId: 2,
+          date: todayDate.toLocaleDateString('en-CA'),
+          workTime: 4,
+          report: 'Lorem ipsum dolor sit amet 2',
+          reportId: 1,
+          isWeekend: 0,
+          comment: 'Comment about this date 2'
+        },
       ];
 
       periodsTimes.value = {
         1: [
+          {
+            periodId: 1,
+            periodStart: new Date(todayDate).setHours(8),
+            periodEnd: new Date(todayDate).setHours(13)
+          },
+          {
+            periodId: 2,
+            periodStart: new Date(todayDate).setHours(14),
+            periodEnd: new Date(todayDate).setHours(17)
+          },
+          {
+            periodId: 3,
+            periodStart: new Date(todayDate).setHours(14),
+            periodEnd: new Date(todayDate).setHours(17)
+          },
+          {
+            periodId: 4,
+            periodStart: new Date(todayDate).setHours(14),
+            periodEnd: new Date(todayDate).setHours(17)
+          },
+          {
+            periodId: 5,
+            periodStart: new Date(todayDate).setHours(14),
+            periodEnd: new Date(todayDate).setHours(17)
+          },
+          {
+            periodId: 6,
+            periodStart: new Date(todayDate).setHours(14),
+            periodEnd: new Date(todayDate).setHours(17)
+          }
+        ],
+
+        2: [
           {
             periodId: 1,
             periodStart: new Date(todayDate).setHours(8),
@@ -297,6 +370,31 @@ onMounted(async () => {
     }
   );
 });
+
+// Действия над днями
+const daysActions = {
+  /**
+   * Удаление выбранного дня
+   */
+  async deleteSelectedDay() {
+    isDeleteDayRequestNow.value = true;
+
+    // @TODO запрос за удалением
+    await new Promise((resolve) => setTimeout(resolve, 3000));
+    console.log('Удаляю: ', activeDay.value.dayId);
+
+    isDeleteDayRequestNow.value = false;
+
+    // Моковое удаление
+    days.value = days.value.filter((day) => {
+      return day.dayId !== activeDay.value.dayId;
+    });
+
+    delete periodsTimes[activeDay.value.dayId];
+
+    modalsActions.closeDeleteDayModal();
+  }
+};
 
 // Действия над периодами
 const periodsActions = {
@@ -355,6 +453,13 @@ const modalsActions = {
    */
   closeDeletePeriodModal() {
     isDeletePeriodModalVisible.value = false;
+  },
+
+  /**
+   * Закрыть модалку удаления дня
+   */
+  closeDeleteDayModal() {
+    isDeleteDayModalVisible.value = false;
   }
 };
 </script>
@@ -419,19 +524,6 @@ const modalsActions = {
 
 .modal-add-period__footer,
 .modal-edit-period__footer {
-  display: flex;
-  justify-content: center;
-  width: 100%;
-}
-
-/* Modal delete period */
-.modal-delete-period__header {
-  display: flex;
-  flex-direction: column;
-  gap: 10px;
-}
-
-.modal-delete-period__footer {
   display: flex;
   justify-content: center;
   width: 100%;
