@@ -65,6 +65,14 @@
     @close="modalsActions.closeDeletePeriodModal"
   />
 
+  <!-- Модалка добавления рабочего дня -->
+   <ModalDay
+    :is-show="isAddDayModalVisible"
+    :is-loading="isAddDayRequestNow"
+    @submit="daysActions.addNewDay"
+    @close="modalsActions.closeAddDayModal"
+   />
+
   <!-- Модалка удаления рабочего дня -->
    <ModalConfirm
     :is-show="isDeleteDayModalVisible"
@@ -77,23 +85,26 @@
 </template>
 
 <script setup>
-import { onMounted, onUnmounted, ref, watch } from 'vue';
+import { onMounted, onUnmounted, ref } from 'vue';
 
 import TheHeader from '@/components/TheHeader.vue';
 import SpinnerMain from '@/components/SpinnerMain.vue';
 import TopSquareButton from '@/components/TopSquareButton.vue';
 
 import DaysList from './components/days/DaysList.vue';
+import ModalAddPeriod from './components/modals/ModalAddPeriod.vue';
+import ModalConfirm from './components/modals/ModalConfirm.vue';
+import ModalDay from './components/modals/ModalDay.vue';
 
 import plusIcon from '@/assets/icons/plus.svg';
 
 import { JobGetShedule } from './js/ApiClassesStandardsPage';
-import ModalAddPeriod from './components/modals/ModalAddPeriod.vue';
-import ModalConfirm from './components/modals/ModalConfirm.vue';
 
 // Идёт ли запрос за периодами (инициализация)
 const isJobsRequestNow = ref(false);
 
+// Идёт ли запрос за добавлением дня
+const isAddDayRequestNow = ref(false);
 // Идёт ли запрос за удалением дня
 const isDeleteDayRequestNow = ref(false);
 
@@ -107,6 +118,8 @@ const isAddPeriodModalVisible = ref(false);
 // Видна ли модалка удаления периода
 const isDeletePeriodModalVisible = ref(false);
 
+// Видна ли модалка добавления рабочего дня
+const isAddDayModalVisible = ref(false);
 // Видна ли модалка удаления рабочего дня
 const isDeleteDayModalVisible = ref(false);
 
@@ -145,10 +158,6 @@ const activeDay = ref(initializators.initActiveDay());
 
 // Активный период
 const activePeriod = ref(initializators.initActivePeriod());
-
-watch(activePeriod, (newVal) => {
-  console.log(newVal)
-})
 
 // Вспомогательные функции
 const helpers = {
@@ -231,7 +240,7 @@ const callbacks = {
    * Начать процесс добавления нового дня
    */
   startAddNewDay() {
-    alert('[ADD]');
+    isAddDayModalVisible.value = true;
   }
 };
 
@@ -252,7 +261,7 @@ const tomorrowDate = new Date(new Date(todayDate).setDate(todayDate.getDate() + 
 onMounted(async () => {
   isJobsRequestNow.value = true;
 
-  // await new Promise((resolve) => setTimeout(resolve, 3000));
+  await new Promise((resolve) => setTimeout(resolve, 200));
 
   const jobGetScheduleInstance = new JobGetShedule();
 
@@ -260,119 +269,138 @@ onMounted(async () => {
   jobGetScheduleInstance.filterStartDate = String(todayDate.getTime());
   jobGetScheduleInstance.filterEndDate = String(tomorrowDate.getTime());
 
-  jobGetScheduleInstance.request(
-    '/job/get_shedule.php',
-    'manager',
-    (response) => {
-      console.log(response, '<<<');
-      isJobsRequestNow.value = false;
+  days.value = [
+    {
+      dayId: 1,
+      date: todayDate.toLocaleDateString('en-CA'),
+      workTime: 8,
+      report: 'Lorem ipsum dolor sit amet',
+      reportId: 1,
+      isWeekend: 0,
+      comment: 'Comment about this date'
     },
-    (error) => {
-      console.log(error, '@@@');
+    {
+      dayId: 2,
+      date: todayDate.toLocaleDateString('en-CA'),
+      workTime: 4,
+      report: 'Lorem ipsum dolor sit amet 2',
+      reportId: 1,
+      isWeekend: 0,
+      comment: 'Comment about this date 2'
+    },
+  ];
 
-      days.value = [
-        {
-          dayId: 1,
-          date: todayDate.toLocaleDateString('en-CA'),
-          workTime: 8,
-          report: 'Lorem ipsum dolor sit amet',
-          reportId: 1,
-          isWeekend: 0,
-          comment: 'Comment about this date'
-        },
-        {
-          dayId: 2,
-          date: todayDate.toLocaleDateString('en-CA'),
-          workTime: 4,
-          report: 'Lorem ipsum dolor sit amet 2',
-          reportId: 1,
-          isWeekend: 0,
-          comment: 'Comment about this date 2'
-        },
-      ];
+  periodsTimes.value = {
+    1: [
+      {
+        periodId: 1,
+        periodStart: new Date(todayDate).setHours(8),
+        periodEnd: new Date(todayDate).setHours(13)
+      },
+      {
+        periodId: 2,
+        periodStart: new Date(todayDate).setHours(14),
+        periodEnd: new Date(todayDate).setHours(17)
+      },
+      {
+        periodId: 3,
+        periodStart: new Date(todayDate).setHours(14),
+        periodEnd: new Date(todayDate).setHours(17)
+      },
+      {
+        periodId: 4,
+        periodStart: new Date(todayDate).setHours(14),
+        periodEnd: new Date(todayDate).setHours(17)
+      },
+      {
+        periodId: 5,
+        periodStart: new Date(todayDate).setHours(14),
+        periodEnd: new Date(todayDate).setHours(17)
+      },
+      {
+        periodId: 6,
+        periodStart: new Date(todayDate).setHours(14),
+        periodEnd: new Date(todayDate).setHours(17)
+      }
+    ],
 
-      periodsTimes.value = {
-        1: [
-          {
-            periodId: 1,
-            periodStart: new Date(todayDate).setHours(8),
-            periodEnd: new Date(todayDate).setHours(13)
-          },
-          {
-            periodId: 2,
-            periodStart: new Date(todayDate).setHours(14),
-            periodEnd: new Date(todayDate).setHours(17)
-          },
-          {
-            periodId: 3,
-            periodStart: new Date(todayDate).setHours(14),
-            periodEnd: new Date(todayDate).setHours(17)
-          },
-          {
-            periodId: 4,
-            periodStart: new Date(todayDate).setHours(14),
-            periodEnd: new Date(todayDate).setHours(17)
-          },
-          {
-            periodId: 5,
-            periodStart: new Date(todayDate).setHours(14),
-            periodEnd: new Date(todayDate).setHours(17)
-          },
-          {
-            periodId: 6,
-            periodStart: new Date(todayDate).setHours(14),
-            periodEnd: new Date(todayDate).setHours(17)
-          }
-        ],
+    2: [
+      {
+        periodId: 1,
+        periodStart: new Date(todayDate).setHours(8),
+        periodEnd: new Date(todayDate).setHours(13)
+      },
+      {
+        periodId: 2,
+        periodStart: new Date(todayDate).setHours(14),
+        periodEnd: new Date(todayDate).setHours(17)
+      },
+      {
+        periodId: 3,
+        periodStart: new Date(todayDate).setHours(14),
+        periodEnd: new Date(todayDate).setHours(17)
+      },
+      {
+        periodId: 4,
+        periodStart: new Date(todayDate).setHours(14),
+        periodEnd: new Date(todayDate).setHours(17)
+      },
+      {
+        periodId: 5,
+        periodStart: new Date(todayDate).setHours(14),
+        periodEnd: new Date(todayDate).setHours(17)
+      },
+      {
+        periodId: 6,
+        periodStart: new Date(todayDate).setHours(14),
+        periodEnd: new Date(todayDate).setHours(17)
+      }
+    ]
+  };
 
-        2: [
-          {
-            periodId: 1,
-            periodStart: new Date(todayDate).setHours(8),
-            periodEnd: new Date(todayDate).setHours(13)
-          },
-          {
-            periodId: 2,
-            periodStart: new Date(todayDate).setHours(14),
-            periodEnd: new Date(todayDate).setHours(17)
-          },
-          {
-            periodId: 3,
-            periodStart: new Date(todayDate).setHours(14),
-            periodEnd: new Date(todayDate).setHours(17)
-          },
-          {
-            periodId: 4,
-            periodStart: new Date(todayDate).setHours(14),
-            periodEnd: new Date(todayDate).setHours(17)
-          },
-          {
-            periodId: 5,
-            periodStart: new Date(todayDate).setHours(14),
-            periodEnd: new Date(todayDate).setHours(17)
-          },
-          {
-            periodId: 6,
-            periodStart: new Date(todayDate).setHours(14),
-            periodEnd: new Date(todayDate).setHours(17)
-          }
-        ]
-      };
+  staffData.value = {
+    id: 1,
+    userVkId: 'vkid123',
+    name: 'Ivan Ivanov',
+    isWorkingTimeNow: true
+  };
 
-      staffData.value = {
-        id: 1,
-        userVkId: 'vkid123',
-        name: 'Ivan Ivanov',
-        isWorkingTimeNow: true
-      };
+    isJobsRequestNow.value = false;
+
+  // jobGetScheduleInstance.request(
+  //   '/job/get_shedule.php',
+  //   'manager',
+  //   (response) => {
+  //     console.log(response, '<<<');
+  //     isJobsRequestNow.value = false;
+  //   },
+  //   (error) => {
+  //     console.log(error, '@@@');
+
       
-      isJobsRequestNow.value = false;
-    }
-  );
+      
+  //     isJobsRequestNow.value = false;
+  //   }
+  // );
 });
 
 // Действия над днями
 const daysActions = {
+  /**
+   * Добавление нового дня
+   * @param {Object} newDay - новый день
+   */
+  async addNewDay(newDay) {
+    isAddDayRequestNow.value = true;
+
+    // @TODO Запрос за добавлением дня
+    await new Promise((resolve) => setTimeout(resolve, 3000));
+    console.log('Добавляю новый день: ', newDay);
+
+    isAddDayRequestNow.value = false;
+    modalsActions.closeAddDayModal();
+  },
+
   /**
    * Удаление выбранного дня
    */
@@ -453,6 +481,13 @@ const modalsActions = {
    */
   closeDeletePeriodModal() {
     isDeletePeriodModalVisible.value = false;
+  },
+
+  /**
+   * Закрыть модалку добавления дня
+   */
+  closeAddDayModal() {
+    isAddDayModalVisible.value = false;
   },
 
   /**

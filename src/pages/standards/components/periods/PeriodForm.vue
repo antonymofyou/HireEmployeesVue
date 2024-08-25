@@ -1,7 +1,6 @@
 <template>
   <form
-    id="edit-period-form"
-    class="modal-edit-period__form"
+    class="period-form"
     @submit.prevent="handleSubmit"
   >
     <InputSimple
@@ -56,3 +55,11 @@ function isFieldDisabled(fieldName) {
   return props.disabledFields.includes(fieldName);
 }
 </script>
+
+<style scoped>
+.period-form {
+  display: flex;
+  flex-direction: column;
+  row-gap: 10px;
+}
+</style>

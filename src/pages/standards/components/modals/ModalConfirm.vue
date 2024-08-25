@@ -23,7 +23,7 @@
   </Modal>
 </template>
 
-<script setup lang="ts">
+<script setup>
 import ButtonMain from '@/components/ButtonMain.vue';
 import Modal from '@/components/Modal.vue';
 

@@ -15,7 +15,6 @@
         v-model:period-end="newPeriod.periodEnd"
         :disabled-fields="['date']"
         id="add-period-form"
-        class="modal-add-period__form"
         @submit="handleSubmitForm"
       />
     </template>
@@ -34,7 +33,7 @@
   </Modal>
 </template>
 
-<script setup lang="ts">
+<script setup>
 import { ref, computed } from 'vue';
 
 import Modal from '@/components/Modal.vue';
@@ -82,10 +81,6 @@ function handleSubmitForm() {
 </script>
 
 <style scoped>
-.modal-add-period__form {
-  display: contents;
-}
-
 .modal-add-period__footer {
   display: flex;
   justify-content: center;
