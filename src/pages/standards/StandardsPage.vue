@@ -16,19 +16,23 @@
 
     <div class="wrapper">
       <div class="wrapper__inner">
-        <SpinnerMain
+        <div
           v-if="isJobsRequestNow"
-          class="spinner-loader"
-        />
+          class="wrapper__spinner"
+        >
+          <SpinnerMain
+            class="spinner-loader"
+          />
+        </div>
       
         <div
           v-else
           class="schedule"
         >
           <div class="schedule__inner">
-            <ScheduleList
-              :job-periods="jobPeriods"
-              :data-by-date="dataByDate"
+            <DaysList
+              :days="days"
+              :periods="periodsTimes"
               @start-edit="handleStartEditPeriod"
               @start-delete="handleDeleteEditPeriod"
             />
@@ -135,7 +139,6 @@
 </template>
 
 <script setup>
-// @ts-check
 import { computed, onMounted, ref, watchEffect } from 'vue';
 
 import TheHeader from '@/components/TheHeader.vue';
@@ -144,8 +147,8 @@ import TopSquareButton from '@/components/TopSquareButton.vue';
 import Modal from '@/components/Modal.vue';
 import ButtonMain from '@/components/ButtonMain.vue';
 
-import ScheduleList from './components/ScheduleList.vue';
-import PeriodForm from './components/PeriodForm.vue';
+import DaysList from './components/days/DaysList.vue';
+import PeriodForm from './components/periods/PeriodForm.vue';
 
 import plusIcon from '@/assets/icons/plus.svg';
 
@@ -164,7 +167,7 @@ const isDeletePeriodRequestNow = ref(false);
 /**
  * Период
  * @typedef {Object} Period
- * @property {String} forDate - Дата периода
+ * @property {Number} peiodId - ID периода
  * @property {String} periodStart - Начало рабочего периода
  * @property {String} periodEnd - Конец рабочего периода
  * @property {String} report - Отчёт за период
@@ -258,15 +261,13 @@ const managerId = 1;
 const todayDate = new Date();
 const tomorrowDate = new Date(new Date(todayDate).setDate(todayDate.getDate() + 1));
 
-/** 
- * Расписание сотрудника. Содержит начало и конец рабочего периода для каждой даты
- */
-const jobPeriods = ref([]);
+// Информация о днях работы
+const days = ref([]);
+// Информация о периодах по дням работы. Record<DayId, period>
+const periodsTimes = ref([]);
+// Данные сотрудника
+const staffData = ref({});
 
-/**
- * Данные для графика. Содержит общее время работы, наличие отчёта, текст отчёта
- */
-const dataByDate = ref([]);
 
 onMounted(async () => {
   isJobsRequestNow.value = true;
@@ -275,7 +276,7 @@ onMounted(async () => {
 
   const jobGetScheduleInstance = new JobGetShedule();
 
-  jobGetScheduleInstance.managerId = String(managerId);
+  jobGetScheduleInstance.staffId = String(managerId);
   jobGetScheduleInstance.filterStartDate = String(todayDate.getTime());
   jobGetScheduleInstance.filterEndDate = String(tomorrowDate.getTime());
 
@@ -288,35 +289,41 @@ onMounted(async () => {
     },
     (error) => {
       console.log(error, '@@@');
-      jobPeriods.value = [
+
+      days.value = [
         {
-          managerId,
-          forDate: todayDate.toLocaleDateString('en-CA'),
-          periodStart: new Date(new Date().setHours(8)),
-          periodEnd: new Date(new Date().setHours(16)),      
-        },
-        {
-          managerId,
-          forDate: tomorrowDate.toLocaleDateString('en-CA'),
-          periodStart: new Date(new Date().setHours(8)),
-          periodEnd: new Date(new Date().setHours(16)),      
+          dayId: 1,
+          date: todayDate.toLocaleDateString('en-CA'),
+          workTime: 8,
+          report: 'Lorem ipsum dolor sit amet',
+          reportId: 1,
+          isWeekend: 0,
+          comment: 'Comment about this date'
         }
       ];
 
-      dataByDate.value = [
-        {
-          forDate: todayDate.toLocaleDateString('en-CA'),
-          workTime: 1000 * 60 * 60 * 8,
-          haveReport: true,
-          report: 'Lorem ipsum dolor sit amet'
-        },
-        {
-          forDate: tomorrowDate.toLocaleDateString('en-CA'),
-          workTime: 1000 * 60 * 60 * 8,
-          haveReport: false,
-          report: ''
-        },
-      ];
+      periodsTimes.value = {
+        1: [
+          {
+            periodId: 1,
+            periodStart: new Date(todayDate).setHours(8),
+            periodEnd: new Date(todayDate).setHours(13)
+          },
+          {
+            periodId: 2,
+            periodStart: new Date(todayDate).setHours(14),
+            periodEnd: new Date(todayDate).setHours(17)
+          }
+        ]
+      };
+
+      staffData.value = {
+        id: 1,
+        userVkId: 'vkid123',
+        name: 'Ivan Ivanov',
+        isWorkingTimeNow: true
+      };
+      
       isJobsRequestNow.value = false;
     }
   );
@@ -478,8 +485,14 @@ function handleDeleteEditPeriod(period) {
 }
 
 .wrapper__inner {
+  padding: 0 20px;
   max-width: 925px;
   width: 100%;
+}
+
+.wrapper__spinner {
+  display: flex;
+  justify-content: center;
 }
 
 /* Modal add, edit period */
