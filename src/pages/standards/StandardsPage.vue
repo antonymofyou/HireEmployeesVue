@@ -326,9 +326,14 @@ const periodsActions = {
     isDeletePeriodRequestNow.value = true;
   
     // @TODO Запрос на удаление
-    await new Promise((resolve) => setTimeout(resolve, 3000));
+    await new Promise((resolve) => setTimeout(resolve, 1000));
   
     console.log('Удаляю выбранный период: ', activePeriod.value);
+
+    // Моковое удаление
+    periodsTimes.value[activePeriod.value.dayId] = periodsTimes.value[activePeriod.value.dayId].filter((period) => {
+      return period.periodId !== activePeriod.value.periodId;
+    });
   
     isDeletePeriodRequestNow.value = false;
     modalsActions.closeDeletePeriodModal();

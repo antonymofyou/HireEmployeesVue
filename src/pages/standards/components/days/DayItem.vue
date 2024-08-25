@@ -10,15 +10,18 @@
 
     <div class="day__body">
       <div class="day__periods">
-        <PeriodItem
-          v-for="period in props.periods"
-          :period-id="period.periodId"
-          :start="formatTime(period.periodStart)"
-          :end="formatTime(period.periodEnd)"
-          :is-active="props.activePeriodId === period.periodId"
-          @select="handleSelectPeriodItem"
-          @delete="handleDeletePeriodItem"
-        />
+        <TransitionGroup name="period-tr-group">
+          <PeriodItem
+            v-for="period in props.periods"
+            :key="period.periodId"
+            :period-id="period.periodId"
+            :start="formatTime(period.periodStart)"
+            :end="formatTime(period.periodEnd)"
+            :is-active="props.activePeriodId === period.periodId"
+            @select="handleSelectPeriodItem"
+            @delete="handleDeletePeriodItem"
+          />
+        </TransitionGroup>
 
         <AddButton @click="handleClickAddButtonPeriod" />
       </div>
@@ -230,6 +233,23 @@ function handleDeletePeriodItem(periodEmitted) {
 
 .day__text:not(:last-of-type) {
   margin-bottom: 15px;
+}
+
+/* Period transition group */
+.period-tr-group-move,
+.period-tr-group-enter-active,
+.period-tr-group-leave-active {
+  transition: all 0.5s ease
+}
+
+.period-tr-group-enter-from,
+.period-tr-group-leave-to {
+  opacity: 0;
+  transform: scale(0) translate(0, 0);
+}
+
+.period-tr-group-leave-active {
+  position: absolute;
 }
 
 /* Buttons */
