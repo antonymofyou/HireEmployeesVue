@@ -20,7 +20,7 @@
           @delete="handleDeletePeriodItem"
         />
 
-        <AddButton />
+        <AddButton @click="handleClickAddButton" />
       </div>
 
       <div class="day__info">
@@ -90,14 +90,26 @@ const props = defineProps({
   }
 });
 
-const emit = defineEmits(['periodSelect', 'periodDelete']);
+const emit = defineEmits(['periodSelect', 'periodAdd', 'periodDelete']);
 
 /**
  * Обработка выделения периода
  * @param {Object} periodEmitted - Период
  */
 function handleSelectPeriodItem(periodEmitted) {
-  emit('periodSelect', periodEmitted);
+  emit('periodSelect', {
+    ...periodEmitted,
+    dayId: props.dayId
+  });
+}
+
+/**
+ * Обработка добавления периода
+ */
+ function handleClickAddButton() {
+  emit('periodAdd', {
+    dayId: props.dayId,
+  });
 }
 
 /**
@@ -105,7 +117,10 @@ function handleSelectPeriodItem(periodEmitted) {
  * @param {Object} periodEmitted - Период
  */
 function handleDeletePeriodItem(periodEmitted) {
-  emit('periodDelete', periodEmitted);
+  emit('periodDelete', {
+    ...periodEmitted,
+    dayId: props.dayId
+  });
 }
 </script>
 
@@ -145,7 +160,8 @@ function handleDeletePeriodItem(periodEmitted) {
   padding-bottom: 20px;
   border-bottom: 2px solid var(--cornflower-blue);
   display: flex;
-  column-gap: 20px;
+  gap: 20px;
+  flex-wrap: wrap;
 }
 
 .day__text {

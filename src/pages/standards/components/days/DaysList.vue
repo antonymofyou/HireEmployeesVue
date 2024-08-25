@@ -3,18 +3,18 @@
     <DayItem
       v-for="day in props.days"
       :key="day.dayId"
+      :day-id="day.dayId"
       :date="day.date"
       :work-time="day.workTime"
       :report="day.report"
       :report-id="day.reportId"
-      :is-weekend="day.isWeekend"
+      :is-weekend="Boolean(day.isWeekend)"
       :comment="day.comment"
       :periods="props.periods[day.dayId]"
       :active-period-id="props.activePeriodId"
       @period-select="handlePeriodSelectDayItem"
+      @period-add="handlePeriodAddDayItem"
       @period-delete="handlePeriodDeleteDayItem"
-      @edit-click="handleEditClickPeriodItem(period)"
-      @delete-click="handleDeleteClickPeriodItem(period)"
     />
   </div>
 </template>
@@ -31,7 +31,7 @@ const props = defineProps({
 
   // Периоды сотрудника
   periods: {
-    type: Array,
+    type: Object,
     required: true
   },
 
@@ -43,7 +43,7 @@ const props = defineProps({
   }
 });
 
-const emit = defineEmits(['periodSelect', 'periodDelete']);
+const emit = defineEmits(['periodSelect', 'periodAdd', 'periodDelete']);
 
 /**
  * Обработка события выделения периода
@@ -51,6 +51,13 @@ const emit = defineEmits(['periodSelect', 'periodDelete']);
  */
 function handlePeriodSelectDayItem(periodEmitted) {
   emit('periodSelect', periodEmitted);
+}
+
+/**
+ * Обработка события добавления периода
+ */
+function handlePeriodAddDayItem() {
+  emit('periodAdd');
 }
 
 /**

@@ -6,6 +6,7 @@
   >
     <InputSimple
       v-model="mainDateModel"
+      :disabled="isFieldDisabled('date')"
       placeholder="Дата (yyyy-mm-dd)"
       pattern="\d{4}-\d{2}-\d{2}"
     />
@@ -19,22 +20,24 @@
       placeholder="Конец (II:ss)"
       pattern="\d{2}:\d{2}"
     />
-    <InputSimple
-      v-model="periodReportModel"
-      placeholder="Текст отчёта"
-      input-type="textarea"
-    />
   </form>
 </template>
 
 <script setup>
 import InputSimple from '@/components/InputSimple.vue';
 
+const props = defineProps({
+  disabledFields: {
+    type: Array,
+    required: false,
+    default: () => []
+  }
+});
+
 // Модели для сущностей периода для двусторонней связки
-const mainDateModel = defineModel('forDate');
+const mainDateModel = defineModel('date');
 const periodStartTimeModel = defineModel('periodStart');
 const periodEndTimeModel = defineModel('periodEnd');
-const periodReportModel = defineModel('report');
 
 const emit = defineEmits(['submit']);
 
@@ -43,5 +46,13 @@ const emit = defineEmits(['submit']);
  */
 function handleSubmit() {
   emit('submit');
+}
+
+/**
+ * Проверка блокировки поля
+ * @param {String} fieldName - Имя поля
+ */
+function isFieldDisabled(fieldName) {
+  return props.disabledFields.includes(fieldName);
 }
 </script>

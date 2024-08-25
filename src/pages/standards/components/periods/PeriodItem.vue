@@ -42,11 +42,11 @@ const props = defineProps({
 
 const emit = defineEmits({
   select: (payload) => {
-    return Boolean(payload.id);
+    return Boolean(payload.periodId);
   },
 
   delete: (payload) => {
-    return Boolean(payload.id && payload.action === 'delete');
+    return Boolean(payload.periodId && payload.action === 'delete');
   }
 });
 
@@ -55,7 +55,7 @@ const emit = defineEmits({
  */
 function handlePeriodClick() {
   console.log('Select: ', props.periodId)
-  emit('select', { id: props.periodId });
+  emit('select', { periodId: props.periodId });
 }
 
 /**
@@ -63,7 +63,7 @@ function handlePeriodClick() {
  */
 function handleDeleteAction() {
   console.log('Delete: ', props.periodId)
-  emit('delete', { id: props.periodId, action: 'delete' });
+  emit('delete', { periodId: props.periodId, action: 'delete' });
 }
 </script>
 
