@@ -75,6 +75,16 @@ function handleDeleteAction() {
   display: flex;
   flex-direction: column;
   position: relative;
+  cursor: pointer;
+  transition: opacity ease 0.1s;
+}
+
+.period:hover {
+  opacity: 0.8;
+}
+
+.period:active {
+  opacity: 0.4;
 }
 
 .period__body {

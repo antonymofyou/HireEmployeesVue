@@ -12,6 +12,8 @@
       :comment="day.comment"
       :periods="props.periods[day.dayId]"
       :active-period-id="props.activePeriodId"
+      @day-edit="handleDayEditDayItem"
+      @day-delete="handleDayDeleteDayItem"
       @period-select="handlePeriodSelectDayItem"
       @period-add="handlePeriodAddDayItem"
       @period-delete="handlePeriodDeleteDayItem"
@@ -43,7 +45,23 @@ const props = defineProps({
   }
 });
 
-const emit = defineEmits(['periodSelect', 'periodAdd', 'periodDelete']);
+const emit = defineEmits(['dayEdit', 'dayDelete', 'periodSelect', 'periodAdd', 'periodDelete']);
+
+/**
+ * Обработка события редактирования дня
+ * @param {Number} dayId - ID дня
+ */
+function handleDayEditDayItem(dayId) {
+  emit('dayEdit', dayId);
+}
+
+/**
+ * Обработка события удаления дня
+ * @param {Number} dayId - ID дня
+ */
+function handleDayDeleteDayItem(dayId) {
+  emit('dayDelete', dayId);
+}
 
 /**
  * Обработка события выделения периода

@@ -33,9 +33,11 @@
               :days="days"
               :periods="periodsTimes"
               :active-period-id="activePeriod.periodId"
-              @period-select="handlePeriodSelectDaysList"
-              @period-add="handlePeriodAddDaysList"
-              @period-delete="handlePeriodDeleteDaysList"
+              @day-edit="callbacks.handleDayEditDaysList"
+              @day-delete="callbacks.handleDayDeleteDaysList"
+              @period-select="callbacks.handlePeriodSelectDaysList"
+              @period-add="callbacks.handlePeriodAddDaysList"
+              @period-delete="callbacks.handlePeriodDeleteDaysList"
             />
           </div>
         </div>
@@ -48,15 +50,15 @@
     :is-show="isAddPeriodModalVisible"
     :is-loading="isAddNewPeriodRequestNow"
     :for-day="days[0]"
-    @close="closeAddPeriodModal"
-    @period-add="addNewPeriod"
+    @close="modalsActions.closeAddPeriodModal"
+    @period-add="periodsActions.addNewPeriod"
   />
 
   <!-- Модалка удаления периода -->
   <Modal
     :show="isDeletePeriodModalVisible"
     class="modal-delete-period"
-    @click.self="closeDeletePeriodModal"
+    @click.self="modalsActions.closeDeletePeriodModal"
   >
     <template #header>
       <div class="modal-delete-period__header">
@@ -68,7 +70,7 @@
       <div class="modal-delete-period__footer">
         <ButtonMain
           :is-active="isDeletePeriodRequestNow"
-          @click="deleteSelectedPeriod"
+          @click="periodsActions.deleteSelectedPeriod"
         >
           <template #text>Удалить</template>
         </ButtonMain>
@@ -100,81 +102,10 @@ const isAddNewPeriodRequestNow = ref(false);
 // Идёт ли запрос за удалением периода
 const isDeletePeriodRequestNow = ref(false);
 
-// Активный период (ID, ID дня, и действие над ним)
-const activePeriod = ref({
-  periodId: null,
-  dayId: null,
-  action: null
-});
-
-/**
- * Сброс активного периода
- */
-function resetActivePeriod() {
-  if (!activePeriod.value) return;
-  if (isDeletePeriodModalVisible.value) return;
-
-  activePeriod.value = {
-    periodId: null,
-    dayId: null,
-    action: null
-  };
-}
-
-/**
- * Обработка выбора периода
- * @param {Object} periodEmitted - Период
- */
-function handlePeriodSelectDaysList(periodEmitted) {
-  activePeriod.value = {
-    periodId: periodEmitted.periodId,
-    dayId: periodEmitted.dayId,
-    action: null
-  };
-}
-
-/**
- * Обработка клика по кнопке удаления периода
- * @param {Object} periodEmitted - Период
- */
-function handlePeriodDeleteDaysList(periodEmitted) {
-  isDeletePeriodModalVisible.value = true;
-
-  activePeriod.value = {
-    periodId: periodEmitted.periodId,
-    dayId: periodEmitted.dayId,
-    action: periodEmitted.action
-  };
-}
-
-/**
- * Обработка клика по кнопке добавления периода
- */
-function handlePeriodAddDaysList() {
-  isAddPeriodModalVisible.value = true;
-}
-
-onMounted(() => {
-  document.addEventListener('click', resetActivePeriod);
-});
-
-onUnmounted(() => {
-  document.removeEventListener('click', resetActivePeriod);
-});
-
-function getDayById(id) {
-  return days.value.find((d) => d.id === id);
-}
-
 // Видна ли модалка добавления периода
 const isAddPeriodModalVisible = ref(false);
 // Видна ли модалка удаления периода
 const isDeletePeriodModalVisible = ref(false);
-
-// Моки
-const managerId = 1;
-const todayDate = new Date();
-const tomorrowDate = new Date(new Date(todayDate).setDate(todayDate.getDate() + 1));
 
 // Информация о днях работы
 const days = ref([]);
@@ -182,6 +113,109 @@ const days = ref([]);
 const periodsTimes = ref([]);
 // Данные сотрудника
 const staffData = ref({});
+
+// Инициализаторы
+const initializators = {
+  /**
+   * Инициализация активного периода
+   */
+  initActivePeriod() {
+    return {
+      periodId: null,
+      dayId: null,
+      action: null
+    };
+  } 
+};
+
+// Активный период
+const activePeriod = ref(initializators.initActivePeriod());
+
+// Вспомогательные функции
+const helpers = {
+  /**
+   * Сброс активного периода
+   */
+  resetActivePeriod() {
+    if (!activePeriod.value) return;
+    if (isDeletePeriodModalVisible.value) return;
+  
+    activePeriod.value = initializators.initActivePeriod();
+  },
+
+  /**
+   * Получить день по ID
+   * @param {Number} id - ID дня
+   */
+  getDayById(id) {
+    return days.value.find((d) => d.id === id);
+  }
+};
+
+// Основные функции (обработчики событий и т.д.)
+const callbacks = {
+  /**
+   * Обработка события изменения дня
+   * @param {Number} dayId - ID дня
+   */
+  handleDayEditDaysList(dayId) {
+    alert('[EDIT]: ' + dayId);
+  },
+
+  /**
+   * Обработка события удаления дня
+   * @param {Number} dayId - ID дня
+   */
+  handleDayDeleteDaysList(dayId) {
+    alert('[DELETE]: ' + dayId);
+  },
+
+  /**
+   * Обработка события выбора периода
+   * @param {Object} periodEmitted - Период
+   */
+  handlePeriodSelectDaysList(periodEmitted) {
+    activePeriod.value = {
+      periodId: periodEmitted.periodId,
+      dayId: periodEmitted.dayId,
+      action: null
+    };
+  },
+
+  /**
+   * Обработка события добавления периода
+   */
+  handlePeriodAddDaysList() {
+    isAddPeriodModalVisible.value = true;
+  },
+
+  /**
+   * Обработка события удаления периода
+   * @param {Object} periodEmitted - Период
+   */
+  handlePeriodDeleteDaysList(periodEmitted) {
+    isDeletePeriodModalVisible.value = true;
+  
+    activePeriod.value = {
+      periodId: periodEmitted.periodId,
+      dayId: periodEmitted.dayId,
+      action: periodEmitted.action
+    };
+  }
+};
+
+onMounted(() => {
+  document.addEventListener('click', helpers.resetActivePeriod);
+});
+
+onUnmounted(() => {
+  document.removeEventListener('click', helpers.resetActivePeriod);
+});
+
+// Моки
+const managerId = 1;
+const todayDate = new Date();
+const tomorrowDate = new Date(new Date(todayDate).setDate(todayDate.getDate() + 1));
 
 // Запрос к бэку
 onMounted(async () => {
@@ -264,49 +298,60 @@ onMounted(async () => {
   );
 });
 
-/**
- * Добавление нового периода
- */
-async function addNewPeriod(period) {
-  isAddNewPeriodRequestNow.value = true;
+// Действия над периодами
+const periodsActions = {
+  /**
+   * Добавление нового периода
+   */
+  async addNewPeriod(period) {
+    if (isAddNewPeriodRequestNow.value) return;
 
-   // @TODO Запрос на добавление
-   await new Promise((resolve) => setTimeout(resolve, 3000));
+    isAddNewPeriodRequestNow.value = true;
 
-   console.log('Добавляю новый период: ', period);
+    // @TODO Запрос на добавление
+    await new Promise((resolve) => setTimeout(resolve, 3000));
 
-   isAddNewPeriodRequestNow.value = false;
-   closeAddPeriodModal();
-}
+    console.log('Добавляю новый период: ', period);
 
-/**
- * Удаление выбранного периода
- */
-async function deleteSelectedPeriod() {
-  isDeletePeriodRequestNow.value = true;
+    isAddNewPeriodRequestNow.value = false;
+    modalsActions.closeAddPeriodModal();
+  },
 
-  // @TODO Запрос на удаление
-  await new Promise((resolve) => setTimeout(resolve, 3000));
+  /**
+   * Удаление выбранного периода
+   */
+  async deleteSelectedPeriod() {
+    if (isDeletePeriodRequestNow.value) return;
 
-  console.log('Удаляю выбранный период: ', activePeriod.value);
+    isDeletePeriodRequestNow.value = true;
+  
+    // @TODO Запрос на удаление
+    await new Promise((resolve) => setTimeout(resolve, 3000));
+  
+    console.log('Удаляю выбранный период: ', activePeriod.value);
+  
+    isDeletePeriodRequestNow.value = false;
+    modalsActions.closeDeletePeriodModal();
+    helpers.resetActivePeriod();
+  }
+};
 
-  isDeletePeriodRequestNow.value = false;
-  closeDeletePeriodModal();
-}
-
-/**
- * Закрыть модалку добавления периода
- */
-function closeAddPeriodModal() {
-  isAddPeriodModalVisible.value = false;
-}
-
-/**
- * Закрыть модалку удаления периода
- */
-function closeDeletePeriodModal() {
-  isDeletePeriodModalVisible.value = false;
-}
+// Действия над модалками
+const modalsActions = {
+  /**
+   * Закрыть модалку добавления периода
+   */
+  closeAddPeriodModal() {
+    isAddPeriodModalVisible.value = false;
+  },
+  
+  /**
+   * Закрыть модалку удаления периода
+   */
+  closeDeletePeriodModal() {
+    isDeletePeriodModalVisible.value = false;
+  }
+};
 </script>
 
 <style scoped>
