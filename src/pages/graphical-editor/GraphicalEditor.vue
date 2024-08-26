@@ -13,13 +13,7 @@
           :active-shape="activeShape"
           @update-shape="updateShape"
         />
-        <MainControlButtons 
-          :active-shape="activeShape"
-          :mode="mode"
-          @update-shape="updateShape"
-          @add-shape="addShape"
-          @change-mode="changeModeHandler"
-        />
+        <MainControlButtons @add-shape="addShape" />
       </div>
     </div>
   </header>
@@ -31,6 +25,7 @@
           :is-selected="activeShape.id == shape.id"
           @update-shape="updateShape"
           @select-shape="handleSelectShape"
+          @change-mode="changeModeHandler"
       />
     </template>
     <TooltipControlButtons
@@ -143,13 +138,11 @@ let activeShape = reactive({
     }),
 });
 /**
- * move - перемещение
- * edit - редактирование
+ * edit - перемещение / редактирование
  * text - текст
  */
 let mode = reactive({
-  value: 'move',
-  _move: 'move',
+  value: 'edit',
   _edit: 'edit',
   _text: 'text',
 });

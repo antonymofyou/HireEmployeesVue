@@ -57,7 +57,7 @@ const props = defineProps({
       required: true,
     }
 });
-const emits = defineEmits(['updateShape', 'select-shape']);
+const emits = defineEmits(['updateShape', 'select-shape', 'change-mode']);
 const isDragging = ref(false);
 const isResizing = ref(false);
 const isRotating = ref(false);
@@ -73,9 +73,12 @@ const paramsTextVerticalAlignment = {
     'center': 'center',
     'bottom': 'flex-end',
 };
-const isTextMode = ref(false);
-const isEditMode = computed(() => !isTextMode.value && props.isSelected);
-const isMoveMode = computed(() => !isTextMode.value);
+const isTextMode = computed(() => {
+  return props.mode.value === props.mode._text;
+});
+const isEditMode = computed(() => {
+  return props.mode.value === props.mode._edit;
+});
 const rectangleStyles = computed(() => {
     return {
         // Geometry
@@ -96,7 +99,7 @@ const rectangleStyles = computed(() => {
         // Text vertical align
         justifyContent: paramsTextVerticalAlignment[props.params.textVerticalAlignment],
         // Mode styles
-        cursor: isMoveMode.value ? 'move' : isEditMode.value ? 'pointer' : 'text',
+        cursor: isEditMode.value ? 'move' : 'text',
         userSelect: isTextMode.value ? 'text' : 'none',
     }
 });
@@ -122,7 +125,6 @@ const editor = useEditor({
     },
     editable: isTextMode.value,
 });
-
 watch(() => isTextMode.value, function() {
   editor.value.setEditable(isTextMode.value);
 });
@@ -150,14 +152,14 @@ const selectRectangle = () => {
 
 // Вход в режим редактирования текста
 const enterTextEditMode = () => {
-  isTextMode.value = true;
+  emits('change-mode', props.mode._text);
   editor.value.chain().focus().run();
 };
 
 // Переключение режима текста по двойному клику
 const toggleTextEditMode = () => {
-  if (isTextMode.value) {
-    isTextMode.value = false;
+  if (props.mode.value === props.mode._text) {
+    emits('change-mode', props.mode._edit);
   } else {
     enterTextEditMode();
   }
@@ -165,7 +167,7 @@ const toggleTextEditMode = () => {
 
 // Начало перемещения
 const startDragging = (event) => {
-  if (!isMoveMode.value) return;
+  if (!isEditMode.value) return;
 
   isDragging.value = true;
   offsetX.value = event.clientX - props.params.x;
