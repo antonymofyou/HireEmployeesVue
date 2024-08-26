@@ -55,6 +55,7 @@
           :is-active="props.isLoading"
           :is-disabled="isSubmitButtonDisabled"
           :message="props.error"
+          align="center"
           form="add-day-form"
         >
           <template #text>{{ props.buttonText }}</template>

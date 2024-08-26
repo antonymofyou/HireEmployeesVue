@@ -53,7 +53,7 @@
     :for-day="helpers.getDayById(activePeriod.dayId) ?? {}"
     :error="errorMessage"
     @close="modalsActions.closeAddPeriodModal"
-    @period-add="periodsActions.addNewPeriod"
+    @submit="periodsActions.addNewPeriod"
   />
 
   <!-- Модалка удаления периода -->
@@ -201,7 +201,8 @@ const helpers = {
    */
   resetActivePeriod() {
     if (!activePeriod.value) return;
-    if (isDeletePeriodModalVisible.value) return;
+    // Если есть модалки - не сбрасываем
+    if (document.querySelectorAll('*[class^="modal"]').length !== 0) return;
   
     activePeriod.value = initializators.initActivePeriod();
   },

@@ -72,6 +72,7 @@ const props = defineProps({
 // Выравнивание расположения кнопки и сообщения о выполнении
 const alignClass = computed(() => ({
   'button--align-start': props.align === 'start',
+  'button--align-center': props.align === 'center',
   'button--align-end': props.align === 'end',
 }));
 
@@ -89,6 +90,10 @@ const isButtonDisabled = computed(() => {
 
 .button--align-start {
   align-items: flex-start;
+}
+
+.button--align-center {
+  align-items: center;
 }
 
 .button--align-end {

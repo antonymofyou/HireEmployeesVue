@@ -24,7 +24,8 @@
         <ButtonMain
           :is-active="props.isLoading"
           :is-disabled="isSubmitButtonDisabled"
-          :message="props.error"
+          :message="finalErrorMessage"
+          align="center"
           form="add-period-form"
         >
           <template #text>Создать</template>
@@ -35,7 +36,7 @@
 </template>
 
 <script setup>
-import { ref, computed } from 'vue';
+import { ref, computed, watch } from 'vue';
 
 import Modal from '@/components/Modal.vue';
 import ButtonMain from '@/components/ButtonMain.vue';
@@ -64,7 +65,39 @@ const props = defineProps({
   }
 });
 
-const emit = defineEmits(['close', 'period-add']);
+// Локальные ошибки (валидации и т.д.)
+const localError = ref('');
+
+// Сообщение об ошибке для показа пользователю
+const finalErrorMessage = computed(() => {
+  return props.error || localError.value;
+});
+
+watch(() => props.forDay, () => {
+  console.log('For Day = ', props.forDay)
+})
+
+const emit = defineEmits(['close', 'submit']);
+
+// Вспомогательные функции
+const helpers = {
+  /**
+   * Сравнение двух единиц времени формата hh:mm
+   * @param {String} time1
+   * @param {String} time2 
+   * @returns {Boolean} - Меньше ли первое время второго
+   */
+  isTimeOneLessThanTwo(time1, time2) {
+    const date1 = new Date(`2000-01-01T${time1}Z`);
+    const date2 = new Date(`2000-01-01T${time2}Z`);
+
+    if (date1 - date2 < 0) {
+      return true;
+    }
+
+    return false;
+  }
+};
 
 // Модель нового периода
 const newPeriod = ref({
@@ -82,7 +115,19 @@ const isSubmitButtonDisabled = computed(() => {
  * Обработка отправки формы
  */
 function handleSubmitForm() {
-  emit('period-add', newPeriod.value);
+  // Проверяем корректность введённых данных
+  const isTimesCorrect = helpers.isTimeOneLessThanTwo(
+    newPeriod.value.periodStart,
+    newPeriod.value.periodEnd
+  );
+
+  if (!isTimesCorrect) {
+    localError.value = 'Первое время больше второго!';
+    return;
+  }
+
+  localError.value = '';
+  emit('submit', newPeriod.value);
 }
 </script>
 

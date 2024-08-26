@@ -15,6 +15,7 @@
         <ButtonMain
           :is-active="props.isLoading"
           :message="props.error"
+          align="center"
           @click="handleClickConfirm"
         >
           <template #text>{{ props.buttonText }}</template>
