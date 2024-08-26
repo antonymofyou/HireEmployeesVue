@@ -14,6 +14,7 @@
       <div class="modal-confirm__footer">
         <ButtonMain
           :is-active="props.isLoading"
+          :message="props.error"
           @click="handleClickConfirm"
         >
           <template #text>{{ props.buttonText }}</template>
@@ -45,6 +46,11 @@ const props = defineProps({
     type: Boolean,
     required: false,
     default: false
+  },
+  error: {
+    type: String,
+    required: false,
+    default: ''
   }
 });
 

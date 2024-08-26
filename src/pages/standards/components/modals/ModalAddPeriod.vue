@@ -24,6 +24,7 @@
         <ButtonMain
           :is-active="props.isLoading"
           :is-disabled="isSubmitButtonDisabled"
+          :message="props.error"
           form="add-period-form"
         >
           <template #text>Создать</template>
@@ -55,6 +56,11 @@ const props = defineProps({
   forDay: {
     type: Object,
     required: true
+  },
+  error: {
+    type: String,
+    required: false,
+    default: ''
   }
 });
 

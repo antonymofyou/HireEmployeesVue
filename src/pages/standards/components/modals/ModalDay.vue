@@ -54,6 +54,7 @@
         <ButtonMain
           :is-active="props.isLoading"
           :is-disabled="isSubmitButtonDisabled"
+          :message="props.error"
           form="add-day-form"
         >
           <template #text>{{ props.buttonText }}</template>
@@ -93,6 +94,11 @@ const props = defineProps({
   defaultDay: {
     type: Object,
     required: false
+  },
+  error: {
+    type: String,
+    required: false,
+    default: ''
   }
 });
 

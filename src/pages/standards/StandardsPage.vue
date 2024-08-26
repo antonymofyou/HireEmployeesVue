@@ -51,6 +51,7 @@
     :is-show="isAddPeriodModalVisible"
     :is-loading="isAddNewPeriodRequestNow"
     :for-day="helpers.getDayById(activePeriod.dayId) ?? {}"
+    :error="errorMessage"
     @close="modalsActions.closeAddPeriodModal"
     @period-add="periodsActions.addNewPeriod"
   />
@@ -59,6 +60,7 @@
   <ModalConfirm
     :is-show="isDeletePeriodModalVisible"
     :is-loading="isDeletePeriodRequestNow"
+    :error="errorMessage"
     title="Удалить период?"
     button-text="Удалить"
     @confirm="periodsActions.deleteSelectedPeriod"
@@ -69,6 +71,7 @@
    <ModalDay
     :is-show="isAddDayModalVisible"
     :is-loading="isAddDayRequestNow"
+    :error="errorMessage"
     title="Добавление дня"
     button-text="Добавить"
     @submit="daysActions.addNewDay"
@@ -80,6 +83,7 @@
     :is-show="isEditDayModalVisible"
     :is-loading="isEditDayRequestNow"
     :default-day="activeDayFromStore"
+    :error="errorMessage"
     title="Изменение дня"
     button-text="Изменить"
     @submit="daysActions.editActiveDay"
@@ -90,6 +94,7 @@
    <ModalConfirm
     :is-show="isDeleteDayModalVisible"
     :is-loading="isDeleteDayRequestNow"
+    :error="errorMessage"
     title="Удалить рабочий день?"
     button-text="Удалить"
     @confirm="daysActions.deleteSelectedDay"
@@ -139,6 +144,9 @@ const isAddDayModalVisible = ref(false);
 const isEditDayModalVisible = ref(false);
 // Видна ли модалка удаления рабочего дня
 const isDeleteDayModalVisible = ref(false);
+
+// Сообщение об ошибке (запросы к серверу и т.д.)
+const errorMessage = ref('');
 
 // Информация о днях работы
 const days = ref([]);
@@ -205,6 +213,13 @@ const helpers = {
   getDayById(id) {
     const result = days.value.find((d) => d.dayId === id);
     return result;
+  },
+
+  /**
+   * Сброс сообщения об ошибке
+   */
+  resetError() {
+    errorMessage.value = '';
   }
 };
 
@@ -419,16 +434,28 @@ const daysActions = {
    * @param {Object} newDay - новый день
    */
   async addNewDay(newDay) {
+    if (isAddDayRequestNow.value) return;
+
     isAddDayRequestNow.value = true;
 
     // @TODO Запрос за добавлением дня
+    //
     await new Promise((resolve) => setTimeout(resolve, 3000));
+
+    if (Math.random() > 0.9) {
+      errorMessage.value = 'Ошибка добавления';
+    }
+
     console.group('Добавление дня');
     console.log('Добавляю новый день: ', newDay);
     console.groupEnd();
 
+    if (!errorMessage.value) {
+      modalsActions.closeAddDayModal();
+      helpers.resetError();
+    }
+
     isAddDayRequestNow.value = false;
-    modalsActions.closeAddDayModal();
   },
 
   /**
@@ -436,44 +463,68 @@ const daysActions = {
    * @param {Object} editedDay - изменённый день
    */
   async editActiveDay(editedDay) {
+    if (isEditDayRequestNow.value) return;
+
     isEditDayRequestNow.value = true;
 
     // @TODO Запрос за изменением дня
     await new Promise((resolve) => setTimeout(resolve, 3000));
+
+    if (Math.random() > 0.9) {
+      errorMessage.value = 'Ошибка изменения';
+    }
+
     console.group('Изменение дня');
     console.log('Меняю день: ', activeDay.value.dayId);
     console.log('Старые значения: ', activeDayFromStore.value);
     console.log('Новые значения: ', editedDay);
     console.groupEnd();
 
+    if (!errorMessage.value) {
+      modalsActions.closeEditDayModal();
+      activeDay.value = initializators.initActiveDay();
+      helpers.resetError();
+    }
+
     isEditDayRequestNow.value = false;
-    modalsActions.closeEditDayModal();
-    activeDay.value = initializators.initActiveDay();
   },
 
   /**
    * Удаление выбранного дня
    */
   async deleteSelectedDay() {
+    if (isDeleteDayRequestNow.value) return;
+
     isDeleteDayRequestNow.value = true;
 
     // @TODO запрос за удалением
     await new Promise((resolve) => setTimeout(resolve, 3000));
+
+    const chance = Math.random()
+    console.log({ chance })
+    if (chance > 0.9) {
+      errorMessage.value = 'Ошибка удаления';
+    }
+
     console.group('Удаление дня');
     console.log('Удаляю: ', activeDay.value.dayId);
     console.groupEnd();
+    
+    if (!errorMessage.value) {
+      console.log('here>>>', errorMessage.value)
+      // Моковое удаление
+      days.value = days.value.filter((day) => {
+        return day.dayId !== activeDay.value.dayId;
+      });
+  
+      delete periodsTimes[activeDay.value.dayId];
+
+      modalsActions.closeDeleteDayModal();
+      activeDay.value = initializators.initActiveDay();
+      helpers.resetError();
+    }
 
     isDeleteDayRequestNow.value = false;
-
-    // Моковое удаление
-    days.value = days.value.filter((day) => {
-      return day.dayId !== activeDay.value.dayId;
-    });
-
-    delete periodsTimes[activeDay.value.dayId];
-
-    modalsActions.closeDeleteDayModal();
-    activeDay.value = initializators.initActiveDay();
   }
 };
 
@@ -490,10 +541,20 @@ const periodsActions = {
     // @TODO Запрос на добавление
     await new Promise((resolve) => setTimeout(resolve, 3000));
 
+    const chance = Math.random();
+    console.log({ chance })
+    if (chance > 0.9) {
+      errorMessage.value = 'Ошибка добавления';
+    }
+
     console.log('Добавляю новый период: ', period);
 
+    if (!errorMessage.value) {
+      modalsActions.closeAddPeriodModal();
+      helpers.resetError();
+    }
+
     isAddNewPeriodRequestNow.value = false;
-    modalsActions.closeAddPeriodModal();
   },
 
   /**
@@ -509,14 +570,24 @@ const periodsActions = {
   
     console.log('Удаляю выбранный период: ', activePeriod.value);
 
-    // Моковое удаление
-    periodsTimes.value[activePeriod.value.dayId] = periodsTimes.value[activePeriod.value.dayId].filter((period) => {
-      return period.periodId !== activePeriod.value.periodId;
-    });
+    const chance = Math.random();
+    console.log({ chance })
+    if (chance > 0.9) {
+      errorMessage.value = 'Ошибка удаления';
+    }
+
+    if (!errorMessage.value) {
+      // Моковое удаление
+      periodsTimes.value[activePeriod.value.dayId] = periodsTimes.value[activePeriod.value.dayId].filter((period) => {
+        return period.periodId !== activePeriod.value.periodId;
+      });
+
+      modalsActions.closeDeletePeriodModal();
+      helpers.resetActivePeriod();
+      helpers.resetError();
+    }
   
     isDeletePeriodRequestNow.value = false;
-    modalsActions.closeDeletePeriodModal();
-    helpers.resetActivePeriod();
   }
 };
 
@@ -560,6 +631,11 @@ const modalsActions = {
 </script>
 
 <style scoped>
+/* Disable scroll when modal visible */
+:global(body:has(*[class^="modal"])) {
+  overflow-y: hidden !important;
+}
+
 /* Spinner */
 .spinner-loader {
   width: 50px;
