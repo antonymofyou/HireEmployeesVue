@@ -1,12 +1,17 @@
 <template>
     <div
         @mousedown="startDragging"
+        @dblclick="toggleTextEditMode"
         @click="selectRectangle"
         :id="props.params.id"
         :style="rectangleStyles"
         class="rectangle"
     >
-        <EditorContent class="text-editor" :editor="editor" />
+      <EditorContent
+          class="text-editor"
+          :editor="editor"
+          @mousedown.stop="enterTextEditMode"
+      />
 
     <!-- Показать манипуляторы только если объект выбран -->
     <div v-if="props.isSelected && isEditMode" class="resize-handles">
@@ -68,15 +73,9 @@ const paramsTextVerticalAlignment = {
     'center': 'center',
     'bottom': 'flex-end',
 };
-const isTextMode = computed(() => {
-  return props.mode.value === props.mode._text;
-});
-const isMoveMode = computed(() => {
-  return props.mode.value === props.mode._move;
-});
-const isEditMode = computed(() => {
-  return props.mode.value === props.mode._edit;
-});
+const isTextMode = ref(false);
+const isEditMode = computed(() => !isTextMode.value && props.isSelected);
+const isMoveMode = computed(() => !isTextMode.value);
 const rectangleStyles = computed(() => {
     return {
         // Geometry
@@ -147,9 +146,20 @@ const selectRectangle = () => {
     id: props.params.id,
     editor,
   });
+};
 
+// Вход в режим редактирования текста
+const enterTextEditMode = () => {
+  isTextMode.value = true;
+  editor.value.chain().focus().run();
+};
+
+// Переключение режима текста по двойному клику
+const toggleTextEditMode = () => {
   if (isTextMode.value) {
-    editor.value.chain().focus().run();
+    isTextMode.value = false;
+  } else {
+    enterTextEditMode();
   }
 };
 
@@ -338,10 +348,11 @@ onBeforeUnmount(() => {
 .handle.bottom { bottom: -5px; left: calc(50% - 5px); cursor: ns-resize; }
 
 .handle.rotate {
-  top: -20px;
+  top: -30px;
   left: 50%;
   transform: translateX(-50%);
   cursor: grab;
+  border-radius: 8px;
 }
 
 .text-editor {
