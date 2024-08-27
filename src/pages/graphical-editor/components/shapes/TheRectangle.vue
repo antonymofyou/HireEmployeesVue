@@ -26,7 +26,7 @@
 </template>
 
 <script setup>
-import { defineProps, computed, onBeforeUnmount, ref, watch } from 'vue';
+import {defineProps, computed, onBeforeUnmount, ref, watch, onMounted} from 'vue';
 import { useEditor, EditorContent } from '@tiptap/vue-3'
 import StarterKit from '@tiptap/starter-kit'
 import Underline from '@tiptap/extension-underline'
@@ -125,8 +125,10 @@ const editor = useEditor({
     },
     editable: isTextMode.value,
 });
-watch(() => isTextMode.value, function() {
-  editor.value.setEditable(isTextMode.value);
+watch(() => isTextMode.value, (newValue) => {
+  if (editor.value) {
+    editor.value.setEditable(newValue);
+  }
 });
 
 // Список манипуляторов
@@ -139,14 +141,14 @@ const handles = [
   { position: 'right', cursor: 'ew-resize' },
   { position: 'top', cursor: 'ns-resize' },
   { position: 'bottom', cursor: 'ns-resize' },
-  { position: 'rotate', cursor: 'grab', isRotateHandle: true },
+  { position: 'rotate', cursor: 'url("@/assets/icons/rotate.svg?component"), auto', isRotateHandle: true },
 ];
 
 // Выбор объекта
 const selectRectangle = () => {
   emits('select-shape', {
     id: props.params.id,
-    editor,
+    editor: editor.value,
   });
 };
 
@@ -303,11 +305,27 @@ const stopRotating = () => {
   document.removeEventListener('mouseup', stopRotating);
 };
 
+// Обработчик кликов вне объекта для снятия выделения
+const handleDocumentClick = (event) => {
+  if (!event.target.closest('.rectangle') && !event.target.closest('.header')) {
+    emits('select-shape', {
+      id: null,
+      editor: undefined
+    });
+    emits('change-mode', props.mode._edit);
+  }
+};
+
+onMounted(() => {
+  document.addEventListener('click', handleDocumentClick);
+});
+
 onBeforeUnmount(() => {
   editor.value.destroy();
   stopDragging();
   stopResizing();
   stopRotating();
+  document.removeEventListener('click', handleDocumentClick);
 });
 </script>
 
@@ -327,7 +345,7 @@ onBeforeUnmount(() => {
   left: 0;
   right: 0;
   bottom: 0;
-  border: 1px dashed gray;
+  border: 1px solid #1A73E8;
 }
 
 .handle {
@@ -353,7 +371,7 @@ onBeforeUnmount(() => {
   top: -30px;
   left: 50%;
   transform: translateX(-50%);
-  cursor: grab;
+  cursor: url("@/assets/icons/rotate.svg?component"), auto;
   border-radius: 8px;
 }
 
