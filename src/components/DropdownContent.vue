@@ -1,5 +1,5 @@
 <template>
-    <div v-click-outside="close" :class="{ 'active': isOpen }" class="dropdown">
+    <div v-click-outside="close" :class="{ 'active': isOpen, 'disabled': disabled }" class="dropdown">
         <button 
             @pointerup="toggle"
             @keydown.enter.space="toggle"
@@ -16,12 +16,21 @@
   
 <script setup>
 
-import { ref } from 'vue';
+import { defineProps, ref } from 'vue';
+
+const props = defineProps({
+  disabled: {
+    type: Boolean,
+    default: false,
+  }
+});
 
 const isOpen = ref(false);
 
 function toggle() {
-   isOpen.value = !isOpen.value;
+  if (props.disabled) return;
+
+  isOpen.value = !isOpen.value;
 }
 
 function close() {
@@ -52,6 +61,11 @@ const vClickOutside = {
 <style scoped>
 .dropdown {
     position: relative;
+    transition: opacity .2s;
+}
+
+.dropdown.disabled {
+  opacity: 0.5;
 }
 
 .dropdown__content {

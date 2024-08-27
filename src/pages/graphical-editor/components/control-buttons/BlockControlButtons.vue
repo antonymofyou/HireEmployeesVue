@@ -2,8 +2,9 @@
     <div class="control-buttons-block">
         <ColorPicker
             :color="props.activeShape.shape?.color || '#000000'"
+            :disabled="disabled"
             @reset-color="updateShapeHandler('color', '#000000')"
-            @update:color="updateShapeHandler('color', $event)"            
+            @update:color="updateShapeHandler('color', $event)"   
         >
             <template #icon>
                 <FormatPaint />
@@ -11,6 +12,7 @@
         </ColorPicker>
         <ColorPicker
             :color="props.activeShape.shape?.borderColor || '#000000'"
+            :disabled="disabled"
             @reset-color="updateShapeHandler('borderColor', '#000000')"
             @update:color="updateShapeHandler('borderColor', $event)"            
         >
@@ -20,6 +22,7 @@
         </ColorPicker>
         <ValuePicker
             class="control-buttons-button control-buttons-value-picker"
+            :disabled="disabled"
             :value="+props.activeShape.shape?.cornerRadius || 0"
             @update:value="updateShapeHandler('cornerRadius', +$event)"            
         >
@@ -32,6 +35,7 @@
         </ValuePicker>
         <ValuePicker
             class="control-buttons-button control-buttons-value-picker"
+            :disabled="disabled"
             :value="+props.activeShape.shape?.borderWidth || 0"
             @update:value="updateShapeHandler('borderWidth', +$event)"            
         >
@@ -44,6 +48,7 @@
         </ValuePicker>
         <ValuePicker
             class="control-buttons-button control-buttons-value-picker"
+            :disabled="disabled"
             :value="+props.activeShape.shape?.paddingHorizontal || 0"
             @update:value="updateShapeHandler('paddingHorizontal', +$event)"            
         >
@@ -56,6 +61,7 @@
         </ValuePicker>
         <ValuePicker
             class="control-buttons-button control-buttons-value-picker"
+            :disabled="disabled"
             :value="+props.activeShape.shape?.paddingVertical || 0"
             @update:value="updateShapeHandler('paddingVertical', +$event)"            
         >
@@ -68,6 +74,7 @@
         </ValuePicker>
         <ValuePicker
             class="control-buttons-button control-buttons-value-picker"
+            :disabled="disabled"
             :value="+props.activeShape.shape?.zIndex || 1"
             @update:value="updateShapeHandler('zIndex', +$event)"    
         >
@@ -80,7 +87,7 @@
 
 <script setup>
 
-import { defineProps, defineEmits } from 'vue';
+import { defineProps, defineEmits, computed } from 'vue';
 
 import ColorPicker from './ColorPicker.vue';
 import ValuePicker from './ValuePicker.vue';
@@ -103,6 +110,10 @@ const props = defineProps({
 });
 const emits = defineEmits({
     updateShape: null,
+});
+
+const disabled = computed(() => {
+    return !Boolean(props.activeShape.id);
 });
 
 // Handlers

@@ -1,5 +1,5 @@
 <template>
-    <DropdownContent :style="{ color: color }">
+    <DropdownContent :style="{ color: color }" :disabled="props.disabled">
         <template #trigger>
             <slot name="icon"></slot>
         </template>
