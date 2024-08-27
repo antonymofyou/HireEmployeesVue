@@ -1,14 +1,16 @@
 <template>
   <transition-group name="move" tag="div" class="question">
     <div :key="props.id">
+      <div class="questions__block">
+        <span class="questions">{{ props.labelName }}</span>
+        <span class="id_questions">Id{{ props.id }}</span>
+      </div>
       <TextEditor
       :modelValue="text"
       @update:modelValue="updateText"
       size="medium"
-      :label="labelName"
       :id="props.id"
     />
-    <div><span class="id_questions">Id{{ props.id }}</span></div>
     <div class="question__footer">
       <div class="question__select">
         <span class="question__label">Опубликован:</span>
@@ -134,11 +136,17 @@ const updateIsPublished = (newValue) => {
   align-items: baseline;
 }
 
+.questions__block{
+  margin-bottom: 10px;
+}
+
+.questions {
+  margin-bottom: 10px;
+  font-weight: 600;
+}
+
 .id_questions{
-  position: absolute;
-  margin-top: 7px;
-  top: 0;
-  left: 110px;
+  margin-left: 5px;
   font-size: 8px;
   font-weight: 600; 
   color: gray;
