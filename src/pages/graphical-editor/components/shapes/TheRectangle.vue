@@ -307,7 +307,11 @@ const stopRotating = () => {
 
 // Обработчик кликов вне объекта для снятия выделения
 const handleDocumentClick = (event) => {
-  if (!event.target.closest('.rectangle') && !event.target.closest('.header')) {
+  if (
+      !event.target.closest('.rectangle') &&
+      !event.target.closest('.header') &&
+      !event.target.closest('.tooltip-control-buttons')
+  ) {
     emits('select-shape', {
       id: null,
       editor: undefined
