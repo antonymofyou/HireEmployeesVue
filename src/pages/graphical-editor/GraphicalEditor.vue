@@ -19,14 +19,16 @@
   </header>
   <main class="canvas">
     <template v-for="shape of formattedShapes" :key="shape.id">
-      <TheRectangle
+      <component 
+          :is="shapeComponents[shape.type]" 
+      
           :params="shape"
           :mode="mode"
           :is-selected="activeShape.id == shape.id"
           @update-shape="updateShape"
           @select-shape="handleSelectShape"
           @change-mode="changeModeHandler"
-      />
+        />
     </template>
     <TooltipControlButtons
       v-if="windowInnerWidth > breakpoint"
@@ -52,7 +54,12 @@ import BlockControlButtons from './components/control-buttons/BlockControlButton
 import MainControlButtons from './components/control-buttons/MainControlButtons.vue';
 import TooltipControlButtons from './components/control-buttons/TooltipControlButtons.vue';
 import TheRectangle from './components/shapes/TheRectangle.vue';
+import TheArrow from './components/shapes/TheArrow.vue';
 
+const shapeComponents = {
+  'rectangle': TheRectangle,
+  'arrow': TheArrow
+};
 const formattedShapes = reactive({
     1: {
         "id": 1,
@@ -68,6 +75,7 @@ const formattedShapes = reactive({
         "cornerRadius": 5,
         "borderWidth": 5,
         "textVerticalAlignment": "top",
+        "rotation": 0,
     },
     2: {
         "id": 2,
@@ -81,6 +89,7 @@ const formattedShapes = reactive({
         "borderStyle": 'solid',
         "zIndex": 2,
         "textVerticalAlignment": "center",
+        "rotation": 100,
         "text": [
             {
                 "alignment": "left",
@@ -127,7 +136,19 @@ const formattedShapes = reactive({
         "borderStyle": 'solid',
         "zIndex": 3,
         "textVerticalAlignment": "bottom",
+        "rotation": 0,
         "borderWidth": 5
+    },
+    4: {
+        "id": 4,
+        "type": "arrow",
+        "x": 130,
+        "y": 70,
+        "width": 150,
+        "height": 10,
+        "color": "#330300",
+        "zIndex": 3,
+        "rotation": 0,
     }
 });
 let activeShape = reactive({
@@ -163,11 +184,11 @@ const updateWindowInnerWidth = debounce(function() {
 }, 400);
 
 /**
- * 
- * Результат декоратора debounce(callback, delay) – это обёртка, которая откладывает вызовы callback, 
- * пока не пройдёт delay миллисекунд бездействия (без вызовов), 
+ *
+ * Результат декоратора debounce(callback, delay) – это обёртка, которая откладывает вызовы callback,
+ * пока не пройдёт delay миллисекунд бездействия (без вызовов),
  * а затем вызывает callback один раз с последними аргументами.
- * 
+ *
 */
 
 function debounce(callback, delay) {
@@ -262,7 +283,7 @@ const changeModeHandler = (event) => {
   border-radius: 8px;
 }
 
-:deep(svg){
+:deep(.material-design-icon__svg){
   display: block;
   width: 21px;
   height: 21px;

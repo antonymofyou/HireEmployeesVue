@@ -305,23 +305,23 @@ const stopRotating = () => {
   document.removeEventListener('mouseup', stopRotating);
 };
 
-// Обработчик кликов вне объекта для снятия выделения
-const handleDocumentClick = (event) => {
-  if (
-      !event.target.closest('.rectangle') &&
-      !event.target.closest('.header') &&
-      !event.target.closest('.tooltip-control-buttons')
-  ) {
-    emits('select-shape', {
-      id: null,
-      editor: undefined
-    });
-    emits('change-mode', props.mode._edit);
-  }
-};
+// // Обработчик кликов вне объекта для снятия выделения
+// const handleDocumentClick = (event) => {
+//   if (
+//       !event.target.closest('.rectangle') &&
+//       !event.target.closest('.header') &&
+//       !event.target.closest('.tooltip-control-buttons')
+//   ) {
+//     emits('select-shape', {
+//       id: null,
+//       editor: undefined
+//     });
+//     emits('change-mode', props.mode._edit);
+//   }
+// };
 
 onMounted(() => {
-  document.addEventListener('click', handleDocumentClick);
+  // document.addEventListener('click', handleDocumentClick);
 });
 
 onBeforeUnmount(() => {
@@ -329,7 +329,7 @@ onBeforeUnmount(() => {
   stopDragging();
   stopResizing();
   stopRotating();
-  document.removeEventListener('click', handleDocumentClick);
+  // document.removeEventListener('click', handleDocumentClick);
 });
 </script>
 
