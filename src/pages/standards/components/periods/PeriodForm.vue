@@ -11,13 +11,17 @@
     />
     <InputSimple
       v-model="periodStartTimeModel"
-      placeholder="Начало (II:ss)"
+      placeholder="Начало (часы:секунды)"
       pattern="\d{2}:\d{2}"
+      @input="clearCustomErrors"
+      @invalid="showReadableMessage"
     />
     <InputSimple
       v-model="periodEndTimeModel"
-      placeholder="Конец (II:ss)"
+      placeholder="Конец (часы:секунды)"
       pattern="\d{2}:\d{2}"
+      @input="clearCustomErrors"
+      @invalid="showReadableMessage"
     />
   </form>
 </template>
@@ -39,6 +43,23 @@ const periodStartTimeModel = defineModel('periodStart');
 const periodEndTimeModel = defineModel('periodEnd');
 
 const emit = defineEmits(['submit']);
+
+/**
+ * Вывод читабельной ошибки при ошибке по паттерну
+ * @param {Event} event - Объект события
+ */
+function showReadableMessage(event) {
+  console.log(event.target)
+  event.target.setCustomValidity('Введите время в формате часы:минуты');
+}
+
+/**
+ * Сброс кастомных ошибок при пользовательском вводе
+ * @param {InputEvent} event - Объект события
+ */
+function clearCustomErrors(event) {
+  event.target.setCustomValidity('');
+}
 
 /**
  * Обработка отправки формы

@@ -117,6 +117,7 @@ import ModalDay from './components/modals/ModalDay.vue';
 import plusIcon from '@/assets/icons/plus.svg';
 
 import { JobGetShedule } from './js/ApiClassesStandardsPage';
+import { formatTime } from './js/utils';
 
 // Идёт ли запрос за периодами (инициализация)
 const isJobsRequestNow = ref(false);
@@ -213,6 +214,7 @@ const helpers = {
    */
   getDayById(id) {
     const result = days.value.find((d) => d.dayId === id);
+    console.log(result, '<<< for ' + id);
     return result;
   },
 
@@ -338,68 +340,68 @@ onMounted(async () => {
     1: [
       {
         periodId: 1,
-        periodStart: new Date(todayDate).setHours(8),
-        periodEnd: new Date(todayDate).setHours(13)
+        periodStart: formatTime(new Date(todayDate).setHours(8)),
+        periodEnd: formatTime(new Date(todayDate).setHours(13))
       },
       {
         periodId: 2,
-        periodStart: new Date(todayDate).setHours(14),
-        periodEnd: new Date(todayDate).setHours(17)
+        periodStart: formatTime(new Date(todayDate).setHours(14)),
+        periodEnd: formatTime(new Date(todayDate).setHours(17))
       },
       {
         periodId: 3,
-        periodStart: new Date(todayDate).setHours(14),
-        periodEnd: new Date(todayDate).setHours(17)
+        periodStart: formatTime(new Date(todayDate).setHours(14)),
+        periodEnd: formatTime(new Date(todayDate).setHours(17))
       },
       {
         periodId: 4,
-        periodStart: new Date(todayDate).setHours(14),
-        periodEnd: new Date(todayDate).setHours(17)
+        periodStart: formatTime(new Date(todayDate).setHours(14)),
+        periodEnd: formatTime(new Date(todayDate).setHours(17))
       },
       {
         periodId: 5,
-        periodStart: new Date(todayDate).setHours(14),
-        periodEnd: new Date(todayDate).setHours(17)
+        periodStart: formatTime(new Date(todayDate).setHours(14)),
+        periodEnd: formatTime(new Date(todayDate).setHours(17))
       },
       {
         periodId: 6,
-        periodStart: new Date(todayDate).setHours(14),
-        periodEnd: new Date(todayDate).setHours(17)
+        periodStart: formatTime(new Date(todayDate).setHours(14)),
+        periodEnd: formatTime(new Date(todayDate).setHours(17))
       }
     ],
 
     2: [
       {
-        periodId: 1,
-        periodStart: new Date(todayDate).setHours(8),
-        periodEnd: new Date(todayDate).setHours(13)
+        periodId: 7,
+        periodStart: formatTime(new Date(todayDate).setHours(8)),
+        periodEnd: formatTime(new Date(todayDate).setHours(13))
       },
       {
-        periodId: 2,
-        periodStart: new Date(todayDate).setHours(14),
-        periodEnd: new Date(todayDate).setHours(17)
+        periodId: 8,
+        periodStart: formatTime(new Date(todayDate).setHours(14)),
+        periodEnd: formatTime(new Date(todayDate).setHours(17))
       },
       {
-        periodId: 3,
-        periodStart: new Date(todayDate).setHours(14),
-        periodEnd: new Date(todayDate).setHours(17)
+        periodId: 9,
+        periodStart: formatTime(new Date(todayDate).setHours(14)),
+        periodEnd: formatTime(new Date(todayDate).setHours(17))
       },
       {
-        periodId: 4,
-        periodStart: new Date(todayDate).setHours(14),
-        periodEnd: new Date(todayDate).setHours(17)
+        periodId: 10,
+        periodStart: formatTime(new Date(todayDate).setHours(14)),
+        periodEnd: formatTime(new Date(todayDate).setHours(17))
       },
       {
-        periodId: 5,
-        periodStart: new Date(todayDate).setHours(14),
-        periodEnd: new Date(todayDate).setHours(17)
+        periodId: 11,
+        periodStart: formatTime(new Date(todayDate).setHours(14)),
+        periodEnd: formatTime(new Date(todayDate).setHours(17))
       },
       {
-        periodId: 6,
-        periodStart: new Date(todayDate).setHours(14),
-        periodEnd: new Date(todayDate).setHours(17)
+        periodId: 12,
+        periodStart: formatTime(new Date(todayDate).setHours(14)),
+        periodEnd: formatTime(new Date(todayDate).setHours(17))
       }
-    ]
+    ],
   };
 
   staffData.value = {
@@ -436,6 +438,7 @@ const daysActions = {
    */
   async addNewDay(newDay) {
     if (isAddDayRequestNow.value) return;
+    helpers.resetError();
 
     isAddDayRequestNow.value = true;
 
@@ -452,6 +455,11 @@ const daysActions = {
     console.groupEnd();
 
     if (!errorMessage.value) {
+      newDay.dayId = crypto.randomUUID();
+      days.value.push(newDay);
+
+      periodsTimes.value[newDay.dayId] = [];
+
       modalsActions.closeAddDayModal();
       helpers.resetError();
     }
@@ -465,6 +473,7 @@ const daysActions = {
    */
   async editActiveDay(editedDay) {
     if (isEditDayRequestNow.value) return;
+    helpers.resetError();
 
     isEditDayRequestNow.value = true;
 
@@ -482,6 +491,9 @@ const daysActions = {
     console.groupEnd();
 
     if (!errorMessage.value) {
+      const findDayIndex = days.value.findIndex((day) => day.dayId === activeDay.value.dayId);
+      days.value[findDayIndex] = editedDay;
+
       modalsActions.closeEditDayModal();
       activeDay.value = initializators.initActiveDay();
       helpers.resetError();
@@ -495,6 +507,7 @@ const daysActions = {
    */
   async deleteSelectedDay() {
     if (isDeleteDayRequestNow.value) return;
+    helpers.resetError();
 
     isDeleteDayRequestNow.value = true;
 
@@ -536,6 +549,7 @@ const periodsActions = {
    */
   async addNewPeriod(period) {
     if (isAddNewPeriodRequestNow.value) return;
+    helpers.resetError();
 
     isAddNewPeriodRequestNow.value = true;
 
@@ -551,6 +565,11 @@ const periodsActions = {
     console.log('Добавляю новый период: ', period);
 
     if (!errorMessage.value) {
+      periodsTimes.value[period.dayId].push({
+        ...period,
+        periodId: crypto.randomUUID()
+      });
+
       modalsActions.closeAddPeriodModal();
       helpers.resetError();
     }
@@ -563,6 +582,7 @@ const periodsActions = {
    */
   async deleteSelectedPeriod() {
     if (isDeletePeriodRequestNow.value) return;
+    helpers.resetError();
 
     isDeletePeriodRequestNow.value = true;
   

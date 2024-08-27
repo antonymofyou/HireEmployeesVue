@@ -99,11 +99,19 @@ const helpers = {
   }
 };
 
-// Модель нового периода
-const newPeriod = ref({
+// Фабрика для нового периода
+const initNewDay = () => ({
   dayId: props.forDay.dayId,
   periodStart: '',
   periodEnd: ''
+});
+
+// Модель нового периода
+const newPeriod = ref(initNewDay());
+
+// Следим за props.forDay, т.к. иначе - newPeriod всегда будет пустым
+watch(() => props.forDay, () => {
+  newPeriod.value = initNewDay();
 });
 
 // Заблокирована ли кнопка отправки формы
@@ -127,6 +135,8 @@ function handleSubmitForm() {
   }
 
   localError.value = '';
+
+  console.log('submit value:', newPeriod.value)
   emit('submit', newPeriod.value);
 }
 </script>

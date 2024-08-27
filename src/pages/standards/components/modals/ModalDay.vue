@@ -117,7 +117,7 @@ const initNewDay = () => ({
 // Новый день для заполнения
 const newDay = ref(initNewDay());
 
-// Следим за props.isShow, т.к. иначе - defaultDay всегда будет пустым
+// Следим за props.isShow, т.к. иначе - newDay всегда будет пустым
 watch(() => props.isShow, () => {
   newDay.value = initNewDay();
 });
