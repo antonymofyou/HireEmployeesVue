@@ -6,13 +6,13 @@
       <h1 class="schedule-section__title">
         График работы сотрудника
       </h1>
-  
-      <TopSquareButton
-        :icon="plusIcon"
-        class="top-button"
-        @click="callbacks.startAddNewDay"
-      />
     </div>
+
+    <TopSquareButton
+      :icon="plusIcon"
+      class="top-button"
+      @click="callbacks.startAddNewDay"
+    />
 
     <div class="wrapper">
       <div class="wrapper__inner">
@@ -411,21 +411,21 @@ onMounted(async () => {
 
     isJobsRequestNow.value = false;
 
-  // jobGetScheduleInstance.request(
-  //   '/job/get_shedule.php',
-  //   'manager',
-  //   (response) => {
-  //     console.log(response, '<<<');
-  //     isJobsRequestNow.value = false;
-  //   },
-  //   (error) => {
-  //     console.log(error, '@@@');
+  jobGetScheduleInstance.request(
+    '/job/get_shedule.php',
+    'manager',
+    (response) => {
+      console.log(response, '<<<');
+      isJobsRequestNow.value = false;
+    },
+    (error) => {
+      console.log(error, '@@@');
 
       
       
-  //     isJobsRequestNow.value = false;
-  //   }
-  // );
+      isJobsRequestNow.value = false;
+    }
+  );
 });
 
 // Действия над днями
@@ -659,6 +659,7 @@ const modalsActions = {
 .schedule-section__title {
   margin: 0;
   line-height: 42px;
+  text-align: center;
 }
 
 /* Top Button */
@@ -669,6 +670,12 @@ const modalsActions = {
   right: 20px;
   transform: translateY(-100%);
   display: flex;
+}
+
+@media (width < 390px) {
+  .top-button {
+    transform: translate(0px, -20%);
+  }
 }
 
 /* Wrapper */
