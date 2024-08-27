@@ -20,8 +20,7 @@
   <main class="canvas">
     <template v-for="shape of formattedShapes" :key="shape.id">
       <component 
-          :is="shapeComponents[shape.type]" 
-      
+          :is="shapeComponents[shape.type]"
           :params="shape"
           :mode="mode"
           :is-selected="activeShape.id == shape.id"
