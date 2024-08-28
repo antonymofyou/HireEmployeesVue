@@ -10,7 +10,7 @@
             target="_blank"
             rel="noopener noreferrer"
           >
-            vk
+          vk
           </a>
         </div>
         <div class="employee__type" :style="{ color: getColor(employee.type) }">
@@ -198,7 +198,9 @@ const removeEmployee = () => {
   text-decoration: none;
   font-size: 14px;
   color: blue;
-  min-width: fit-content
+  min-width: fit-content;
+  white-space:pre-wrap;
+  word-break:break-word;
 }
 .employee__vk-link:hover {
   text-decoration: underline;
