@@ -4,20 +4,20 @@
     @submit.prevent="handleSubmit"
   >
     <InputSimple
-      v-model="mainDateModel"
+      v-model.trim="mainDateModel"
       :disabled="isFieldDisabled('date')"
       placeholder="Дата (yyyy-mm-dd)"
       pattern="\d{4}-\d{2}-\d{2}"
     />
     <InputSimple
-      v-model="periodStartTimeModel"
+      v-model.trim="periodStartTimeModel"
       placeholder="Начало (часы:секунды)"
       pattern="\d{2}:\d{2}"
       @input="clearCustomErrors"
       @invalid="showReadableMessage"
     />
     <InputSimple
-      v-model="periodEndTimeModel"
+      v-model.trim="periodEndTimeModel"
       placeholder="Конец (часы:секунды)"
       pattern="\d{2}:\d{2}"
       @input="clearCustomErrors"
