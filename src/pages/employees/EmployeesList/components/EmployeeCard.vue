@@ -200,6 +200,7 @@ const removeEmployee = () => {
   text-decoration: none;
   font-size: 14px;
   color: blue;
+  min-width: fit-content
 }
 .employee__vk-link:hover {
   text-decoration: underline;
