@@ -2,7 +2,7 @@
    <Modal
     :show="props.isShow"
     class="modal-confirm"
-    @click.self="$emit('close')"
+    @pointerdown.self="$emit('close')"
   >
     <template #header>
       <div class="modal-confirm__header">

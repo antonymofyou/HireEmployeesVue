@@ -2,7 +2,7 @@
   <Modal
     :show="props.isShow"
     class="modal-add-period"
-    @click.self="$emit('close')"
+    @pointerdown.self="$emit('close')"
   >
     <template #header>
       <div>Добавление периода</div>

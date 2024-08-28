@@ -31,8 +31,8 @@ import IconCrossDelete from "@/assets/icons/close.svg?component";
 }
 
 .button-icon {
-  width: 15px;
-  height: 15px;
+  width: 13px;
+  height: 13px;
   position: relative;
 }
 

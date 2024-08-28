@@ -2,51 +2,22 @@
   <Modal
     :show="props.isShow"
     class="modal-add-day"
-    @click.self="$emit('close')"
+    @pointerdown.self="$emit('close')"
   >
     <template #header>
       <div>{{ props.title }}</div>
     </template>
 
     <template #body>
-      <form
-        @submit.prevent="handleSubmitForm"
-        id="add-day-form"
-        class="day-form"
-      >
-        <InputSimple
-          v-model="newDay.date"
-          placeholder="Дата (yyyy-mm-dd)"
-          pattern="\d{4}-\d{2}-\d{2}"
-        />
-        <div class="day-form__separator">
-          <label>
-            Выходной?
-            <input
-              v-model="newDay.isWeekend"
-              type="checkbox"
-            >
-          </label>
-        </div>
-        <InputSimple
-          v-model="newDay.workTime"
-          :disabled="isRestDisabled"
-          placeholder="Рабочий день (в минутах)"
-          pattern="\d+"
-        />
-        <InputSimple
-          v-model="newDay.report"
-          :disabled="isRestDisabled"
-          placeholder="Отчёт"
-          input-type="textarea"
-        />
-        <InputSimple
-          v-model="newDay.comment"
-          :disabled="isRestDisabled"
-          placeholder="Комментарий"
-          input-type="textarea"
-        />
-      </form>
+      <DayForm
+        v-model:date="newDay.date"
+        v-model:is-weekend="newDay.isWeekend"
+        v-model:work-time="newDay.workTime"
+        v-model:report="newDay.report"
+        v-model:comment="newDay.comment"
+        :removed-fields="props.removedFields"
+        @submit="handleSubmitForm"
+      />
     </template>
 
     <template #footer-control-buttons>
@@ -70,7 +41,7 @@ import { ref, computed, watch } from 'vue';
 
 import Modal from '@/components/Modal.vue';
 import ButtonMain from '@/components/ButtonMain.vue';
-import InputSimple from '@/components/InputSimple.vue';
+import DayForm from '../days/DayForm.vue';
 
 const props = defineProps({
   isShow: {
@@ -100,6 +71,12 @@ const props = defineProps({
     type: String,
     required: false,
     default: ''
+  },
+  // Не отображаемые поля
+  removedFields: {
+    type: Array,
+    required: false,
+    default: () => []
   }
 });
 
@@ -117,6 +94,11 @@ const initNewDay = () => ({
 // Новый день для заполнения
 const newDay = ref(initNewDay());
 
+watch(newDay, (newVal) => {
+  console.log(newVal);
+})
+
+
 // Следим за props.isShow, т.к. иначе - newDay всегда будет пустым
 watch(() => props.isShow, () => {
   newDay.value = initNewDay();
@@ -129,13 +111,17 @@ const isSubmitButtonDisabled = computed(() => {
   // [x] Если дата пуста при выходном дне - дизейбл
   // [x] Если все значения пусты при не выходном дне - дизейбл
   // [x] Если все значения равны значениям по умолчанию - дизейбл
+  // [] Если какие-то поля отсутствуют - мы их не считаем
+
+  const restFields = Object.keys(newDay.value).filter((key) => !props.removedFields.includes(key));
+  console.log('RestFields = ', restFields)
 
   if (newDay.value.isWeekend) {
     result = newDay.value.date.length === 0;
   } else if (props.defaultDay) {
     result = true;
 
-    for (const key in newDay.value) {
+    for (const key of restFields) {
       const newValue = newDay.value[key];
       const oldValue = props.defaultDay[key];
 
@@ -148,7 +134,7 @@ const isSubmitButtonDisabled = computed(() => {
       }
     }
   } else {
-    for (const key in newDay.value) {
+    for (const key of restFields) {
       const value = newDay.value[key];
 
       if (typeof value !== 'boolean' && value.length === 0) {
@@ -159,11 +145,6 @@ const isSubmitButtonDisabled = computed(() => {
   }
 
   return result;
-});
-
-// Будем дизейблить всё, кроме date, если isWeekend === true
-const isRestDisabled = computed(() => {
-  return newDay.value.isWeekend;
 });
 
 /**
@@ -183,20 +164,5 @@ function handleSubmitForm() {
   display: flex;
   justify-content: center;
   width: 100%;
-}
-
-/* Day form */
-.day-form {
-  display: flex;
-  flex-direction: column;
-  row-gap: 10px;
-}
-
-.day-form__separator {
-  margin: 10px 0;
-  display: flex;
-  justify-content: center;
-  padding-bottom: 10px;
-  border-bottom: 1px solid var(--cornflower-blue);
 }
 </style>

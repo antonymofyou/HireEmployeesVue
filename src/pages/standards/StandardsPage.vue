@@ -72,6 +72,7 @@
     :is-show="isAddDayModalVisible"
     :is-loading="isAddDayRequestNow"
     :error="errorMessage"
+    :removed-fields="['workTime', 'report', 'comment']"
     title="Добавление дня"
     button-text="Добавить"
     @submit="daysActions.addNewDay"
@@ -188,10 +189,6 @@ const activeDayFromStore = computed(() => {
   });
 });
 
-watch(activeDayFromStore, (newVal) => {
-  console.log(newVal);
-});
-
 // Активный период
 const activePeriod = ref(initializators.initActivePeriod());
 
@@ -214,7 +211,6 @@ const helpers = {
    */
   getDayById(id) {
     const result = days.value.find((d) => d.dayId === id);
-    console.log(result, '<<< for ' + id);
     return result;
   },
 
@@ -273,6 +269,7 @@ const callbacks = {
    * @param {Object} periodEmitted - Период
    */
   handlePeriodDeleteDaysList(periodEmitted) {
+    console.log('here')
     isDeletePeriodModalVisible.value = true;
   
     activePeriod.value = {
@@ -469,7 +466,7 @@ const daysActions = {
 
   /**
    * Изменение выбранного дня
-   * @param {Object} editedDay - изменённый день
+   * @param {Object} editedDay - Изменённый день
    */
   async editActiveDay(editedDay) {
     if (isEditDayRequestNow.value) return;
@@ -491,6 +488,7 @@ const daysActions = {
     console.groupEnd();
 
     if (!errorMessage.value) {
+      editedDay.dayId = activeDay.value.dayId;
       const findDayIndex = days.value.findIndex((day) => day.dayId === activeDay.value.dayId);
       days.value[findDayIndex] = editedDay;
 
