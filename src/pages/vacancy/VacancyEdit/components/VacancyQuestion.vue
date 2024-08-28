@@ -15,6 +15,7 @@
       <div class="question__select">
         <span class="question__label">Опубликован:</span>
         <SelectMain
+          class="question__select-options"
           :modelValue="isPublished"
           @update:modelValue="updateIsPublished"
           :options="options"
@@ -137,6 +138,10 @@ const updateIsPublished = (newValue) => {
   flex-wrap: wrap;
 }
 
+.question__select-options {
+  min-width: fit-content;
+}
+
 .questions__block{
   margin-bottom: 10px;
 }
@@ -164,6 +169,7 @@ const updateIsPublished = (newValue) => {
   align-items: center;
   margin-top: 5px;
 }
+
 .question__remove-btn {
   background-size: 100% 100%;
   background-color: transparent;
@@ -192,6 +198,12 @@ const updateIsPublished = (newValue) => {
   margin-left: auto;
   margin-right: 30px;
   gap: 28px;
+}
+
+@media screen and (max-width: 400px) {
+  .item__arrows {
+    gap: 10px;
+  }
 }
 
 .arrow-top,
