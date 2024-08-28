@@ -18,7 +18,7 @@
       :success="successSave"
       :message="successMessage"
       :align="'end'"
-      :isActive="saveLoad"
+      :isActive="!changedVK"
     >
       <template v-slot:text>Сохранить</template>
       <template v-slot:icon
@@ -132,6 +132,7 @@ const handleVkId = ref({
   userVklink: "",
   checked: false,
 });
+const changedVK = ref(true);
 
 onMounted(() => {
   try {
@@ -226,6 +227,7 @@ function getEmployeeVkId() {
       if (response.success === "1") {
         formData.value.userVkId = response.vkInfo.vkId.toString();
         handleVkId.value.checked = true;
+        changedVK.value = true;
       } else {
         errorMessage.value = err;
       }
@@ -280,10 +282,17 @@ watch(
   },
   { deep: true }
 );
+let previousVkId = null; // Переменная для хранения предыдущего значения
+
 watch(
   handleVkId,
   () => {
     successMessage.value = "";
+    previousVkId !== null && previousVkId !== handleVkId.value.userVklink
+      ? (changedVK.value = false)
+      : (changedVK.value = true);
+    // Обновление значения предыдущего VK ID
+    previousVkId = handleVkId.value.userVklink;
   },
   { deep: true }
 );

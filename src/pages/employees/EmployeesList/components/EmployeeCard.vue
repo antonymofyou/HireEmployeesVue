@@ -2,8 +2,8 @@
   <div @click="onOpenHendleDelete" class="employee">
     <div class="employee__box">
       <div class="employee__info">
-        <div class="employee__name">
-          {{ employee.name }}
+        <div class="employee__name-box">
+          <div class="employee__name">{{ employee.name }}</div>
           <a
             class="employee__vk-link"
             :href="`https://vk.com/id${employee.userVkId}`"
@@ -29,7 +29,7 @@
           {{ employee.type }}
         </div>
       </div>
-      <div class="employee__left-side">
+      <div class="employee__right-side">
         <div class="employee__id">id: {{ employee.managerId }}</div>
         <RouterLink
           :to="{
@@ -167,6 +167,7 @@ const removeEmployee = () => {
   text-decoration: none;
   color: #111;
   align-items: center;
+  gap: 7px;
 }
 .employee__info {
   display: flex;
@@ -179,13 +180,15 @@ const removeEmployee = () => {
   line-height: 22px;
   font-weight: 400;
   color: gray;
+  max-height: 20px;
 }
-.employee__name {
+.employee__name-box {
+  display: flex;
+  gap: 10px;
   overflow: hidden;
   word-break: break-all;
   text-overflow: ellipsis;
   font-size: 15px;
-  line-height: 20px;
 }
 .employee__type {
   font-size: 15px;
@@ -201,7 +204,7 @@ const removeEmployee = () => {
 .employee__vk-link:hover {
   text-decoration: underline;
 }
-.employee__left-side {
+.employee__right-side {
   display: flex;
   justify-content: space-between;
   align-items: end;
@@ -243,5 +246,35 @@ const removeEmployee = () => {
 }
 .employee-edit__modal-btn-add {
   margin: auto;
+}
+@media screen and (max-width: 480px) {
+  .employee__info {
+    flex-direction: column;
+    gap: 5px;
+    align-items: self-start;
+  }
+}
+@media screen and (max-width: 370px) {
+  .employee__name {
+    max-width: 150px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+  .employee__name-box {
+    gap: 5px;
+  }
+  .employee__box {
+    height: 85px;
+  }
+  .employee__right-side {
+    flex-direction: column;
+    white-space: nowrap;
+  }
+}
+@media screen and (max-width: 312px) {
+  .employee__name {
+    max-width: 130px;
+  }
 }
 </style>
