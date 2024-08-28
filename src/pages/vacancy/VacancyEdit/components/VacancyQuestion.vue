@@ -134,6 +134,7 @@ const updateIsPublished = (newValue) => {
 .question__select {
   display: flex;
   align-items: baseline;
+  flex-wrap: wrap;
 }
 
 .questions__block{
