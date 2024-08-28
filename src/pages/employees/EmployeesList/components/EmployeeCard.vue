@@ -2,8 +2,8 @@
   <div @click="onOpenHendleDelete" class="employee">
     <div class="employee__box">
       <div class="employee__info">
-        <div class="employee__name-box">
-          <div class="employee__name">{{ employee.name }}</div>
+        <div class="employee__name">
+          {{ employee.name }}
           <a
             class="employee__vk-link"
             :href="`https://vk.com/id${employee.userVkId}`"
@@ -182,12 +182,10 @@ const removeEmployee = () => {
   color: gray;
   max-height: 20px;
 }
-.employee__name-box {
-  display: flex;
+.employee__name {
   gap: 10px;
   overflow: hidden;
   word-break: break-all;
-  text-overflow: ellipsis;
   font-size: 15px;
 }
 .employee__type {
@@ -257,12 +255,7 @@ const removeEmployee = () => {
 }
 @media screen and (max-width: 370px) {
   .employee__name {
-    max-width: 150px;
-    overflow: hidden;
-    text-overflow: ellipsis;
-    white-space: nowrap;
-  }
-  .employee__name-box {
+    flex-wrap: wrap;
     gap: 5px;
   }
   .employee__box {
@@ -275,7 +268,7 @@ const removeEmployee = () => {
 }
 @media screen and (max-width: 312px) {
   .employee__name {
-    max-width: 130px;
+
   }
 }
 </style>
