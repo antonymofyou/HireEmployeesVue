@@ -2,7 +2,7 @@
     <div class="control-buttons-block">
         <ColorPicker
             :color="props.activeShape.shape?.color || '#000000'"
-            :disabled="disabled"
+            :disabled="!isActiveShape"
             @reset-color="updateShapeHandler('color', '#000000')"
             @update:color="updateShapeHandler('color', $event)"   
         >
@@ -12,9 +12,10 @@
         </ColorPicker>
         <ColorPicker
             :color="props.activeShape.shape?.borderColor || '#000000'"
-            :disabled="disabled"
+            :disabled="!isActiveShape"
             @reset-color="updateShapeHandler('borderColor', '#000000')"
-            @update:color="updateShapeHandler('borderColor', $event)"            
+            @update:color="updateShapeHandler('borderColor', $event)"
+            v-show="!isArrowShape"         
         >
             <template #icon>
                 <BorderColor />
@@ -22,9 +23,10 @@
         </ColorPicker>
         <ValuePicker
             class="control-buttons-button control-buttons-value-picker"
-            :disabled="disabled"
+            :disabled="!isActiveShape"
             :value="+props.activeShape.shape?.cornerRadius || 0"
-            @update:value="updateShapeHandler('cornerRadius', +$event)"            
+            @update:value="updateShapeHandler('cornerRadius', +$event)"
+            v-show="!isArrowShape"     
         >
             <template #icon>
                 <BorderRadius />
@@ -35,9 +37,10 @@
         </ValuePicker>
         <ValuePicker
             class="control-buttons-button control-buttons-value-picker"
-            :disabled="disabled"
+            :disabled="!isActiveShape"
             :value="+props.activeShape.shape?.borderWidth || 0"
-            @update:value="updateShapeHandler('borderWidth', +$event)"            
+            @update:value="updateShapeHandler('borderWidth', +$event)"     
+            v-show="!isArrowShape"         
         >
             <template #icon>
                 <FormatLineWeight />
@@ -48,9 +51,10 @@
         </ValuePicker>
         <ValuePicker
             class="control-buttons-button control-buttons-value-picker"
-            :disabled="disabled"
+            :disabled="!isActiveShape"
             :value="+props.activeShape.shape?.paddingHorizontal || 0"
             @update:value="updateShapeHandler('paddingHorizontal', +$event)"            
+            v-show="!isArrowShape"  
         >
             <template #icon>
                 <ArrowExpandHorizontal />
@@ -61,9 +65,10 @@
         </ValuePicker>
         <ValuePicker
             class="control-buttons-button control-buttons-value-picker"
-            :disabled="disabled"
+            :disabled="!isActiveShape"
             :value="+props.activeShape.shape?.paddingVertical || 0"
-            @update:value="updateShapeHandler('paddingVertical', +$event)"            
+            @update:value="updateShapeHandler('paddingVertical', +$event)"   
+            v-show="!isArrowShape"           
         >
             <template #icon>
                 <ArrowExpandVertical />
@@ -74,7 +79,7 @@
         </ValuePicker>
         <ValuePicker
             class="control-buttons-button control-buttons-value-picker"
-            :disabled="disabled"
+            :disabled="!isActiveShape"
             :value="+props.activeShape.shape?.zIndex || 1"
             @update:value="updateShapeHandler('zIndex', +$event)"    
         >
@@ -112,9 +117,12 @@ const emits = defineEmits({
     updateShape: null,
 });
 
-const disabled = computed(() => {
-    return !Boolean(props.activeShape.id);
-});
+const isActiveShape = computed(() => {
+    return Boolean(props.activeShape?.id);
+})
+const isArrowShape = computed(() => {
+    return Boolean(props.activeShape.shape?.type === 'arrow');
+})
 
 // Handlers
 
