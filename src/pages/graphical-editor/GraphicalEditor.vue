@@ -289,16 +289,17 @@ const changeModeHandler = (event) => {
 .container {
     padding: 24px 16px;
     margin: 0 auto;
-    max-width: 90%;
 }
 
 .header__control-buttons {
   display: flex;
-  gap: 48px;
+  align-items: flex-start;
+  gap: 16px 48px;
 }
 
 .header__control-buttons > * {
   display: flex;
+  flex-wrap: wrap;
   gap: 16px;
 }
 
@@ -355,6 +356,18 @@ const changeModeHandler = (event) => {
 .tooltip-control-buttons .control-buttons-block {
   display: flex;
   gap: 16px;
+}
+
+@media (max-width: 768px) {
+  .control-buttons-main {
+    flex-direction: column;
+    gap: 16px;
+  }
+
+
+  .header__control-buttons {
+    gap: 16px;
+  }
 }
 
 </style>

@@ -51,32 +51,6 @@
                 <Marker />
             </template>
         </ColorPicker>
-        <ValuePicker
-            class="control-buttons-button control-buttons-value-picker"
-            :value="parseInt(props.activeShape.editor?.getAttributes('textStyle').fontSize) || 0"
-            @update:value="sizeTextHandler"
-            title="Размер текста"           
-        >
-            <template #icon>
-                <FormatText />
-            </template>
-            <template #units>
-                px
-            </template>
-        </ValuePicker>
-        <ValuePicker
-            class="control-buttons-button control-buttons-value-picker"
-            :value="+props.activeShape.shape?.padding || 0"
-            @update:value="updateShapeHandler('padding', +$event)"     
-            title="Внутренние отступы"       
-        >
-            <template #icon>
-                <FitToPageOutline />
-            </template>
-            <template #units>
-                px
-            </template>
-        </ValuePicker>
         <SelectMain
             :options="optionsHorizontalAlign"
             :model-value="currentHorizontalAlign"
@@ -103,6 +77,32 @@
                 <component :is="verticalAlignIcons[selected.id]"></component>
             </template>
         </SelectMain> 
+        <ValuePicker
+            class="control-buttons-button control-buttons-value-picker"
+            :value="parseInt(props.activeShape.editor?.getAttributes('textStyle').fontSize) || 0"
+            @update:value="sizeTextHandler"
+            title="Размер текста"           
+        >
+            <template #icon>
+                <FormatText />
+            </template>
+            <template #units>
+                px
+            </template>
+        </ValuePicker>
+        <ValuePicker
+            class="control-buttons-button control-buttons-value-picker"
+            :value="+props.activeShape.shape?.padding || 0"
+            @update:value="updateShapeHandler('padding', +$event)"     
+            title="Внутренние отступы"       
+        >
+            <template #icon>
+                <FitToPageOutline />
+            </template>
+            <template #units>
+                px
+            </template>
+        </ValuePicker>
     </div>
 </template>
 
