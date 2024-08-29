@@ -2,7 +2,7 @@
   <div class="button" :class="alignClass">
     <button
       class="button__control"
-      :disabled="isActive"
+      :disabled="isButtonDisabled"
     >
       <span v-if="isActive" class="button__spinner"></span>
       <div class="button__icon" v-if="$slots['icon'] && !isActive" >
@@ -25,6 +25,7 @@ import { computed } from 'vue';
 // Статус выполнения (1 - success, 0 - warning),
 // сообщение (фидбек), цвет текста, цвет кнопки, жирный шрифт текста, выравнивание ошибки
 const props = defineProps({
+  // Идёт загрузка или нет
   isActive: {
     type: Boolean,
     default: false,
@@ -59,7 +60,12 @@ const props = defineProps({
     type: String,
     default: 'start',
     required: false,
-  }
+  },
+  isDisabled: {
+    type: Boolean,
+    default: false,
+    required: false,
+  },
 });
 
 // Выравнивание расположения кнопки и сообщения о выполнении
@@ -67,6 +73,11 @@ const alignClass = computed(() => ({
   'button--align-start': props.align === 'start',
   'button--align-end': props.align === 'end',
 }));
+
+// Задизейблена ли кнопка
+const isButtonDisabled = computed(() => {
+  return props.isDisabled || props.isActive;
+});
 </script>
 
 <style scoped>

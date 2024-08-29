@@ -122,6 +122,7 @@ export class VacanciesModifyVacancyStatus extends MainRequestClass {
 
 export class VacanciesAccessGetManagerAccessVacancy  extends MainRequestClass {
     vacancyId = ''; // ID вакансии, для которой нужно получить менеджеров
+    statusName = ''; //// название статуса
     permissionType = ''; // Тип прав, информацию о которых необходимо получить 
 }
 export class VacanciesAccessSetManagerAccessVacancy   extends MainRequestClass {
@@ -130,4 +131,13 @@ export class VacanciesAccessSetManagerAccessVacancy   extends MainRequestClass {
     action = ""; //Действие которое нужно сделать с менеджером (добавить/удалить)
     statusName = ''; //название статуса, на который нужно добавить менеджера
     managerId = '' // id менеджера
+}
+
+export class VacanciesSortVacancyQuestion extends MainRequestClass {
+    vacancyId = ''; // ID вакансии, к которой относятся вопросы
+
+    questionId = ''; // ID вопроса, который нужно переместить
+
+    direction = ''; // направление сортировки, на сколько нужно позиций нужно переместить вверх или вниз (положительное число - увеличивает значение сортировки, опуская вопрос вниз, отрицательное - уменьшает значение сортировки, поднимая вопрос вверх; в случае нуля будет ошибка) (сортировка вопросов при выдаче происходит от меньшего значения к большему)
+
 }
