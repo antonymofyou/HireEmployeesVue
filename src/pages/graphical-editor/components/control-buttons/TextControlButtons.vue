@@ -48,11 +48,23 @@
         </ColorPicker>
         <ValuePicker
             class="control-buttons-button control-buttons-value-picker"
-            :value="parseInt(props.activeShape.editor?.getAttributes('textStyle').fontSize) || 16"
+            :value="parseInt(props.activeShape.editor?.getAttributes('textStyle').fontSize) || 0"
             @update:value="sizeTextHandler"            
         >
             <template #icon>
                 <FormatText />
+            </template>
+            <template #units>
+                px
+            </template>
+        </ValuePicker>
+        <ValuePicker
+            class="control-buttons-button control-buttons-value-picker"
+            :value="+props.activeShape.shape?.padding || 0"
+            @update:value="updateShapeHandler('padding', +$event)"            
+        >
+            <template #icon>
+                <FitToPageOutline />
             </template>
             <template #units>
                 px
@@ -109,6 +121,7 @@ import VerticalAlignTop from 'vue-material-design-icons/FormatVerticalAlignTop.v
 import FormatText from 'vue-material-design-icons/FormatText.vue'
 import Marker from 'vue-material-design-icons/Marker.vue'
 import FormatFont from 'vue-material-design-icons/FormatFont.vue';
+import FitToPageOutline from 'vue-material-design-icons/FitToPageOutline.vue';
 
 const props = defineProps({
     activeShape: {
@@ -209,7 +222,7 @@ function colorTextHandler(color) {
 }
 
 function sizeTextHandler(size) {
-    props.activeShape.editor?.chain().focus().setFontSize(size + 'px').run();
+    props.activeShape.editor?.chain().setFontSize(size + 'px').run();
 }
 
 function addHighlightHandler(color) {
@@ -233,7 +246,11 @@ function verticalAlignSelectHandler(id) {
 
     const { name } = optionsVerticalAlign?.filter(item => item.id == id)[0] || {};
 
-    emits('updateShape', props.activeShape.id, 'textVerticalAlignment', name);
+    updateShapeHandler('textVerticalAlignment', name);
+}
+
+function updateShapeHandler(key, value) {
+    emits('updateShape', props.activeShape.id, key, value);
 }
 
 </script>

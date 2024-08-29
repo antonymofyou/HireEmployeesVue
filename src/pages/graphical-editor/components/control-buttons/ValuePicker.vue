@@ -5,7 +5,7 @@
         </span>
         <input
             :value="value"
-            @change="emits('update:value', $event.target.value)"
+            @input="emits('update:value', $event.target.value)"
             :disabled="disabled"
             type="number"
             class="value-picker__input"

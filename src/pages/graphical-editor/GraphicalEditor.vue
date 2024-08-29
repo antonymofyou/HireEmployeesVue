@@ -9,11 +9,16 @@
           @update-shape="updateShape"
         />
         <BlockControlButtons
+          v-if="windowInnerWidth <= breakpoint"
           v-show="isEditMode"
           :active-shape="activeShape"
           @update-shape="updateShape"
         />
-        <MainControlButtons @add-shape="addShape" />
+        <MainControlButtons
+          :active-shape="activeShape"
+          @add-shape="addShapeHandler"
+          @copy-shape="copyShapeHandler"
+        />
       </div>
     </div>
   </header>
@@ -32,10 +37,15 @@
     <TooltipControlButtons
       v-if="windowInnerWidth > breakpoint"
       :active-shape="activeShape"
-      :mode="mode"
     >
       <template #content>
-        <TextControlButtons 
+        <TextControlButtons
+          v-show="isTextMode"
+          :active-shape="activeShape"
+          @update-shape="updateShape"
+        />
+        <BlockControlButtons
+          v-show="isEditMode"
           :active-shape="activeShape"
           @update-shape="updateShape"
         />
@@ -214,7 +224,7 @@ const generateUniqueId = () => {
 }
 
 // Функция для добавления нового прямоугольника
-const addShape = () => {
+const addShapeHandler = () => {
   const newId = generateUniqueId();
 
   formattedShapes[newId] = {
@@ -232,7 +242,29 @@ const addShape = () => {
     borderWidth: 2
   };
 
-  activeShape.id = newId;
+  handleSelectShape({
+    id: newId,
+  });
+}
+
+// Функция для копирования активной фигуры
+const copyShapeHandler = () => {
+  if (!activeShape.shape) return;
+
+  const copyShape = {
+    ...activeShape.shape,
+  };
+  const id = generateUniqueId();
+
+  copyShape.id = id;
+  copyShape.x = 0;
+  copyShape.y = 0;
+
+  formattedShapes[id] = copyShape;
+
+  handleSelectShape({
+    id: id,
+  });
 }
 
 // Функция для обновления свойств формы
@@ -319,7 +351,8 @@ const changeModeHandler = (event) => {
   z-index: 999;
 }
 
-.tooltip-control-buttons .control-buttons-text {
+.tooltip-control-buttons .control-buttons-text,
+.tooltip-control-buttons .control-buttons-block {
   display: flex;
   gap: 16px;
 }

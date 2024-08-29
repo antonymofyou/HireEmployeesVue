@@ -89,7 +89,7 @@ const rectangleStyles = computed(() => {
         // Size
         width: props.params.width + 'px',
         height: props.params.height + 'px',
-        padding: `${props.params.paddingVertical || 0}px ${props.params.paddingHorizontal || 0}px`,
+        padding: `${props.params.padding || 0}px`,
         // Style
         backgroundColor: props.params.color,
         borderRadius: props.params.cornerRadius + 'px',

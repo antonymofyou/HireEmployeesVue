@@ -12,18 +12,11 @@ const props = defineProps({
     activeShape: {
         type: Object,
         required: true,
-    },
-    mode: {
-        type: Object,
-        required: true
     }
 });
 
-const isTextMode = computed(() => {
-  return props.mode.value === props.mode._text;
-});
 const isActive = computed(() => {
-    return props.activeShape.id && props.activeShape.editor && isTextMode.value;
+    return props.activeShape.id;
 });
 const positionTooltips = computed(() => {
     let rotation = Math.round(Math.abs(props.activeShape.shape?.rotation));
@@ -59,7 +52,7 @@ const styleTooltips = computed(() => {
 
 .tooltip-control-buttons {
     position: absolute;
-    transform: translateY(-150%) translateX(-50%);
+    transform: translateY(-175%) translateX(-50%);
 }
 
 </style>
