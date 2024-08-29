@@ -56,7 +56,7 @@
 
 <script setup>
 
-import { reactive, computed, ref, onBeforeUnmount } from 'vue';
+import {reactive, computed, ref, onBeforeUnmount, onMounted} from 'vue';
 
 import TextControlButtons from './components/control-buttons/TextControlButtons.vue';
 import BlockControlButtons from './components/control-buttons/BlockControlButtons.vue';
@@ -212,9 +212,26 @@ function debounce(callback, delay) {
   };
 }
 
-window.addEventListener('resize', updateWindowInnerWidth);
+// Добавление обработчика клика по документу
+const handleDocumentClick = (event) => {
+  if (
+      !event.target.closest('.rectangle') &&
+      !event.target.closest('.arrow-container') &&
+      !event.target.closest('.header') &&
+      !event.target.closest('.tooltip-control-buttons')
+  ) {
+    activeShape.id = null;
+    activeShape.editor = undefined;
+    mode.value = mode._edit;
+  }
+};
 
+onMounted(() => {
+  document.addEventListener('click', handleDocumentClick);
+  window.addEventListener('resize', updateWindowInnerWidth);
+});
 onBeforeUnmount(() => {
+  document.removeEventListener('click', handleDocumentClick);
   window.removeEventListener('resize', updateWindowInnerWidth);
 })
 
@@ -274,9 +291,13 @@ const updateShape = (id, key, value) => {
 
 // Функция для обработки выбора формы
 const handleSelectShape = ({id, editor = undefined} = {}) => {
+  if (activeShape.id !== id && mode.value === mode._text) {
+    mode.value = mode._edit;
+  }
+
   activeShape.id = id;
   activeShape.editor = editor;
-}
+};
 
 // Функция для обработки изменения режима
 const changeModeHandler = (event) => {

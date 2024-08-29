@@ -26,7 +26,7 @@
 </template>
 
 <script setup>
-import {computed, onMounted, onBeforeUnmount, watch} from 'vue';
+import {computed, onBeforeUnmount, watch} from 'vue';
 import { useEditor, EditorContent } from '@tiptap/vue-3'
 import { useShape } from '../../assets/js/useShape';
 import StarterKit from '@tiptap/starter-kit'
@@ -173,32 +173,11 @@ const toggleTextEditMode = () => {
   }
 };
 
- // Обработчик кликов вне объекта для снятия выделения
- const handleDocumentClick = (event) => {
-   if (
-       !event.target.closest('.rectangle') &&
-       !event.target.closest('.arrow-container') &&
-       !event.target.closest('.header') &&
-       !event.target.closest('.tooltip-control-buttons')
-   ) {
-     emits('select-shape', {
-       id: null,
-       editor: undefined
-     });
-     emits('change-mode', props.mode._edit);
-   }
- };
-
-onMounted(() => {
-   document.addEventListener('click', handleDocumentClick);
-});
-
 onBeforeUnmount(() => {
   editor.value.destroy();
   stopDragging();
   stopResizing();
   stopRotating();
-   document.removeEventListener('click', handleDocumentClick);
 });
 </script>
 
