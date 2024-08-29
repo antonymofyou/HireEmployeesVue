@@ -1,42 +1,55 @@
 <template>
-  <div v-if="request === true" class="manager-list__header">
+  <div v-if="request" class="manager-list__header">
       Менеджеры вакансии:
   </div>
-  <SpinnerMain v-if="request" class="manager-list__status-spinner" />
+
+  <SpinnerMain
+    v-if="request"
+    class="manager-list__status-spinner"
+  />
+
   <VacancyManagersList
-    v-if="!request"
+    v-else
     :managerList="managerList.assignedManagers"
-    :requestManagersModification
-    :indicators
-    :managerMod
-  ></VacancyManagersList>
+    :indicators="indicators"
+    :managerMod="managerMod"
+    :renderAddBtn="isAdmin()"
+    @clickManager="setHandledManager"
+    @clickAdd="openAddManagersModal"
+    @clickDelete="openDeleteManagerModal"
+    @resetHandled="resetIsHandled"
+  />
 
   <Teleport to="body">
     <!-- Вывод модалки для добавления и изменения статуса -->
     <VacancyManagersModal
       :show="indicators.isAdd || indicators.isDelete"
-      :managerMod
-      :indicators
+      :managerMod="managerMod"
+      :indicators="indicators"
       :managerList="managerList.unassignedManagers"
       :managerListAssigned="managerList.assignedManagers"
-      :requestManagersModification
-      :request
-      :errorMessage
-      :formData
+      :requestManagersModification="requestManagersModification"
+      :request="request"
+      :errorMessage="errorMessage"
+      :formData="formData"
+      @close="handleVacancyManagersModalClose"
     />
   </Teleport>
 </template>
 
 <script setup>
+import { onMounted, watch, ref } from "vue";
+
 import SpinnerMain from "@/components/SpinnerMain.vue";
+
 import VacancyManagersModal from "./VacancyManagersModal.vue";
+import VacancyManagersList from "./VacancyManagersList.vue";
 
 import {
   VacanciesAccessGetManagerAccessVacancy,
   VacanciesAccessSetManagerAccessVacancy,
 } from "../../js/ApiClassesVacancyEdit";
-import { onMounted, watch, ref } from "vue";
-import VacancyManagersList from "./VacancyManagersList.vue";
+import { isAdmin } from "@/js/AuthFunctions";
 
 const props = defineProps({
   // Id вакансии
@@ -71,9 +84,7 @@ const indicators = ref({
 // Флаг запроса
 const request = ref(false);
 // Сообщение об ошибке
-const errorMessage = ref({
-  error: "",
-});
+const errorMessage = ref('');
 
 // Запрос менеджеров по id
 const requestVacancyManagers = () => {
@@ -81,7 +92,7 @@ const requestVacancyManagers = () => {
   requestInstance.vacancyId = props.vacancyId;
   requestInstance.permissionType = managerMod.value.permissionType;
   request.value = true;
-  errorMessage.value.error = "";
+  errorMessage.value = "";
     requestInstance.request(
       "/vacancies/access/get_managers_access_vacancy.php",
       "manager",
@@ -98,7 +109,7 @@ const requestVacancyManagers = () => {
       },
       (err) => {
         request.value = false;
-        errorMessage.value.error = err;
+        errorMessage.value = err;
       }
     );
 };
@@ -116,7 +127,7 @@ const requestManagersModification = (action, managerId) => {
   requestInstance.permissionType = managerMod.value.permissionType;
   requestInstance.managerId = managerMod.value.managerId;
   request.value = true;
-  errorMessage.value.error = "";
+  errorMessage.value = "";
   requestInstance.request(
     "/vacancies/access/set_manager_access_vacancy.php",
     "manager",
@@ -135,12 +146,57 @@ const requestManagersModification = (action, managerId) => {
     },
     (err) => {
       request.value = false;
-      errorMessage.value.error = err;
+      errorMessage.value = err;
     }
   );
 };
 
-//при загрузке делаем запрос к серверу
+/**
+ * Установка менеджера, которым манипулируем в данный момент
+ * @param {Number} managerId - ID менеджера, на которого кликнули
+ */
+const setHandledManager = (managerId) => {
+  // Если манипулируем менеджером и текущий модифицируемый не равен тому, что в компоненте
+  if (indicators.value.isHandled && managerMod.value.managerId !== managerId)
+    // Меняем модифицируемого менеджера
+    managerMod.value.managerId = managerId;
+  else
+    indicators.value.isHandled = !indicators.value.isHandled;
+
+  managerMod.value.managerId = managerId;
+};
+
+/**
+ * Открыть модалку добавления менеджера
+ */
+const openAddManagersModal = () => {
+  indicators.value.isAdd = true;
+};
+
+/**
+ * Открыть модалку удаления менеджера
+ */
+const openDeleteManagerModal = () => {
+  indicators.value.isDelete = true;
+};
+
+/**
+ * Сброс индикатора обработки
+ */
+const resetIsHandled = () => {
+  indicators.value.isHandled = false;
+};
+
+/**
+ * Обработка закрытия модалки выбора менеджера
+ */
+const handleVacancyManagersModalClose = () => {
+  indicators.value.isAdd = false;
+  indicators.value.isDelete = false;
+  errorMessage.value = '';
+};
+
+// При загрузке делаем запрос к серверу
 onMounted(() => {
   requestVacancyManagers();
 });

@@ -1,17 +1,11 @@
 <template>
   <Modal
-    :show="indicators.isAdd || indicators.isDelete"
-    @click.self="
-      indicators.isAdd = false;
-      indicators.isDelete = false;
-      errorMessage.error = '';
-    "
+    :show="props.show"
+    @click.self="handleModalBackClick"
   >
     <template v-slot:header>
       <div>
-        {{
-          indicators.isAdd ? "Добавить менеджера вакансии" : "Удалить менеджера"
-        }}
+        {{ modalTitle }}
       </div>
       <p v-if="indicators.isDelete">
         {{ managerName(managerMod.managerId) }}
@@ -19,25 +13,24 @@
     </template>
 
     <template v-slot:body>
-      <SelectMain
-        v-if="indicators.isAdd"
-        class="manager-edit__modal-select"
-        v-model="formData.id"
-        :options="managerList"
-      />
+      <div class="select-wrapper">
+        <SelectMain
+          v-if="indicators.isAdd || indicators.isManagerAdd"
+          class="manager-edit__modal-select"
+          v-model="formData.id"
+          :options="managerList"
+        />
+      </div>
 
       <ButtonMain
-        class="manager-edit__modal-btn-add"
-        @click="
-          indicators.isAdd
-            ? requestManagersModification('create', formData.id)
-            : requestManagersModification('delete', managerMod.managerId)
-        "
+        @click="actionFn"
         :isActive="request"
         :message="errorMessage.error"
+        :isDisabled="isActionButtonDisabled"
+        class="manager-edit__modal-btn-add"
       >
         <template v-slot:text>
-          {{ indicators.isAdd ? "Добавить" : "Удалить" }}
+          {{ actionBtnText }}
         </template>
       </ButtonMain>
     </template>
@@ -45,11 +38,24 @@
 </template>
 
 <script setup>
+import { computed } from "vue";
+
 import Modal from "@/components/Modal.vue";
 import ButtonMain from "@/components/ButtonMain.vue";
 import SelectMain from "@/components/SelectMain.vue";
 
 const props = defineProps({
+  // Показывать ли модалку
+  show: {
+    type: Boolean,
+    required: true,
+  },
+  // Заголовок модалки
+  title: {
+    type: String,
+    required: false,
+    default: null,
+  },
   // Создаваемый/изменяемый статус
   managerMod: {
     type: Object,
@@ -77,8 +83,9 @@ const props = defineProps({
   },
   // Сообщение об ошибке
   errorMessage: {
-    type: Object,
-    required: true,
+    type: String,
+    required: false,
+    default: '',
   },
   // Флаг запроса
   request: {
@@ -88,16 +95,63 @@ const props = defineProps({
   //Данные с SelectMain
   formData: {
     type: Object,
-    required: true,
+    required: false,
   },
 });
 
+const emit = defineEmits(['close']);
+
+// Заголовок модалки
+const modalTitle = computed(() => {
+  // props.title имеет приоритет над иными вычисляемыми значениями
+  if (props.title) return props.title;
+
+  // Вычисляем заголовок исходя из индикаторов
+  if (props.indicators.isAdd)
+    return 'Добавить менеджера вакансии';
+  else if (props.indicators.isDelete)
+    return 'Удалить менеджера'
+});
+
+// Текст в кнопке действия
+const actionBtnText = computed(() => {
+  if (props.indicators.isAdd || props.indicators.isManagerAdd) return 'Добавить';
+  else if (props.indicators.isDelete) return 'Удалить';
+});
+
+// Задизейблена ли кнопка действия
+const isActionButtonDisabled = computed(() => {
+  // Если идёт процесс добавления, но так и не было ничего выбрано - то дизейблим
+  if ((props.indicators.isAdd || props.indicators.isManagerAdd) && !props.formData.id)
+    return true;
+
+  return false;
+});
+
+// Действие по клику на кнопку
+const actionFn = computed(() => {
+  if (props.indicators.isAdd || props.indicators.isManagerAdd)
+    return () => props.requestManagersModification('create', props.formData.id);
+  else if (props.indicators.isDelete)
+    return () => props.requestManagersModification('delete', props.managerMod.managerId)
+});
+
+/**
+ * Функция поиска имени менеджера по его ID
+ * @param {Number} managerId - ID менеджера
+ */
 const managerName = (managerId) => {
-  const manager = props.managerListAssigned.find(
+  const manager = props.managerListAssigned?.find(
     (manager) => manager.id === managerId
   );
-  console.log(props.managerListAssigned)
   return manager ? `${manager.name}?` : "";
+};
+
+/**
+ * Обработка клика по заднику модалки
+ */
+const handleModalBackClick = () => {
+  emit('close');
 };
 </script>
 
@@ -113,5 +167,9 @@ const managerName = (managerId) => {
   align-self: center;
   margin-top: 15px;
   align-items: center;
+}
+
+.manager-edit__modal-select {
+  align-items: center
 }
 </style>
