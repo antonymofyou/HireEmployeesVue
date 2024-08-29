@@ -10,7 +10,7 @@
       <TopSquareButton class="employee-edit__back-btn" :icon="iconBack" />
     </RouterLink>
     <div class="employee-edit__title">
-      <h1>Страница редактирования</h1>
+      <h1>Редактирование сотрудника</h1>
     </div>
     <ButtonMain
       class="employee-edit__save-btn"
@@ -18,7 +18,7 @@
       :success="successSave"
       :message="successMessage"
       :align="'end'"
-      :isActive="!changedVK"
+      :style="changedVK ? 'color: var(--cornflower-blue)' : 'opacity: 0.5'"
     >
       <template v-slot:text>Сохранить</template>
       <template v-slot:icon
@@ -49,26 +49,56 @@
         />
         <ButtonIcon
           class="employee-edit__btn-check-btn"
+          v-if="!isVkidLoading"
           @click="getEmployeeVkId"
         >
           <template v-slot:icon>
             <CheckIcon class="employee-edit__btn-check-icon" />
           </template>
         </ButtonIcon>
+        <SpinnerMain
+          v-if="isVkidLoading"
+          class="employees-edit__loading-check-btn"
+        />
       </div>
       <a
         v-if="handleVkId.checked"
         :href="`https://vk.com/id${formData.userVkId}`"
         target="_blank"
         rel="noopener noreferrer"
+        class="employees-edit__vk-link"
       >
         https://vk.com/id{{ formData.userVkId }}
       </a>
+      <div
+        v-if="vkerrorMessage != undefined"
+        class="employees-edit__errorMessage"
+      >
+        {{ vkerrorMessage }}
+      </div>
       <div>
         <h1 class="employee-edit__SelectlabelName">Роль сотрудника:</h1>
         <SelectMain v-model="formData.type" :options="SelectOptions" />
       </div>
     </div>
+    <ButtonMain
+      v-if="isAdmin()"
+      buttonColor="var(--cinnabar)"
+      type="button"
+      @click="showModalOnRemoveEmployee = true"
+    >
+      <template v-slot:text>Удалить сотрудника</template>
+    </ButtonMain>
+    <Teleport to="body">
+      <ModalConfirmation
+        v-model:show="showModalOnRemoveEmployee"
+        confirmText="Удалить"
+        text="Вы уверены, что хотите удалить Сотрудника? Это действие нельзя отменить"
+        confirmButtonColor="var(--cinnabar)"
+        :requestObject="removeEmployeeRequestObject"
+        :show="saveLoad"
+      />
+    </Teleport>
     <Teleport to="body">
       <!-- Вывод сообщения о ошибке -->
       <ErrorNotification v-if="errorMessage" :message="errorMessage" />
@@ -79,8 +109,13 @@
 <script setup>
 import { onMounted, ref, reactive, watch } from "vue";
 import { useRoute, useRouter } from "vue-router";
+import { isAdmin } from "@/js/AuthFunctions";
 import { isManager } from "@/js/AuthFunctions";
 import { ManagersGetManager } from "../EmployeeInfoPage/js/ApiClassesEmployeeInfo";
+import {
+  EmployeesSetEmployees,
+  ManagersGetVkId,
+} from "../EmployeesList/js/ApiClassesEmployees";
 import TopSquareButton from "@/components/TopSquareButton.vue";
 import CheckIcon from "@/assets/icons/check.svg?component";
 import iconBack from "@/assets/icons/back.svg";
@@ -89,10 +124,7 @@ import ButtonMain from "@/components/ButtonMain.vue";
 import InputSimple from "@/components/InputSimple.vue";
 import SelectMain from "@/components/SelectMain.vue";
 import ErrorNotification from "@/components/ErrorNotification.vue";
-import {
-  EmployeesSetEmployees,
-  ManagersGetVkId,
-} from "../EmployeesList/js/ApiClassesEmployees";
+import ModalConfirmation from "@/components/ModalConfirmation.vue";
 import SpinnerMain from "@/components/SpinnerMain.vue";
 import ButtonIcon from "@/components/ButtonIcon.vue";
 
@@ -109,11 +141,20 @@ const employeeId = ref(""); // ID вакансии
 // Отображение ошибки
 const errorMessage = ref("");
 
+// Отображение ошибки
+const vkerrorMessage = ref("");
+
 // индикаторы загрузок для кнопок
 let saveLoad = ref(false); // true когда идет сохранение
 
 //Флаги загрузки данных
 const isLoading = ref(false);
+
+//Флаги загрузки данных vk id
+let isVkidLoading = ref(false);
+
+// Показ модального окна при удалении вакансии
+const showModalOnRemoveEmployee = ref(false);
 
 const SelectOptions = [
   { name: "Админ", id: "1" },
@@ -158,6 +199,15 @@ if (route.query.employeeId) {
   employeeId.value = route.query.employeeId;
 }
 
+//функция удаления и возвращения на страницу со списком сотрудников
+const removeEmployee = () => {
+  editEmployees("delete", formData.value.managerId, "");
+};
+//реактивная функция удаления
+const removeEmployeeRequestObject = reactive({
+  fetch: removeEmployee,
+});
+
 //Заполняем массив set данными select и input
 const fillManagerData = () => {
   const roleName = SelectOptions.find((item) => {
@@ -181,7 +231,7 @@ const fillManagerData = () => {
 //обработка клика для обновления данных о сотруднике
 const saveChanges = () => {
   const result = fillManagerData(); // Получаем объект с данными
-  if (result) {
+  if (result && changedVK.value) {
     // Если объект не пустой
     editEmployees("update", formData.value.managerId, result);
   }
@@ -218,6 +268,7 @@ const getEmployeeInfoById = (callback) => {
 function getEmployeeVkId() {
   let requestClass = new ManagersGetVkId();
 
+  isVkidLoading.value = true;
   requestClass.url = handleVkId.value.userVklink;
   requestClass.request(
     "/managers/get_vk_id.php",
@@ -228,26 +279,31 @@ function getEmployeeVkId() {
         formData.value.userVkId = response.vkInfo.vkId.toString();
         handleVkId.value.checked = true;
         changedVK.value = true;
+        isVkidLoading.value = false;
+        vkerrorMessage.value = "";
       } else {
-        errorMessage.value = err;
+        errorMessvkerrorMessageage.value = err;
+        isVkidLoading.value = false;
       }
     },
     function (err) {
       //неуспешный результат
-      errorMessage.value = err;
+      vkerrorMessage.value = err;
+      isVkidLoading.value = false;
     }
   );
 }
 
 // Создание нового / редактирование Сотрудника
 function editEmployees(action, managerId, managerData) {
-  saveLoad.value = true;
+  action === "update" ? (saveLoad.value = true) : saveLoad.value;
   let requestClass = new EmployeesSetEmployees();
 
   requestClass.action = action;
   requestClass.managerId = managerId;
   requestClass.set = managerData;
 
+  action === "delete" ? (isLoading.value = true) : isLoading.value;
   requestClass.request(
     "/managers/set_manager.php",
     "manager",
@@ -258,6 +314,9 @@ function editEmployees(action, managerId, managerData) {
         successMessage.value = "Данные успешно сохранены!";
         successSave.value = "1";
         saveLoad.value = false;
+        if (action === "delete") {
+          router.go(-1);
+        }
       } else {
         errorMessage.value = err;
         successSave.value = "0";
@@ -363,5 +422,16 @@ watch(
 }
 .employee-edit__vk-input {
   width: 100%;
+}
+.employees-edit__loading-check-btn {
+  width: 20px;
+  margin: 0 0 10px 10px;
+}
+.employees-edit__errorMessage {
+  color: var(--error-color);
+  font-size: 15px;
+}
+.employees-edit__vk-link {
+  max-width: 270px;
 }
 </style>

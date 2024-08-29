@@ -8,20 +8,17 @@
       :icon="plusIcon"
     >
     </TopSquareButton>
-    <div class="employees__box-employees" v-click-outside>
+    <div class="employees__box-employees">
       <EmployeeCard
         v-for="employee in employees"
         :key="employee.managerId"
         :employee="employee"
         :requestEmployeesModification="editEmployees"
-        :indicators="indicators"
-        @updateIsHandled="updateIsHandled"
-        :deleteFunction="editEmployees"
       />
     </div>
 
     <!-- Отображение прелоадера  -->
-    <SpinnerMain v-if="isLoading" style="width: 50px" />
+    <SpinnerMain v-if="isLoading && modalSuccess" style="width: 50px" />
     <div v-if="employees.length === 0 && !isLoading">
       На данный момент сотрудников нет
     </div>
@@ -63,11 +60,19 @@
             :isLabelBold="true"
             :isTextBold="true"
           />
-          <ButtonIcon class="employees__btn-check-btn" @click="getEmployeeVkId">
+          <ButtonIcon
+            v-if="!isVkidLoading"
+            class="employees__btn-check-btn"
+            @click="getEmployeeVkId"
+          >
             <template v-slot:icon>
               <CheckIcon class="employees__btn-check-icon" />
             </template>
           </ButtonIcon>
+          <SpinnerMain
+            v-if="isVkidLoading"
+            class="employees__loading-check-btn"
+          />
         </div>
         <a
           v-if="handleVkId.checked"
@@ -78,19 +83,25 @@
         >
           https://vk.com/id{{ handleVkId.userVkId }}
         </a>
+        <div v-if="errorMessage != undefined" class="employees__errorMessage">
+          {{ errorMessage }}
+        </div>
         <h1 class="employees__SelectlabelName">Роль сотрудника:</h1>
         <SelectMain v-model="formData.type" :options="SelectOptions" />
       </template>
       <template #footer-control-buttons>
         <div class="modal__submit" v-if="handleVkId.checked">
-          <ButtonMain @click="handleAddEmployee">
+          <ButtonMain @click="handleAddEmployee" :isActive="isLoading">
             <template v-slot:text>Добавить</template>
           </ButtonMain>
         </div>
       </template>
     </Modal>
     <!-- Вывод сообщения о ошибке -->
-    <ErrorNotification v-if="errorMessage" :message="errorMessage" />
+    <ErrorNotification
+      v-if="errorMessage && modalSuccess"
+      :message="errorMessage"
+    />
   </Teleport>
 </template>
 
@@ -124,6 +135,9 @@ const errorMessage = ref("");
 //Флаги загрузки данных
 let isLoading = ref(false);
 
+//Флаги загрузки данных vk id
+let isVkidLoading = ref(false);
+
 // Сотрудникик
 const employees = ref([]);
 
@@ -131,46 +145,12 @@ const employees = ref([]);
 let showModal = ref(false);
 let modalSuccess = ref(false);
 
-//Индиквтор для открытия крестика удаления
-const indicators = ref({
-  isHandled: false,
-  handledManagerId: "",
-});
-
-const updateIsHandled = (trigger) => {
-  trigger === true && indicators.value.isHandled
-    ? (indicators.value.isHandled = indicators.value.isHandled)
-    : (indicators.value.isHandled = !indicators.value.isHandled);
-};
-
 //функция перехода к редактированию только что созданного сотрудника
 const navigateToEdit = (createdEmployeeId) => {
   router.push({
     name: "employeeEdit",
     query: { employeeId: createdEmployeeId },
   });
-};
-
-// Директива для закрытия крестика удаления по клику снаружи
-const vClickOutside = {
-  beforeMount(el) {
-    el.clickOutsideEvent = function (event) {
-      // Проверка местоположения элемента
-      if (
-        !(el == event.target || el.contains(event.target)) &&
-        indicators.value.isHandled === true
-      ) {
-        // Вызываем метод после срабатывания клика снаружи
-        indicators.value.isHandled = false;
-      }
-    };
-    // Добавляем обработчик нажатия
-    document.addEventListener("click", el.clickOutsideEvent);
-  },
-  unmounted(el) {
-    // Удаляем обработчик при размонтировании
-    document.removeEventListener("click", el.clickOutsideEvent);
-  },
 };
 
 // Данные Сотрудника: Имя, роль, id VK
@@ -248,7 +228,7 @@ function getAllEmployeesList() {
 //Получения vkid по ссылке на страницу vk
 function getEmployeeVkId() {
   let requestClass = new ManagersGetVkId();
-
+  isVkidLoading.value = true;
   requestClass.url = formData.value.userVklink;
   requestClass.request(
     "/managers/get_vk_id.php",
@@ -258,13 +238,17 @@ function getEmployeeVkId() {
       if (response.success === "1") {
         handleVkId.value.userVkId = response.vkInfo.vkId;
         handleVkId.value.checked = true;
+        isVkidLoading.value = false;
+        errorMessage.value = "";
       } else {
         errorMessage.value = err;
+        isVkidLoading.value = false;
       }
     },
     function (err) {
       //неуспешный результат
       errorMessage.value = err;
+      isVkidLoading.value = false;
     }
   );
 }
@@ -331,7 +315,7 @@ onMounted(() => {
 }
 .employees__box-employees {
   width: 100%;
-  max-width: 600px;
+  max-width: 700px;
   display: flex;
   flex-direction: column;
   justify-content: center;
@@ -391,5 +375,14 @@ onMounted(() => {
 .employees__vk-box {
   display: flex;
   align-items: end;
+}
+.employees__loading-check-btn {
+  width: 20px;
+  margin: 0 0 10px 10px;
+}
+.employees__errorMessage {
+  color: var(--error-color);
+  max-width: 320px;
+  font-size: 15px;
 }
 </style>

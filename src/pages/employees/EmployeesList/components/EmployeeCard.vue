@@ -10,7 +10,7 @@
             target="_blank"
             rel="noopener noreferrer"
           >
-          vk
+            vk
           </a>
         </div>
         <div class="employee__type" :style="{ color: getColor(employee.type) }">
@@ -46,69 +46,21 @@
         </RouterLink>
       </div>
     </div>
-    <ButtonIcon
-      class="employee__btn-delete"
-      v-if="
-        props.indicators.isHandled &&
-        props.indicators.handledManagerId === props.employee.managerId &&
-        isAdmin()
-      "
-      @click="showModalOnRemoveEmployee = true"
-    >
-      <template v-slot:icon>
-        <IconDelete class="employee__icon-delete" />
-      </template>
-    </ButtonIcon>
-    <Teleport to="body">
-      <Modal
-        :show="showModalOnRemoveEmployee"
-        @click.self="showModalOnRemoveEmployee = false"
-      >
-        <template v-slot:header>
-          <div>Удалить сотрудника?</div>
-          <div>{{ employee.name }}</div>
-        </template>
-        <template v-slot:body>
-          <ButtonMain
-            class="employee-edit__modal-btn-add"
-            @click="removeEmployee"
-          >
-            <template v-slot:text> Удалить </template>
-          </ButtonMain>
-        </template>
-      </Modal>
-    </Teleport>
   </div>
 </template>
 
 <script setup>
-import { isAdmin } from "@/js/AuthFunctions";
 import { ref } from "vue";
 import ButtonIcon from "@/components/ButtonIcon.vue";
 import EditIcon from "@/assets/icons/edit.svg?component";
-import IconDelete from "@/assets/icons/close.svg?component";
 import Person from "@/assets/icons/person.svg?component";
-import ButtonMain from "@/components/ButtonMain.vue";
-import Modal from "@/components/Modal.vue";
-import InputSimple from "@/components/InputSimple.vue";
 
 const props = defineProps({
   employee: {},
   indicators: {
     type: Object,
     require: true,
-  },
-  deleteFunction: {
-    type: Function,
-    require: true,
-  },
-});
-
-// Показ модального окна при удалении вакансии
-const showModalOnRemoveEmployee = ref(false);
-
-const formData = ref({
-  userVkId: "",
+  }
 });
 
 //Выбор цвета взависимости от типа сотрудника
@@ -125,34 +77,12 @@ const getColor = (type) => {
   }
 };
 
-//Передача данных к родителю
-const emit = defineEmits(["updateIsHandled"]);
-
-//Переменная для проверки открытия кнопки удаления на другой карточке
-let swithManagerId = "";
-
-//Открытие крестика удаления
-const onOpenHendleDelete = () => {
-  let trigger = false;
-  swithManagerId === props.indicators.handledManagerId
-    ? (trigger = false)
-    : (trigger = true);
-  props.indicators.handledManagerId = props.employee.managerId;
-  swithManagerId = props.indicators.handledManagerId;
-  emit("updateIsHandled", trigger); // Отправка события "updateIsHandled"
-};
-
-//функция удаления
-const removeEmployee = () => {
-  props.deleteFunction("delete", props.employee.managerId, "");
-};
 </script>
 
 <style scoped>
 .employee {
   width: 100%;
   position: relative;
-  cursor: pointer;
 }
 .employee__box {
   padding: 10px 30px 15px;
@@ -199,8 +129,8 @@ const removeEmployee = () => {
   font-size: 14px;
   color: blue;
   min-width: fit-content;
-  white-space:pre-wrap;
-  word-break:break-word;
+  white-space: pre-wrap;
+  word-break: break-word;
 }
 .employee__vk-link:hover {
   text-decoration: underline;
@@ -213,9 +143,6 @@ const removeEmployee = () => {
 }
 .employee__btn-edit-btn {
   padding: 0;
-}
-.employee__box:hover {
-  box-shadow: 0 5px 20px rgba(112, 103, 103, 0.5);
 }
 .employee__type[data-type="Админ"] {
   color: red;
@@ -270,7 +197,6 @@ const removeEmployee = () => {
 }
 @media screen and (max-width: 312px) {
   .employee__name {
-
   }
 }
 </style>
