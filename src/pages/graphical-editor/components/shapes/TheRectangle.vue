@@ -14,7 +14,7 @@
       <!-- @mousedown.stop="enterTextEditMode" обработчик клика по тексту без перехода в EditMode, находится в EditorContent -->
 
     <!-- Показать манипуляторы только если объект выбран -->
-    <div v-if="props.isSelected && isEditMode" class="resize-handles">
+    <div v-if="props.isSelected && isEditMode" class="resize-handles" :style="resizeHandleStyles">
       <div
           v-for="handle in handles"
           :key="handle.position"
@@ -26,9 +26,9 @@
 </template>
 
 <script setup>
-import {defineProps, computed, onMounted, onBeforeUnmount, ref, watch} from 'vue';
+import {computed, onMounted, onBeforeUnmount, watch} from 'vue';
 import { useEditor, EditorContent } from '@tiptap/vue-3'
-import { useShape } from '../../assets/js/useShape'; // Импорт общего хука
+import { useShape } from '../../assets/js/useShape';
 import StarterKit from '@tiptap/starter-kit'
 import Underline from '@tiptap/extension-underline'
 import TextAlign from '@tiptap/extension-text-align'
@@ -94,6 +94,16 @@ const rectangleStyles = computed(() => {
         cursor: isEditMode.value ? 'move' : 'text',
         userSelect: isTextMode.value ? 'text' : 'none',
     }
+});
+const resizeHandleStyles = computed(() => {
+  const borderWidth = parseFloat(rectangleStyles.value.borderWidth) || 0;
+
+  return {
+    width: rectangleStyles.value.width,
+    height: rectangleStyles.value.height,
+    top: `-${borderWidth}px`,
+    left: `-${borderWidth}px`,
+  };
 });
 const editor = useEditor({
     content: convertFrom(props.params.text),
@@ -202,10 +212,6 @@ onBeforeUnmount(() => {
 
 .resize-handles {
   position: absolute;
-  width: calc(100% + 10px);
-  height: calc(100% + 10px);
-  top: -5px;
-  left: -5px;
   border: 1px solid #1A73E8;
   pointer-events: none;
 }
