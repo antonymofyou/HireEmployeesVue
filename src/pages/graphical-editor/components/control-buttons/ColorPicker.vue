@@ -4,8 +4,8 @@
             <slot name="icon"></slot>
         </template>
         <template #content>
-            <input :value="color" @input="emits('update:color', $event.target.value)" type="color" class="btn-reset" >
-            <button @click="emits('resetColor')" class="btn-reset">
+            <input :value="color" @input="emits('update:color', $event.target.value)" type="color" class="btn-reset" title="Выбор цвета">
+            <button @click="emits('resetColor')" class="btn-reset" title="Сброс цвета">
                 <CircleOpacity />
             </button>
         </template>

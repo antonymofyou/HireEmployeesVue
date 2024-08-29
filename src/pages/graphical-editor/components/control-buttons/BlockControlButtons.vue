@@ -3,7 +3,8 @@
         <ColorPicker
             :color="props.activeShape.shape?.color || '#000000'"
             @reset-color="updateShapeHandler('color', '#000000')"
-            @update:color="updateShapeHandler('color', $event)"   
+            @update:color="updateShapeHandler('color', $event)"
+            title="Заливка"
         >
             <template #icon>
                 <FormatPaint />
@@ -13,7 +14,8 @@
             :color="props.activeShape.shape?.borderColor || '#000000'"
             @reset-color="updateShapeHandler('borderColor', '#000000')"
             @update:color="updateShapeHandler('borderColor', $event)"
-            v-show="!isArrowShape"         
+            v-show="!isArrowShape"
+            title="Цвет границ"
         >
             <template #icon>
                 <BorderColor />
@@ -23,7 +25,8 @@
             class="control-buttons-button control-buttons-value-picker"
             :value="+props.activeShape.shape?.cornerRadius || 0"
             @update:value="updateShapeHandler('cornerRadius', +$event)"
-            v-show="!isArrowShape"     
+            v-show="!isArrowShape"    
+            title="Закругление границ" 
         >
             <template #icon>
                 <BorderRadius />
@@ -36,7 +39,8 @@
             class="control-buttons-button control-buttons-value-picker"
             :value="+props.activeShape.shape?.borderWidth || 0"
             @update:value="updateShapeHandler('borderWidth', +$event)"     
-            v-show="!isArrowShape"         
+            v-show="!isArrowShape"
+            title="Размер границ"         
         >
             <template #icon>
                 <FormatLineWeight />
@@ -48,7 +52,8 @@
         <ValuePicker
             class="control-buttons-button control-buttons-value-picker"
             :value="+props.activeShape.shape?.zIndex || 1"
-            @update:value="updateShapeHandler('zIndex', +$event)"    
+            @update:value="updateShapeHandler('zIndex', +$event)"
+            title="Z-ось"    
         >
             <template #icon>
                 <AlphaZBoxOutline />

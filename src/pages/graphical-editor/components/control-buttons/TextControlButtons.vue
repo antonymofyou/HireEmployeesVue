@@ -1,6 +1,6 @@
 <template>
     <div class="control-buttons-text">
-        <DropdownContent>
+        <DropdownContent title="Форматирование текста">
             <template #trigger>
                 <FormatFont />
             </template>
@@ -9,6 +9,7 @@
                     class="control-buttons-button"
                     :active="props.activeShape.editor?.isActive('bold')"
                     @click="boldStyleHandler"
+                    title="Выделение"
                 >
                     <BoldIcon />
                 </ControlButton>
@@ -16,6 +17,7 @@
                     class="control-buttons-button"
                     :active="props.activeShape.editor?.isActive('italic')"
                     @click="italicStyleHandler"
+                    title="Курсив"
                 >
                     <ItalicIcon />
                 </ControlButton>
@@ -23,6 +25,7 @@
                     class="control-buttons-button"
                     :active="props.activeShape.editor?.isActive('underline')"
                     @click="underlineStyleHandler"
+                    title="Подчеркивание"
                 >
                     <UnderlineIcon />
                 </ControlButton>
@@ -31,7 +34,8 @@
         <ColorPicker
             :color="props.activeShape.editor?.getAttributes('textStyle').color || '#000000'"
             @reset-color="colorTextHandler('#000000')"
-            @update:color="colorTextHandler"            
+            @update:color="colorTextHandler"         
+            title="Цвет текста"   
         >
             <template #icon>
                 <FormatText />
@@ -41,6 +45,7 @@
             :color="props.activeShape.editor?.getAttributes('highlight').color || '#000000'"
             @reset-color="removeHighlightHandler"
             @update:color="addHighlightHandler"            
+            title="Выделение текста"
         >
             <template #icon>
                 <Marker />
@@ -49,7 +54,8 @@
         <ValuePicker
             class="control-buttons-button control-buttons-value-picker"
             :value="parseInt(props.activeShape.editor?.getAttributes('textStyle').fontSize) || 0"
-            @update:value="sizeTextHandler"            
+            @update:value="sizeTextHandler"
+            title="Размер текста"           
         >
             <template #icon>
                 <FormatText />
@@ -61,7 +67,8 @@
         <ValuePicker
             class="control-buttons-button control-buttons-value-picker"
             :value="+props.activeShape.shape?.padding || 0"
-            @update:value="updateShapeHandler('padding', +$event)"            
+            @update:value="updateShapeHandler('padding', +$event)"     
+            title="Внутренние отступы"       
         >
             <template #icon>
                 <FitToPageOutline />
@@ -74,9 +81,10 @@
             :options="optionsHorizontalAlign"
             :model-value="currentHorizontalAlign"
             @update:model-value="horizontalAlignSelectHandler"
+            title="Горизонтальное выравнивание"
         >
             <template #option="{ option }">  
-                <component :is="horizontalAlignIcons[option.id]"></component>
+                <component :is="horizontalAlignIcons[option.id]" :title="option.title"></component>
             </template>
             <template #trigger="{ selected }">
                 <component :is="horizontalAlignIcons[selected.id]"></component>
@@ -86,9 +94,10 @@
             :options="optionsVerticalAlign"
             :model-value="currentVerticalAlign"
             @update:model-value="verticalAlignSelectHandler"
+            title="Вертикальное выравнивание"
         >
             <template #option="{ option }">  
-                <component :is="verticalAlignIcons[option.id]"></component>
+                <component :is="verticalAlignIcons[option.id]" :title="option.title"></component>
             </template>
             <template #trigger="{ selected }">
                 <component :is="verticalAlignIcons[selected.id]"></component>
@@ -137,42 +146,49 @@ const itemsHorizontalAlign = [
     {
         id: 0,
         name: 'left',
-        icon: AlignLeftIcon
+        icon: AlignLeftIcon,
+        title: 'По левому краю',
     },
     {
         id: 1,
         name: 'center',
-        icon: AlignCenterIcon
+        icon: AlignCenterIcon,
+        title: 'По центру',
     },
     {
         id: 2,
         name: 'right',
-        icon: AlignRightIcon
+        icon: AlignRightIcon,
+        title: 'По правому краю',
     },
 ];
 const itemsVerticalAlign = [
     {
         id: 0,
         name: 'bottom',
-        icon: VerticalAlignBottom
+        icon: VerticalAlignBottom,
+        title: 'По нижнему краю',
     },
     {
         id: 1,
         name: 'center',
-        icon: VerticalAlignCenter
+        icon: VerticalAlignCenter,
+        title: 'По центру',
     },
     {
         id: 2,
         name: 'top',
-        icon: VerticalAlignTop
+        icon: VerticalAlignTop,
+        title: 'По верхнему краю',
     },
 ];
 
 const getSelectOptions = (items) => {
-    return items.map(({id, name}) => {
+    return items.map(({id, name, title}) => {
         return {
             id,
-            name
+            name,
+            title
         }
     });
 };

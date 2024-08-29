@@ -3,13 +3,15 @@
         <ControlButton
             class="control-buttons-button"
             @click="addShapeHandler"
+            title="Добавить фигуру"
         >
             <PlusIcon />
         </ControlButton>
         <ControlButton
             class="control-buttons-button"
             @click="copyShapeHandler"
-            :disabled="!props.activeShape.id"
+            :disabled="disabled"
+            :title="disabled ? 'Копировать фигуру (недоступно)' : 'Копировать фигуру'"
         >
             <ContentCopy />
         </ControlButton>
@@ -18,7 +20,7 @@
 
 <script setup>
 
-import { defineEmits } from 'vue';
+import { defineEmits, computed } from 'vue';
 
 import ControlButton from './ControlButton.vue';
 
@@ -36,6 +38,10 @@ const props = defineProps({
 const emits = defineEmits({
     addShape: null,
     copyShape: null,
+});
+
+const disabled = computed(() => {
+    return !props.activeShape.id;
 });
 
 // Handlers
