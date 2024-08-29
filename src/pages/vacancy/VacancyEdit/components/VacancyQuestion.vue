@@ -1,34 +1,43 @@
 <template>
   <transition-group name="move" tag="div" class="question">
     <div :key="props.id">
+      <div class="questions__block">
+        <span class="questions">{{ props.labelName }}</span>
+        <span class="id_questions">Id{{ props.id }}</span>
+      </div>
       <TextEditor
       :modelValue="text"
       @update:modelValue="updateText"
       size="medium"
-      :label="labelName"
       :id="props.id"
     />
-    <span class="id_questions">Id{{ props.id }}</span>
     <div class="question__footer">
       <div class="question__select">
         <span class="question__label">Опубликован:</span>
         <SelectMain
+          class="question__select-options"
           :modelValue="isPublished"
           @update:modelValue="updateIsPublished"
           :options="options"
         />
       </div>
+      <div class="item__arrows">
+        <button type="button" class="question__up" @click.stop="moveStatus('up')" :disabled="isFirst" :class="{ 'disabled-class': isFirst }">
+          <svg class="arrow-top" viewBox="0 0 5 9">
+            <path d="M0.419,9.000 L0.003,8.606 L4.164,4.500 L0.003,0.394 L0.419,0.000 L4.997,4.500 L0.419,9.000 Z" />
+          </svg>
+        </button>
+        <button type="button" class="question__bottom" @click.stop="moveStatus('down')" :disabled="isLast" :class="{ 'disabled-class': isLast }">
+          <svg class="arrow-bottom" viewBox="0 0 5 9">
+            <path d="M0.419,9.000 L0.003,8.606 L4.164,4.500 L0.003,0.394 L0.419,0.000 L4.997,4.500 L0.419,9.000 Z" />
+          </svg>
+        </button>
+      </div>
       <button type="button" class="question__remove-btn" title="Удалить вопрос" @click="emit('updateShowModal', props.id)">
         <DeleteIcon class="icon"/>
       </button>
     </div>
-    <div class="item__arrows">
-      <button @click.stop="moveStatus('up')" :disabled="isFirst" class="arrow top" :class="{ 'disabled-class': isFirst }">
-      </button>
-      <button @click.stop="moveStatus('down')" :disabled="isLast" class="arrow bottom" :class="{ 'disabled-class': isLast }">
-      </button>
     </div>
-  </div>
 </transition-group>
 </template>
 
@@ -120,18 +129,30 @@ const updateIsPublished = (newValue) => {
   position: relative;
   display: flex;
   align-items: flex-start;
-  z-index: 10;
+  z-index: 1;
 }
 
 .question__select {
   display: flex;
   align-items: baseline;
+  flex-wrap: wrap;
+}
+
+.question__select-options {
+  min-width: fit-content;
+}
+
+.questions__block{
+  margin-bottom: 10px;
+}
+
+.questions {
+  margin-bottom: 10px;
+  font-weight: 600;
 }
 
 .id_questions{
-  position: absolute;
-  bottom: 197px;
-  left: 110px;
+  margin-left: 5px;
   font-size: 8px;
   font-weight: 600; 
   color: gray;
@@ -139,13 +160,16 @@ const updateIsPublished = (newValue) => {
 
 .question__label {
   font-weight: 600;
+  z-index: 99999;
 }
 
 .question__footer {
   display: flex;
   justify-content: space-between;
+  align-items: center;
   margin-top: 5px;
 }
+
 .question__remove-btn {
   background-size: 100% 100%;
   background-color: transparent;
@@ -162,43 +186,43 @@ const updateIsPublished = (newValue) => {
   transform: scale(2.1);
 }
 
+.question__up,
+.question__bottom{
+  background-color: transparent;
+  border: none;
+}
+
 .item__arrows {
   display: flex;
-  position: absolute;
-  bottom: 7px;
+  justify-content: end;
+  margin-left: auto;
+  margin-right: 30px;
   gap: 28px;
-  right: 50px;
 }
 
-.arrow {
-  background: #ffffff;
-  border: solid black;
-  border-width: 0 2px 2px 0;
-  padding: 7px;
-  cursor: pointer;
-  width: 12px;
-  height: 12px;
+@media screen and (max-width: 400px) {
+  .item__arrows {
+    gap: 10px;
+  }
 }
 
-.arrow:hover {
-  opacity: 1;
+.arrow-top,
+.arrow-bottom {
+    width: 18px;
+    height: 18px;
+    cursor: pointer;
 }
 
 .disabled-class {
   display: none;
 }
 
-.top {
-  position: relative;
-  top: 5px;
-  transform: rotate(-135deg);
+.arrow-top {
+    transform: rotate(270deg);
 }
 
-.bottom {
-  position: relative;
-  bottom: 5px;
-  left: 2px;
-  transform: rotate(45deg);
+.arrow-bottom {
+    transform: rotate(90deg);
 }
 
 .move-enter-active, .move-leave-active, .move-move{
@@ -214,4 +238,5 @@ const updateIsPublished = (newValue) => {
   opacity: 1;
   transform: (translateY(0));
 }
+
 </style>
