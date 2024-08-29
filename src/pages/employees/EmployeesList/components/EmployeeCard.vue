@@ -14,18 +14,6 @@
           </a>
         </div>
         <div class="employee__type" :style="{ color: getColor(employee.type) }">
-          <RouterLink
-            :to="{
-              name: 'employeeInfo',
-              query: { employeeId: employee.managerId },
-            }"
-          >
-            <ButtonIcon class="employee__btn-edit-btn">
-              <template v-slot:icon>
-                <Person :style="{ color: getColor(employee.type) }" />
-              </template>
-            </ButtonIcon>
-          </RouterLink>
           {{ employee.type }}
         </div>
       </div>
@@ -60,7 +48,7 @@ const props = defineProps({
   indicators: {
     type: Object,
     require: true,
-  }
+  },
 });
 
 //Выбор цвета взависимости от типа сотрудника
@@ -76,7 +64,6 @@ const getColor = (type) => {
       return "black"; // Default color if type is unknown
   }
 };
-
 </script>
 
 <style scoped>
@@ -101,7 +88,7 @@ const getColor = (type) => {
 }
 .employee__info {
   display: flex;
-  gap: 20px;
+  gap: 10px;
   align-items: center;
 }
 .employee__id {

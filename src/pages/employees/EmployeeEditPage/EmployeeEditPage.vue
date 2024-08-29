@@ -18,7 +18,7 @@
       :success="successSave"
       :message="successMessage"
       :align="'end'"
-      :style="changedVK ? 'color: var(--cornflower-blue)' : 'opacity: 0.5'"
+      :isDisabled="!changedVK"
     >
       <template v-slot:text>Сохранить</template>
       <template v-slot:icon
@@ -71,10 +71,10 @@
         https://vk.com/id{{ formData.userVkId }}
       </a>
       <div
-        v-if="vkerrorMessage != undefined"
+        v-if="vkErrorMessage != undefined"
         class="employees-edit__errorMessage"
       >
-        {{ vkerrorMessage }}
+        {{ vkErrorMessage }}
       </div>
       <div>
         <h1 class="employee-edit__SelectlabelName">Роль сотрудника:</h1>
@@ -82,6 +82,7 @@
       </div>
     </div>
     <ButtonMain
+      class="employees-edit__delete-btn"
       v-if="isAdmin()"
       buttonColor="var(--cinnabar)"
       type="button"
@@ -111,7 +112,7 @@ import { onMounted, ref, reactive, watch } from "vue";
 import { useRoute, useRouter } from "vue-router";
 import { isAdmin } from "@/js/AuthFunctions";
 import { isManager } from "@/js/AuthFunctions";
-import { ManagersGetManager } from "../EmployeeInfoPage/js/ApiClassesEmployeeInfo";
+import { ManagersGetManager } from "./js/ApiClassesEmployeeInfo";
 import {
   EmployeesSetEmployees,
   ManagersGetVkId,
@@ -142,7 +143,7 @@ const employeeId = ref(""); // ID вакансии
 const errorMessage = ref("");
 
 // Отображение ошибки
-const vkerrorMessage = ref("");
+const vkErrorMessage = ref("");
 
 // индикаторы загрузок для кнопок
 let saveLoad = ref(false); // true когда идет сохранение
@@ -155,6 +156,9 @@ let isVkidLoading = ref(false);
 
 // Показ модального окна при удалении вакансии
 const showModalOnRemoveEmployee = ref(false);
+
+// Переменная для хранения предыдущего значения vk link для btn disabled
+let previousVkId = null;
 
 const SelectOptions = [
   { name: "Админ", id: "1" },
@@ -203,6 +207,7 @@ if (route.query.employeeId) {
 const removeEmployee = () => {
   editEmployees("delete", formData.value.managerId, "");
 };
+
 //реактивная функция удаления
 const removeEmployeeRequestObject = reactive({
   fetch: removeEmployee,
@@ -231,7 +236,7 @@ const fillManagerData = () => {
 //обработка клика для обновления данных о сотруднике
 const saveChanges = () => {
   const result = fillManagerData(); // Получаем объект с данными
-  if (result && changedVK.value) {
+  if (result) {
     // Если объект не пустой
     editEmployees("update", formData.value.managerId, result);
   }
@@ -280,16 +285,18 @@ function getEmployeeVkId() {
         handleVkId.value.checked = true;
         changedVK.value = true;
         isVkidLoading.value = false;
-        vkerrorMessage.value = "";
+        vkErrorMessage.value = "";
       } else {
-        errorMessvkerrorMessageage.value = err;
+        vkErrorMessage.value = err;
         isVkidLoading.value = false;
+        handleVkId.value.checked = false;
       }
     },
     function (err) {
       //неуспешный результат
-      vkerrorMessage.value = err;
+      vkErrorMessage.value = err;
       isVkidLoading.value = false;
+      handleVkId.value.checked = false;
     }
   );
 }
@@ -341,14 +348,16 @@ watch(
   },
   { deep: true }
 );
-let previousVkId = null; // Переменная для хранения предыдущего значения
 
 watch(
   handleVkId,
   () => {
     successMessage.value = "";
-    previousVkId !== null && previousVkId !== handleVkId.value.userVklink
-      ? (changedVK.value = false)
+    previousVkId !== null &&
+    previousVkId !== handleVkId.value.userVklink &&
+    handleVkId.value.userVklink !==
+      `https://vk.com/id${formData.value.userVkId}`
+      ? ((changedVK.value = false), (handleVkId.value.checked = false))
       : (changedVK.value = true);
     // Обновление значения предыдущего VK ID
     previousVkId = handleVkId.value.userVklink;
@@ -433,5 +442,8 @@ watch(
 }
 .employees-edit__vk-link {
   max-width: 270px;
+}
+.employees-edit__delete-btn {
+  margin-top: 10px;
 }
 </style>

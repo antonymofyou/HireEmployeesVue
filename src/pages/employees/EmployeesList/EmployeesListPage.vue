@@ -31,10 +31,11 @@
       :show="showModal"
       v-if="!modalSuccess"
       @click.self="showModal = false"
+      class="employees__modal"
     >
       <template #header>
-        <div class="modal__close">
-          <button class="modal__close-btn" @click="showModal = false">
+        <div class="employees__modal-close">
+          <button class="employees__modal-close-btn" @click="showModal = false">
             &times;
           </button>
         </div>
@@ -331,12 +332,12 @@ onMounted(() => {
   display: flex;
   z-index: 10;
 }
-.modal__close {
+.employees__modal-close {
   display: flex;
   justify-content: end;
 }
 
-.modal__close-btn {
+.employees__modal-close-btn {
   font-size: 30px;
   padding: 0;
 
