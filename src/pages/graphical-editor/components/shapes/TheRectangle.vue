@@ -344,13 +344,12 @@ onBeforeUnmount(() => {
 
 .resize-handles {
   position: absolute;
-  width: 100%;
-  height: 100%;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
+  width: calc(100% + 10px);
+  height: calc(100% + 10px);
+  top: -5px;
+  left: -5px;
   border: 1px solid #1A73E8;
+  pointer-events: none;
 }
 
 .handle {
@@ -378,6 +377,19 @@ onBeforeUnmount(() => {
   transform: translateX(-50%);
   cursor: url("@/assets/icons/rotate.svg?component"), auto;
   border-radius: 8px;
+  pointer-events: all;
+}
+
+.handle.rotate::before {
+  content: '';
+  position: absolute;
+  width: 1px;
+  height: 17px;
+  background-color: black;
+  top: 100%;
+  left: 50%;
+  transform: translateX(-50%);
+  pointer-events: none;
 }
 
 .text-editor {
