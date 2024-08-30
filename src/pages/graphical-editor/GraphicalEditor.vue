@@ -7,6 +7,7 @@
           v-show="isTextMode"
           :active-shape="activeShape"
           @update-shape="updateShape"
+          @update-editor="updateEditor"
         />
         <BlockControlButtons
           v-if="windowInnerWidth <= breakpoint"
@@ -43,6 +44,7 @@
           v-show="isTextMode"
           :active-shape="activeShape"
           @update-shape="updateShape"
+          @update-editor="updateEditor"
         />
         <BlockControlButtons
           v-show="isEditMode"
@@ -302,6 +304,40 @@ const handleSelectShape = ({id, editor = undefined} = {}) => {
 // Функция для обработки изменения режима
 const changeModeHandler = (event) => {
   mode.value = event;
+}
+
+// Функция для обновления св-в текстового редактора
+const updateEditor = (type, value) => {
+  const handlers = {
+    boldStyle() {
+      activeShape.editor?.chain().focus().toggleBold().run();
+    },
+    italicStyle() {
+      activeShape.editor?.chain().focus().toggleItalic().run();
+    },
+    underlineStyle() {
+      activeShape.editor?.chain().focus().toggleUnderline().run();
+    },
+    colorText(color) {
+      console.log(color);
+      activeShape.editor?.chain().focus().setColor(color).run();
+    },
+    sizeText(size) {
+      activeShape.editor?.chain().setFontSize(size + 'px').run();
+    },
+    addHighlight(color) {
+      activeShape.editor?.chain().focus().setHighlight({ color: color }).run();
+    },
+    removeHighlight() {
+      activeShape.editor?.chain().focus().unsetHighlight().run();
+    },
+    horizontalAlign(name) {
+      activeShape.editor?.chain().focus().setTextAlign(name).run();
+    },
+  };
+  const handler = handlers[type];
+
+  handler(value);
 }
 
 </script>

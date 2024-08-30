@@ -8,7 +8,7 @@
                 <ControlButton 
                     class="control-buttons-button"
                     :active="props.activeShape.editor?.isActive('bold')"
-                    @click="boldStyleHandler"
+                    @click="updateEditorHandler('boldStyle')"
                     title="Выделение"
                 >
                     <BoldIcon />
@@ -16,7 +16,7 @@
                 <ControlButton 
                     class="control-buttons-button"
                     :active="props.activeShape.editor?.isActive('italic')"
-                    @click="italicStyleHandler"
+                    @click="updateEditorHandler('italicStyle')"
                     title="Курсив"
                 >
                     <ItalicIcon />
@@ -24,7 +24,7 @@
                 <ControlButton 
                     class="control-buttons-button"
                     :active="props.activeShape.editor?.isActive('underline')"
-                    @click="underlineStyleHandler"
+                    @click="updateEditorHandler('underlineStyle')"
                     title="Подчеркивание"
                 >
                     <UnderlineIcon />
@@ -33,8 +33,8 @@
         </DropdownContent>
         <ColorPicker
             :color="props.activeShape.editor?.getAttributes('textStyle').color || '#000000'"
-            @reset-color="colorTextHandler('#000000')"
-            @update:color="colorTextHandler"         
+            @reset-color="updateEditorHandler('colorText', '#000000')"
+            @update:color="updateEditorHandler('colorText', $event)"         
             title="Цвет текста"   
         >
             <template #icon>
@@ -43,8 +43,8 @@
         </ColorPicker>
         <ColorPicker
             :color="props.activeShape.editor?.getAttributes('highlight').color || '#000000'"
-            @reset-color="removeHighlightHandler"
-            @update:color="addHighlightHandler"            
+            @reset-color="updateEditorHandler('removeHighlight')"
+            @update:color="updateEditorHandler('addHighlight', $event)"            
             title="Выделение текста"
         >
             <template #icon>
@@ -80,7 +80,7 @@
         <ValuePicker
             class="control-buttons-button control-buttons-value-picker"
             :value="parseInt(props.activeShape.editor?.getAttributes('textStyle').fontSize) || 0"
-            @update:value="sizeTextHandler"
+            @update:value="updateEditorHandler('sizeText', $event)"
             title="Размер текста"           
         >
             <template #icon>
@@ -140,6 +140,7 @@ const props = defineProps({
 });
 const emits = defineEmits({
     updateShape: null,
+    updateEditor: null
 });
 
 const itemsHorizontalAlign = [
@@ -219,42 +220,12 @@ const currentVerticalAlign = computed(() => {
     return id || 0;
 });
 
-// Handlers
-
-function boldStyleHandler() {
-    props.activeShape.editor?.chain().focus().toggleBold().run();
+function updateEditorHandler(type, value) {
+    emits('updateEditor', type, value);
 }
 
-function italicStyleHandler() {
-    props.activeShape.editor?.chain().focus().toggleItalic().run();
-}
-
-function underlineStyleHandler() {
-    props.activeShape.editor?.chain().focus().toggleUnderline().run();
-}
-
-function colorTextHandler(color) {
-    props.activeShape.editor?.chain().focus().setColor(color).run();
-}
-
-function sizeTextHandler(size) {
-    props.activeShape.editor?.chain().setFontSize(size + 'px').run();
-}
-
-function addHighlightHandler(color) {
-    props.activeShape.editor?.chain().focus().setHighlight({ color: color }).run();
-}
-
-function removeHighlightHandler() {
-    props.activeShape.editor?.chain().focus().unsetHighlight().run();
-}
-
-function horizontalAlignSelectHandler(id) {
-    if (!props.activeShape.id) return;
-
-    const { name } = optionsHorizontalAlign?.filter(item => item.id == id)[0] || {};
-
-    props.activeShape.editor?.chain().focus().setTextAlign(name).run();
+function updateShapeHandler(key, value) {
+    emits('updateShape', props.activeShape.id, key, value);
 }
 
 function verticalAlignSelectHandler(id) {
@@ -265,8 +236,12 @@ function verticalAlignSelectHandler(id) {
     updateShapeHandler('textVerticalAlignment', name);
 }
 
-function updateShapeHandler(key, value) {
-    emits('updateShape', props.activeShape.id, key, value);
+function horizontalAlignSelectHandler(id) {
+    if (!props.activeShape.id) return;
+
+    const { name } = optionsHorizontalAlign?.filter(item => item.id == id)[0] || {};
+
+    updateEditorHandler('horizontalAlign', name);
 }
 
 </script>
