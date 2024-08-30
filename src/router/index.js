@@ -40,7 +40,7 @@ const router = createRouter({
           component: EmployeesListPage,
         },
         {
-          path: 'employee_edit',
+          path: 'employee_edit/:id',
           name: 'employeeEdit',
           component: EmployeeEditPage,
         },

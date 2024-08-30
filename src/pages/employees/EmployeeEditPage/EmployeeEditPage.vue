@@ -137,8 +137,6 @@ if (!isManager()) router.push({ name: "managerAuth" });
 const successSave = ref(""); // при значении 1 делает текст успешного сохранения зеленым
 const successMessage = ref(""); // текст успешного сохранения
 
-const employeeId = ref(""); // ID вакансии
-
 // Отображение ошибки
 const errorMessage = ref("");
 
@@ -198,11 +196,6 @@ onMounted(() => {
   }
 });
 
-// Получение из роута параметров, если есть query
-if (route.query.employeeId) {
-  employeeId.value = route.query.employeeId;
-}
-
 //функция удаления и возвращения на страницу со списком сотрудников
 const removeEmployee = () => {
   editEmployees("delete", formData.value.managerId, "");
@@ -245,7 +238,7 @@ const saveChanges = () => {
 // Запрос на получения информации о сотруднике по ID
 const getEmployeeInfoById = (callback) => {
   let requestClass = new ManagersGetManager();
-  requestClass.managerId = employeeId.value;
+  requestClass.managerId = route.params.id;
   // Установление флага прелоадера
   isLoading.value = true;
   requestClass.request(

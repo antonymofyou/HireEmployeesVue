@@ -22,7 +22,7 @@
         <RouterLink
           :to="{
             name: 'employeeEdit',
-            query: { employeeId: employee.managerId },
+            params: { id: employee.managerId },
           }"
           class="employee__btn-edit"
         >

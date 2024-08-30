@@ -150,7 +150,7 @@ let modalSuccess = ref(false);
 const navigateToEdit = (createdEmployeeId) => {
   router.push({
     name: "employeeEdit",
-    query: { employeeId: createdEmployeeId },
+    params: { id: createdEmployeeId },
   });
 };
 
