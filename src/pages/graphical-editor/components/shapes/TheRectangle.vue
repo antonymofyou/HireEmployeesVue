@@ -22,6 +22,9 @@
           @mousedown.stop="startResizing(handle)"
       ></div>
     </div>
+    <div v-show="props.isSelected && isTextMode" :style="resizeHandleStyles" class="text-mode">
+      <FormatText class="text-mode__icon" />
+    </div>
     </div>
 </template>
 
@@ -35,7 +38,8 @@ import TextAlign from '@tiptap/extension-text-align'
 import { Color } from '@tiptap/extension-color'
 import TextStyle from '@tiptap/extension-text-style'
 import FontSize from 'tiptap-extension-font-size';
-import Highlight from '@tiptap/extension-highlight'
+import Highlight from '@tiptap/extension-highlight';
+import FormatText from 'vue-material-design-icons/FormatText.vue'
 
 import { convertTo, convertFrom } from '../../assets/js/convert';
 
@@ -193,6 +197,19 @@ onBeforeUnmount(() => {
   position: absolute;
   border: 1px solid #1A73E8;
   pointer-events: none;
+}
+
+.text-mode {
+  position: absolute;
+  border: 1px solid #1A73E8;
+  pointer-events: none;
+}
+
+.text-mode__icon {
+  position: absolute;
+  top: -8px;
+  right: 50%;
+  transform: translateY(-100%) translateX(50%);
 }
 
 .handle {
