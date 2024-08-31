@@ -1,8 +1,11 @@
 <template>
-  <div v-if="isLoading" class="employee-edit__loader">
+  <div v-if="isLoading && isAdmin()" class="employee-edit__loader">
     <SpinnerMain class="employee-edit__loader-spinner" />
   </div>
-  <section v-if="!isLoading" class="employee-edit">
+  <h1 class="employee__bad-access" v-if="!isAdmin()">
+    Данная страница вам недоступна
+  </h1>
+  <section v-if="!isLoading && isAdmin()" class="employee-edit">
     <RouterLink
       class="employee-edit__back-link"
       :to="{ name: 'employeesList' }"
@@ -21,12 +24,13 @@
       :isDisabled="!changedVK"
     >
       <template v-slot:text>Сохранить</template>
-      <template v-slot:icon
-        ><SaveIcon
+      <template v-slot:icon>
+        <SaveIcon
           width="20px"
           height="20px"
           class="employee-edit__icon-button"
-      /></template>
+        />
+      </template>
     </ButtonMain>
     <div class="employee-edit__select-box">
       <InputSimple
@@ -178,21 +182,23 @@ const handleVkId = ref({
 const changedVK = ref(true);
 
 onMounted(() => {
-  try {
-    getEmployeeInfoById((empResp) => {
-      const employee = empResp;
-      formData.value = {
-        // заполняем formData
-        name: employee.name,
-        userVkId: employee.userVkId,
-        managerId: employee.managerId,
-        type:
-          SelectOptions.find((item) => item.name === employee.type)?.id || "",
-      };
-      handleVkId.value.userVklink = `https://vk.com/id${formData.value.userVkId}`;
-    });
-  } catch (err) {
-    errorMessage.value = err;
+  if (isAdmin()) {
+    try {
+      getEmployeeInfoById((empResp) => {
+        const employee = empResp;
+        formData.value = {
+          // заполняем formData
+          name: employee.name,
+          userVkId: employee.userVkId,
+          managerId: employee.managerId,
+          type:
+            SelectOptions.find((item) => item.name === employee.type)?.id || "",
+        };
+        handleVkId.value.userVklink = `https://vk.com/id${formData.value.userVkId}`;
+      });
+    } catch (err) {
+      errorMessage.value = err;
+    }
   }
 });
 
@@ -438,5 +444,9 @@ watch(
 }
 .employees-edit__delete-btn {
   margin-top: 10px;
+}
+.employee__bad-access {
+  width: fit-content;
+  margin: 40px auto;
 }
 </style>

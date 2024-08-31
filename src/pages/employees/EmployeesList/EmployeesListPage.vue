@@ -1,13 +1,15 @@
 <template>
-  <section class="employees">
+  <h1 class="employee__bad-access" v-if="!isAdmin()">
+    Данная страница вам недоступна
+  </h1>
+  <section class="employees" v-if="isAdmin()">
     <h1 class="employee__title">Сотрудники</h1>
     <TopSquareButton
       v-if="isAdmin()"
       class="employees__add-employees-btn"
       @click="showModal = true"
       :icon="plusIcon"
-    >
-    </TopSquareButton>
+    ></TopSquareButton>
     <div class="employees__box-employees">
       <EmployeeCard
         v-for="employee in employees"
@@ -297,7 +299,9 @@ function editEmployees(action, managerId, managerData) {
   );
 }
 onMounted(() => {
-  getAllEmployeesList();
+  if (isAdmin()) {
+    getAllEmployeesList();
+  }
 });
 </script>
 
@@ -385,5 +389,9 @@ onMounted(() => {
   color: var(--error-color);
   max-width: 320px;
   font-size: 15px;
+}
+.employee__bad-access {
+  width: fit-content;
+  margin: 40px auto;
 }
 </style>
