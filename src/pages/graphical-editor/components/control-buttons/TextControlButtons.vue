@@ -81,6 +81,7 @@
             class="control-buttons-button control-buttons-value-picker"
             :value="parseInt(props.activeShape.editor?.getAttributes('textStyle').fontSize) || 0"
             @update:value="updateEditorHandler('sizeText', $event)"
+            :min="0"
             title="Размер текста"           
         >
             <template #icon>
@@ -94,6 +95,7 @@
             class="control-buttons-button control-buttons-value-picker"
             :value="+props.activeShape.shape?.padding || 0"
             @update:value="updateShapeHandler('padding', +$event)"     
+            :min="0"
             title="Внутренние отступы"       
         >
             <template #icon>

@@ -1,6 +1,6 @@
 <template>
     <div
-        @mousedown="startDragging"
+        @mousedown="startDragging($event), selectRectangle()"
         @dblclick="toggleTextEditMode"
         @click="selectRectangle"
         :id="props.params.id"

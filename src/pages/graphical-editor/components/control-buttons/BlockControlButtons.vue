@@ -26,6 +26,7 @@
             :value="+props.activeShape.shape?.cornerRadius || 0"
             @update:value="updateShapeHandler('cornerRadius', +$event)"
             v-show="!isArrowShape"    
+            :min="0"
             title="Закругление границ" 
         >
             <template #icon>
@@ -40,6 +41,7 @@
             :value="+props.activeShape.shape?.borderWidth || 0"
             @update:value="updateShapeHandler('borderWidth', +$event)"     
             v-show="!isArrowShape"
+            :min="0"
             title="Размер границ"         
         >
             <template #icon>

@@ -1,60 +1,71 @@
 <template>
-  <header class="header">
-    <div class="container">
-      <div class="header__control-buttons">
-        <TextControlButtons
-          v-if="windowInnerWidth <= breakpoint"
-          v-show="isTextMode && activeShape.id"
-          :active-shape="activeShape"
-          @update-shape="updateShape"
-          @update-editor="updateEditor"
-        />
-        <BlockControlButtons
-          v-if="windowInnerWidth <= breakpoint"
-          v-show="isEditMode && activeShape.id"
-          :active-shape="activeShape"
-          @update-shape="updateShape"
-        />
-        <MainControlButtons
-          :active-shape="activeShape"
-          @add-shape="addShapeHandler"
-          @delete-shape="deleteShapeHandler"
-          @copy-shape="copyShapeHandler"
-        />
+  <div
+    @pointerdown="startGrabbingHandler"
+    @pointermove="moveGrabbingHandler"
+    @pointerup="cancelGrabbing"
+    @contextmenu="cancelGrabbing"
+    @wheel.prevent
+    class="wrapper"
+  >
+    <header class="header">
+      <div class="container">
+        <div class="header__control-buttons">
+          <TextControlButtons
+            v-if="windowInnerWidth <= breakpoint"
+            v-show="isTextMode && activeShape.id"
+            :active-shape="activeShape"
+            @update-shape="updateShape"
+            @update-editor="updateEditor"
+          />
+          <BlockControlButtons
+            v-if="windowInnerWidth <= breakpoint"
+            v-show="isEditMode && activeShape.id"
+            :active-shape="activeShape"
+            @update-shape="updateShape"
+          />
+          <MainControlButtons
+            :active-shape="activeShape"
+            :scale="scale"
+            @add-shape="addShapeHandler"
+            @delete-shape="deleteShapeHandler"
+            @copy-shape="copyShapeHandler"
+            @update-scale="updateScaleHandler"
+          />
+        </div>
       </div>
-    </div>
-  </header>
-  <main class="canvas">
-    <template v-for="shape of formattedShapes" :key="shape.id">
-      <component 
-          :is="shapeComponents[shape.type]"
-          :params="shape"
-          :mode="mode"
-          :is-selected="activeShape.id == shape.id"
-          @update-shape="updateShape"
-          @select-shape="handleSelectShape"
-          @change-mode="changeModeHandler"
-        />
-    </template>
-    <TooltipControlButtons
-      v-if="windowInnerWidth > breakpoint"
-      :active-shape="activeShape"
-    >
-      <template #content>
-        <TextControlButtons
-          v-show="isTextMode"
-          :active-shape="activeShape"
-          @update-shape="updateShape"
-          @update-editor="updateEditor"
-        />
-        <BlockControlButtons
-          v-show="isEditMode"
-          :active-shape="activeShape"
-          @update-shape="updateShape"
-        />
+    </header>
+    <main :style="canvasStyle" class="canvas">
+      <template v-for="shape of formattedShapes" :key="shape.id">
+        <component 
+            :is="shapeComponents[shape.type]"
+            :params="shape"
+            :mode="mode"
+            :is-selected="activeShape.id == shape.id"
+            @update-shape="updateShape"
+            @select-shape="handleSelectShape"
+            @change-mode="changeModeHandler"
+          />
       </template>
-    </TooltipControlButtons>
-  </main>
+      <TooltipControlButtons
+        v-if="windowInnerWidth > breakpoint"
+        :active-shape="activeShape"
+      >
+        <template #content>
+          <TextControlButtons
+            v-show="isTextMode"
+            :active-shape="activeShape"
+            @update-shape="updateShape"
+            @update-editor="updateEditor"
+          />
+          <BlockControlButtons
+            v-show="isEditMode"
+            :active-shape="activeShape"
+            @update-shape="updateShape"
+          />
+        </template>
+      </TooltipControlButtons>
+    </main>
+  </div>
 </template>
 
 <script setup>
@@ -185,6 +196,23 @@ const isEditMode = computed(() => {
 const isTextMode = computed(() => {
     return mode.value === mode._text && !!activeShape.editor;
 });
+let isGrabbing = ref(false);
+let scale = reactive({
+  value: 100,
+  _step: 10, // 10%
+  _default: 100, // 100%
+  _min: 50, // 50%
+  _max: 200, // 200%
+});
+let xCoord = ref(0);
+let yCoord = ref(0);
+let xLastCoord = ref(0);
+let yLastCoord = ref(0);
+const canvasStyle = computed(() => {
+  return {
+    transform: `translate(${xCoord.value}px, ${yCoord.value}px) scale(${(scale.value / 100).toFixed(1)})`,
+  };
+})
 // Ширина экрана
 let windowInnerWidth = ref(window.innerWidth);
 // Ширина экрана при которой будет скрываться TooltipControlButtons
@@ -355,9 +383,50 @@ const updateEditor = (type, value) => {
   handler(value);
 }
 
+const updateScaleHandler = (value) => {
+  scale.value = value;
+}
+
+const startGrabbingHandler = (event) => {
+  if (activeShape.id) return;
+
+  isGrabbing.value = true;
+
+  xLastCoord.value = event.clientX;
+  yLastCoord.value = event.clientY;
+}
+
+const cancelGrabbing = () => {
+  isGrabbing.value = false;
+}
+
+const moveGrabbingHandler = (event) => {
+  if (!isGrabbing.value) return;
+
+  if (activeShape.id) {
+    cancelGrabbing();
+
+    return;
+  }
+
+  xCoord.value += event.clientX - xLastCoord.value;
+  yCoord.value += event.clientY - yLastCoord.value;
+
+  xLastCoord.value = event.clientX;
+  yLastCoord.value = event.clientY;
+}
+
+
 </script>
 
 <style scoped>
+.wrapper {
+  position: relative;
+  width: 100vw;
+  height: 100vh;
+  overflow: hidden;
+}
+
 .container {
     padding: 24px 16px;
     margin: 0 auto;
@@ -412,8 +481,9 @@ const updateEditor = (type, value) => {
     border-radius: 8px;
 }
 
-.canvas {
-  position: relative;
+.content {
+  position: absolute;
+  transform-origin: 50% 50%;
 }
 
 .tooltip-control-buttons {
@@ -432,7 +502,9 @@ const updateEditor = (type, value) => {
 
 @media (max-width: 768px) {
   .control-buttons-main {
-    flex-direction: column;
+    max-width: 100px;
+    justify-content: center;
+    flex-wrap: wrap;
     gap: 16px;
   }
 

@@ -4,9 +4,10 @@
             <slot name="icon"></slot>
         </span>
         <input
-            :value="value"
-            @input="emits('update:value', $event.target.value)"
+            :value="props.value"
+            @input="updateValueHandler"
             :disabled="disabled"
+            :step="props.step"
             type="number"
             class="value-picker__input"
         >
@@ -26,11 +27,41 @@ const props = defineProps({
     value: {
         type: Number,
         required: true,
+    },
+    step: {
+        type: Number,
+        default: 1,
+    },
+    min: {
+        type: Number,
+        default: null,
+    },
+    max: {
+        type: Number,
+        default: null,
     }
 });
 const emits = defineEmits({
     'update:value': null,
 })
+
+function updateValueHandler(event) {
+    let value = +event.target.value;
+
+    if (props.min !== null) {
+        value = value < props.min ? props.min : value;
+    }
+
+    if (props.max !== null) {
+        value = value > props.max ? props.max : value;
+    }
+
+    if (props.max !== null || props.min !== null) {
+        event.target.value = value;
+    }
+
+    emits('update:value', value);
+}
 
 </script>
 

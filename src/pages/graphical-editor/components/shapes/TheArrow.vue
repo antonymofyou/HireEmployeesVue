@@ -4,7 +4,7 @@
       :style="arrowStyles"
       class="arrow-container"
       @click="selectArrow"
-      @mousedown="startDragging"
+      @mousedown="startDragging($event), selectArrow()"
   >
     <svg
         :height="props.params.height"
