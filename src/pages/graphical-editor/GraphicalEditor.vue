@@ -4,20 +4,21 @@
       <div class="header__control-buttons">
         <TextControlButtons
           v-if="windowInnerWidth <= breakpoint"
-          v-show="isTextMode"
+          v-show="isTextMode && activeShape.id"
           :active-shape="activeShape"
           @update-shape="updateShape"
           @update-editor="updateEditor"
         />
         <BlockControlButtons
           v-if="windowInnerWidth <= breakpoint"
-          v-show="isEditMode"
+          v-show="isEditMode && activeShape.id"
           :active-shape="activeShape"
           @update-shape="updateShape"
         />
         <MainControlButtons
           :active-shape="activeShape"
           @add-shape="addShapeHandler"
+          @delete-shape="deleteShapeHandler"
           @copy-shape="copyShapeHandler"
         />
       </div>
@@ -266,6 +267,13 @@ const addShapeHandler = () => {
   });
 }
 
+// Функция для удаления фигуры
+const deleteShapeHandler = (id) => {
+  handleSelectShape();
+
+  delete formattedShapes[id];
+}
+
 // Функция для копирования активной фигуры
 const copyShapeHandler = () => {
   if (!activeShape.shape) return;
@@ -292,7 +300,7 @@ const updateShape = (id, key, value) => {
 }
 
 // Функция для обработки выбора формы
-const handleSelectShape = ({id, editor = undefined} = {}) => {
+const handleSelectShape = ({ id = undefined, editor = undefined } = {}) => {
   if (activeShape.id !== id && mode.value === mode._text) {
     mode.value = mode._edit;
   }
@@ -424,6 +432,12 @@ const updateEditor = (type, value) => {
 
   .header__control-buttons {
     gap: 16px;
+  }
+
+  :deep(.dropdown .dropdown__content),
+  :deep(.select-box-main .options-container-main) {
+    flex-direction: column;
+    max-width: max-content !important;
   }
 }
 

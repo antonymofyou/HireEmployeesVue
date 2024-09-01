@@ -9,6 +9,14 @@
         </ControlButton>
         <ControlButton
             class="control-buttons-button"
+            @click="deleteShapeHandler"
+            :disabled="disabled"
+            title="Удалить фигуру"
+        >
+            <DeleteOutline />
+        </ControlButton>
+        <ControlButton
+            class="control-buttons-button"
             @click="copyShapeHandler"
             :disabled="disabled"
             :title="disabled ? 'Копировать фигуру (недоступно)' : 'Копировать фигуру'"
@@ -28,6 +36,7 @@ import ControlButton from './ControlButton.vue';
 
 import PlusIcon from 'vue-material-design-icons/Plus.vue';
 import ContentCopy from 'vue-material-design-icons/ContentCopy.vue';
+import DeleteOutline from 'vue-material-design-icons/DeleteOutline.vue';
 
 const props = defineProps({
     activeShape: {
@@ -38,6 +47,7 @@ const props = defineProps({
 const emits = defineEmits({
     addShape: null,
     copyShape: null,
+    deleteShape: null,
 });
 
 const disabled = computed(() => {
@@ -48,6 +58,10 @@ const disabled = computed(() => {
 
 function addShapeHandler() {
     emits('addShape');
+}
+
+function deleteShapeHandler() {
+    emits('deleteShape', props.activeShape.id);
 }
 
 function copyShapeHandler() {
