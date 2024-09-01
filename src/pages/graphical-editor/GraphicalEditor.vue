@@ -5,6 +5,7 @@
     @pointerup="cancelGrabbing"
     @contextmenu="cancelGrabbing"
     @wheel.prevent
+    :style="{ cursor: isGrabbing ? 'grabbing' : 'grab' }"
     class="wrapper"
   >
     <header class="header">
@@ -212,7 +213,7 @@ const canvasStyle = computed(() => {
   return {
     transform: `translate(${xCoord.value}px, ${yCoord.value}px) scale(${(scale.value / 100).toFixed(1)})`,
   };
-})
+});
 // Ширина экрана
 let windowInnerWidth = ref(window.innerWidth);
 // Ширина экрана при которой будет скрываться TooltipControlButtons
