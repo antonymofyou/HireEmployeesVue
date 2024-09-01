@@ -1,5 +1,5 @@
 <template>
-  <div class="select-box-main" :class="{ active: openSelect }" v-click-outside="closeSelect">
+  <div class="select-box-main" :class="{ active: openSelect, disabled: props.disabled }" v-click-outside="closeSelect">
     <!-- Компонент плавного открытия селекта -->
     <Transition>
     <div ref="openSelect" class="options-container-main" :style="[optionsContainerStyle, styles]" v-if="openSelect">
@@ -9,26 +9,33 @@
         :key="option.id"
         @click="setSelected(option)"
         :style="{ color: option.color || defaultColor }"
+        :class="{'selected' : selected.id == option.id}"
       >
-        <label>{{ option.name }}</label>
+        <slot name="option" :option="option">
+          <label>
+          {{ option.name }}
+          </label>
+        </slot>
       </div>
     </div>
   </Transition>
 
     <div @click="toggleSelect" class="selected-main">
-      <span v-if="selected"
-        class="selected-number-main"
-        :data-id="selected.id"
-        :style="{ color: selected.color || defaultColor }"
-      >
-        {{ selected.name }}
-      </span>
-      <span v-else class="selected-number-main-empty"></span>
-      <svg class="arrow" xmlns="http://www.w3.org/2000/svg" width="10" height="10" viewBox="0 0 10 10" fill="none">
-        <path
-          d="M4.0575 8.85915C4.00917 8.81206 3.8025 8.63428 3.6325 8.46866C2.56333 7.49773 0.813333 4.96485 0.279167 3.63915C0.193333 3.43781 0.0116667 2.9288 0 2.65684C0 2.39625 0.06 2.14783 0.181667 1.91078C0.351667 1.61528 0.619167 1.37823 0.935 1.24834C1.15417 1.16472 1.81 1.03483 1.82167 1.03483C2.53917 0.904936 3.705 0.833496 4.99333 0.833496C6.22083 0.833496 7.33917 0.904936 8.0675 1.01128C8.07917 1.02346 8.89417 1.15335 9.17333 1.29542C9.68333 1.55602 10 2.06503 10 2.60976V2.65684C9.9875 3.01161 9.67083 3.75767 9.65917 3.75767C9.12417 5.01193 7.46 7.48636 6.35417 8.48084C6.35417 8.48084 6.07 8.76092 5.8925 8.88269C5.6375 9.07266 5.32167 9.16683 5.00583 9.16683C4.65333 9.16683 4.325 9.06048 4.0575 8.85915Z"
-          fill="#212121"></path>
-      </svg>
+      <slot name="trigger" :selected="selected">
+        <span v-if="selected"
+          class="selected-number-main"
+          :data-id="selected.id"
+          :style="{ color: selected.color || defaultColor }"
+        >
+          {{ selected.name }}
+        </span>
+        <span v-else class="selected-number-main-empty"></span>
+        <svg class="arrow" xmlns="http://www.w3.org/2000/svg" width="10" height="10" viewBox="0 0 10 10" fill="none">
+          <path
+            d="M4.0575 8.85915C4.00917 8.81206 3.8025 8.63428 3.6325 8.46866C2.56333 7.49773 0.813333 4.96485 0.279167 3.63915C0.193333 3.43781 0.0116667 2.9288 0 2.65684C0 2.39625 0.06 2.14783 0.181667 1.91078C0.351667 1.61528 0.619167 1.37823 0.935 1.24834C1.15417 1.16472 1.81 1.03483 1.82167 1.03483C2.53917 0.904936 3.705 0.833496 4.99333 0.833496C6.22083 0.833496 7.33917 0.904936 8.0675 1.01128C8.07917 1.02346 8.89417 1.15335 9.17333 1.29542C9.68333 1.55602 10 2.06503 10 2.60976V2.65684C9.9875 3.01161 9.67083 3.75767 9.65917 3.75767C9.12417 5.01193 7.46 7.48636 6.35417 8.48084C6.35417 8.48084 6.07 8.76092 5.8925 8.88269C5.6375 9.07266 5.32167 9.16683 5.00583 9.16683C4.65333 9.16683 4.325 9.06048 4.0575 8.85915Z"
+            fill="#212121"></path>
+        </svg>
+      </slot>
     </div>
   </div>
 </template>
@@ -47,6 +54,10 @@ const props = defineProps({
     type: Array,
     required: true,
   },
+  disabled: {
+    type: Boolean,
+    default: false,
+  }
 });
 
 // Передача значения родителю
@@ -95,6 +106,8 @@ const closeSelect = () => {
 
 // Переключатель открытия селекта
 const toggleSelect = () => {
+  if (props.disabled) return;
+
   openSelect.value = !openSelect.value;
   if (openSelect.value) {
     nextTick(() => { // Для проверки после отрисовки
