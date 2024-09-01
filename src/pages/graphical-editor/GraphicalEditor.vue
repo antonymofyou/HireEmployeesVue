@@ -240,8 +240,15 @@ onBeforeUnmount(() => {
 
 // Функция для генерации уникального ID для новой формы
 const generateUniqueId = () => {
-  return Math.max(...Object.keys(formattedShapes).map(id => Number(id))) + 1;
+  const ids = Object.keys(formattedShapes).map(id => Number(id));
+
+  if (ids.length > 0) {
+    return Math.max(...ids) + 1;
+  } else {
+    return Date.now();
+  }
 }
+
 
 // Функция для добавления нового прямоугольника
 const addShapeHandler = () => {
@@ -257,7 +264,7 @@ const addShapeHandler = () => {
     color: '#6aa1f3',
     borderColor: '#000000',
     borderStyle: 'solid',
-    zIndex: newId,
+    zIndex: 1,
     textVerticalAlignment: 'center',
     borderWidth: 2
   };
