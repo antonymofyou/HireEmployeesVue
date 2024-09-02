@@ -1,5 +1,10 @@
 <template>
-  <button class="multi__button">
+  <button 
+    class="multi__button"
+    :class="{
+      'invisible': !props.isVisible
+    }"
+  >
     <div class="multi__button-box">
       <slot name="icon"> <img class="multi__button-icon" :src="icon" alt="иконка" /></slot>
     </div>
@@ -14,6 +19,11 @@ const props = defineProps({
     type: String,
     required: true,
   },
+  isVisible: {
+    type: Boolean,
+    required: false,
+    default: true
+  }
 });
 </script>
 
@@ -33,6 +43,10 @@ const props = defineProps({
   padding: 0;
   border: 0;
   cursor: pointer;
+}
+
+.multi__button.invisible {
+  visibility: hidden
 }
 
 .multi__button-box {

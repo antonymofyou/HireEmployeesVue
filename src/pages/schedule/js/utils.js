@@ -16,6 +16,15 @@ export function formatTime(time) {
 }
 
 /**
+ * Привести время в привычный формат: hh:mm:ss -> hh:mm
+ * @param {String} time - Время
+ * @returns {String} - Время в привычном формате
+ */
+export function prettifyTime(time) {
+  return time.split(':').slice(0, 2).join(':');
+}
+
+/**
  * @typedef {import('../SchedulePage.vue').Period} Period
  * 
  * Получить текст отчёта к определённому периоду

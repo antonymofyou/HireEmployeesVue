@@ -65,7 +65,6 @@
 <script setup>
 import { computed } from 'vue';
 import InputSimple from '@/components/InputSimple.vue';
-import { formatTime } from '../../js/utils';
 
 const props = defineProps({
   // Не отображаемые поля

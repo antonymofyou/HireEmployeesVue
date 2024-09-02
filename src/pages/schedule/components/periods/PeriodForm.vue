@@ -44,13 +44,17 @@ const periodEndTimeModel = defineModel('periodEnd');
 
 const emit = defineEmits(['submit']);
 
+// Уведомления по определённым ошибкам
+const validityNotifiers = {
+  pattern: 'Введите время в формате часы:минуты'
+};
+
 /**
  * Вывод читабельной ошибки при ошибке по паттерну
  * @param {Event} event - Объект события
  */
 function showReadableMessage(event) {
-  console.log(event.target)
-  event.target.setCustomValidity('Введите время в формате часы:минуты');
+  event.target.setCustomValidity(validityNotifiers.pattern);
 }
 
 /**
@@ -58,7 +62,11 @@ function showReadableMessage(event) {
  * @param {InputEvent} event - Объект события
  */
 function clearCustomErrors(event) {
-  event.target.setCustomValidity('');
+  if (event.target.validity.patternMismatch) {
+    event.target.setCustomValidity(validityNotifiers.pattern);
+  } else {
+    event.target.setCustomValidity('');
+  }
 }
 
 /**

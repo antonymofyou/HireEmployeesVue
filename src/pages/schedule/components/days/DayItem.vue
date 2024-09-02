@@ -56,7 +56,10 @@
       </div>
     </div>
 
-    <div class="day__footer">
+    <div
+      v-if="props.isAllowEdit"
+      class="day__footer"
+    >
       <ButtonIcon
         class="button-icon"
         @click="handleClickEditButton"
@@ -130,6 +133,12 @@ const props = defineProps({
     type: Number,
     required: false,
     default: null
+  },
+  // Разрешено ли редактирование дня
+  isAllowEdit: {
+    type: Boolean,
+    required: false,
+    default: false
   }
 });
 

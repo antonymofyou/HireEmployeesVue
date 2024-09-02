@@ -12,6 +12,7 @@
       :comment="day.comment"
       :periods="props.periods[day.dayId]"
       :active-period-id="props.activePeriodId"
+      :is-allow-edit="props.isAllowEdit"
       @day-edit="handleDayEditDayItem"
       @day-delete="handleDayDeleteDayItem"
       @period-select="handlePeriodSelectDayItem"
@@ -42,6 +43,13 @@ const props = defineProps({
     type: Number,
     required: false,
     default: null
+  },
+
+  // Разрешено ли редактирование списка
+  isAllowEdit: {
+    type: Boolean,
+    required: false,
+    default: false
   }
 });
 

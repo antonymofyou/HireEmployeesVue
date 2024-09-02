@@ -10,19 +10,20 @@
     />
 
     <div class="period__body">
-      <span>{{ props.start }}</span>
+      <span>{{ prettifyTime(props.start) }}</span>
       -
-      <span>{{ props.end }}</span>
+      <span>{{ prettifyTime(props.end) }}</span>
     </div>
   </div>
 </template>
 
 <script setup>
 import ActionsButtons from '../ActionsButtons.vue';
+import { prettifyTime } from '../../js/utils';
 
 const props = defineProps({
   periodId: {
-    type: Number,
+    type: [String, Number],
     required: true
   },
   start: {

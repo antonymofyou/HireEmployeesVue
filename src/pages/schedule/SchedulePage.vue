@@ -9,6 +9,7 @@
     </div>
 
     <TopSquareButton
+      :is-visible="isAllowEditingSchedule"
       :icon="plusIcon"
       class="top-button"
       @click="callbacks.startAddNewDay"
@@ -34,6 +35,7 @@
               :days="days"
               :periods="periodsTimes"
               :active-period-id="activePeriod.periodId"
+              :is-allow-edit="isAllowEditingSchedule"
               @day-edit="callbacks.handleDayEditDaysList"
               @day-delete="callbacks.handleDayDeleteDaysList"
               @period-select="callbacks.handlePeriodSelectDaysList"
@@ -117,8 +119,7 @@ import ModalDay from './components/modals/ModalDay.vue';
 
 import plusIcon from '@/assets/icons/plus.svg';
 
-import { JobGetShedule, JobSetDay } from './js/ApiClassesStandardsPage';
-import { formatTime } from './js/utils';
+import { JobGetShedule, JobSetDay, JobSetPeriod } from './js/ApiClassesStandardsPage';
 
 // Идёт ли запрос за периодами (инициализация)
 const isJobsRequestNow = ref(false);
@@ -156,6 +157,11 @@ const days = ref([]);
 const periodsTimes = ref([]);
 // Данные сотрудника
 const staffData = ref({});
+
+// Разрешено ли пользователю редактировать расписание
+const isAllowEditingSchedule = computed(() => {
+  return Boolean(staffData.value.isSelfSchedule);
+});
 
 // Инициализаторы
 const initializators = {
@@ -324,15 +330,15 @@ const todayDate = new Date();
 const tomorrowDate = new Date(new Date(todayDate).setDate(todayDate.getDate() + 1));
 
 onMounted(() => {
-  requests.getSchedule();
+  requests.fetchSchedule();
 })
 
 // Запросы к серверу
 const requests = {
   /**
-   * Получение расписания
+   * Запрос на получение расписания
    */
-  getSchedule: () => {
+  fetchSchedule: () => {
     isJobsRequestNow.value = true;
 
     const jobGetScheduleInstance = new JobGetShedule();
@@ -348,10 +354,16 @@ const requests = {
       (response) => {
         console.log('Response: ', response)
 
-        const { days: responseDays, periodsTimes: responsePeriods } = response;
+        const { 
+          days: responseDays,
+          periodsTimes: responsePeriods,
+          staffData: responseStaffData
+        } = response;
 
+        // Устанавливаем пришедшие значения в состояние
         days.value = responseDays || [];
         periodsTimes.value = responsePeriods;
+        staffData.value = responseStaffData;
 
         console.log(response, '<<<');
         isJobsRequestNow.value = false;
@@ -361,22 +373,15 @@ const requests = {
         isJobsRequestNow.value = false;
       }
     );
-  }
-};
+  },
 
-// Действия над днями
-const daysActions = {
   /**
-   * Добавление нового дня
-   * @param {Object} newDay - новый день
+   * Запрос на добавление нового дня
+   * @param {Object} newDay - Новый день
    */
-  async addNewDay(newDay) {
-    if (isAddDayRequestNow.value) return;
-    helpers.resetError();
-
+  fetchAddNewDay: (newDay) => {
     isAddDayRequestNow.value = true;
 
-    // Запрос на добавление дня
     const jobSetDayInstance = new JobSetDay();
 
     jobSetDayInstance.action = 'create';
@@ -400,7 +405,7 @@ const daysActions = {
 
         isAddDayRequestNow.value = false;
 
-        requests.getSchedule();
+        requests.fetchSchedule();
       },
       (error) => {
         // Обработка ошибки при добавлении
@@ -413,26 +418,18 @@ const daysActions = {
   },
 
   /**
-   * Изменение выбранного дня
+   * Запрос на изменение дня
+   * @param {String | Number} dayId - ID изменяемого дня
    * @param {Object} editedDay - Изменённый день
    */
-  async editActiveDay(editedDay) {
-    if (isEditDayRequestNow.value) return;
-    helpers.resetError();
-
+  fetchEditDay: (dayId, editedDay) => {
     isEditDayRequestNow.value = true;
-
-    console.group('Изменение дня');
-    console.log('Меняю день: ', activeDay.value.dayId);
-    console.log('Старые значения: ', activeDayFromStore.value);
-    console.log('Новые значения: ', editedDay);
-    console.groupEnd();
 
     // Запрос на измененеи дня
     const jobSetDayInstance = new JobSetDay();
 
     jobSetDayInstance.action = 'update';
-    jobSetDayInstance.dayId = activeDay.value.dayId;
+    jobSetDayInstance.dayId = dayId;
     jobSetDayInstance.setDay = {
       date: editedDay.date,
       isWeekend: String(Number(editedDay.isWeekend)),
@@ -453,7 +450,7 @@ const daysActions = {
         
         isEditDayRequestNow.value = false;
 
-        requests.getSchedule();
+        requests.fetchSchedule();
       },
       (error) => {
         console.log('Error edit day: ', error);
@@ -464,35 +461,29 @@ const daysActions = {
   },
 
   /**
-   * Удаление выбранного дня
+   * Запрос на удаление дня
+   * @param {String | Number} dayId - ID удаляемого дня
    */
-  async deleteSelectedDay() {
-    if (isDeleteDayRequestNow.value) return;
-    helpers.resetError();
-
+  fetchDeleteDay: (dayId) => {
     isDeleteDayRequestNow.value = true;
-
-    console.group('Удаление дня');
-    console.log('Удаляю: ', activeDay.value.dayId);
-    console.groupEnd();
 
     // Запрос на удаление дня
     const jobSetDayInstance = new JobSetDay();
 
     jobSetDayInstance.action = 'delete';
-    jobSetDayInstance.dayId = activeDay.value.dayId;
+    jobSetDayInstance.dayId = dayId;
 
     jobSetDayInstance.request(
       '/job/set_day.php',
       'manager',
-      (response) => {
+      () => {
         modalsActions.closeDeleteDayModal();
         activeDay.value = initializators.initActiveDay();
         helpers.resetError();
 
         isDeleteDayRequestNow.value = false;
 
-        requests.getSchedule();
+        requests.fetchSchedule();
       },
       (error) => {
         console.log('Error delete:', error);
@@ -500,6 +491,43 @@ const daysActions = {
         isDeleteDayRequestNow.value = false;
       }
     );
+  },
+};
+
+// Действия над днями
+const daysActions = {
+  /**
+   * Добавление нового дня
+   * @param {Object} newDay - Новый день
+   */
+  async addNewDay(newDay) {
+    if (isAddDayRequestNow.value) return;
+    helpers.resetError();
+
+    // Отправляем запрос на добавление дня
+    requests.fetchAddNewDay(newDay);
+  },
+
+  /**
+   * Изменение выбранного дня
+   * @param {Object} editedDay - Изменённый день
+   */
+  async editActiveDay(editedDay) {
+    if (isEditDayRequestNow.value) return;
+    helpers.resetError();
+
+    // Отправляем запрос на изменение дня
+    requests.fetchEditDay(activeDay.value.dayId, editedDay);
+  },
+
+  /**
+   * Удаление выбранного дня
+   */
+  async deleteSelectedDay() {
+    if (isDeleteDayRequestNow.value) return;
+    helpers.resetError();
+
+    requests.fetchDeleteDay(activeDay.value.dayId);
   }
 };
 
@@ -514,28 +542,36 @@ const periodsActions = {
 
     isAddNewPeriodRequestNow.value = true;
 
-    // @TODO Запрос на добавление
-    await new Promise((resolve) => setTimeout(resolve, 3000));
+    // Запрос на добавление периода
+    const jobSetPeriodInstance = new JobSetPeriod();
 
-    const chance = Math.random();
-    console.log({ chance })
-    if (chance > 0.9) {
-      errorMessage.value = 'Ошибка добавления';
-    }
+    jobSetPeriodInstance.action = 'create';
+    jobSetPeriodInstance.dayId = period.dayId;
+    jobSetPeriodInstance.periodStart = period.periodStart;
+    jobSetPeriodInstance.periodEnd = period.periodEnd;
+
+    jobSetPeriodInstance.request(
+      '/job/set_period.php',
+      'manager',
+      (response) => {
+        console.log('Успешно добавили период: ', response);
+
+        modalsActions.closeAddPeriodModal();
+        helpers.resetError()
+
+        isAddNewPeriodRequestNow.value = false;
+
+        requests.fetchSchedule();
+      },
+      (error) => {
+        console.log('Ошибка при добавлении периода: ', error);
+        errorMessage.value = error;
+
+        isAddNewPeriodRequestNow.value = false;
+      }
+    );
 
     console.log('Добавляю новый период: ', period);
-
-    if (!errorMessage.value) {
-      periodsTimes.value[period.dayId].push({
-        ...period,
-        periodId: crypto.randomUUID()
-      });
-
-      modalsActions.closeAddPeriodModal();
-      helpers.resetError();
-    }
-
-    isAddNewPeriodRequestNow.value = false;
   },
 
   /**
@@ -547,29 +583,35 @@ const periodsActions = {
 
     isDeletePeriodRequestNow.value = true;
   
-    // @TODO Запрос на удаление
-    await new Promise((resolve) => setTimeout(resolve, 1000));
-  
     console.log('Удаляю выбранный период: ', activePeriod.value);
 
-    const chance = Math.random();
-    console.log({ chance })
-    if (chance > 0.9) {
-      errorMessage.value = 'Ошибка удаления';
-    }
+    // Запрос на удаление периода
+    const jobSetPeriodInstance = new JobSetPeriod();
 
-    if (!errorMessage.value) {
-      // Моковое удаление
-      periodsTimes.value[activePeriod.value.dayId] = periodsTimes.value[activePeriod.value.dayId].filter((period) => {
-        return period.periodId !== activePeriod.value.periodId;
-      });
+    jobSetPeriodInstance.action = 'delete';
+    jobSetPeriodInstance.dayId = activePeriod.value.dayId;
+    jobSetPeriodInstance.periodId = activePeriod.value.periodId;
 
-      modalsActions.closeDeletePeriodModal();
-      helpers.resetActivePeriod();
-      helpers.resetError();
-    }
-  
-    isDeletePeriodRequestNow.value = false;
+    jobSetPeriodInstance.request(
+      '/job/set_period.php',
+      'manager',
+      (response) => {
+        console.log('Успешно добавили период: ', response);
+        
+        modalsActions.closeDeletePeriodModal();
+        helpers.resetActivePeriod();
+        helpers.resetError();
+
+        isDeletePeriodRequestNow.value = false;
+
+        requests.fetchSchedule();
+      },
+      (error) => {
+        console.log('Ошибка удаления периода: ', error);
+        errorMessage.value = error;
+        isDeletePeriodRequestNow.value = false;
+      }
+    );
   }
 };
 
