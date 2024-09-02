@@ -8,7 +8,7 @@
       :spent-time="day.spentTime"
       :report="day.report"
       :report-id="day.reportId"
-      :is-weekend="Boolean(day.isWeekend === '1')"
+      :is-weekend="day.isWeekend === '1'"
       :comment="day.comment"
       :periods="props.periods[day.dayId]"
       :active-period-id="props.activePeriodId"

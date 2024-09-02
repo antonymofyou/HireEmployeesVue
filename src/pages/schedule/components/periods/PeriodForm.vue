@@ -3,26 +3,40 @@
     class="period-form"
     @submit.prevent="handleSubmit"
   >
-    <InputSimple
-      v-model.trim="mainDateModel"
-      :disabled="isFieldDisabled('date')"
-      placeholder="Дата (yyyy-mm-dd)"
-      pattern="\d{4}-\d{2}-\d{2}"
-    />
-    <InputSimple
-      v-model.trim="periodStartTimeModel"
-      placeholder="Начало (часы:секунды)"
-      pattern="\d{2}:\d{2}"
-      @input="clearCustomErrors"
-      @invalid="showReadableMessage"
-    />
-    <InputSimple
-      v-model.trim="periodEndTimeModel"
-      placeholder="Конец (часы:секунды)"
-      pattern="\d{2}:\d{2}"
-      @input="clearCustomErrors"
-      @invalid="showReadableMessage"
-    />
+    <label class="form-label">
+      <span class="form-label__title">Дата:</span>
+
+      <InputSimple
+        v-model.trim="mainDateModel"
+        :disabled="isFieldDisabled('date')"
+        placeholder="Дата (yyyy-mm-dd)"
+        pattern="\d{4}-\d{2}-\d{2}"
+      />
+    </label>
+
+    <label class="form-label">
+      <span class="form-label__title">Начало периода:</span>
+
+      <InputSimple
+        v-model.trim="periodStartTimeModel"
+        placeholder="Начало (часы:минуты)"
+        pattern="\d{2}:\d{2}"
+        @input="clearCustomErrors"
+        @invalid="showReadableMessage"
+      />
+    </label>
+
+    <label class="form-label">
+      <span class="form-label__title">Конец периода:</span>
+
+      <InputSimple
+        v-model.trim="periodEndTimeModel"
+        placeholder="Конец (часы:минуты)"
+        pattern="\d{2}:\d{2}"
+        @input="clearCustomErrors"
+        @invalid="showReadableMessage"
+      />
+    </label>
   </form>
 </template>
 
@@ -90,5 +104,17 @@ function isFieldDisabled(fieldName) {
   display: flex;
   flex-direction: column;
   row-gap: 10px;
+}
+
+/* Form label */
+.form-label {
+  display: flex;
+  flex-direction: column;
+  row-gap: 2px;
+}
+
+.form-label__title {
+  font-size: 14px;
+  margin-bottom: 5px;
 }
 </style>

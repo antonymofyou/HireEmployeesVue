@@ -38,6 +38,7 @@
         >
           <div class="schedule__inner">
             <DaysList
+              v-if="days.length"
               :days="days"
               :periods="periodsTimes"
               :active-period-id="activePeriod.periodId"
@@ -48,6 +49,13 @@
               @period-add="callbacks.handlePeriodAddDaysList"
               @period-delete="callbacks.handlePeriodDeleteDaysList"
             />
+
+            <div
+              v-else
+              class="schedule__empty-notifier"
+            >
+              Расписание отсутствует
+            </div>
           </div>
         </div>
       </div>
@@ -197,12 +205,16 @@ const initializators = {
 const activeDay = ref(initializators.initActiveDay());
 // Нормализованный активный день из состояния
 const activeDayFromStore = computed(() => {
-  const foundedDay = days.value.find((d) => {
+  let foundedDay = days.value.find((d) => {
     return d.dayId === activeDay.value.dayId;
   });
 
   if (foundedDay) {
-    foundedDay.isWeekend = foundedDay.isWeekend === '1' ? true : false;
+    // Для избежания мутаций
+    foundedDay = {
+      ...foundedDay,
+      isWeekend: foundedDay.isWeekend === '1' ? true : false
+    }
   }
 
   return foundedDay;
@@ -707,6 +719,10 @@ const modalsActions = {
 .schedule-section__title {
   margin: 0;
   line-height: 42px;
+  text-align: center;
+}
+
+.schedule__empty-notifier {
   text-align: center;
 }
 

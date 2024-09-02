@@ -48,7 +48,7 @@
       <InputSimple
         v-model.trim="reportModel"
         :disabled="isRestDisabled"
-        placeholder="Отчёт"
+        placeholder="Текст отчёта"
         input-type="textarea"
       />
     </label>
@@ -58,7 +58,7 @@
       <InputSimple
         v-model.trim="commentModel"
         :disabled="isRestDisabled"
-        placeholder="Комментарий"
+        placeholder="Текст комментария"
         input-type="textarea"
       />
     </label>

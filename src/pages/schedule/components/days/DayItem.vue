@@ -20,10 +20,14 @@
             :is-active="props.activePeriodId === period.periodId"
             @select="handleSelectPeriodItem"
             @delete="handleDeletePeriodItem"
+            />
+
+          <AddButton
+            key="add-button"
+            @click="handleClickAddButtonPeriod"
           />
         </TransitionGroup>
 
-        <AddButton @click="handleClickAddButtonPeriod" />
       </div>
 
       <div class="day__info">
@@ -38,7 +42,7 @@
           v-else
           class="day__text"
         >
-          Длина рабочего дня: {{ props.spentTime }}
+          Длина рабочего дня: {{ props.spentTime }} минут
         </p>
 
         <p
