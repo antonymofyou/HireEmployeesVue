@@ -16,7 +16,7 @@ export function formatTime(time) {
 }
 
 /**
- * @typedef {import('../StandardsPage.vue').Period} Period
+ * @typedef {import('../SchedulePage.vue').Period} Period
  * 
  * Получить текст отчёта к определённому периоду
  * @param {Array<Object>} dataByDate - Данные для графика
