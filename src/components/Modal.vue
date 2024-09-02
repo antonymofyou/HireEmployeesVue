@@ -1,7 +1,12 @@
 <template>
   <Transition name="modal">
     <div v-if="show" class="modal-mask" @click.self="$emit('close')">
-      <div class="modal-container">
+      <div
+        :style="{
+          maxWidth: props.maxWidth
+        }"
+        class="modal-container"
+      >
         <div class="modal-header">
           <slot name="header"></slot>
         </div>
@@ -22,6 +27,13 @@
 
 const props = defineProps({
   show: Boolean,
+
+  // Максимальная ширина контента модалки (например: 300px)
+  maxWidth: {
+    type: String,
+    required: false,
+    default: 'initial'
+  }
 });
 
 </script>

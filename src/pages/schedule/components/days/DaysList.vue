@@ -40,7 +40,7 @@ const props = defineProps({
 
   // ID выбранного периода
   activePeriodId: {
-    type: Number,
+    type: [String, Number],
     required: false,
     default: null
   },

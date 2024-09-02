@@ -18,7 +18,10 @@
     <div class="wrapper">
       <div class="wrapper__inner">
         <div
-          v-if="isJobsRequestNow"
+          :class="{
+            'by-visible-toggler': true,
+            'visible': isJobsRequestNow
+          }"
           class="wrapper__spinner"
         >
           <SpinnerMain
@@ -27,7 +30,10 @@
         </div>
       
         <div
-          v-else
+          :class="{
+            'by-visible-toggler': true,
+            'visible': !isJobsRequestNow
+          }"
           class="schedule"
         >
           <div class="schedule__inner">
@@ -87,6 +93,7 @@
     :is-loading="isEditDayRequestNow"
     :default-day="activeDayFromStore"
     :error="errorMessage"
+    mode="edit"
     title="Изменение дня"
     button-text="Изменить"
     @submit="daysActions.editActiveDay"
@@ -323,15 +330,13 @@ onUnmounted(() => {
   document.removeEventListener('click', helpers.resetActivePeriod);
 });
 
-// Моки
-// const managerId = 3;
-const managerId = 128;
+// Границы расписания
 const todayDate = new Date();
 const tomorrowDate = new Date(new Date(todayDate).setDate(todayDate.getDate() + 1));
 
 onMounted(() => {
   requests.fetchSchedule();
-})
+});
 
 // Запросы к серверу
 const requests = {
@@ -343,7 +348,7 @@ const requests = {
 
     const jobGetScheduleInstance = new JobGetShedule();
 
-    jobGetScheduleInstance.staffId = String(managerId);
+    // jobGetScheduleInstance.staffId = String(managerId);
     // @TODO
     // jobGetScheduleInstance.filterStartDate = todayDate.toLocaleDateString('en-CA');
     // jobGetScheduleInstance.filterEndDate = tomorrowDate.toLocaleDateString('en-CA');
@@ -670,7 +675,7 @@ const modalsActions = {
 </script>
 
 <style scoped>
-/* Disable scroll when modal visible */
+/* Выключаем скролл когда активирована модалка */
 :global(body:has(*[class^="modal"])) {
   overflow-y: hidden !important;
 }
@@ -678,6 +683,11 @@ const modalsActions = {
 /* Spinner */
 .spinner-loader {
   width: 50px;
+}
+
+.wrapper__spinner:not(.visible) {
+  position: absolute;
+  pointer-events: none;
 }
 
 /* Section */
@@ -744,5 +754,16 @@ const modalsActions = {
   display: flex;
   justify-content: center;
   width: 100%;
+}
+
+/* Переключатели прозрачности */
+.by-visible-toggler {
+  opacity: 0;
+  pointer-events: none;
+}
+
+.visible {
+  opacity: 1;
+  pointer-events: all;
 }
 </style>

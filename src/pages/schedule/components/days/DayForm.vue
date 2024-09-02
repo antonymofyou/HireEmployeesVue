@@ -1,8 +1,10 @@
 <template>
   <form
-    @submit.prevent="handleSubmitForm"
-    id="add-day-form"
+    :style="{
+      maxWidth: props.maxWidth
+    }"
     class="day-form"
+    @submit.prevent="handleSubmitForm"
   >
     <label class="form-label">
       <span class="form-label__title">Дата:</span>
@@ -10,6 +12,7 @@
       <InputSimple
         v-model.trim="dateModel"
         :min="new Date().toLocaleDateString('en-CA')"
+        :disabled="isFieldDisabled('date')"
         placeholder="Дата"
         pattern="\d{4}-\d{2}-\d{2}"
         type="date"
@@ -59,12 +62,23 @@
         input-type="textarea"
       />
     </label>
+
+    <ButtonMain
+      :is-active="props.isLoading"
+      :is-disabled="props.isSubmitDisabled"
+      :message="props.error"
+      align="center"
+    >
+      <template #text>{{ props.buttonText }}</template>
+    </ButtonMain>
   </form>
 </template>
 
 <script setup>
 import { computed } from 'vue';
+
 import InputSimple from '@/components/InputSimple.vue';
+import ButtonMain from '@/components/ButtonMain.vue';
 
 const props = defineProps({
   // Не отображаемые поля
@@ -72,6 +86,39 @@ const props = defineProps({
     type: Array,
     required: false,
     default: () => []
+  },
+  // Не активные поля
+  disabledFields: {
+    type: Array,
+    required: false,
+    default: () => []
+  },
+  // Статус загрузки
+  isLoading: {
+    type: Boolean,
+    required: false,
+    default: false
+  },
+  buttonText: {
+    type: String,
+    required: false,
+    default: 'Подтвердить'
+  },
+  error: {
+    type: String,
+    required: false,
+    default: ''
+  },
+  isSubmitDisabled: {
+    type: Boolean,
+    required: false,
+    default: false
+  },
+  // Максимальная ширина формы (например: 300px)
+  maxWidth: {
+    type: String,
+    required: false,
+    default: 'initial'
   }
 });
 
@@ -102,7 +149,7 @@ function handleSubmitForm() {
     spentTime: spentTimeModel.value,
     report: reportModel.value,
     comment: commentModel.value
-  })
+  });
 }
 
 /**
@@ -111,6 +158,14 @@ function handleSubmitForm() {
  */
  function isFieldRemoved(fieldName) {
   return props.removedFields.includes(fieldName);
+}
+
+/**
+ * Проверка поля на неактивность
+ * @param {String} fieldName - Имя поля
+ */
+function isFieldDisabled(fieldName) {
+  return props.disabledFields.includes(fieldName);
 }
 
 /**
@@ -129,6 +184,7 @@ function isFieldLast(fieldName) {
   display: flex;
   flex-direction: column;
   row-gap: 10px;
+  max-width: 300px;
 }
 
 .day-form__checkbox {

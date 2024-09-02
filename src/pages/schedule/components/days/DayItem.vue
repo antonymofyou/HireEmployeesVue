@@ -130,7 +130,7 @@ const props = defineProps({
     default: () => []
   },
   activePeriodId: {
-    type: Number,
+    type: [String, Number],
     required: false,
     default: null
   },

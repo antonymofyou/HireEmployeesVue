@@ -15,23 +15,14 @@
         v-model:spent-time="newDay.spentTime"
         v-model:report="newDay.report"
         v-model:comment="newDay.comment"
+        :disabled-fields="disabledFields"
         :removed-fields="props.removedFields"
+        :is-loading="props.isLoading"
+        :error="props.error"
+        :is-submit-disabled="isSubmitButtonDisabled"
+        max-width="250px"
         @submit="handleSubmitForm"
       />
-    </template>
-
-    <template #footer-control-buttons>
-      <div class="modal-add-day__footer">
-        <ButtonMain
-          :is-active="props.isLoading"
-          :is-disabled="isSubmitButtonDisabled"
-          :message="props.error"
-          align="center"
-          form="add-day-form"
-        >
-          <template #text>{{ props.buttonText }}</template>
-        </ButtonMain>
-      </div>
     </template>
   </Modal>
 </template>
@@ -40,7 +31,6 @@
 import { ref, computed, watch } from 'vue';
 
 import Modal from '@/components/Modal.vue';
-import ButtonMain from '@/components/ButtonMain.vue';
 import DayForm from '../days/DayForm.vue';
 
 const props = defineProps({
@@ -48,6 +38,7 @@ const props = defineProps({
     type: Boolean,
     required: true
   },
+  // Статус загрузки
   isLoading: {
     type: Boolean,
     required: false,
@@ -77,6 +68,12 @@ const props = defineProps({
     type: Array,
     required: false,
     default: () => []
+  },
+  // Режим (редактирование или добавление)
+  mode: {
+    type: String,
+    required: false,
+    default: 'create'
   }
 });
 
@@ -94,9 +91,22 @@ const initNewDay = () => ({
 // Новый день для заполнения
 const newDay = ref(initNewDay());
 
-watch(newDay, (newVal) => {
-  console.log(newVal);
-})
+// Не активные поля
+const disabledFields = computed(() => {
+  switch (props.mode) {
+    case 'edit': {
+      return ['date']
+    }
+  }
+
+  return [];
+});
+
+watch(() => props.defaultDay, (newVal) => {
+  console.log(newVal, '<<<');
+}, {
+  deep: true
+});
 
 // Следим за props.isShow, т.к. иначе - newDay всегда будет пустым
 watch(() => props.isShow, () => {
@@ -110,7 +120,7 @@ const isSubmitButtonDisabled = computed(() => {
   // [x] Если дата пуста при выходном дне - дизейбл
   // [x] Если все значения пусты при не выходном дне - дизейбл
   // [x] Если все значения равны значениям по умолчанию - дизейбл
-  // [] Если какие-то поля отсутствуют - мы их не считаем
+  // [x] Если какие-то поля отсутствуют - мы их не считаем
 
   const restFields = Object.keys(newDay.value).filter((key) => !props.removedFields.includes(key));
   console.log('RestFields = ', restFields)
