@@ -60,7 +60,8 @@ function getNasotkuTokenFromServer(vkToken, vkUserId) {
             if(response.success==='0'){
                 errorMessage.value += ' '+response.message+'.'
             }
-            else {             
+            else {
+                console.log(response)             
                 setAuth(response.nasotkuToken, response.device, response.managerType || '')
                 router.push({name:'vacanciesList'})
             }

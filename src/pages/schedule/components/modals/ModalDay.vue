@@ -12,7 +12,7 @@
       <DayForm
         v-model:date="newDay.date"
         v-model:is-weekend="newDay.isWeekend"
-        v-model:work-time="newDay.workTime"
+        v-model:spent-time="newDay.spentTime"
         v-model:report="newDay.report"
         v-model:comment="newDay.comment"
         :removed-fields="props.removedFields"
@@ -86,7 +86,7 @@ const emit = defineEmits(['submit', 'close']);
 const initNewDay = () => ({
   date: props.defaultDay?.date ?? '',
   isWeekend: props.defaultDay?.isWeekend ?? false,
-  workTime: String(props.defaultDay?.workTime ?? ''),
+  spentTime: String(props.defaultDay?.spentTime ?? ''),
   report: props.defaultDay?.report ?? '',
   comment: props.defaultDay?.comment ?? ''
 });
@@ -97,7 +97,6 @@ const newDay = ref(initNewDay());
 watch(newDay, (newVal) => {
   console.log(newVal);
 })
-
 
 // Следим за props.isShow, т.к. иначе - newDay всегда будет пустым
 watch(() => props.isShow, () => {
@@ -124,8 +123,6 @@ const isSubmitButtonDisabled = computed(() => {
     for (const key of restFields) {
       const newValue = newDay.value[key];
       const oldValue = props.defaultDay[key];
-
-      console.log(newValue, oldValue);
 
       // Обязательно "!=", не опечатка
       if (newValue != oldValue) {

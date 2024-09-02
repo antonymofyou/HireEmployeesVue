@@ -29,17 +29,17 @@
         >
       </label>
     </div>
-    <label v-if="!isFieldRemoved('workTime')" class="form-label">
+    <label v-if="!isFieldRemoved('spentTime')" class="form-label">
       <span class="form-label__title">Рабочий день (в минутах):</span>
 
       <InputSimple
-        v-model.trim="workTimeModel"
+        v-model.trim="spentTimeModel"
         :disabled="isRestDisabled"
         placeholder="Рабочий день (в минутах)"
         pattern="\d+"
       />
     </label>
-    <label v-if="!isFieldRemoved('workTime')" class="form-label">
+    <label v-if="!isFieldRemoved('spentTime')" class="form-label">
       <span class="form-label__title">Отчёт:</span>
 
       <InputSimple
@@ -49,7 +49,7 @@
         input-type="textarea"
       />
     </label>
-    <label v-if="!isFieldRemoved('workTime')" class="form-label">
+    <label v-if="!isFieldRemoved('spentTime')" class="form-label">
       <span class="form-label__title">Комментарий:</span>
 
       <InputSimple
@@ -79,12 +79,12 @@ const props = defineProps({
 const emit = defineEmits(['submit']);
 
 // Все поля формы. Т.к. defineModel является макросом, мы не можем использовать их внутри него
-const fieldsNames = ['date', 'isWeekend', 'workTime', 'report', 'comment'];
+const fieldsNames = ['date', 'isWeekend', 'spentTime', 'report', 'comment'];
 
 // Модели для сущностей дня для двусторонней связки
 const dateModel = defineModel('date', { default: '' });
 const isWeekendModel = defineModel('isWeekend', { default: '' });
-const workTimeModel = defineModel('workTime', { default: null });
+const spentTimeModel = defineModel('spentTime', { default: null });
 const reportModel = defineModel('report', { default: null });
 const commentModel = defineModel('comment', { default: null });
 
@@ -100,7 +100,7 @@ function handleSubmitForm() {
   emit('submit', {
     date: dateModel.value,
     isWeekend: isWeekendModel.value,
-    workTime: workTimeModel.value,
+    spentTime: spentTimeModel.value,
     report: reportModel.value,
     comment: commentModel.value
   })

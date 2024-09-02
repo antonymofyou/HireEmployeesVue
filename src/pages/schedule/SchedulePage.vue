@@ -72,7 +72,7 @@
     :is-show="isAddDayModalVisible"
     :is-loading="isAddDayRequestNow"
     :error="errorMessage"
-    :removed-fields="['workTime', 'report', 'comment']"
+    :removed-fields="['spentTime', 'report', 'comment']"
     title="Добавление дня"
     button-text="Добавить"
     @submit="daysActions.addNewDay"
@@ -104,7 +104,7 @@
 </template>
 
 <script setup>
-import { computed, onMounted, onUnmounted, ref, watch } from 'vue';
+import { computed, onBeforeMount, onMounted, onUnmounted, ref } from 'vue';
 
 import TheHeader from '@/components/TheHeader.vue';
 import SpinnerMain from '@/components/SpinnerMain.vue';
@@ -117,7 +117,7 @@ import ModalDay from './components/modals/ModalDay.vue';
 
 import plusIcon from '@/assets/icons/plus.svg';
 
-import { JobGetShedule } from './js/ApiClassesStandardsPage';
+import { JobGetShedule, JobSetDay } from './js/ApiClassesStandardsPage';
 import { formatTime } from './js/utils';
 
 // Идёт ли запрос за периодами (инициализация)
@@ -182,11 +182,17 @@ const initializators = {
 
 // Активный день
 const activeDay = ref(initializators.initActiveDay());
-// Активный день из состояния
+// Нормализованный активный день из состояния
 const activeDayFromStore = computed(() => {
-  return days.value.find((d) => {
+  const foundedDay = days.value.find((d) => {
     return d.dayId === activeDay.value.dayId;
   });
+
+  if (foundedDay) {
+    foundedDay.isWeekend = foundedDay.isWeekend === '1' ? true : false;
+  }
+
+  return foundedDay;
 });
 
 // Активный период
@@ -208,8 +214,11 @@ const helpers = {
   /**
    * Получить день по ID
    * @param {Number} id - ID дня
+   * @returns {Object | null} - День или его отсутствие
    */
   getDayById(id) {
+    if (!days.value) return null;
+
     const result = days.value.find((d) => d.dayId === id);
     return result;
   },
@@ -229,7 +238,10 @@ const callbacks = {
    * @param {Number} dayId - ID дня
    */
   handleDayEditDaysList(dayId) {
+    helpers.resetError();
+
     activeDay.value.dayId = dayId;
+    console.log('Начинаю редактировать: ', dayId);
     isEditDayModalVisible.value = true;
   },
 
@@ -238,6 +250,8 @@ const callbacks = {
    * @param {Number} dayId - ID дня
    */
   handleDayDeleteDaysList(dayId) {
+    helpers.resetError();
+
     activeDay.value.dayId = dayId;
     isDeleteDayModalVisible.value = true;
   },
@@ -247,6 +261,8 @@ const callbacks = {
    * @param {Object} periodEmitted - Период
    */
   handlePeriodSelectDaysList(periodEmitted) {
+    helpers.resetError();
+
     activePeriod.value = {
       periodId: periodEmitted.periodId,
       dayId: periodEmitted.dayId,
@@ -259,6 +275,8 @@ const callbacks = {
    * @param {Object} periodEmitted - Период
    */
   handlePeriodAddDaysList(periodEmitted) {
+    helpers.resetError();
+
     console.log('Period = ', periodEmitted)
     activePeriod.value.dayId = periodEmitted.dayId;
     isAddPeriodModalVisible.value = true;
@@ -269,6 +287,8 @@ const callbacks = {
    * @param {Object} periodEmitted - Период
    */
   handlePeriodDeleteDaysList(periodEmitted) {
+    helpers.resetError();
+
     console.log('here')
     isDeletePeriodModalVisible.value = true;
   
@@ -283,6 +303,8 @@ const callbacks = {
    * Начать процесс добавления нового дня
    */
   startAddNewDay() {
+    helpers.resetError();
+
     isAddDayModalVisible.value = true;
   }
 };
@@ -296,136 +318,51 @@ onUnmounted(() => {
 });
 
 // Моки
-const managerId = 1;
+// const managerId = 3;
+const managerId = 128;
 const todayDate = new Date();
 const tomorrowDate = new Date(new Date(todayDate).setDate(todayDate.getDate() + 1));
 
-// Запрос к бэку
-onMounted(async () => {
-  isJobsRequestNow.value = true;
+onMounted(() => {
+  requests.getSchedule();
+})
 
-  await new Promise((resolve) => setTimeout(resolve, 200));
+// Запросы к серверу
+const requests = {
+  /**
+   * Получение расписания
+   */
+  getSchedule: () => {
+    isJobsRequestNow.value = true;
 
-  const jobGetScheduleInstance = new JobGetShedule();
+    const jobGetScheduleInstance = new JobGetShedule();
 
-  jobGetScheduleInstance.staffId = String(managerId);
-  jobGetScheduleInstance.filterStartDate = String(todayDate.getTime());
-  jobGetScheduleInstance.filterEndDate = String(tomorrowDate.getTime());
+    jobGetScheduleInstance.staffId = String(managerId);
+    // @TODO
+    // jobGetScheduleInstance.filterStartDate = todayDate.toLocaleDateString('en-CA');
+    // jobGetScheduleInstance.filterEndDate = tomorrowDate.toLocaleDateString('en-CA');
 
-  days.value = [
-    {
-      dayId: 1,
-      date: todayDate.toLocaleDateString('en-CA'),
-      workTime: 8,
-      report: 'Lorem ipsum dolor sit amet',
-      reportId: 1,
-      isWeekend: 0,
-      comment: 'Comment about this date'
-    },
-    {
-      dayId: 2,
-      date: todayDate.toLocaleDateString('en-CA'),
-      workTime: 4,
-      report: 'Lorem ipsum dolor sit amet 2',
-      reportId: 1,
-      isWeekend: 0,
-      comment: 'Comment about this date 2'
-    },
-  ];
+    jobGetScheduleInstance.request(
+      '/job/get_schedule.php',
+      'manager',
+      (response) => {
+        console.log('Response: ', response)
 
-  periodsTimes.value = {
-    1: [
-      {
-        periodId: 1,
-        periodStart: formatTime(new Date(todayDate).setHours(8)),
-        periodEnd: formatTime(new Date(todayDate).setHours(13))
+        const { days: responseDays, periodsTimes: responsePeriods } = response;
+
+        days.value = responseDays || [];
+        periodsTimes.value = responsePeriods;
+
+        console.log(response, '<<<');
+        isJobsRequestNow.value = false;
       },
-      {
-        periodId: 2,
-        periodStart: formatTime(new Date(todayDate).setHours(14)),
-        periodEnd: formatTime(new Date(todayDate).setHours(17))
-      },
-      {
-        periodId: 3,
-        periodStart: formatTime(new Date(todayDate).setHours(14)),
-        periodEnd: formatTime(new Date(todayDate).setHours(17))
-      },
-      {
-        periodId: 4,
-        periodStart: formatTime(new Date(todayDate).setHours(14)),
-        periodEnd: formatTime(new Date(todayDate).setHours(17))
-      },
-      {
-        periodId: 5,
-        periodStart: formatTime(new Date(todayDate).setHours(14)),
-        periodEnd: formatTime(new Date(todayDate).setHours(17))
-      },
-      {
-        periodId: 6,
-        periodStart: formatTime(new Date(todayDate).setHours(14)),
-        periodEnd: formatTime(new Date(todayDate).setHours(17))
+      (error) => {
+        console.log(error, '@@@');
+        isJobsRequestNow.value = false;
       }
-    ],
-
-    2: [
-      {
-        periodId: 7,
-        periodStart: formatTime(new Date(todayDate).setHours(8)),
-        periodEnd: formatTime(new Date(todayDate).setHours(13))
-      },
-      {
-        periodId: 8,
-        periodStart: formatTime(new Date(todayDate).setHours(14)),
-        periodEnd: formatTime(new Date(todayDate).setHours(17))
-      },
-      {
-        periodId: 9,
-        periodStart: formatTime(new Date(todayDate).setHours(14)),
-        periodEnd: formatTime(new Date(todayDate).setHours(17))
-      },
-      {
-        periodId: 10,
-        periodStart: formatTime(new Date(todayDate).setHours(14)),
-        periodEnd: formatTime(new Date(todayDate).setHours(17))
-      },
-      {
-        periodId: 11,
-        periodStart: formatTime(new Date(todayDate).setHours(14)),
-        periodEnd: formatTime(new Date(todayDate).setHours(17))
-      },
-      {
-        periodId: 12,
-        periodStart: formatTime(new Date(todayDate).setHours(14)),
-        periodEnd: formatTime(new Date(todayDate).setHours(17))
-      }
-    ],
-  };
-
-  staffData.value = {
-    id: 1,
-    userVkId: 'vkid123',
-    name: 'Ivan Ivanov',
-    isWorkingTimeNow: true
-  };
-
-    isJobsRequestNow.value = false;
-
-  jobGetScheduleInstance.request(
-    '/job/get_shedule.php',
-    'manager',
-    (response) => {
-      console.log(response, '<<<');
-      isJobsRequestNow.value = false;
-    },
-    (error) => {
-      console.log(error, '@@@');
-
-      
-      
-      isJobsRequestNow.value = false;
-    }
-  );
-});
+    );
+  }
+};
 
 // Действия над днями
 const daysActions = {
@@ -439,29 +376,40 @@ const daysActions = {
 
     isAddDayRequestNow.value = true;
 
-    // @TODO Запрос за добавлением дня
-    //
-    await new Promise((resolve) => setTimeout(resolve, 3000));
+    // Запрос на добавление дня
+    const jobSetDayInstance = new JobSetDay();
 
-    if (Math.random() > 0.9) {
-      errorMessage.value = 'Ошибка добавления';
-    }
+    jobSetDayInstance.action = 'create';
+    jobSetDayInstance.setDay = {
+      date: newDay.date,
+      isWeekend: String(Number(newDay.isWeekend)),
+      comment: newDay.comment
+    };
 
-    console.group('Добавление дня');
-    console.log('Добавляю новый день: ', newDay);
-    console.groupEnd();
+    jobSetDayInstance.request(
+      '/job/set_day.php',
+      'manager',
+      (response) => {
+        // Обработка успешного добавления
+        console.log('Success: ', response);
 
-    if (!errorMessage.value) {
-      newDay.dayId = crypto.randomUUID();
-      days.value.push(newDay);
+        periodsTimes.value[newDay.dayId] = [];
 
-      periodsTimes.value[newDay.dayId] = [];
+        modalsActions.closeAddDayModal();
+        helpers.resetError();
 
-      modalsActions.closeAddDayModal();
-      helpers.resetError();
-    }
+        isAddDayRequestNow.value = false;
 
-    isAddDayRequestNow.value = false;
+        requests.getSchedule();
+      },
+      (error) => {
+        // Обработка ошибки при добавлении
+        console.log('Error: ', error);
+        errorMessage.value = error;
+
+        isAddDayRequestNow.value = false;
+      }
+    );
   },
 
   /**
@@ -474,30 +422,45 @@ const daysActions = {
 
     isEditDayRequestNow.value = true;
 
-    // @TODO Запрос за изменением дня
-    await new Promise((resolve) => setTimeout(resolve, 3000));
-
-    if (Math.random() > 0.9) {
-      errorMessage.value = 'Ошибка изменения';
-    }
-
     console.group('Изменение дня');
     console.log('Меняю день: ', activeDay.value.dayId);
     console.log('Старые значения: ', activeDayFromStore.value);
     console.log('Новые значения: ', editedDay);
     console.groupEnd();
 
-    if (!errorMessage.value) {
-      editedDay.dayId = activeDay.value.dayId;
-      const findDayIndex = days.value.findIndex((day) => day.dayId === activeDay.value.dayId);
-      days.value[findDayIndex] = editedDay;
+    // Запрос на измененеи дня
+    const jobSetDayInstance = new JobSetDay();
 
-      modalsActions.closeEditDayModal();
-      activeDay.value = initializators.initActiveDay();
-      helpers.resetError();
-    }
+    jobSetDayInstance.action = 'update';
+    jobSetDayInstance.dayId = activeDay.value.dayId;
+    jobSetDayInstance.setDay = {
+      date: editedDay.date,
+      isWeekend: String(Number(editedDay.isWeekend)),
+      spentTime: editedDay.spentTime,
+      report: editedDay.report,
+      comment: editedDay.comment
+    };
 
-    isEditDayRequestNow.value = false;
+    jobSetDayInstance.request(
+      '/job/set_day.php',
+      'manager',
+      (response) => {
+        console.log('Success edit: ', response);
+        
+        modalsActions.closeEditDayModal();
+        activeDay.value = initializators.initActiveDay();
+        helpers.resetError();
+        
+        isEditDayRequestNow.value = false;
+
+        requests.getSchedule();
+      },
+      (error) => {
+        console.log('Error edit day: ', error);
+        errorMessage.value = error;
+        isEditDayRequestNow.value = false;
+      }
+    );
   },
 
   /**
@@ -509,34 +472,34 @@ const daysActions = {
 
     isDeleteDayRequestNow.value = true;
 
-    // @TODO запрос за удалением
-    await new Promise((resolve) => setTimeout(resolve, 3000));
-
-    const chance = Math.random()
-    console.log({ chance })
-    if (chance > 0.9) {
-      errorMessage.value = 'Ошибка удаления';
-    }
-
     console.group('Удаление дня');
     console.log('Удаляю: ', activeDay.value.dayId);
     console.groupEnd();
-    
-    if (!errorMessage.value) {
-      console.log('here>>>', errorMessage.value)
-      // Моковое удаление
-      days.value = days.value.filter((day) => {
-        return day.dayId !== activeDay.value.dayId;
-      });
-  
-      delete periodsTimes[activeDay.value.dayId];
 
-      modalsActions.closeDeleteDayModal();
-      activeDay.value = initializators.initActiveDay();
-      helpers.resetError();
-    }
+    // Запрос на удаление дня
+    const jobSetDayInstance = new JobSetDay();
 
-    isDeleteDayRequestNow.value = false;
+    jobSetDayInstance.action = 'delete';
+    jobSetDayInstance.dayId = activeDay.value.dayId;
+
+    jobSetDayInstance.request(
+      '/job/set_day.php',
+      'manager',
+      (response) => {
+        modalsActions.closeDeleteDayModal();
+        activeDay.value = initializators.initActiveDay();
+        helpers.resetError();
+
+        isDeleteDayRequestNow.value = false;
+
+        requests.getSchedule();
+      },
+      (error) => {
+        console.log('Error delete:', error);
+        errorMessage.value = error;
+        isDeleteDayRequestNow.value = false;
+      }
+    );
   }
 };
 

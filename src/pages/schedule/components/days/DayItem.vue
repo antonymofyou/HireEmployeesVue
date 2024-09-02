@@ -38,7 +38,7 @@
           v-else
           class="day__text"
         >
-          Длина рабочего дня: {{ props.workTime }}
+          Длина рабочего дня: {{ props.spentTime }}
         </p>
 
         <p
@@ -92,29 +92,27 @@ import DeleteIcon from '@/assets/icons/delete.svg?component';
 import AddButton from '../AddButton.vue';
 import PeriodItem from '../periods/PeriodItem.vue';
 
-import { formatTime } from '../../js/utils';
-
 const props = defineProps({
   dayId: {
-    type: Number,
+    type: [Number, String],
     required: true
   },
   date: {
     type: String,
     required: true
   },
-  workTime: {
-    type: Number,
+  spentTime: {
+    type: [Number, String],
     required: true
   },
   report: {
     type: String,
     required: true
   },
-  reportId: {
-    type: Number,
-    required: true
-  },
+  // reportId: {
+  //   type: Number,
+  //   required: true
+  // },
   isWeekend: {
     type: Boolean,
     required: true
