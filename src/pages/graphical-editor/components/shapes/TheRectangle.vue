@@ -19,7 +19,7 @@
           v-for="handle in handles"
           :key="handle.position"
           :class="['handle', handle.position]"
-          @mousedown.stop="startResizing(handle)"
+          @mousedown.stop="startResizing(handle, $event)"
       ></div>
     </div>
     <div v-show="props.isSelected && isTextMode" :style="resizeHandleStyles" class="text-mode">
