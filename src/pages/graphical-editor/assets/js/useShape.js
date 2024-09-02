@@ -16,6 +16,8 @@ export function useShape(emits, props) {
 
     let draggingFrame;
     let resizingFrame;
+    let initialAngle = 0;
+    let initialMouseAngle = 0;
 
     // Получение трансформаций translate и scale
     const updateCanvasScale = () => {
@@ -25,7 +27,7 @@ export function useShape(emits, props) {
 
         if (canvasTransform !== 'none') {
             const matrix = canvasTransform.match(/^matrix\((.+)\)$/)[1].split(', ').map(parseFloat);
-            canvasScale = matrix[0]; // Предполагается, что scaleX и scaleY равны
+            canvasScale = matrix[0];
         }
 
         return canvasScale;
@@ -154,11 +156,13 @@ export function useShape(emits, props) {
 
     // Начало вращения
     const startRotating = (event) => {
-        const canvasScale = updateCanvasScale();
-
         isRotating.value = true;
-        startX.value = event.clientX / canvasScale;
-        startY.value = event.clientY / canvasScale;
+
+        const centerX = (props.params.x + props.params.width / 2);
+        const centerY = (props.params.y + props.params.height / 2);
+
+        initialAngle = props.params.rotation || 0;
+        initialMouseAngle = Math.atan2(event.clientY - centerY, event.clientX - centerX) * (180 / Math.PI);
 
         document.addEventListener('mousemove', onRotating);
         document.addEventListener('mouseup', stopRotating);
@@ -167,16 +171,16 @@ export function useShape(emits, props) {
     // Функция для вращения
     const onRotating = (event) => {
         if (isRotating.value) {
-            const canvasScale = updateCanvasScale();
+            const centerX = (props.params.x + props.params.width / 2);
+            const centerY = (props.params.y + props.params.height / 2);
 
-            const centerX = (props.params.x + props.params.width / 2) * canvasScale;
-            const centerY = (props.params.y + props.params.height / 2) * canvasScale;
-
-            let angle = Math.atan2((event.clientY / canvasScale) - centerY, (event.clientX / canvasScale) - centerX) * (180 / Math.PI);
+            let currentMouseAngle = Math.atan2(event.clientY - centerY, event.clientX - centerX) * (180 / Math.PI);
+            let angle = initialAngle + (currentMouseAngle - initialMouseAngle);
 
             if (event.shiftKey) {
                 angle = Math.round(angle / 15) * 15;
             }
+            angle = (angle % 360 + 360) % 360;
 
             // Обновляем свойства фигуры
             updateShape({rotation: angle});
