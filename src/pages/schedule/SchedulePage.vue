@@ -492,6 +492,80 @@ const requests = {
       }
     );
   },
+
+  /**
+   * Запрос на добавление периода
+   * @param {Number | String} dayId - ID дня, к которому добавляем период
+   * @param {Object} newPeriod - Новый период
+   */
+  fetchAddNewPeriod: (dayId, newPeriod) => {
+    isAddNewPeriodRequestNow.value = true;
+
+    // Запрос на добавление периода
+    const jobSetPeriodInstance = new JobSetPeriod();
+
+    jobSetPeriodInstance.action = 'create';
+    jobSetPeriodInstance.dayId = dayId;
+    jobSetPeriodInstance.periodStart = newPeriod.periodStart;
+    jobSetPeriodInstance.periodEnd = newPeriod.periodEnd;
+
+    jobSetPeriodInstance.request(
+      '/job/set_period.php',
+      'manager',
+      (response) => {
+        console.log('Успешно добавили период: ', response);
+
+        modalsActions.closeAddPeriodModal();
+        helpers.resetError()
+
+        isAddNewPeriodRequestNow.value = false;
+
+        requests.fetchSchedule();
+      },
+      (error) => {
+        console.log('Ошибка при добавлении периода: ', error);
+        errorMessage.value = error;
+
+        isAddNewPeriodRequestNow.value = false;
+      }
+    );
+  },
+
+  /**
+   * Запрос на удаление периода
+   * @param {Number | String} dayId - ID дня, у которого удаляем период
+   * @param {Number | String} periodId - ID удаляемого периода
+   */
+  fetchDeletePeriod: (dayId, periodId) => {
+    isDeletePeriodRequestNow.value = true;
+  
+    const jobSetPeriodInstance = new JobSetPeriod();
+
+    jobSetPeriodInstance.action = 'delete';
+    jobSetPeriodInstance.dayId = dayId;
+    jobSetPeriodInstance.periodId = periodId;
+
+    jobSetPeriodInstance.request(
+      '/job/set_period.php',
+      'manager',
+      (response) => {
+        console.log('Успешно добавили период: ', response);
+        
+        modalsActions.closeDeletePeriodModal();
+        helpers.resetActivePeriod();
+        helpers.resetError();
+
+        isDeletePeriodRequestNow.value = false;
+
+        requests.fetchSchedule();
+      },
+      (error) => {
+        console.log('Ошибка удаления периода: ', error);
+        errorMessage.value = error;
+        isDeletePeriodRequestNow.value = false;
+      }
+    );
+  }
 };
 
 // Действия над днями
@@ -539,39 +613,9 @@ const periodsActions = {
   async addNewPeriod(period) {
     if (isAddNewPeriodRequestNow.value) return;
     helpers.resetError();
-
-    isAddNewPeriodRequestNow.value = true;
-
-    // Запрос на добавление периода
-    const jobSetPeriodInstance = new JobSetPeriod();
-
-    jobSetPeriodInstance.action = 'create';
-    jobSetPeriodInstance.dayId = period.dayId;
-    jobSetPeriodInstance.periodStart = period.periodStart;
-    jobSetPeriodInstance.periodEnd = period.periodEnd;
-
-    jobSetPeriodInstance.request(
-      '/job/set_period.php',
-      'manager',
-      (response) => {
-        console.log('Успешно добавили период: ', response);
-
-        modalsActions.closeAddPeriodModal();
-        helpers.resetError()
-
-        isAddNewPeriodRequestNow.value = false;
-
-        requests.fetchSchedule();
-      },
-      (error) => {
-        console.log('Ошибка при добавлении периода: ', error);
-        errorMessage.value = error;
-
-        isAddNewPeriodRequestNow.value = false;
-      }
-    );
-
-    console.log('Добавляю новый период: ', period);
+    
+    // Запрос за добавлением нового периода
+    requests.fetchAddNewPeriod(period.dayId, period)
   },
 
   /**
@@ -581,37 +625,8 @@ const periodsActions = {
     if (isDeletePeriodRequestNow.value) return;
     helpers.resetError();
 
-    isDeletePeriodRequestNow.value = true;
-  
-    console.log('Удаляю выбранный период: ', activePeriod.value);
-
-    // Запрос на удаление периода
-    const jobSetPeriodInstance = new JobSetPeriod();
-
-    jobSetPeriodInstance.action = 'delete';
-    jobSetPeriodInstance.dayId = activePeriod.value.dayId;
-    jobSetPeriodInstance.periodId = activePeriod.value.periodId;
-
-    jobSetPeriodInstance.request(
-      '/job/set_period.php',
-      'manager',
-      (response) => {
-        console.log('Успешно добавили период: ', response);
-        
-        modalsActions.closeDeletePeriodModal();
-        helpers.resetActivePeriod();
-        helpers.resetError();
-
-        isDeletePeriodRequestNow.value = false;
-
-        requests.fetchSchedule();
-      },
-      (error) => {
-        console.log('Ошибка удаления периода: ', error);
-        errorMessage.value = error;
-        isDeletePeriodRequestNow.value = false;
-      }
-    );
+    // Запрос за удалением периода
+    requests.fetchDeletePeriod(activePeriod.value.dayId, activePeriod.value.periodId);
   }
 };
 
