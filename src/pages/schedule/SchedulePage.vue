@@ -125,6 +125,7 @@
 
 <script setup>
 import { computed, onMounted, onUnmounted, ref } from 'vue';
+import { useRouter } from 'vue-router';
 
 import TheHeader from '@/components/TheHeader.vue';
 import SpinnerMain from '@/components/SpinnerMain.vue';
@@ -138,6 +139,12 @@ import ModalDay from './components/modals/ModalDay.vue';
 import plusIcon from '@/assets/icons/plus.svg';
 
 import { JobGetShedule, JobSetDay, JobSetPeriod } from './js/ApiClassesStandardsPage';
+import { isManager } from '@/js/AuthFunctions';
+
+const router = useRouter();
+
+// Проверка авторизации пользователя
+if (!isManager()) router.push({ name: 'managerAuth' });
 
 // Идёт ли запрос за периодами (инициализация)
 const isJobsRequestNow = ref(false);
