@@ -1,5 +1,8 @@
 <template>
   <form
+    :style="{
+      maxWidth: props.maxWidth
+    }"
     class="period-form"
     @submit.prevent="handleSubmit"
   >
@@ -37,18 +40,55 @@
         @invalid="showReadableMessage"
       />
     </label>
+
+    <ButtonMain
+      :is-active="props.isLoading"
+      :is-disabled="props.isSubmitDisabled"
+      :message="props.error"
+      align="center"
+      form="add-period-form"
+    >
+      <template #text>Создать</template>
+    </ButtonMain>
   </form>
 </template>
 
 <script setup>
-import { ref, watch } from 'vue';
+import { watch } from 'vue';
+
 import InputSimple from '@/components/InputSimple.vue';
+import ButtonMain from '@/components/ButtonMain.vue';
 
 const props = defineProps({
+  // Не активные поля
   disabledFields: {
     type: Array,
     required: false,
     default: () => []
+  },
+  // Ошибка для формы
+  error: {
+    type: String,
+    required: false,
+    default: ''
+  },
+  // Запрещено ли отправлять форму
+  isSubmitDisabled: {
+    type: Boolean,
+    required: false,
+    default: false
+  },
+  // Идёт ли загрузка
+  isLoading: {
+    type: Boolean,
+    required: false,
+    default: false
+  },
+  // Максимальная ширина формы (например: 300px)
+  maxWidth: {
+    type: String,
+    required: false,
+    default: 'initial'
   }
 });
 
@@ -57,28 +97,13 @@ const mainDateModel = defineModel('date');
 const periodStartTimeModel = defineModel('periodStart');
 const periodEndTimeModel = defineModel('periodEnd');
 
+// Для масок на инпуты
 watch(periodStartTimeModel, (newVal, prevVal) => {
-  if (newVal.length === 2 && prevVal.length < newVal.length) {
-    periodStartTimeModel.value += ":";
-  }
-
-  if (newVal.length > 5) {
-    periodStartTimeModel.value = prevVal;
-  }
-
-  console.log('After: ', periodStartTimeModel.value);
+  periodStartTimeModel.value = maskifyInputValueString(newVal, prevVal);
 });
 
 watch(periodEndTimeModel, (newVal, prevVal) => {
-  if (newVal.length === 2 && prevVal.length < newVal.length) {
-    periodEndTimeModel.value += ":";
-  }
-
-  if (newVal.length > 5) {
-    periodEndTimeModel.value = prevVal;
-  }
-
-  console.log('After: ', periodStartTimeModel.value);
+  periodEndTimeModel.value = maskifyInputValueString(newVal, prevVal);
 });
 
 const emit = defineEmits(['submit']);
@@ -121,6 +146,24 @@ function handleSubmit() {
  */
 function isFieldDisabled(fieldName) {
   return props.disabledFields.includes(fieldName);
+}
+
+/**
+ * Маска для инпутов времени
+ * @param {String} newVal - Новое значение
+ * @param {String} prevVal - Предыдущее значение
+ * @returns {String}
+ */
+function maskifyInputValueString(newVal, prevVal) {
+  if (newVal.length === 2 && prevVal.length < newVal.length) {
+    return newVal += ":";
+  }
+
+  if (newVal.length > 5) {
+    return prevVal;
+  }
+
+  return newVal;
 }
 </script>
 

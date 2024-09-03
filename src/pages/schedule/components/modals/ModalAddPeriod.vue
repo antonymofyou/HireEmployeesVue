@@ -5,7 +5,7 @@
     @pointerdown.self="$emit('close')"
   >
     <template #header>
-      <div>Добавление периода</div>
+      <div>Добавление рабочего времени</div>
     </template>
 
     <template #body>
@@ -14,23 +14,12 @@
         v-model:period-start="newPeriod.periodStart"
         v-model:period-end="newPeriod.periodEnd"
         :disabled-fields="['date']"
+        :error="finalErrorMessage"
+        :is-submit-disabled="isSubmitButtonDisabled"
+        :max-width="props.maxFormWidth"
         id="add-period-form"
         @submit="handleSubmitForm"
       />
-    </template>
-
-    <template #footer-control-buttons>
-      <div class="modal-add-period__footer">
-        <ButtonMain
-          :is-active="props.isLoading"
-          :is-disabled="isSubmitButtonDisabled"
-          :message="finalErrorMessage"
-          align="center"
-          form="add-period-form"
-        >
-          <template #text>Создать</template>
-        </ButtonMain>
-      </div>
     </template>
   </Modal>
 </template>
@@ -48,6 +37,7 @@ const props = defineProps({
     type: Boolean,
     required: true
   },
+  // Идёт ли загрузка
   isLoading: {
     type: Boolean,
     required: false,
@@ -58,10 +48,17 @@ const props = defineProps({
     type: Object,
     required: true
   },
+  // Ошибка для формы
   error: {
     type: String,
     required: false,
     default: ''
+  },
+  // Максимальная ширина формы (например: 300px)
+  maxFormWidth: {
+    type: String,
+    required: false,
+    default: 'initial'
   }
 });
 

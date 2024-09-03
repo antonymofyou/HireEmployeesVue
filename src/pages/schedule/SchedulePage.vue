@@ -68,6 +68,7 @@
     :is-loading="isAddNewPeriodRequestNow"
     :for-day="helpers.getDayById(activePeriod.dayId) ?? {}"
     :error="errorMessage"
+    max-form-width="300px"
     @close="modalsActions.closeAddPeriodModal"
     @submit="periodsActions.addNewPeriod"
   />
@@ -89,6 +90,7 @@
     :is-loading="isAddDayRequestNow"
     :error="errorMessage"
     :removed-fields="['spentTime', 'report', 'comment']"
+    max-form-width="200px"
     title="Добавление дня"
     button-text="Добавить"
     @submit="daysActions.addNewDay"
@@ -101,6 +103,7 @@
     :is-loading="isEditDayRequestNow"
     :default-day="activeDayFromStore"
     :error="errorMessage"
+    max-form-width="300px"
     mode="edit"
     title="Изменение дня"
     button-text="Изменить"

@@ -20,17 +20,18 @@
         :is-loading="props.isLoading"
         :error="props.error"
         :is-submit-disabled="isSubmitButtonDisabled"
-        max-width="300px"
+        :max-width="props.maxFormWidth"
         @submit="handleSubmitForm"
       />
     </template>
   </Modal>
 </template>
 
-<script setup lang="ts">
+<script setup>
 import { ref, computed, watch } from 'vue';
 
 import Modal from '@/components/Modal.vue';
+
 import DayForm from '../days/DayForm.vue';
 
 const props = defineProps({
@@ -74,6 +75,12 @@ const props = defineProps({
     type: String,
     required: false,
     default: 'create'
+  },
+  // Максимальная ширина формы (например: 300px)
+  maxFormWidth: {
+    type: String,
+    required: false,
+    default: 'initial'
   }
 });
 
