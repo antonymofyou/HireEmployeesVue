@@ -9,13 +9,24 @@
             @update:value="updateScaleHandler('input', $event)"
             title="Увеличить масштаб"           
         >
-            <template #icon>
-                <MagnifyIcon />
-            </template>
             <template #units>
                 %
             </template>
         </ValuePicker>
+        <ControlButton
+            class="control-buttons-button"
+            @click="updateScaleHandler('inc')"
+            title="Увеличить масштаб (+10%)"
+        >
+            <MagnifyPlusOutline />
+        </ControlButton>
+        <ControlButton
+            class="control-buttons-button"
+            @click="updateScaleHandler('dec')"
+            title="Уменьшить масштаб (-10%)"
+        >
+            <MagnifyMinusOutline />
+        </ControlButton>
         <ControlButton
             class="control-buttons-button"
             @click="updateScaleHandler('reset')"
@@ -62,7 +73,8 @@ import PlusIcon from 'vue-material-design-icons/Plus.vue';
 import RestoreIcon from 'vue-material-design-icons/Restore.vue';
 import ContentCopy from 'vue-material-design-icons/ContentCopy.vue';
 import DeleteOutline from 'vue-material-design-icons/DeleteOutline.vue';
-import MagnifyIcon from 'vue-material-design-icons/Magnify.vue'
+import MagnifyPlusOutline from 'vue-material-design-icons/MagnifyPlusOutline.vue';
+import MagnifyMinusOutline from 'vue-material-design-icons/MagnifyMinusOutline.vue';
 
 const props = defineProps({
     activeShape: {
@@ -106,6 +118,16 @@ function updateScaleHandler(handler, value) {
         },
         'input': function(value) {
             emits('updateScale', value);
+        },
+        'inc': function() {
+            if (props.scale.value >= props.scale._max) return;
+
+            emits('updateScale', props.scale.value + props.scale._step);
+        },
+        'dec': function() {
+            if (props.scale.value <= props.scale._min) return;
+
+            emits('updateScale', props.scale.value - props.scale._step);
         }
     };
 
@@ -113,3 +135,17 @@ function updateScaleHandler(handler, value) {
 }
 
 </script>
+
+<style scoped>
+
+.control-buttons-value-picker:deep(input::-webkit-outer-spin-button),
+.control-buttons-value-picker:deep(input::-webkit-inner-spin-button) {
+  -webkit-appearance: none;
+  margin: 0;
+}
+
+.control-buttons-value-picker:deep(input) {
+  -moz-appearance: textfield;
+}
+
+</style>

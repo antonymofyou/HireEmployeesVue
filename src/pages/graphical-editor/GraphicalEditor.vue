@@ -429,8 +429,13 @@ const moveGrabbingHandler = (event) => {
 }
 
 .container {
-    padding: 24px 16px;
-    margin: 0 auto;
+  padding: 24px 16px;
+  margin: 0 auto;
+}
+
+.header {
+  position: fixed;
+  width: 100%;
 }
 
 .header__control-buttons {
@@ -461,6 +466,7 @@ const moveGrabbingHandler = (event) => {
   display: block;
   width: 21px;
   height: 21px;
+  transition: .2s color;
 }
 
 :deep(.control-buttons-value-picker input) {
@@ -502,22 +508,43 @@ const moveGrabbingHandler = (event) => {
 }
 
 @media (max-width: 768px) {
-  .control-buttons-main {
-    max-width: 100px;
-    justify-content: center;
-    flex-wrap: wrap;
-    gap: 16px;
+  .header__control-buttons,
+  .header__control-buttons > * {
+    gap: 8px;
   }
 
-
-  .header__control-buttons {
-    gap: 16px;
+  .control-buttons-main {
+    flex-direction: column;
+    align-items: flex-end;
   }
 
   :deep(.dropdown .dropdown__content),
   :deep(.select-box-main .options-container-main) {
     flex-direction: column;
     max-width: max-content !important;
+  }
+
+  :deep(.control-buttons-value-picker input) {
+    width: 40px;
+  }
+
+}
+
+@media (hover: hover) and (pointer: fine) {
+  :deep(.control-button),
+  :deep(.dropdown__trigger),
+  :deep(.value-picker),
+  :deep(.selected-main),
+  :deep(.option-main) {
+    transition: box-shadow .2s;
+  }
+
+  :deep(.control-button:hover),
+  :deep(.dropdown__trigger:hover),
+  :deep(.value-picker:hover),
+  :deep(.selected-main:hover),
+  :deep(.option-main:hover) {
+    box-shadow: 0px 2.5px 5px 1px rgba(34, 60, 80, 0.2);
   }
 }
 
