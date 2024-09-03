@@ -1,7 +1,7 @@
 <template>
   <form
     :style="{
-      maxWidth: props.maxWidth
+      // maxWidth: props.maxWidth
     }"
     class="day-form"
     @submit.prevent="handleSubmitForm"
@@ -47,6 +47,7 @@
 
       <InputSimple
         v-model.trim="reportModel"
+        size="medium"
         :disabled="isRestDisabled"
         placeholder="Текст отчёта"
         input-type="textarea"
@@ -57,6 +58,7 @@
 
       <InputSimple
         v-model.trim="commentModel"
+        size="medium"
         :disabled="isRestDisabled"
         placeholder="Текст комментария"
         input-type="textarea"
@@ -184,7 +186,8 @@ function isFieldLast(fieldName) {
   display: flex;
   flex-direction: column;
   row-gap: 10px;
-  max-width: 300px;
+  /* max-width: 300px; */
+  width: 300px;
 }
 
 .day-form__checkbox {
