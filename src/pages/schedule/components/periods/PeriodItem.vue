@@ -55,7 +55,6 @@ const emit = defineEmits({
  * Обработка клика по периоду
  */
 function handlePeriodClick() {
-  console.log('Select: ', props.periodId)
   emit('select', { periodId: props.periodId });
 }
 
@@ -63,7 +62,6 @@ function handlePeriodClick() {
  * Обработка события удаления с кнопок действия
  */
 function handleDeleteAction() {
-  console.log('Delete: ', props.periodId)
   emit('delete', { periodId: props.periodId, action: 'delete' });
 }
 </script>

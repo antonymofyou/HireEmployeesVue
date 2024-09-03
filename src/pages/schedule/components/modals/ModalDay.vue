@@ -109,12 +109,6 @@ const disabledFields = computed(() => {
   return [];
 });
 
-watch(() => props.defaultDay, (newVal) => {
-  console.log(newVal, '<<<');
-}, {
-  deep: true
-});
-
 // Следим за props.isShow, т.к. иначе - newDay всегда будет пустым
 watch(() => props.isShow, () => {
   newDay.value = initNewDay();
@@ -130,7 +124,6 @@ const isSubmitButtonDisabled = computed(() => {
   // [x] Если какие-то поля отсутствуют - мы их не считаем
 
   const restFields = Object.keys(newDay.value).filter((key) => !props.removedFields.includes(key));
-  console.log('RestFields = ', restFields)
 
   if (newDay.value.isWeekend) {
     result = newDay.value.date.length === 0;

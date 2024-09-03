@@ -28,7 +28,6 @@
 import { ref, computed, watch } from 'vue';
 
 import Modal from '@/components/Modal.vue';
-import ButtonMain from '@/components/ButtonMain.vue';
 
 import PeriodForm from '../periods/PeriodForm.vue';
 
@@ -70,10 +69,6 @@ const finalErrorMessage = computed(() => {
   return props.error || localError.value;
 });
 
-watch(() => props.forDay, () => {
-  console.log('For Day = ', props.forDay)
-})
-
 const emit = defineEmits(['close', 'submit']);
 
 // Вспомогательные функции
@@ -106,12 +101,6 @@ const initNewDay = () => ({
 // Модель нового периода
 const newPeriod = ref(initNewDay());
 
-watch(newPeriod, (newVal) => {
-  console.log('newPeriod = ', newVal);
-}, {
-  deep: true
-});
-
 // Следим за props.forDay, т.к. иначе - newPeriod всегда будет пустым
 watch(() => props.forDay, () => {
   newPeriod.value = initNewDay();
@@ -139,7 +128,6 @@ function handleSubmitForm() {
 
   localError.value = '';
 
-  console.log('submit value:', newPeriod.value)
   emit('submit', newPeriod.value);
 }
 </script>

@@ -276,7 +276,6 @@ const callbacks = {
     helpers.resetError();
 
     activeDay.value.dayId = dayId;
-    console.log('Начинаю редактировать: ', dayId);
     isEditDayModalVisible.value = true;
   },
 
@@ -312,7 +311,6 @@ const callbacks = {
   handlePeriodAddDaysList(periodEmitted) {
     helpers.resetError();
 
-    console.log('Period = ', periodEmitted)
     activePeriod.value.dayId = periodEmitted.dayId;
     isAddPeriodModalVisible.value = true;
   },
@@ -324,7 +322,6 @@ const callbacks = {
   handlePeriodDeleteDaysList(periodEmitted) {
     helpers.resetError();
 
-    console.log('here')
     isDeletePeriodModalVisible.value = true;
   
     activePeriod.value = {
@@ -379,8 +376,6 @@ const requests = {
       '/job/get_schedule.php',
       'manager',
       (response) => {
-        console.log('Response: ', response)
-
         const { 
           days: responseDays,
           periodsTimes: responsePeriods,
@@ -392,11 +387,9 @@ const requests = {
         periodsTimes.value = responsePeriods;
         staffData.value = responseStaffData;
 
-        console.log(response, '<<<');
         isJobsRequestNow.value = false;
       },
       (error) => {
-        console.log(error, '@@@');
         isJobsRequestNow.value = false;
       }
     );
@@ -423,8 +416,6 @@ const requests = {
       'manager',
       (response) => {
         // Обработка успешного добавления
-        console.log('Success: ', response);
-
         periodsTimes.value[newDay.dayId] = [];
 
         modalsActions.closeAddDayModal();
@@ -436,7 +427,6 @@ const requests = {
       },
       (error) => {
         // Обработка ошибки при добавлении
-        console.log('Error: ', error);
         errorMessage.value = error;
 
         isAddDayRequestNow.value = false;
@@ -452,7 +442,7 @@ const requests = {
   fetchEditDay: (dayId, editedDay) => {
     isEditDayRequestNow.value = true;
 
-    // Запрос на измененеи дня
+    // Запрос на изменение дня
     const jobSetDayInstance = new JobSetDay();
 
     jobSetDayInstance.action = 'update';
@@ -469,8 +459,6 @@ const requests = {
       '/job/set_day.php',
       'manager',
       (response) => {
-        console.log('Success edit: ', response);
-        
         modalsActions.closeEditDayModal();
         activeDay.value = initializators.initActiveDay();
         helpers.resetError();
@@ -480,7 +468,6 @@ const requests = {
         requests.fetchSchedule();
       },
       (error) => {
-        console.log('Error edit day: ', error);
         errorMessage.value = error;
         isEditDayRequestNow.value = false;
       }
@@ -513,7 +500,6 @@ const requests = {
         requests.fetchSchedule();
       },
       (error) => {
-        console.log('Error delete:', error);
         errorMessage.value = error;
         isDeleteDayRequestNow.value = false;
       }
@@ -540,8 +526,6 @@ const requests = {
       '/job/set_period.php',
       'manager',
       (response) => {
-        console.log('Успешно добавили период: ', response);
-
         modalsActions.closeAddPeriodModal();
         helpers.resetError()
 
@@ -550,7 +534,6 @@ const requests = {
         requests.fetchSchedule();
       },
       (error) => {
-        console.log('Ошибка при добавлении периода: ', error);
         errorMessage.value = error;
 
         isAddNewPeriodRequestNow.value = false;
@@ -576,8 +559,6 @@ const requests = {
       '/job/set_period.php',
       'manager',
       (response) => {
-        console.log('Успешно добавили период: ', response);
-        
         modalsActions.closeDeletePeriodModal();
         helpers.resetActivePeriod();
         helpers.resetError();
@@ -587,7 +568,6 @@ const requests = {
         requests.fetchSchedule();
       },
       (error) => {
-        console.log('Ошибка удаления периода: ', error);
         errorMessage.value = error;
         isDeletePeriodRequestNow.value = false;
       }
