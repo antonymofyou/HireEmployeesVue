@@ -17,61 +17,25 @@
     <label class="form-label">
       <span class="form-label__title">Начало периода:</span>
 
-      <!-- <InputSimple
+      <InputSimple
         v-model.trim="periodStartTimeModel"
         placeholder="Начало (часы:минуты)"
         pattern="\d{2}:\d{2}"
         @input="clearCustomErrors"
         @invalid="showReadableMessage"
-      /> -->
-
-      <div class="form-label__row">
-        <NumberStepper
-          :value="times.start.hours"
-          :min="1"
-          :max="24"
-          @input="(val) => times.start.hours = val"
-          placeholder="Часы"
-        />
-        :
-        <NumberStepper
-          :value="times.start.minutes"
-          :min="1"
-          :max="60"
-          @input="(val) => times.start.minutes = val"
-          placeholder="Минуты"
-        />
-      </div>
+      />
     </label>
 
     <label class="form-label">
       <span class="form-label__title">Конец периода:</span>
 
-      <!-- <InputSimple
+      <InputSimple
         v-model.trim="periodEndTimeModel"
         placeholder="Конец (часы:минуты)"
         pattern="\d{2}:\d{2}"
         @input="clearCustomErrors"
         @invalid="showReadableMessage"
-      /> -->
-
-      <div class="form-label__row">
-        <NumberStepper
-          :value="times.end.hours"
-          :min="Number(times.start.hours)"
-          :max="24"
-          @input="(val) => times.end.hours = val"
-          placeholder="Часы"
-        />
-        :
-        <NumberStepper
-          :value="times.end.minutes"
-          :min="1"
-          :max="60"
-          @input="(val) => times.end.minutes = val"
-          placeholder="Минуты"
-        />
-      </div>
+      />
     </label>
   </form>
 </template>
@@ -79,7 +43,6 @@
 <script setup>
 import { ref, watch } from 'vue';
 import InputSimple from '@/components/InputSimple.vue';
-import NumberStepper from '../NumberStepper.vue';
 
 const props = defineProps({
   disabledFields: {
@@ -94,23 +57,28 @@ const mainDateModel = defineModel('date');
 const periodStartTimeModel = defineModel('periodStart');
 const periodEndTimeModel = defineModel('periodEnd');
 
-// Текущее время (отдаём как модель в инпут)
-const times = ref({
-  start: {
-    hours: '',
-    minutes: ''
-  },
-  end: {
-    hours: '',
-    minutes: ''
+watch(periodStartTimeModel, (newVal, prevVal) => {
+  if (newVal.length === 2 && prevVal.length < newVal.length) {
+    periodStartTimeModel.value += ":";
   }
+
+  if (newVal.length > 5) {
+    periodStartTimeModel.value = prevVal;
+  }
+
+  console.log('After: ', periodStartTimeModel.value);
 });
 
-watch(times, () => {
-  periodStartTimeModel.value = `${times.value.start.hours}:${times.value.start.minutes}`;
-  periodEndTimeModel.value = `${times.value.end.hours}:${times.value.end.minutes}`;
-}, {
-  deep: true
+watch(periodEndTimeModel, (newVal, prevVal) => {
+  if (newVal.length === 2 && prevVal.length < newVal.length) {
+    periodEndTimeModel.value += ":";
+  }
+
+  if (newVal.length > 5) {
+    periodEndTimeModel.value = prevVal;
+  }
+
+  console.log('After: ', periodStartTimeModel.value);
 });
 
 const emit = defineEmits(['submit']);
