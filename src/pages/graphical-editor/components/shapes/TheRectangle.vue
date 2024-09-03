@@ -3,6 +3,7 @@
         @mousedown="startDragging($event), selectRectangle()"
         @touchstart="startDragging($event), selectRectangle()"
         @dblclick="toggleTextEditMode"
+        @touchend="handleTouchEnd"
         @click="selectRectangle"
         :id="props.params.id"
         :style="rectangleStyles"
@@ -31,7 +32,7 @@
 </template>
 
 <script setup>
-import {computed, onBeforeUnmount, watch} from 'vue';
+import {computed, onBeforeUnmount, watch, ref} from 'vue';
 import { useEditor, EditorContent } from '@tiptap/vue-3'
 import { useShape } from '../../assets/js/useShape';
 import StarterKit from '@tiptap/starter-kit'
@@ -46,9 +47,9 @@ import FormatText from 'vue-material-design-icons/FormatText.vue'
 import { convertTo, convertFrom } from '../../assets/js/convert';
 
 /**
- * 
+ *
  * Объект с параметрами фигуры { width: 100, height: 200 ... }
- * 
+ *
  */
 const props = defineProps({
     params: {
@@ -114,7 +115,7 @@ const resizeHandleStyles = computed(() => {
 const editor = useEditor({
     content: convertFrom(props.params.text),
     extensions: [
-        StarterKit, 
+        StarterKit,
         Underline,
         TextStyle,
         FontSize,
@@ -156,6 +157,19 @@ const handles  = computed(() => {
 
 const { startDragging, stopDragging, startResizing, stopResizing, stopRotating} = useShape(emits, props);
 
+const lastTap = ref(0);
+
+// Обработка двойного тапа для смены режимов
+const handleTouchEnd = (event) => {
+  const currentTime = new Date().getTime();
+  const tapLength = currentTime - lastTap.value;
+
+  if (tapLength < 300 && tapLength > 0) {
+    toggleTextEditMode();
+  }
+  lastTap.value = currentTime;
+};
+
 // Выбор объекта
 const selectRectangle = () => {
   emits('select-shape', {
@@ -170,7 +184,7 @@ const enterTextEditMode = () => {
   editor.value.chain().focus().run();
 };
 
-// Переключение режима текста по двойному клику
+// Переключение режима текста по двойному клику или тапу
 const toggleTextEditMode = () => {
   if (props.mode.value === props.mode._text) {
     emits('change-mode', props.mode._edit);
