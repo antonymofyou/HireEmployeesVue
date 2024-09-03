@@ -152,9 +152,14 @@ function isFieldDisabled(fieldName) {
  * Маска для инпутов времени
  * @param {String} newVal - Новое значение
  * @param {String} prevVal - Предыдущее значение
- * @returns {String}
+ * @returns {String} - Маска
  */
 function maskifyInputValueString(newVal, prevVal) {
+  // Чтобы нельзя было вводить вида 25:34 и т.д.
+  if (Number(newVal.split(':')[0]) > 23) {
+    return '23:';
+  }
+
   if (newVal.length === 2 && prevVal.length < newVal.length) {
     return newVal += ":";
   }

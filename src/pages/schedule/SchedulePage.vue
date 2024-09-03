@@ -124,7 +124,7 @@
 </template>
 
 <script setup>
-import { computed, onBeforeMount, onMounted, onUnmounted, ref } from 'vue';
+import { computed, onMounted, onUnmounted, ref } from 'vue';
 
 import TheHeader from '@/components/TheHeader.vue';
 import SpinnerMain from '@/components/SpinnerMain.vue';
