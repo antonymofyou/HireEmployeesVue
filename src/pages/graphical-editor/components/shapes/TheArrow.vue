@@ -5,6 +5,7 @@
       class="arrow-container"
       @click="selectArrow"
       @mousedown="startDragging($event), selectArrow()"
+      @touchstart="startDragging($event), selectArrow()"
   >
     <svg
         :height="props.params.height"
@@ -51,6 +52,7 @@
           :key="handle.position"
           :class="['handle', handle.position]"
           @mousedown.stop="startResizing(handle, $event)"
+          @touchstart.stop="startResizing(handle, $event)"
       ></div>
     </div>
   </div>

@@ -41,15 +41,19 @@ export function useShape(emits, props) {
     // Начало перемещения
     const startDragging = (event) => {
         if (!isEditMode.value) return;
-
+        event.preventDefault();
         const canvasScale = updateCanvasScale();
 
         isDragging.value = true;
-        offsetX.value = (event.clientX / canvasScale) - props.params.x;
-        offsetY.value = (event.clientY / canvasScale) - props.params.y;
+        const clientX = event.clientX || event.touches[0].clientX;
+        const clientY = event.clientY || event.touches[0].clientY;
+        offsetX.value = (clientX / canvasScale) - props.params.x;
+        offsetY.value = (clientY / canvasScale) - props.params.y;
 
         document.addEventListener('mousemove', onDragging);
+        document.addEventListener('touchmove', onDragging);
         document.addEventListener('mouseup', stopDragging);
+        document.addEventListener('touchend', stopDragging);
     };
 
     // Функция для перемещения
@@ -60,8 +64,10 @@ export function useShape(emits, props) {
             draggingFrame = requestAnimationFrame(() => {
                 const canvasScale = updateCanvasScale();
 
-                const newX = (event.clientX / canvasScale) - offsetX.value;
-                const newY = (event.clientY / canvasScale) - offsetY.value;
+                const clientX = event.clientX || event.touches[0].clientX;
+                const clientY = event.clientY || event.touches[0].clientY;
+                const newX = (clientX / canvasScale) - offsetX.value;
+                const newY = (clientY / canvasScale) - offsetY.value;
 
                 // Обновляем свойства фигуры
                 updateShape({x: newX, y: newY});
@@ -73,7 +79,9 @@ export function useShape(emits, props) {
     const stopDragging = () => {
         isDragging.value = false;
         document.removeEventListener('mousemove', onDragging);
+        document.removeEventListener('touchmove', onDragging);
         document.removeEventListener('mouseup', stopDragging);
+        document.removeEventListener('touchend', stopDragging);
     };
 
     // Начало изменения размера
@@ -81,6 +89,7 @@ export function useShape(emits, props) {
         if (handle.isRotateHandle) {
             startRotating(event);
         } else {
+            event.preventDefault();
             resizingHandle = handle;
 
             const canvasScale = updateCanvasScale();
@@ -90,11 +99,15 @@ export function useShape(emits, props) {
             startY.value = props.params.y;
             startWidth.value = props.params.width;
             startHeight.value = props.params.height;
-            offsetX.value = event.clientX / canvasScale;
-            offsetY.value = event.clientY / canvasScale;
+            const clientX = event.clientX || event.touches[0].clientX;
+            const clientY = event.clientY || event.touches[0].clientY;
+            offsetX.value = clientX / canvasScale;
+            offsetY.value = clientY / canvasScale;
 
             document.addEventListener('mousemove', onResizing);
+            document.addEventListener('touchmove', onResizing);
             document.addEventListener('mouseup', stopResizing);
+            document.addEventListener('touchend', stopResizing);
         }
     };
 
@@ -106,13 +119,15 @@ export function useShape(emits, props) {
             resizingFrame = requestAnimationFrame(() => {
                 const canvasScale = updateCanvasScale();
 
+                const clientX = event.clientX || event.touches[0].clientX;
+                const clientY = event.clientY || event.touches[0].clientY;
                 let newWidth = startWidth.value;
                 let newHeight = startHeight.value;
                 let newX = startX.value;
                 let newY = startY.value;
 
-                const adjustedClientX = event.clientX / canvasScale;
-                const adjustedClientY = event.clientY / canvasScale;
+                const adjustedClientX = clientX / canvasScale;
+                const adjustedClientY = clientY / canvasScale;
 
                 // Обработка изменения размера по горизонтали
                 if (resizingHandle.position.includes('left')) {
@@ -151,30 +166,40 @@ export function useShape(emits, props) {
         isResizing.value = false;
         resizingHandle = null;
         document.removeEventListener('mousemove', onResizing);
+        document.removeEventListener('touchmove', onResizing);
         document.removeEventListener('mouseup', stopResizing);
+        document.removeEventListener('touchend', stopResizing);
     };
 
     // Начало вращения
     const startRotating = (event) => {
+        event.preventDefault();
         isRotating.value = true;
 
+        const clientX = event.clientX || event.touches[0].clientX;
+        const clientY = event.clientY || event.touches[0].clientY;
         const centerX = (props.params.x + props.params.width / 2);
         const centerY = (props.params.y + props.params.height / 2);
 
         initialAngle = props.params.rotation || 0;
-        initialMouseAngle = Math.atan2(event.clientY - centerY, event.clientX - centerX) * (180 / Math.PI);
+        initialMouseAngle = Math.atan2(clientY - centerY, clientX - centerX) * (180 / Math.PI);
 
         document.addEventListener('mousemove', onRotating);
+        document.addEventListener('touchmove', onRotating);
         document.addEventListener('mouseup', stopRotating);
+        document.addEventListener('touchend', stopRotating);
     };
 
     // Функция для вращения
     const onRotating = (event) => {
         if (isRotating.value) {
+            const clientX = event.clientX || event.touches[0].clientX;
+            const clientY = event.clientY || event.touches[0].clientY;
+
             const centerX = (props.params.x + props.params.width / 2);
             const centerY = (props.params.y + props.params.height / 2);
 
-            let currentMouseAngle = Math.atan2(event.clientY - centerY, event.clientX - centerX) * (180 / Math.PI);
+            let currentMouseAngle = Math.atan2(clientY - centerY, clientX - centerX) * (180 / Math.PI);
             let angle = initialAngle + (currentMouseAngle - initialMouseAngle);
 
             if (event.shiftKey) {
@@ -191,7 +216,9 @@ export function useShape(emits, props) {
     const stopRotating = () => {
         isRotating.value = false;
         document.removeEventListener('mousemove', onRotating);
+        document.removeEventListener('touchmove', onRotating);
         document.removeEventListener('mouseup', stopRotating);
+        document.removeEventListener('touchend', stopRotating);
     };
 
     return {

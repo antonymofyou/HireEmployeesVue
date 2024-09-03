@@ -1,6 +1,7 @@
 <template>
     <div
         @mousedown="startDragging($event), selectRectangle()"
+        @touchstart="startDragging($event), selectRectangle()"
         @dblclick="toggleTextEditMode"
         @click="selectRectangle"
         :id="props.params.id"
@@ -20,6 +21,7 @@
           :key="handle.position"
           :class="['handle', handle.position]"
           @mousedown.stop="startResizing(handle, $event)"
+          @touchstart.stop="startResizing(handle, $event)"
       ></div>
     </div>
     <div v-show="props.isSelected && isTextMode" :style="resizeHandleStyles" class="text-mode">
