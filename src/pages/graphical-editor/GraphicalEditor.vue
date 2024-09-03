@@ -4,7 +4,7 @@
     @pointermove="moveGrabbingHandler"
     @pointerup="cancelGrabbing"
     @contextmenu="cancelGrabbing"
-    @wheel.prevent
+    @wheel.prevent="scaleHandler"
     :style="{ cursor: isGrabbing ? 'grabbing' : 'grab' }"
     class="wrapper"
   >
@@ -89,7 +89,7 @@ const formattedShapes = reactive({
         "id": 1,
         "type": "rectangle",
         "x": 170,
-        "y": 200,
+        "y": -200,
         "width": 200,
         "height": 100,
         "color": "#FF5733",
@@ -249,7 +249,9 @@ const handleDocumentClick = (event) => {
   if (
       !event.target.closest('.rectangle') &&
       !event.target.closest('.arrow-container') &&
-      !event.target.closest('.header') &&
+      !event.target.closest('.control-buttons-main') &&
+      !event.target.closest('.control-buttons-text') &&
+      !event.target.closest('.control-buttons-block') &&
       !event.target.closest('.tooltip-control-buttons')
   ) {
     activeShape.id = null;
@@ -417,6 +419,17 @@ const moveGrabbingHandler = (event) => {
   yLastCoord.value = event.clientY;
 }
 
+function scaleHandler(event) {
+  let delta = event.deltaY || event.detail || event.wheelDelta;
+
+  if (delta > 0) {
+    updateScaleHandler(scale.value >= scale._max ? scale.value : scale.value + scale._step);
+
+    return;
+  }
+
+  updateScaleHandler(scale.value <= scale._min ? scale.value : scale.value - scale._step);
+}
 
 </script>
 
@@ -428,14 +441,20 @@ const moveGrabbingHandler = (event) => {
   overflow: hidden;
 }
 
+.canvas {
+  position: absolute;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  transform-origin: center;
+}
+
 .container {
   padding: 24px 16px;
   margin: 0 auto;
-}
-
-.header {
-  position: fixed;
-  width: 100%;
 }
 
 .header__control-buttons {
@@ -486,11 +505,6 @@ const moveGrabbingHandler = (event) => {
     background-color: var(--milk);
     padding: 6px;
     border-radius: 8px;
-}
-
-.content {
-  position: absolute;
-  transform-origin: 50% 50%;
 }
 
 .tooltip-control-buttons {
