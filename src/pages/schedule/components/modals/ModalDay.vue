@@ -20,7 +20,7 @@
         :is-loading="props.isLoading"
         :error="props.error"
         :is-submit-disabled="isSubmitButtonDisabled"
-        max-width="250px"
+        max-width="300px"
         @submit="handleSubmitForm"
       />
     </template>

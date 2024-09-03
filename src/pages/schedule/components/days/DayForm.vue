@@ -1,7 +1,7 @@
 <template>
   <form
     :style="{
-      // maxWidth: props.maxWidth
+      maxWidth: props.maxWidth
     }"
     class="day-form"
     @submit.prevent="handleSubmitForm"
@@ -186,8 +186,13 @@ function isFieldLast(fieldName) {
   display: flex;
   flex-direction: column;
   row-gap: 10px;
-  /* max-width: 300px; */
   width: 300px;
+}
+
+@media (max-width: 350px) {
+  .day-form {
+    width: 100%;
+  }
 }
 
 .day-form__checkbox {

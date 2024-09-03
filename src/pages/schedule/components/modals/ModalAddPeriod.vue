@@ -109,6 +109,12 @@ const initNewDay = () => ({
 // Модель нового периода
 const newPeriod = ref(initNewDay());
 
+watch(newPeriod, (newVal) => {
+  console.log('newPeriod = ', newVal);
+}, {
+  deep: true
+});
+
 // Следим за props.forDay, т.к. иначе - newPeriod всегда будет пустым
 watch(() => props.forDay, () => {
   newPeriod.value = initNewDay();

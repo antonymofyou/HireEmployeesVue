@@ -35,3 +35,22 @@ export function prettifyTime(time) {
 export function getReportText(dataByDate, period) {
   return dataByDate.find((d) => d.forDate === period.forDate).report ?? '';
 }
+
+/**
+ * Функция debounce для отложенного вызова
+ * @param {Function} fn - Функция для отложенного вызова
+ * @param {Number} ms - Количество миллисекунд
+ * @returns {Object} - Отложенная функция и функция отписки
+ */
+export function makeDebouncedFn(fn, ms = 1000) {
+  let timer = null;
+
+  const debouncedFn = (...args) => {
+    clearTimeout(timer);
+    timer = setTimeout(() => fn.apply(this, args), ms);
+  };
+
+  const unSubscribe = () => clearTimeout(timer);
+
+  return { debouncedFn, unSubscribe };
+}
