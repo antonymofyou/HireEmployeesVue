@@ -19,7 +19,7 @@ const isActive = computed(() => {
     return props.activeShape.id;
 });
 const positionTooltips = computed(() => {
-    let rotation = Math.round(Math.abs(props.activeShape.shape?.rotation));
+    let rotation = Math.round(props.activeShape.shape?.rotation);
     const centerX = props.activeShape.shape?.x + props.activeShape.shape?.width / 2;
     const centerY = props.activeShape.shape?.y + props.activeShape.shape?.height / 2;
     const initialX = props.activeShape.shape?.x;
@@ -28,7 +28,7 @@ const positionTooltips = computed(() => {
     let y = initialY;
 
     if (rotation) {
-        rotation = rotation >= 90 ? 180 - rotation : rotation;
+        rotation = rotation >= 270 ? 360 - rotation : rotation >= 90 ? Math.abs(180 - rotation) : rotation;
         const radians = rotation * (Math.PI / 180);
 
         y = Math.sin(radians) * (initialX - centerX) + Math.cos(radians) * (initialY - centerY) + centerY;
