@@ -1,7 +1,7 @@
 <template>
   <div
     @pointerdown="startGrabbingHandler"
-    @pointermove="moveGrabbingHandler"
+    @pointermove="moveGrabbingHandler($event), defineTargetScale($event)"
     @pointerup="cancelGrabbing"
     @contextmenu="cancelGrabbing"
     @wheel.prevent="scaleHandler"
@@ -209,6 +209,10 @@ let xCoord = ref(0);
 let yCoord = ref(0);
 let xLastCoord = ref(0);
 let yLastCoord = ref(0);
+let aimScale = reactive({
+  x: 0,
+  y: 0,
+});
 const canvasStyle = computed(() => {
   return {
     transform: `translate(${xCoord.value}px, ${yCoord.value}px) scale(${(scale.value / 100).toFixed(1)})`,
@@ -216,12 +220,15 @@ const canvasStyle = computed(() => {
 });
 // Ширина экрана
 let windowInnerWidth = ref(window.innerWidth);
+// Высота экрана
+let windowInnerHeight = ref(window.innerHeight);
 // Ширина экрана при которой будет скрываться TooltipControlButtons
 let breakpoint = 768;
 
 // Функция для обновления ширины экрана
 const updateWindowInnerWidth = debounce(function() {
   windowInnerWidth.value = window.innerWidth;
+  windowInnerHeight.value = window.innerHeight;
 }, 400);
 
 /**
@@ -399,6 +406,40 @@ const startGrabbingHandler = (event) => {
   yLastCoord.value = event.clientY;
 }
 
+const defineTargetScale = (event) => {
+  let clientX = event.clientX;
+  let clientY = event.clientY;
+  let xCoordAim = 0;
+  let yCoordAim = 0;
+
+  if (xCoord.value > 0) {
+    let coord = xCoord.value - clientX;
+
+    xCoordAim = coord > 0 ? coord : xCoord.value + (windowInnerWidth.value - clientX);
+  }
+
+  if (xCoord.value <= 0) {
+    let coord = xCoord.value + (windowInnerWidth.value - clientX);
+
+    xCoordAim = coord < 0 ? coord : xCoord.value - clientX;
+  }
+
+  if (yCoord.value > 0) {
+    let coord = yCoord.value - clientY;
+
+    yCoordAim = coord > 0 ? coord : yCoord.value + (windowInnerHeight.value - clientY);
+  }
+
+  if (yCoord.value <= 0) {
+    let coord = yCoord.value + (windowInnerHeight.value - clientY);
+
+    yCoordAim = coord < 0 ? coord : yCoord.value - clientY;
+  }
+
+  aimScale.x = xCoordAim;
+  aimScale.y = yCoordAim;
+}
+
 const cancelGrabbing = () => {
   isGrabbing.value = false;
 }
@@ -450,6 +491,7 @@ function scaleHandler(event) {
   width: 100%;
   height: 100%;
   transform-origin: center;
+  outline: 1px solid black;
 }
 
 .container {
