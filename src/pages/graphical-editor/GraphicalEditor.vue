@@ -1,7 +1,7 @@
 <template>
   <div
-    @pointerdown="startGrabbingHandler"
-    @pointermove="moveGrabbingHandler($event), defineTargetScale($event)"
+    @pointerdown="startGrabbingHandler($event) , defineTargetScale($event)"
+    @pointermove="moveGrabbingHandler"
     @pointerup="cancelGrabbing"
     @contextmenu="cancelGrabbing"
     @wheel.prevent="scaleHandler"
@@ -395,6 +395,9 @@ const updateEditor = (type, value) => {
 
 const updateScaleHandler = (value) => {
   scale.value = value;
+
+  xCoord.value = aimScale.x * (scale.value / 100);
+  yCoord.value = aimScale.y * (scale.value / 100);
 }
 
 const startGrabbingHandler = (event) => {
@@ -407,37 +410,54 @@ const startGrabbingHandler = (event) => {
 }
 
 const defineTargetScale = (event) => {
+  if (
+    event.target.closest('.control-buttons-main') ||
+    event.target.closest('.control-buttons-text') || 
+    event.target.closest('.control-buttons-block')
+  ) return;
+
   let clientX = event.clientX;
   let clientY = event.clientY;
+  let xCenter = windowInnerWidth.value / 2;
+  let yCenter = windowInnerHeight.value / 2;
   let xCoordAim = 0;
   let yCoordAim = 0;
 
-  if (xCoord.value > 0) {
-    let coord = xCoord.value - clientX;
+  let xOuterCanvas = xCoord.value > 0 ? 
+    clientX < windowInnerWidth.value - (windowInnerWidth.value - xCoord.value) :
+    clientX > windowInnerWidth.value + xCoord.value;
+  let yOuterCanvas = yCoord.value > 0 ?
+    clientY < windowInnerHeight.value - (windowInnerHeight.value - yCoord.value) :
+    clientY > windowInnerHeight.value + yCoord.value;
 
-    xCoordAim = coord > 0 ? coord : xCoord.value + (windowInnerWidth.value - clientX);
+  // Координаты x, y относительно canvas
+
+  if (xCoord.value > 0 && xOuterCanvas) {
+    xCoordAim = (xCoord.value - clientX) + xCenter;
   }
 
-  if (xCoord.value <= 0) {
-    let coord = xCoord.value + (windowInnerWidth.value - clientX);
-
-    xCoordAim = coord < 0 ? coord : xCoord.value - clientX;
+  if (xCoord.value <= 0 && xOuterCanvas) {
+    xCoordAim = (xCoord.value + (windowInnerWidth.value - clientX)) - xCenter;
   }
 
-  if (yCoord.value > 0) {
-    let coord = yCoord.value - clientY;
-
-    yCoordAim = coord > 0 ? coord : yCoord.value + (windowInnerHeight.value - clientY);
+  if (!xOuterCanvas) {
+    xCoordAim = xCenter - (Math.abs(xCoord.value - clientX));
   }
 
-  if (yCoord.value <= 0) {
-    let coord = yCoord.value + (windowInnerHeight.value - clientY);
-
-    yCoordAim = coord < 0 ? coord : yCoord.value - clientY;
+  if (yCoord.value > 0 && yOuterCanvas) {
+    yCoordAim = (yCoord.value - clientY) + yCenter
   }
 
-  aimScale.x = xCoordAim;
-  aimScale.y = yCoordAim;
+  if (yCoord.value <= 0 && xOuterCanvas) {
+    yCoordAim = (yCoord.value + (windowInnerHeight.value - clientY)) - yCenter;
+  }
+
+  if (!yOuterCanvas) {
+    yCoordAim = yCenter - (Math.abs(yCoord.value - clientY));
+  }
+
+  aimScale.x = xCoordAim / (scale.value / 100);
+  aimScale.y = yCoordAim / (scale.value / 100);
 }
 
 const cancelGrabbing = () => {
@@ -491,7 +511,7 @@ function scaleHandler(event) {
   width: 100%;
   height: 100%;
   transform-origin: center;
-  outline: 1px solid black;
+  transition: .15s transform;
 }
 
 .container {
@@ -503,6 +523,13 @@ function scaleHandler(event) {
   display: flex;
   align-items: flex-start;
   gap: 16px 48px;
+}
+
+.header .control-buttons-main ,
+.header .control-button-text ,
+.header .control-buttons-block {
+  position: relative;
+  z-index: 999;
 }
 
 .header__control-buttons > * {
