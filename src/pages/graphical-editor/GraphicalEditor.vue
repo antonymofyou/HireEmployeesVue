@@ -500,6 +500,7 @@ function scaleHandler(event) {
   width: 100vw;
   height: 100vh;
   overflow: hidden;
+  touch-action: none;
 }
 
 .canvas {
