@@ -34,13 +34,27 @@
         >
             <RestoreIcon />
         </ControlButton>
-        <ControlButton
-            class="control-buttons-button"
-            @click="addShapeHandler"
-            title="Добавить фигуру"
-        >
-            <PlusIcon />
-        </ControlButton>
+        <DropdownContent title="Добавить фигуру">
+            <template #trigger>
+                <ShapeOutline />
+            </template>
+            <template #content>
+                <ControlButton 
+                    class="control-buttons-button"
+                    @click="addShapeHandler('rectangle')"
+                    title="Прямоугольник"
+                >
+                    <RectangleOutline />
+                </ControlButton>
+                <ControlButton 
+                    class="control-buttons-button"
+                    @click="addShapeHandler('arrow')"
+                    title="Стрелка"
+                >
+                    <ArrowRightThin />
+                </ControlButton>
+            </template>
+        </DropdownContent>
         <ControlButton
             class="control-buttons-button"
             @click="deleteShapeHandler"
@@ -66,15 +80,18 @@ import { defineEmits, computed } from 'vue';
 
 import ControlButton from './ControlButton.vue';
 import ValuePicker from './ValuePicker.vue';
+import DropdownContent from '@/components/DropdownContent.vue';
 
 // Icons
 
-import PlusIcon from 'vue-material-design-icons/Plus.vue';
 import RestoreIcon from 'vue-material-design-icons/Restore.vue';
 import ContentCopy from 'vue-material-design-icons/ContentCopy.vue';
 import DeleteOutline from 'vue-material-design-icons/DeleteOutline.vue';
 import MagnifyPlusOutline from 'vue-material-design-icons/MagnifyPlusOutline.vue';
 import MagnifyMinusOutline from 'vue-material-design-icons/MagnifyMinusOutline.vue';
+import RectangleOutline from 'vue-material-design-icons/RectangleOutline.vue';
+import ArrowRightThin from 'vue-material-design-icons/ArrowRightThin.vue';
+import ShapeOutline from 'vue-material-design-icons/ShapeOutline.vue';
 
 const props = defineProps({
     activeShape: {
@@ -99,8 +116,8 @@ const disabled = computed(() => {
 
 // Handlers
 
-function addShapeHandler() {
-    emits('addShape');
+function addShapeHandler(type) {
+    emits('addShape', type);
 }
 
 function deleteShapeHandler() {
@@ -146,6 +163,20 @@ function updateScaleHandler(handler, value) {
 
 .control-buttons-value-picker:deep(input) {
   -moz-appearance: textfield;
+}
+
+.dropdown:deep(.dropdown__content) {
+    bottom: -8px;
+    transform: translateY(100%) translateX(-50%);
+    left: 50%;
+}
+
+@media (max-width: 768px) {
+    .dropdown:deep(.dropdown__content) {
+        bottom: 50%;
+        transform: translateY(50%) translateX(-100%);
+        left: -8px;
+    }
 }
 
 </style>

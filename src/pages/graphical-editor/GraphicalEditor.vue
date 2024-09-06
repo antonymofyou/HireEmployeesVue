@@ -289,22 +289,18 @@ const generateUniqueId = () => {
 
 
 // Функция для добавления нового прямоугольника
-const addShapeHandler = () => {
+const addShapeHandler = (type) => {
   const newId = generateUniqueId();
 
   formattedShapes[newId] = {
     id: newId,
-    type: 'rectangle',
-    x: 100,
-    y: 100,
+    type,
+    x: 0,
+    y: 0,
     width: 150,
-    height: 100,
-    color: '#6aa1f3',
-    borderColor: '#000000',
-    borderStyle: 'solid',
+    height: type === 'arrow' ? 10 : 100,
+    color: '#000000',
     zIndex: 1,
-    textVerticalAlignment: 'center',
-    borderWidth: 2
   };
 
   handleSelectShape({
