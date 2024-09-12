@@ -83,6 +83,9 @@
             :text="question.question"
             :options="options"
             :isPublished="question.published"
+            :formData="formData.questions"
+            :vacancyId="vacancyId"
+            :requestSortVacancyStatus="sortVacancyQuestion"
             @updateText="updateQuestionText(index, $event)"
             @updateIsPublished="updateIsPublished(index, $event)"
             class="list-item"
@@ -159,7 +162,8 @@ import { isAdmin, isManager } from '@/js/AuthFunctions';
 import { VacanciesGetAllVacancyById, 
   VacanciesQuestionsCreateVacancyQuestion,
   VacanciesQuestionsDeleteVacancyQuestion,
-  VacanciesUpdateVacancy
+  VacanciesUpdateVacancy,
+  VacanciesSortVacancyQuestion
 } from './js/ApiClassesVacancyEdit.js';
 import { MainRequestClass } from "@/js/RootClasses";
 import ButtonMain from "@/components/ButtonMain.vue";
@@ -346,6 +350,41 @@ const removeVacancyFromServer = (success, reject, id) => {
     },
     function (err) { // неуспешный результат
       reject(err);
+    }
+  );
+};
+
+// Массив, для изменение порядка вопросов у вакансии
+const sortVacancyQuestion = (vacancyId, questionId, direction) => {
+  let sortQuestion = new VacanciesSortVacancyQuestion();
+  sortQuestion.questionId = questionId;
+  sortQuestion.direction = direction;
+  sortQuestion.vacancyId = vacancyId;
+
+  errorMessage.value = '';
+
+  sortQuestion.request(
+    '/vacancies/sort_vacancy_question.php',
+    'manager',
+    (response) => {
+
+      if (response.success === "1") {
+        getVacancyDataManager((vacResp) => {
+          const { vacancy, questions } = vacResp;
+          formData.value = {
+            name: vacancy.name,
+            published: vacancy.published,
+            description: vacancy.description,
+            questions: questions,
+          };
+          errorMessage.value = '';
+        });
+      } else {
+        errorMessage.value += ' ' + response.message + '.';
+      }
+    },
+    (err) => {
+      errorMessage.value = err;
     }
   );
 };
