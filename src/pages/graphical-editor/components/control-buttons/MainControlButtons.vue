@@ -15,21 +15,23 @@
         </ValuePicker>
         <ControlButton
             class="control-buttons-button"
-            @click="updateScaleHandler('inc')"
+            @pointerdown.prevent="updateScaleHandler('inc')"
+            @pointerup.prevent="resetMouseClamped"
             title="Увеличить масштаб (+10%)"
         >
             <MagnifyPlusOutline />
         </ControlButton>
         <ControlButton
             class="control-buttons-button"
-            @click="updateScaleHandler('dec')"
+            @pointerdown.prevent="updateScaleHandler('dec')"
+            @pointerup.prevent="resetMouseClamped"
             title="Уменьшить масштаб (-10%)"
         >
             <MagnifyMinusOutline />
         </ControlButton>
         <ControlButton
             class="control-buttons-button"
-            @click="updateScaleHandler('reset')"
+            @pointerdown="updateScaleHandler('reset')"
             title="Сбросить масштаб (100%)"
         >
             <RestoreIcon />
@@ -57,7 +59,7 @@
         </DropdownContent>
         <ControlButton
             class="control-buttons-button"
-            @click="deleteShapeHandler"
+            @pointerdown="deleteShapeHandler"
             :disabled="disabled"
             title="Удалить фигуру"
         >
@@ -65,7 +67,7 @@
         </ControlButton>
         <ControlButton
             class="control-buttons-button"
-            @click="copyShapeHandler"
+            @pointerdown="copyShapeHandler"
             :disabled="disabled"
             :title="disabled ? 'Копировать фигуру (недоступно)' : 'Копировать фигуру'"
         >
@@ -76,7 +78,7 @@
 
 <script setup>
 
-import { defineEmits, computed } from 'vue';
+import { defineEmits, computed, ref } from 'vue';
 
 import ControlButton from './ControlButton.vue';
 import ValuePicker from './ValuePicker.vue';
@@ -128,6 +130,12 @@ function copyShapeHandler() {
     emits('copyShape');
 }
 
+let mouseIsClamped = ref(false);
+
+function resetMouseClamped() {
+    mouseIsClamped.value = false;
+}
+
 function updateScaleHandler(handler, value) {
     const handlers = {
         'reset': function() {
@@ -140,11 +148,27 @@ function updateScaleHandler(handler, value) {
             if (props.scale.value >= props.scale._max) return;
 
             emits('updateScale', props.scale.value + props.scale._step);
+
+            mouseIsClamped.value = true;
+
+            setTimeout(() => {
+                if (!mouseIsClamped.value) return;
+
+                updateScaleHandler(handler, value);
+            }, 100);
         },
         'dec': function() {
             if (props.scale.value <= props.scale._min) return;
 
             emits('updateScale', props.scale.value - props.scale._step);
+
+            mouseIsClamped.value = true;
+
+            setTimeout(() => {
+                if (!mouseIsClamped.value) return;
+
+                updateScaleHandler(handler, value);
+            }, 100);
         }
     };
 

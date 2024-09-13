@@ -100,6 +100,7 @@ const formattedShapes = reactive({
         "borderWidth": 5,
         "textVerticalAlignment": "top",
         "rotation": 0,
+        "padding": 10,
     },
     2: {
         "id": 2,
@@ -146,7 +147,8 @@ const formattedShapes = reactive({
                 ]
             }
         ],
-        "borderWidth": 5
+        "borderWidth": 5,
+        "padding": 10,
     },
     3: {
         "id": 3,
@@ -161,7 +163,8 @@ const formattedShapes = reactive({
         "zIndex": 3,
         "textVerticalAlignment": "bottom",
         "rotation": 0,
-        "borderWidth": 5
+        "borderWidth": 5,
+        "padding": 10,
     },
     4: {
         "id": 4,
@@ -291,17 +294,35 @@ const generateUniqueId = () => {
 // Функция для добавления нового прямоугольника
 const addShapeHandler = (type) => {
   const newId = generateUniqueId();
-
-  formattedShapes[newId] = {
-    id: newId,
-    type,
-    x: 0,
-    y: 0,
-    width: 150,
-    height: type === 'arrow' ? 10 : 100,
-    color: '#000000',
-    zIndex: 1,
+  const shape = {
+    arrow() {
+      return {
+        id: newId,
+        type: 'arrow',
+        x: 0,
+        y: 0,
+        width: 150,
+        height: 10,
+        color: '#000000',
+        zIndex: 1,
+      }
+    },
+    rectangle() {
+      return {
+        id: newId,
+        type: 'rectangle',
+        x: 0,
+        y: 0,
+        width: 150,
+        height: 100,
+        color: '#000000',
+        zIndex: 1,
+        padding: 10,
+      }
+    }
   };
+
+  formattedShapes[newId] = shape[type]();
 
   handleSelectShape({
     id: newId,
@@ -368,17 +389,16 @@ const updateEditor = (type, value) => {
       activeShape.editor?.chain().focus().toggleUnderline().run();
     },
     colorText(color) {
-      console.log(color);
-      activeShape.editor?.chain().focus().setColor(color).run();
+      activeShape.editor?.chain().focus().setColor(color).blur().run();
     },
     sizeText(size) {
       activeShape.editor?.chain().setFontSize(size + 'px').run();
     },
     addHighlight(color) {
-      activeShape.editor?.chain().focus().setHighlight({ color: color }).run();
+      activeShape.editor?.chain().focus().setHighlight({ color: color }).blur().run();
     },
     removeHighlight() {
-      activeShape.editor?.chain().focus().unsetHighlight().run();
+      activeShape.editor?.chain().focus().unsetHighlight().blur().run();
     },
     horizontalAlign(name) {
       activeShape.editor?.chain().focus().setTextAlign(name).run();
