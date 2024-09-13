@@ -13,7 +13,11 @@
       :periods="props.periods[day.dayId]"
       :active-period-id="props.activePeriodId"
       :is-allow-edit="props.isAllowEdit"
+      :is-editing="day.dayId === props.editingDayId"
+      :is-editing-load-now="props.isEditingDayNow && day.dayId === props.editingDayId"
+      :error-message="props.editErrorMessage"
       @day-edit="handleDayEditDayItem"
+      @day-edit-submit="handleDayEditSubmitDayItem"
       @day-delete="handleDayDeleteDayItem"
       @period-select="handlePeriodSelectDayItem"
       @period-add="handlePeriodAddDayItem"
@@ -50,10 +54,38 @@ const props = defineProps({
     type: Boolean,
     required: false,
     default: false
+  },
+
+  // Текущий редактируемый день
+  editingDayId: {
+    type: [String, Number, null],
+    required: false,
+    default: null
+  },
+
+  // Статус - идёт ли запрос за обновлением дня
+  isEditingDayNow: {
+    type: Boolean,
+    required: false,
+    default: false
+  },
+
+  // Сообщение об ошибке 
+  editErrorMessage: {
+    type: String,
+    required: false,
+    default: '',
   }
 });
 
-const emit = defineEmits(['dayEdit', 'dayDelete', 'periodSelect', 'periodAdd', 'periodDelete']);
+const emit = defineEmits([
+  'dayEdit',
+  'dayEditSubmit',
+  'dayDelete',
+  'periodSelect',
+  'periodAdd',
+  'periodDelete'
+]);
 
 /**
  * Обработка события редактирования дня
@@ -61,6 +93,15 @@ const emit = defineEmits(['dayEdit', 'dayDelete', 'periodSelect', 'periodAdd', '
  */
 function handleDayEditDayItem(dayId) {
   emit('dayEdit', dayId);
+}
+
+/**
+ * Обработка события отправки формы на редактирование дня
+ * @param {Number} editedDay - Отредактированный день
+ */
+function handleDayEditSubmitDayItem(editedDay) {
+  console.log('here', editedDay)
+  emit('dayEditSubmit', editedDay);
 }
 
 /**

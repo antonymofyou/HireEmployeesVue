@@ -30,34 +30,37 @@
           class="schedule"
         >
           <div class="schedule__inner">
-            <template v-if="days.length">
-              <DaysList
-                :days="days"
-                :periods="periodsTimes"
-                :active-period-id="activePeriod.periodId"
-                :is-allow-edit="isAllowEditingSchedule"
-                @day-edit="callbacks.handleDayEditDaysList"
-                @day-delete="callbacks.handleDayDeleteDaysList"
-                @period-select="callbacks.handlePeriodSelectDaysList"
-                @period-add="callbacks.handlePeriodAddDaysList"
-                @period-delete="callbacks.handlePeriodDeleteDaysList"
-              />
-
-              <div class="schedule__actions">
-                <TopSquareButton
-                  :is-visible="isAllowEditingSchedule"
-                  :icon="plusIcon"
-                  class="add-button"
-                  @click="callbacks.startAddNewDay"
-                />
-              </div>
-            </template>
+            <DaysList
+              v-if="days.length"
+              :days="days"
+              :periods="periodsTimes"
+              :active-period-id="activePeriod.periodId"
+              :is-allow-edit="isAllowEditingSchedule"
+              :is-editing-day-now="isEditDayRequestNow"
+              :editing-day-id="currentEditingDayId"
+              :editErrorMessage="errorMessage"
+              @day-edit="callbacks.handleDayEditDaysList"
+              @day-edit-submit="daysActions.editActiveDay"
+              @day-delete="callbacks.handleDayDeleteDaysList"
+              @period-select="callbacks.handlePeriodSelectDaysList"
+              @period-add="callbacks.handlePeriodAddDaysList"
+              @period-delete="callbacks.handlePeriodDeleteDaysList"
+            />
 
             <div
               v-else
               class="schedule__empty-notifier"
             >
               Расписание отсутствует
+            </div>
+
+            <div class="schedule__actions">
+              <TopSquareButton
+                :is-visible="isAllowEditingSchedule"
+                :icon="plusIcon"
+                class="add-button"
+                @click="callbacks.startAddNewDay"
+              />
             </div>
           </div>
         </div>
@@ -102,7 +105,7 @@
 
    <!-- Модалка изменения рабочего дня -->
    <ModalDay
-    :is-show="isEditDayModalVisible"
+    :is-show="false"
     :is-loading="isEditDayRequestNow"
     :default-day="activeDayFromStore"
     :error="errorMessage"
@@ -127,7 +130,7 @@
 </template>
 
 <script setup>
-import { computed, onMounted, onUnmounted, ref } from 'vue';
+import { computed, onMounted, onUnmounted, ref, watch } from 'vue';
 import { useRouter } from 'vue-router';
 
 import TheHeader from '@/components/TheHeader.vue';
@@ -175,6 +178,21 @@ const isAddDayModalVisible = ref(false);
 const isEditDayModalVisible = ref(false);
 // Видна ли модалка удаления рабочего дня
 const isDeleteDayModalVisible = ref(false);
+
+// Видна ли форма изменения рабочего дня
+const isEditDayFormVisible = ref(false);
+
+// Текущий день на изменение
+const currentEditingDayId = computed(() => {
+  if (!isEditDayFormVisible.value) return null;
+  const findDay = days.value.find((day) => day.dayId === activeDay.value.dayId);
+
+  return findDay?.dayId ?? null;
+});
+
+watch(currentEditingDayId, (newVal) => {
+  console.log(newVal, '<<<');
+});
 
 // Сообщение об ошибке (запросы к серверу и т.д.)
 const errorMessage = ref('');
@@ -278,8 +296,16 @@ const callbacks = {
   handleDayEditDaysList(dayId) {
     helpers.resetError();
 
+    console.log(activeDay.value.dayId, '<<<')
+
+    if (activeDay.value.dayId && dayId === activeDay.value.dayId) {
+      isEditDayFormVisible.value = false;      
+    } else {
+      isEditDayFormVisible.value = true;
+    }
+
     activeDay.value.dayId = dayId;
-    isEditDayModalVisible.value = true;
+    // isEditDayModalVisible.value = true;
   },
 
   /**
@@ -442,7 +468,7 @@ const requests = {
    * @param {String | Number} dayId - ID изменяемого дня
    * @param {Object} editedDay - Изменённый день
    */
-  fetchEditDay: (dayId, editedDay) => {
+  fetchEditDay: async (dayId, editedDay) => {
     isEditDayRequestNow.value = true;
 
     // Запрос на изменение дня
@@ -462,10 +488,11 @@ const requests = {
       '/job/set_day.php',
       'manager',
       (response) => {
-        modalsActions.closeEditDayModal();
         activeDay.value = initializators.initActiveDay();
         helpers.resetError();
         
+        // modalsActions.closeEditDayModal();
+        isEditDayFormVisible.value = false;
         isEditDayRequestNow.value = false;
 
         requests.fetchSchedule();
@@ -597,6 +624,8 @@ const daysActions = {
    * @param {Object} editedDay - Изменённый день
    */
   async editActiveDay(editedDay) {
+    console.log(editedDay, '<<<');
+
     if (isEditDayRequestNow.value) return;
     helpers.resetError();
 

@@ -1,11 +1,9 @@
 <template>
   <div class="day">
     <div class="day__header">
-      <p class="day__text">
-        <span class="day__title day__highlight">
-          {{ props.date }}
-        </span>
-      </p>
+      <span class="day__title day__highlight">
+        {{ props.date }}
+      </span>
     </div>
 
     <div class="day__body">
@@ -30,7 +28,10 @@
 
       </div>
 
-      <div class="day__info">
+      <div
+        v-if="!props.isEditing"
+        class="day__info"
+      >
         <p
           v-if="props.isWeekend"
           class="day__text"
@@ -46,17 +47,88 @@
         </p>
 
         <p
-          v-if="props.report"
           class="day__text"
         >
-          Текст отчёта: {{ props.report }}
+          Текст отчёта: {{ props.report || 'отсутствует' }}
         </p>
         <p
-          v-if="props.comment"
           class="day__text"
         >
-          Комментарий: {{ props.comment }}
+          Комментарий: {{ props.comment || 'отсутствует' }}
         </p>
+      </div>
+
+      <div v-else>
+        <form
+          class="edit-form"
+          @submit.prevent="handleEditFormSubmit"
+        >
+          <div class="edit-form__row">
+            <label
+              class="edit-form__label"
+            >
+              Выходной:
+              <input
+                v-model="editDay.isWeekend"
+                type="checkbox"
+              >
+            </label>
+          </div>
+
+          <div class="edit-form__row">
+            <label
+              class="edit-form__label--vertical"
+            >
+              Длина рабочего дня:
+              <InputSimple
+                v-model="editDay.spentTime"
+                class="day__input"
+                placeholder="Длина рабочего дня"
+                pattern="\d+"
+              />
+            </label>
+          </div>
+
+          <div class="edit-form__row">
+            <label
+              class="edit-form__label--vertical"
+            >
+              Текст отчёта:
+              <InputSimple
+                v-model="editDay.report"
+                input-type="textarea"
+                size="medium"
+                class="day__input"
+                placeholder="Текст отчёта"
+              />
+            </label>
+          </div>
+
+          <div class="edit-form__row">
+            <label
+              class="edit-form__label--vertical"
+            >
+              Комментарий:
+              <InputSimple
+                v-model="editDay.comment"
+                input-type="textarea"
+                size="medium"
+                class="day__input"
+                placeholder="Комментарий"
+              />
+            </label>
+          </div>
+
+          <ButtonMain
+            :is-active="props.isEditingLoadNow"
+            :is-disabled="isSubmitEditButtonDisabled"
+            :message="props.errorMessage"
+          >
+            <template #text>
+              Изменить
+            </template>
+          </ButtonMain>
+        </form>
       </div>
     </div>
 
@@ -92,6 +164,8 @@
 <script setup>
 /* @component Сущность дня сотрудника */
 
+import { computed, ref } from 'vue';
+
 import ButtonIcon from '@/components/ButtonIcon.vue';
 
 import EditIcon from '@/assets/icons/edit.svg?component';
@@ -99,6 +173,9 @@ import DeleteIcon from '@/assets/icons/delete.svg?component';
 
 import AddButton from '../AddButton.vue';
 import PeriodItem from '../periods/PeriodItem.vue';
+import { watch } from 'vue';
+import InputSimple from '@/components/InputSimple.vue';
+import ButtonMain from '@/components/ButtonMain.vue';
 
 const props = defineProps({
   dayId: {
@@ -135,15 +212,84 @@ const props = defineProps({
     required: false,
     default: null
   },
+
   // Разрешено ли редактирование дня
   isAllowEdit: {
     type: Boolean,
     required: false,
     default: false
+  },
+
+  // Редактируем ли мы этот день сейчас
+  isEditing: {
+    type: Boolean,
+    required: false,
+    default: false
+  },
+
+  // Статус - идёт ли запрос за обновлением дня
+  isEditingLoadNow: {
+    type: Boolean,
+    required: false,
+    default: false
+  },
+
+  // Сообщение об ошибке
+  errorMessage: {
+    type: String,
+    required: false,
+    default: ''
   }
 });
 
-const emit = defineEmits(['dayEdit', 'dayDelete', 'periodSelect', 'periodAdd', 'periodDelete']);
+watch(() => props.isEditing, (newVal) => {
+  console.log(newVal)
+})
+
+const emit = defineEmits([
+  'dayEdit',
+  'dayEditSubmit',
+  'dayDelete',
+  'periodSelect',
+  'periodAdd',
+  'periodDelete'
+]);
+
+// Фабрика для нового дня
+const initNewDay = () => ({
+  isWeekend: props.isWeekend,
+  spentTime: String(props.spentTime),
+  report: props.report,
+  comment: props.comment
+});
+
+// Состояние формы
+const editDay = ref(initNewDay());
+
+// Задизейблена ли кнопка отправки формы редактирования дня
+const isSubmitEditButtonDisabled = computed(() => {
+  let result = false;
+  
+  // [x] Если хоть что-то пустое - дизейблим
+
+  for (const key of Object.keys(editDay.value)) {
+      const value = editDay.value[key];
+
+      if (typeof value !== 'boolean' && value.length === 0) {
+        result = true;
+        break;
+      }
+    }
+
+  return result;
+});
+
+/**
+ * Обработка отправки формы редактирования дня
+ */
+function handleEditFormSubmit() {
+  emit('dayEditSubmit', editDay.value);
+}
 
 /**
  * Обработка клика по кнопке редактирования
@@ -232,12 +378,34 @@ function handleDeletePeriodItem(periodEmitted) {
   flex-wrap: wrap;
 }
 
+.day__info {
+  display: flex;
+  flex-direction: column;
+  row-gap: 10px;
+}
+
 .day__text {
   margin: 0;
 }
 
-.day__text:not(:last-of-type) {
-  margin-bottom: 15px;
+/* Edit form */
+.edit-form {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  max-width: 300px;
+}
+
+.edit-form__row {
+  display: flex;
+}
+
+.edit-form__label--vertical {
+  display: flex;
+  flex-direction: column;
+  row-gap: 5px;
+  max-width: 300px;
+  width: 100%;
 }
 
 /* Period transition group */
