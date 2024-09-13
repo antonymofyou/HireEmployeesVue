@@ -247,7 +247,7 @@ watch(
             commentsBlock.value.scrollHeight,
           behavior: 'smooth',
         });
-      }, 0);
+      }, 50);
     }
   }
 );
