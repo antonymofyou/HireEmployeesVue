@@ -70,7 +70,7 @@
         <CommentAddition
           v-model.trim="newComment"
           :errorMessage="errorMessageCreate"
-           @create-comment="createComment({ comment: newComment })"
+          @create-comment="createComment({ comment: newComment })"
         />
       </template>
     </template>
@@ -78,22 +78,22 @@
 </template>
 
 <script setup>
-import { ref, computed, onMounted, watch, reactive } from 'vue';
-import CommentCard from '@/pages/candidates/CandidateComments/components/CommentCard.vue';
-import SpinnerMain from '@/components/SpinnerMain.vue';
-import CommentAddition from './CommentAddition.vue';
+import { ref, computed, onMounted, watch, reactive } from "vue";
+import CommentCard from "@/pages/candidates/CandidateComments/components/CommentCard.vue";
+import SpinnerMain from "@/components/SpinnerMain.vue";
+import CommentAddition from "./CommentAddition.vue";
 import {
   CandidatesSetCandidateComment,
   CandidateGetCandidateComments,
-} from '../js/CommentsClasses.js';
-import ButtonIcon from '@/components/ButtonIcon.vue';
-import ArrowIcon from '@/assets/icons/arrow.svg?component';
+} from "../js/CommentsClasses.js";
+import ButtonIcon from "@/components/ButtonIcon.vue";
+import ArrowIcon from "@/assets/icons/arrow.svg?component";
 
 const props = defineProps({
   // ID вакансии, если передано - получаем комментарии для кандидата по отношению к отклику, иначе общие комментарии для кандидата
   respondId: {
     type: String,
-    default: '',
+    default: "",
   },
   // ID кандидата
   candidateId: {
@@ -111,11 +111,11 @@ const comments = ref([]);
 // Состояние загрузки
 const isLoading = ref(false);
 // Сообщение об ошибках
-const mainErrorMessage = ref('');
-const errorMessageCreate = ref('');
-const errorMessageControls = ref('');
+const mainErrorMessage = ref("");
+const errorMessageCreate = ref("");
+const errorMessageControls = ref("");
 // Значение нового комментария
-const newComment = ref('');
+const newComment = ref("");
 // Флаг показа комментариев
 const show = ref(false);
 // Ref для блока с комментариями
@@ -125,14 +125,14 @@ const createdCommentId = ref(null);
 
 // Формируем строку вида "for_otklik:id" или "for_candidate"
 const commentFor = computed(
-  () => `for_${props.respondId ? 'otklik:' + props.respondId : 'candidate'}`
+  () => `for_${props.respondId ? "otklik:" + props.respondId : "candidate"}`
 );
 
 // Заголовок блока, если передано ID вакансии - "Комментарии на отклик кандидата", иначе "Комментарии на кандидата"
 const headingText = computed(() => {
   return props.respondId
-    ? 'Комментарии на отклик кандидата'
-    : 'Комментарии на кандидата';
+    ? "Комментарии на отклик кандидата"
+    : "Комментарии на кандидата";
 });
 
 // Функция для работы с комментариями, принимает action ('create', 'update', 'delete') и payload {id, comment}
@@ -141,19 +141,19 @@ const dispatchComments = (action, payload) => {
   requestInstance.candidateId = props.candidateId;
   requestInstance.action = action;
   requestInstance.commentFor = commentFor.value;
-  requestInstance.commentText = payload.comment || '';
-  requestInstance.commentId = payload.id || '';
+  requestInstance.commentText = payload.comment || "";
+  requestInstance.commentId = payload.id || "";
 
-  errorMessageCreate.value = '';
-  errorMessageControls.value = '';
+  errorMessageCreate.value = "";
+  errorMessageControls.value = "";
 
   return (onSuccess, errCallback) =>
     requestInstance.request(
-      '/candidates/set_candidate_comment.php',
-      'manager',
+      "/candidates/set_candidate_comment.php",
+      "manager",
       onSuccess,
       (err) => {
-        if (action === 'create') {
+        if (action === "create") {
           errorMessageCreate.value = err;
         } else errorMessageControls.value = err;
         errCallback(err);
@@ -174,22 +174,20 @@ const updateComment = (payload) => {
     }
   };
   // Функция для запроса на обновление комментария
-  const requestFn = dispatchComments('update', payload);
+  const requestFn = dispatchComments("update", payload);
   requestFn(onUpdateSuccess);
 };
 
 // Удаление комментария
 const removeCommentObject = reactive({
   fetch: dispatchComments,
-  dataArg: '',
+  dataArg: "",
   callback: (id) => {
     return () => {
-      comments.value = comments.value.filter(
-      (comment) => comment.id !== id
-    );
-    }
+      comments.value = comments.value.filter((comment) => comment.id !== id);
+    };
   },
-})
+});
 
 // Создание комментария
 const createComment = (payload) => {
@@ -198,10 +196,10 @@ const createComment = (payload) => {
     const onCreateSuccess = (res) => {
       createdCommentId.value = res.comment.id;
       comments.value.push(res.comment);
-      newComment.value = '';
+      newComment.value = "";
     };
     // Функция для запроса на создание комментария
-    const requestFn = dispatchComments('create', payload);
+    const requestFn = dispatchComments("create", payload);
     requestFn(onCreateSuccess);
   }
 };
@@ -214,17 +212,28 @@ const requestComments = () => {
 
   // При старте запроса состояние загрузки меняется на true и обнуляется значение сообщения об ошибке
   isLoading.value = true;
-  mainErrorMessage.value = '';
+  mainErrorMessage.value = "";
 
   requestInstance.request(
-    '/candidates/get_candidate_comments.php',
-    'manager',
+    "/candidates/get_candidate_comments.php",
+    "manager",
     (response) => {
       comments.value = response.comments;
       isLoading.value = false;
+      if (props.receivedObject) {
+        if (commentsBlock.value) {
+          // Добавляем небольшой задержку, чтобы обновление высоты произошло после изменения контента
+          setTimeout(() => {
+            commentsBlock.value.scrollTo({
+              top: commentsBlock.value.scrollHeight,
+              behavior: "smooth",
+            });
+          }, 0);
+        }
+      }
     },
     () => {
-      mainErrorMessage.value = 'Произошла ошибка при получении комментариев';
+      mainErrorMessage.value = "Произошла ошибка при получении комментариев";
       isLoading.value = false;
     }
   );
@@ -237,18 +246,9 @@ const showComments = () => {
 
 // При изменении значения свойства "createdCommentId" обновляем положение скролла в конце блока
 watch(
-  () => props.receivedObject, () => {
-    requestComments()
-    if (commentsBlock.value) {
-      // Добавляем небольшой задержку, чтобы обновление высоты произошло после изменения контента
-      setTimeout(() => {
-        commentsBlock.value.scrollTo({
-          top:
-            commentsBlock.value.scrollHeight,
-          behavior: 'smooth',
-        });
-      }, 50);
-    }
+  () => props.receivedObject,
+  () => {
+    requestComments();
   }
 );
 
