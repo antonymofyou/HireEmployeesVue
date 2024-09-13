@@ -66,18 +66,8 @@ const emit = defineEmits(['sendObject']);
 
 const sendToParent = () => {
   const object = { 
-    id:"645",
-    managerId:"17",
-    managerName:"Nameless Sin",
-    otklikId:"43",
-    vacancyId:"181",
-    commentFor:"for_otklik",
-    comment: `Статус изменён с "${statusCurrent.value.status}" на "${newStatus.value}"`,
-    canEdit:"1",
-    canDelete:"1",
-    updatedAt:"2024-08-20 14:24:30",
-    createdAt:"2024-08-20 14:24:30",
-   };
+    changed : true
+  }
   emit('sendObject', object);
 }
 

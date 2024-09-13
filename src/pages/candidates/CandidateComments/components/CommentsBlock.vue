@@ -237,19 +237,14 @@ const showComments = () => {
 
 // При изменении значения свойства "createdCommentId" обновляем положение скролла в конце блока
 watch(
-  () => props.receivedObject, (newComment) => {
-    if (newComment) {
-      comments.value.push(newComment);
-    }
-  },
-  () => createdCommentId.value,
-  () => {
+  () => props.receivedObject, () => {
+    requestComments()
     if (commentsBlock.value) {
       // Добавляем небольшой задержку, чтобы обновление высоты произошло после изменения контента
       setTimeout(() => {
         commentsBlock.value.scrollTo({
           top:
-            commentsBlock.value.scrollHeight - commentsBlock.value.clientHeight,
+            commentsBlock.value.scrollHeight,
           behavior: 'smooth',
         });
       }, 0);
