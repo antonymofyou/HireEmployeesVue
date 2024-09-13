@@ -2,7 +2,7 @@
   <div class="day">
     <div class="day__header">
       <span class="day__title day__highlight">
-        {{ props.date }}
+        {{ formatDate(props.day.date) }}
       </span>
     </div>
 
@@ -50,7 +50,7 @@
 
             <div class="edit-form__row edit-form__row--small">
               <label
-                class="edit-form__label--vertical"
+                class="edit-form__label edit-form__label--vertical"
               >
                 Длина рабочего дня:
                 <InputSimple
@@ -67,7 +67,7 @@
           <div class="edit-form__block edit-form__block--horizontal">
             <div class="edit-form__row">
               <label
-                class="edit-form__label--vertical"
+                class="edit-form__label edit-form__label--vertical"
               >
                 Текст отчёта:
                 <InputSimple
@@ -84,7 +84,7 @@
 
             <div class="edit-form__row">
               <label
-                class="edit-form__label--vertical"
+                class="edit-form__label edit-form__label--vertical"
               >
                 Комментарий:
                 <InputSimple
@@ -117,7 +117,6 @@
       <ButtonIcon
         v-if="props.isEditing"
         :form="currentDayFormId"
-        :disabled="isSubmitEditButtonDisabled"
         class="button-icon"
       >
         <template #icon>
@@ -128,6 +127,7 @@
       </ButtonIcon>
 
       <ButtonIcon
+        v-else
         class="button-icon"
         @click="handleClickEditButton"
       >
@@ -168,35 +168,20 @@ import PeriodItem from '../periods/PeriodItem.vue';
 import InputSimple from '@/components/InputSimple.vue';
 
 const props = defineProps({
-  dayId: {
-    type: [Number, String],
+  // Объект дня
+  day: {
+    type: Object,
     required: true
   },
-  date: {
-    type: String,
-    required: true
-  },
-  spentTime: {
-    type: [Number, String],
-    required: true
-  },
-  report: {
-    type: String,
-    required: true
-  },
-  isWeekend: {
-    type: Boolean,
-    required: true
-  },
-  comment: {
-    type: String,
-    required: true,
-  },
+
+  // Массив периодов
   periods: {
     type: Array,
     required: false,
     default: () => []
   },
+
+  // ID периода, над которым проводятся манипуляции
   activePeriodId: {
     type: [String, Number],
     required: false,
@@ -248,22 +233,25 @@ const currentDayFormId = computed(() => {
 
 // Фабрика для нового дня
 const initNewDay = () => ({
-  isWeekend: props.isWeekend,
-  spentTime: String(props.spentTime),
-  report: props.report,
-  comment: props.comment
+  isWeekend: props.day.isWeekend === '1',
+  spentTime: String(props.day.spentTime),
+  report: props.day.report,
+  comment: props.day.comment
 });
 
 // Состояние формы
-const editDay = ref(initNewDay());
+const editDay = ref(null);
 
-watch(() => props.isEditing, () => {
+watch([() => props.isEditing, () => props.day], () => {
   editDay.value = initNewDay();
+}, {
+  immediate: true
 });
 
 // Дизейблим ли остальные поля, если выбран выходной день
 const isRestDisabled = computed(() => {
-  return editDay.value.isWeekend;
+  // return editDay.value.isWeekend;
+  return false;
 });
 
 // Задизейблена ли кнопка отправки формы редактирования дня
@@ -312,14 +300,14 @@ function handleEditFormSubmit() {
  * Обработка клика по кнопке редактирования
  */
 function handleClickEditButton() {
-  emit('dayEdit', props.dayId);
+  emit('dayEdit', props.day.dayId);
 }
 
 /**
  * Обработка клика по кнопке удаления
  */
 function handleClickDeleteButton() {
-  emit('dayDelete', props.dayId);
+  emit('dayDelete', props.day.dayId);
 }
 
 /**
@@ -329,7 +317,7 @@ function handleClickDeleteButton() {
 function handleSelectPeriodItem(periodEmitted) {
   emit('periodSelect', {
     ...periodEmitted,
-    dayId: props.dayId
+    dayId: props.day.dayId
   });
 }
 
@@ -338,7 +326,7 @@ function handleSelectPeriodItem(periodEmitted) {
  */
  function handleClickAddButtonPeriod() {
   emit('periodAdd', {
-    dayId: props.dayId,
+    dayId: props.day.dayId,
   });
 }
 
@@ -349,8 +337,23 @@ function handleSelectPeriodItem(periodEmitted) {
 function handleDeletePeriodItem(periodEmitted) {
   emit('periodDelete', {
     ...periodEmitted,
-    dayId: props.dayId
+    dayId: props.day.dayId
   });
+}
+
+/**
+ * Форматирование даты
+ * @param {String} date - Дата для форматирования
+ * @returns {String} - Отформатированная дата
+ */
+function formatDate(date) {
+  const formatter = new Intl.DateTimeFormat('ru-RU', {
+    year: 'numeric',
+    month: '2-digit',
+    day: '2-digit',
+    weekday: 'long'
+  });
+  return formatter.format(new Date(date));
 }
 </script>
 
@@ -368,7 +371,7 @@ function handleDeletePeriodItem(periodEmitted) {
 
 .day__header {
   text-align: center;
-  margin-bottom: 5px;
+  margin-bottom: 7px;
 }
 
 .day__title {
@@ -405,8 +408,13 @@ function handleDeletePeriodItem(periodEmitted) {
   margin: 0;
 }
 
+:deep(.day__input) input {
+  font-size: 14px;
+  padding: 5px;
+}
+
 :deep(.day__input--textarea) textarea {
-  font-size: 15px;
+  font-size: 14px;
   padding: 5px;
   height: 100px;
 }
@@ -417,7 +425,7 @@ function handleDeletePeriodItem(periodEmitted) {
   flex-direction: column;
   justify-content: center;
   align-items: center;
-  gap: 20px;
+  gap: 10px;
   flex-wrap: wrap;
 }
 
@@ -459,7 +467,6 @@ function handleDeletePeriodItem(periodEmitted) {
   display: flex;
   flex-direction: column;
   row-gap: 5px;
-  /* max-width: 300px; */
   width: 100%;
 }
 

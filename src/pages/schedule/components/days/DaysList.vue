@@ -3,12 +3,7 @@
     <DayItem
       v-for="day in props.days"
       :key="day.dayId"
-      :day-id="day.dayId"
-      :date="day.date"
-      :spent-time="day.spentTime"
-      :report="day.report"
-      :report-id="day.reportId"
-      :is-weekend="day.isWeekend === '1'"
+      :day="day"
       :comment="day.comment"
       :periods="props.periods[day.dayId]"
       :active-period-id="props.activePeriodId"
