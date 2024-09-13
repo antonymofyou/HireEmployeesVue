@@ -8,24 +8,22 @@
       {{ labelName }}: 
     </label>
     <component
+      v-bind="$attrs"
       :is="inputType"
-      class="input__field"
       :class="inputClass"
       :id="id"
-      v-bind="$attrs"
       :value="props.modelValue"
       :placeholder="placeholder"
+      class="input__field"
+      ref="inputRef"
+      @keydown="autoSizeInput"
       @input="updateModelValue($event.target.value)"
     />
   </div>
 </template>
 
 <script setup>
-import { computed } from 'vue';
-
-// defineOptions({
-//   inheritAttrs: false
-// });
+import { ref, computed, watchEffect, onMounted } from 'vue';
 
 /* Модель для обновления, тип инпута (input или textarea), id инпута для связи с label,
 имя label, жирный ли текст инпута, жирный ли label, размер инпута */
@@ -62,6 +60,11 @@ const props = defineProps({
   placeholder: {
     type: String,
   },
+  isAutoSize: {
+    type: Boolean,
+    required: false,
+    default: false
+  }
 });
 
 // Обновление селекта в родителе
@@ -70,6 +73,23 @@ const emit = defineEmits(['update:modelValue']);
 const updateModelValue = (value) => {
   emit('update:modelValue', value);
 };
+
+// Реф на дом ноду инпута
+const inputRef = ref(null);
+// Изначальная высота ноды инпута
+const initialHeight = ref(null);
+
+// Синхронизируем высоту под содержимое инпута
+watchEffect(() => {
+  if (!inputRef.value || !props.isAutoSize || !props.modelValue) return;
+  autoSizeInput();
+});
+
+// Ставим изначальную высоту
+onMounted(() => {
+  if (!inputRef.value) return;
+  initialHeight.value = inputRef.value.clientHeight;
+});
 
 // Опциональные классы для инпута
 const inputClass = computed(() => ({
@@ -84,6 +104,16 @@ const inputClass = computed(() => ({
 const labelClass = computed(() => ({
   'input__label--bold': props.isLabelBold,
 }))
+
+/**
+ * Сделать высоту инпута под его содержимое
+ */
+function autoSizeInput() {
+  window.requestAnimationFrame(() => {
+    inputRef.value.style.height = initialHeight.value + 'px';
+    inputRef.value.style.height = inputRef.value.scrollHeight + 'px';
+  });
+}
 </script>
 
 <style scoped>

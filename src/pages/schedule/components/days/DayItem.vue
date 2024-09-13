@@ -28,112 +28,84 @@
 
       </div>
 
-      <div
-        v-if="!props.isEditing"
-        class="day__info"
-      >
-        <p
-          v-if="props.isWeekend"
-          class="day__text"
-        >
-          Выходной: Да
-        </p>
-
-        <p
-          v-else
-          class="day__text"
-        >
-          Длина рабочего дня: {{ props.spentTime }} минут
-        </p>
-
-        <p
-          class="day__text"
-        >
-          Текст отчёта: {{ props.report || 'отсутствует' }}
-        </p>
-        <p
-          class="day__text"
-        >
-          Комментарий: {{ props.comment || 'отсутствует' }}
-        </p>
-      </div>
-
-      <div v-else>
+      <div>
         <form
           :id="currentDayFormId"
           class="edit-form"
           @submit.prevent="handleEditFormSubmit"
         >
-          <div class="edit-form__row edit-form__row--extra-small">
-            <label
-              class="edit-form__label"
-            >
-              Выходной:
-              <input
-                v-model="editDay.isWeekend"
-                type="checkbox"
+          <div class="edit-form__block edit-form__block--horizontal edit-form__block--items-center">
+            <div class="edit-form__row edit-form__row--extra-small">
+              <label
+                class="edit-form__label"
               >
-            </label>
+                Выходной:
+                <input
+                  v-model="editDay.isWeekend"
+                  :disabled="!props.isEditing"
+                  type="checkbox"
+                >
+              </label>
+            </div>
+
+            <div class="edit-form__row edit-form__row--small">
+              <label
+                class="edit-form__label--vertical"
+              >
+                Длина рабочего дня:
+                <InputSimple
+                  v-model="editDay.spentTime"
+                  :disabled="!props.isEditing || isRestDisabled"
+                  class="day__input"
+                  placeholder="Длина рабочего дня"
+                  pattern="\d+"
+                />
+              </label>
+            </div>
           </div>
 
-          <div class="edit-form__row edit-form__row--small">
-            <label
-              class="edit-form__label--vertical"
-            >
-              Длина рабочего дня:
-              <InputSimple
-                v-model="editDay.spentTime"
-                class="day__input"
-                placeholder="Длина рабочего дня"
-                pattern="\d+"
-              />
-            </label>
+          <div class="edit-form__block edit-form__block--horizontal">
+            <div class="edit-form__row">
+              <label
+                class="edit-form__label--vertical"
+              >
+                Текст отчёта:
+                <InputSimple
+                  v-model="editDay.report"
+                  :disabled="!props.isEditing || isRestDisabled"
+                  :is-auto-size="true"
+                  input-type="textarea"
+                  size="medium"
+                  class="day__input day__input--textarea"
+                  placeholder="Текст отчёта"
+                />
+              </label>
+            </div>
+
+            <div class="edit-form__row">
+              <label
+                class="edit-form__label--vertical"
+              >
+                Комментарий:
+                <InputSimple
+                  v-model="editDay.comment"
+                  :disabled="!props.isEditing || isRestDisabled"
+                  :is-auto-size="true"
+                  input-type="textarea"
+                  size="medium"
+                  class="day__input day__input--textarea"
+                  placeholder="Комментарий"
+                />
+              </label>
+            </div>
           </div>
 
-          <div class="edit-form__row">
-            <label
-              class="edit-form__label--vertical"
-            >
-              Текст отчёта:
-              <InputSimple
-                v-model="editDay.report"
-                input-type="textarea"
-                size="medium"
-                class="day__input day__input--textarea"
-                placeholder="Текст отчёта"
-              />
-            </label>
-          </div>
-
-          <div class="edit-form__row">
-            <label
-              class="edit-form__label--vertical"
-            >
-              Комментарий:
-              <InputSimple
-                v-model="editDay.comment"
-                input-type="textarea"
-                size="medium"
-                class="day__input day__input--textarea"
-                placeholder="Комментарий"
-              />
-            </label>
-          </div>
-
-          <span class="edit-form__error">
+          <span
+            v-if="props.errorMessage"
+            class="edit-form__error"
+          >
             {{ props.errorMessage }}
           </span>
-          <!-- <div>
-            <ButtonMain
-              :is-active="props.isEditingLoadNow"
-              :is-disabled="isSubmitEditButtonDisabled"
-              :message="props.errorMessage"
-            >
-              <template #text>
-                Изменить
-              </template>
-            </ButtonMain>
-          </div> -->
         </form>
       </div>
     </div>
@@ -183,7 +155,7 @@
 <script setup>
 /* @component Сущность дня сотрудника */
 
-import { computed, ref } from 'vue';
+import { computed, ref, watch } from 'vue';
 
 import ButtonIcon from '@/components/ButtonIcon.vue';
 
@@ -285,11 +257,24 @@ const initNewDay = () => ({
 // Состояние формы
 const editDay = ref(initNewDay());
 
+watch(() => props.isEditing, () => {
+  editDay.value = initNewDay();
+});
+
+// Дизейблим ли остальные поля, если выбран выходной день
+const isRestDisabled = computed(() => {
+  return editDay.value.isWeekend;
+});
+
 // Задизейблена ли кнопка отправки формы редактирования дня
 const isSubmitEditButtonDisabled = computed(() => {
   let result = true;
   
-  const editDayKeys = Object.keys(editDay.value);
+  const editDayKeys = Object.keys(editDay.value).filter((key) => {
+    // Если задизейблено всё, кроме выбора выходного - будем проверять только его
+    if (isRestDisabled.value) return key === 'isWeekend';
+    return true;
+  });
 
   // [x] Если ничего не поменялось - дизейблим
 
@@ -429,9 +414,26 @@ function handleDeletePeriodItem(periodEmitted) {
 /* Edit form */
 .edit-form {
   display: flex;
+  flex-direction: column;
   justify-content: center;
-  gap: 10px;
+  align-items: center;
+  gap: 20px;
   flex-wrap: wrap;
+}
+
+.edit-form__block {
+  width: 100%;
+  flex-wrap: wrap;
+}
+
+.edit-form__block--horizontal {
+  display: flex;
+  justify-content: center;
+  gap: 20px;
+}
+
+.edit-form__block--items-center {
+  align-items: center;
 }
 
 .edit-form__error {
@@ -441,6 +443,8 @@ function handleDeletePeriodItem(periodEmitted) {
 
 .edit-form__row {
   flex-grow: 1;
+  display: flex;
+  justify-content: center;
 }
 
 .edit-form__row--extra-small {
@@ -455,7 +459,7 @@ function handleDeletePeriodItem(periodEmitted) {
   display: flex;
   flex-direction: column;
   row-gap: 5px;
-  max-width: 300px;
+  /* max-width: 300px; */
   width: 100%;
 }
 

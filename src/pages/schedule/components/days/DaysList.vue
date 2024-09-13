@@ -15,7 +15,7 @@
       :is-allow-edit="props.isAllowEdit"
       :is-editing="day.dayId === props.editingDayId"
       :is-editing-load-now="props.isEditingDayNow && day.dayId === props.editingDayId"
-      :error-message="props.editErrorMessage"
+      :error-message="day.dayId === props.editingDayId ? props.editErrorMessage : ''"
       @day-edit="handleDayEditDayItem"
       @day-edit-submit="handleDayEditSubmitDayItem"
       @day-delete="handleDayDeleteDayItem"
