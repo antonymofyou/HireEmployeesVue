@@ -130,7 +130,7 @@
 </template>
 
 <script setup>
-import { computed, onMounted, onUnmounted, ref, watch } from 'vue';
+import { computed, onMounted, onUnmounted, ref } from 'vue';
 import { useRouter } from 'vue-router';
 
 import TheHeader from '@/components/TheHeader.vue';
@@ -188,10 +188,6 @@ const currentEditingDayId = computed(() => {
   const findDay = days.value.find((day) => day.dayId === activeDay.value.dayId);
 
   return findDay?.dayId ?? null;
-});
-
-watch(currentEditingDayId, (newVal) => {
-  console.log(newVal, '<<<');
 });
 
 // Сообщение об ошибке (запросы к серверу и т.д.)
@@ -296,15 +292,13 @@ const callbacks = {
   handleDayEditDaysList(dayId) {
     helpers.resetError();
 
-    console.log(activeDay.value.dayId, '<<<')
-
     if (activeDay.value.dayId && dayId === activeDay.value.dayId) {
-      isEditDayFormVisible.value = false;      
+      isEditDayFormVisible.value = false;
+      activeDay.value.dayId = null;   
     } else {
       isEditDayFormVisible.value = true;
+      activeDay.value.dayId = dayId;
     }
-
-    activeDay.value.dayId = dayId;
     // isEditDayModalVisible.value = true;
   },
 
@@ -624,8 +618,6 @@ const daysActions = {
    * @param {Object} editedDay - Изменённый день
    */
   async editActiveDay(editedDay) {
-    console.log(editedDay, '<<<');
-
     if (isEditDayRequestNow.value) return;
     helpers.resetError();
 

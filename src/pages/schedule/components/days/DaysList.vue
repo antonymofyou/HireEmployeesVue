@@ -100,7 +100,6 @@ function handleDayEditDayItem(dayId) {
  * @param {Number} editedDay - Отредактированный день
  */
 function handleDayEditSubmitDayItem(editedDay) {
-  console.log('here', editedDay)
   emit('dayEditSubmit', editedDay);
 }
 

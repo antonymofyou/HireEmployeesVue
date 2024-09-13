@@ -60,10 +60,11 @@
 
       <div v-else>
         <form
+          :id="currentDayFormId"
           class="edit-form"
           @submit.prevent="handleEditFormSubmit"
         >
-          <div class="edit-form__row">
+          <div class="edit-form__row edit-form__row--extra-small">
             <label
               class="edit-form__label"
             >
@@ -75,7 +76,7 @@
             </label>
           </div>
 
-          <div class="edit-form__row">
+          <div class="edit-form__row edit-form__row--small">
             <label
               class="edit-form__label--vertical"
             >
@@ -98,7 +99,7 @@
                 v-model="editDay.report"
                 input-type="textarea"
                 size="medium"
-                class="day__input"
+                class="day__input day__input--textarea"
                 placeholder="Текст отчёта"
               />
             </label>
@@ -113,21 +114,26 @@
                 v-model="editDay.comment"
                 input-type="textarea"
                 size="medium"
-                class="day__input"
+                class="day__input day__input--textarea"
                 placeholder="Комментарий"
               />
             </label>
           </div>
 
-          <ButtonMain
-            :is-active="props.isEditingLoadNow"
-            :is-disabled="isSubmitEditButtonDisabled"
-            :message="props.errorMessage"
-          >
-            <template #text>
-              Изменить
-            </template>
-          </ButtonMain>
+          <span class="edit-form__error">
+            {{ props.errorMessage }}
+          </span>
+          <!-- <div>
+            <ButtonMain
+              :is-active="props.isEditingLoadNow"
+              :is-disabled="isSubmitEditButtonDisabled"
+              :message="props.errorMessage"
+            >
+              <template #text>
+                Изменить
+              </template>
+            </ButtonMain>
+          </div> -->
         </form>
       </div>
     </div>
@@ -136,6 +142,19 @@
       v-if="props.isAllowEdit"
       class="day__footer"
     >
+      <ButtonIcon
+        v-if="props.isEditing"
+        :form="currentDayFormId"
+        :disabled="isSubmitEditButtonDisabled"
+        class="button-icon"
+      >
+        <template #icon>
+          <SaveIcon
+            class="button-icon__icon button-icon__icon--save"
+          />
+        </template>
+      </ButtonIcon>
+
       <ButtonIcon
         class="button-icon"
         @click="handleClickEditButton"
@@ -170,12 +189,11 @@ import ButtonIcon from '@/components/ButtonIcon.vue';
 
 import EditIcon from '@/assets/icons/edit.svg?component';
 import DeleteIcon from '@/assets/icons/delete.svg?component';
+import SaveIcon from '@/assets/icons/save.svg?component';
 
 import AddButton from '../AddButton.vue';
 import PeriodItem from '../periods/PeriodItem.vue';
-import { watch } from 'vue';
 import InputSimple from '@/components/InputSimple.vue';
-import ButtonMain from '@/components/ButtonMain.vue';
 
 const props = defineProps({
   dayId: {
@@ -242,10 +260,6 @@ const props = defineProps({
   }
 });
 
-watch(() => props.isEditing, (newVal) => {
-  console.log(newVal)
-})
-
 const emit = defineEmits([
   'dayEdit',
   'dayEditSubmit',
@@ -254,6 +268,11 @@ const emit = defineEmits([
   'periodAdd',
   'periodDelete'
 ]);
+
+// ID для формы и для кнопки отправки
+const currentDayFormId = computed(() => {
+  return `form-edit-day-${props.dayId}`;
+});
 
 // Фабрика для нового дня
 const initNewDay = () => ({
@@ -268,18 +287,31 @@ const editDay = ref(initNewDay());
 
 // Задизейблена ли кнопка отправки формы редактирования дня
 const isSubmitEditButtonDisabled = computed(() => {
-  let result = false;
+  let result = true;
   
+  const editDayKeys = Object.keys(editDay.value);
+
+  // [x] Если ничего не поменялось - дизейблим
+
+  for (const key of editDayKeys) {
+    const currentValue = editDay.value[key];
+    const oldValue = props[key];
+
+    if (currentValue !== oldValue) {
+      result = false;
+    }
+  }
+
   // [x] Если хоть что-то пустое - дизейблим
 
-  for (const key of Object.keys(editDay.value)) {
-      const value = editDay.value[key];
+  for (const key of editDayKeys) {
+    const value = editDay.value[key];
 
-      if (typeof value !== 'boolean' && value.length === 0) {
-        result = true;
-        break;
-      }
+    if (typeof value !== 'boolean' && value.length === 0) {
+      result = true;
+      break;
     }
+  }
 
   return result;
 });
@@ -388,16 +420,35 @@ function handleDeletePeriodItem(periodEmitted) {
   margin: 0;
 }
 
+:deep(.day__input--textarea) textarea {
+  font-size: 15px;
+  padding: 5px;
+  height: 100px;
+}
+
 /* Edit form */
 .edit-form {
   display: flex;
-  flex-direction: column;
+  justify-content: center;
   gap: 10px;
-  max-width: 300px;
+  flex-wrap: wrap;
+}
+
+.edit-form__error {
+  color: var(--cinnabar);
+  font-size: 14px;
 }
 
 .edit-form__row {
-  display: flex;
+  flex-grow: 1;
+}
+
+.edit-form__row--extra-small {
+  max-width: 110px;
+}
+
+.edit-form__row--small {
+  max-width: 160px;
 }
 
 .edit-form__label--vertical {
@@ -426,12 +477,24 @@ function handleDeletePeriodItem(periodEmitted) {
 }
 
 /* Buttons */
-.button-icon:hover {
-  opacity: 0.7;
+.button-icon:disabled {
+  pointer-events: none;
 }
 
-.button-icon:active {
-  opacity: 0.3;
+.button-icon:not(:disabled) {
+  cursor: pointer;
+
+  &:hover {
+    opacity: 0.7;
+  }
+  
+  &:active {
+    opacity: 0.3;
+  }
+}
+
+.button-icon__icon--save {
+  transform: scale(1.75);
 }
 
 .button-icon__icon--delete {
