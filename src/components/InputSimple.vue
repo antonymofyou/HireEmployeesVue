@@ -13,7 +13,7 @@
       :class="inputClass"
       :id="id"
       v-bind="$attrs"
-      :value="inputValue"
+      :value="props.modelValue"
       :placeholder="placeholder"
       @input="updateModelValue($event.target.value)"
     />
@@ -21,7 +21,7 @@
 </template>
 
 <script setup>
-import { ref, computed } from 'vue';
+import { computed } from 'vue';
 
 /* Модель для обновления, тип инпута (input или textarea), id инпута для связи с label,
 имя label, жирный ли текст инпута, жирный ли label, размер инпута */
@@ -60,14 +60,10 @@ const props = defineProps({
   },
 });
 
-// Значение инпута
-const inputValue = ref(props.modelValue);
-
 // Обновление селекта в родителе
 const emit = defineEmits(['update:modelValue']);
 
 const updateModelValue = (value) => {
-  inputValue.value = value;
   emit('update:modelValue', value);
 };
 
