@@ -90,7 +90,8 @@
 </template>
 
 <script setup>
-/* Сущность дня сотрудника */
+/* @component Сущность дня сотрудника */
+
 import ButtonIcon from '@/components/ButtonIcon.vue';
 
 import EditIcon from '@/assets/icons/edit.svg?component';
@@ -116,10 +117,6 @@ const props = defineProps({
     type: String,
     required: true
   },
-  // reportId: {
-  //   type: Number,
-  //   required: true
-  // },
   isWeekend: {
     type: Boolean,
     required: true
@@ -198,7 +195,7 @@ function handleDeletePeriodItem(periodEmitted) {
 .day {
   box-shadow: 0 1px 10px rgba(112, 103, 103, 0.3);
   background: #fff;
-  padding: 20px 30px;
+  padding: 10px 30px;
   border-radius: 10px;
 }
 
@@ -208,7 +205,7 @@ function handleDeletePeriodItem(periodEmitted) {
 
 .day__header {
   text-align: center;
-  margin-bottom: 20px;
+  margin-bottom: 5px;
 }
 
 .day__title {
@@ -224,15 +221,12 @@ function handleDeletePeriodItem(periodEmitted) {
 .day__body {
   display: flex;
   flex-direction: column;
-  row-gap: 20px;
-  border-bottom: 2px solid var(--cornflower-blue);
-  padding-bottom: 20px;
-  margin-bottom: 20px;
+  row-gap: 5px;
+  padding-bottom: 10px;
 }
 
 .day__periods {
-  padding-bottom: 20px;
-  border-bottom: 2px solid var(--cornflower-blue);
+  padding-bottom: 10px;
   display: flex;
   gap: 20px;
   flex-wrap: wrap;

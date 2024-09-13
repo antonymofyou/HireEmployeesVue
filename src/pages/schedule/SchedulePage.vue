@@ -8,13 +8,6 @@
       </h1>
     </div>
 
-    <TopSquareButton
-      :is-visible="isAllowEditingSchedule"
-      :icon="plusIcon"
-      class="top-button"
-      @click="callbacks.startAddNewDay"
-    />
-
     <div class="wrapper">
       <div class="wrapper__inner">
         <div
@@ -37,18 +30,28 @@
           class="schedule"
         >
           <div class="schedule__inner">
-            <DaysList
-              v-if="days.length"
-              :days="days"
-              :periods="periodsTimes"
-              :active-period-id="activePeriod.periodId"
-              :is-allow-edit="isAllowEditingSchedule"
-              @day-edit="callbacks.handleDayEditDaysList"
-              @day-delete="callbacks.handleDayDeleteDaysList"
-              @period-select="callbacks.handlePeriodSelectDaysList"
-              @period-add="callbacks.handlePeriodAddDaysList"
-              @period-delete="callbacks.handlePeriodDeleteDaysList"
-            />
+            <template v-if="days.length">
+              <DaysList
+                :days="days"
+                :periods="periodsTimes"
+                :active-period-id="activePeriod.periodId"
+                :is-allow-edit="isAllowEditingSchedule"
+                @day-edit="callbacks.handleDayEditDaysList"
+                @day-delete="callbacks.handleDayDeleteDaysList"
+                @period-select="callbacks.handlePeriodSelectDaysList"
+                @period-add="callbacks.handlePeriodAddDaysList"
+                @period-delete="callbacks.handlePeriodDeleteDaysList"
+              />
+
+              <div class="schedule__actions">
+                <TopSquareButton
+                  :is-visible="isAllowEditingSchedule"
+                  :icon="plusIcon"
+                  class="add-button"
+                  @click="callbacks.startAddNewDay"
+                />
+              </div>
+            </template>
 
             <div
               v-else
@@ -704,6 +707,7 @@ const modalsActions = {
   display: flex;
   flex-direction: column;
   align-items: center;
+  margin-bottom: 20px;
 }
 
 .schedule-section__title {
@@ -716,18 +720,19 @@ const modalsActions = {
   text-align: center;
 }
 
-/* Top Button */
-.top-button {
-  position: sticky;
-  align-self: flex-end;
-  top: 60px;
-  right: 20px;
-  transform: translateY(-100%);
+.schedule__actions {
+  display: flex;
+  justify-content: center;
+  padding-top: 30px;
+}
+
+/* Add Button */
+.add-button {
   display: flex;
 }
 
 @media (width < 390px) {
-  .top-button {
+  .add-button {
     transform: translate(0px, -20%);
   }
 }
