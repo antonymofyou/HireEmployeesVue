@@ -52,7 +52,7 @@
               <label
                 class="edit-form__label edit-form__label--vertical"
               >
-                Длина рабочего дня:
+                Рабочий день (минуты):
                 <InputSimple
                   v-model.numbers-only="editDay.spentTime"
                   :disabled="!props.isEditing || isRestDisabled"
@@ -218,7 +218,6 @@ const initNewDay = () => ({
   isWeekend: props.day.isWeekend === '1',
   spentTime: String(props.day.spentTime),
   report: props.day.report,
-  // comment: props.day.comment
 });
 
 // Состояние формы
@@ -403,7 +402,6 @@ function formatDate(date) {
 /* Edit form */
 .edit-form {
   display: flex;
-  /* flex-direction: column;*/
   justify-content: center;
   align-items: center;
   gap: 10px;
@@ -441,7 +439,11 @@ function formatDate(date) {
 }
 
 .edit-form__row--small {
-  max-width: 160px;
+  max-width: 170px;
+}
+
+.edit-form__label {
+  font-size: 15px;
 }
 
 .edit-form__label--vertical {

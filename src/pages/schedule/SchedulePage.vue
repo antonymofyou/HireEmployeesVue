@@ -103,20 +103,6 @@
     @close="modalsActions.closeAddDayModal"
    />
 
-   <!-- Модалка изменения рабочего дня -->
-   <ModalDay
-    :is-show="false"
-    :is-loading="isEditDayRequestNow"
-    :default-day="activeDayFromStore"
-    :error="errorMessage"
-    max-form-width="300px"
-    mode="edit"
-    title="Изменение дня"
-    button-text="Изменить"
-    @submit="daysActions.editActiveDay"
-    @close="modalsActions.closeEditDayModal"
-   />
-
   <!-- Модалка удаления рабочего дня -->
    <ModalConfirm
     :is-show="isDeleteDayModalVisible"
@@ -174,8 +160,6 @@ const isDeletePeriodModalVisible = ref(false);
 
 // Видна ли модалка добавления рабочего дня
 const isAddDayModalVisible = ref(false);
-// Видна ли модалка изменения рабочего дня
-const isEditDayModalVisible = ref(false);
 // Видна ли модалка удаления рабочего дня
 const isDeleteDayModalVisible = ref(false);
 
@@ -230,22 +214,6 @@ const initializators = {
 
 // Активный день
 const activeDay = ref(initializators.initActiveDay());
-// Нормализованный активный день из состояния
-const activeDayFromStore = computed(() => {
-  let foundedDay = days.value.find((d) => {
-    return d.dayId === activeDay.value.dayId;
-  });
-
-  if (foundedDay) {
-    // Для избежания мутаций
-    foundedDay = {
-      ...foundedDay,
-      isWeekend: foundedDay.isWeekend === '1' ? true : false
-    }
-  }
-
-  return foundedDay;
-});
 
 // Активный период
 const activePeriod = ref(initializators.initActivePeriod());
@@ -299,7 +267,6 @@ const callbacks = {
       isEditDayFormVisible.value = true;
       activeDay.value.dayId = dayId;
     }
-    // isEditDayModalVisible.value = true;
   },
 
   /**
@@ -374,7 +341,6 @@ onUnmounted(() => {
 
 // Границы расписания
 const todayDate = new Date();
-const tomorrowDate = new Date(new Date(todayDate).setDate(todayDate.getDate() + 1));
 
 onMounted(() => {
   requests.fetchSchedule();
@@ -389,11 +355,6 @@ const requests = {
     isJobsRequestNow.value = true;
 
     const jobGetScheduleInstance = new JobGetShedule();
-
-    // jobGetScheduleInstance.staffId = String(managerId);
-    // @TODO
-    // jobGetScheduleInstance.filterStartDate = todayDate.toLocaleDateString('en-CA');
-    // jobGetScheduleInstance.filterEndDate = tomorrowDate.toLocaleDateString('en-CA');
 
     jobGetScheduleInstance.request(
       '/job/get_schedule.php',
@@ -412,7 +373,7 @@ const requests = {
 
         isJobsRequestNow.value = false;
       },
-      (error) => {
+      () => {
         isJobsRequestNow.value = false;
       }
     );
@@ -437,7 +398,7 @@ const requests = {
     jobSetDayInstance.request(
       '/job/set_day.php',
       'manager',
-      (response) => {
+      () => {
         // Обработка успешного добавления
         periodsTimes.value[newDay.dayId] = [];
 
@@ -481,11 +442,10 @@ const requests = {
     jobSetDayInstance.request(
       '/job/set_day.php',
       'manager',
-      (response) => {
+      () => {
         activeDay.value = initializators.initActiveDay();
         helpers.resetError();
         
-        // modalsActions.closeEditDayModal();
         isEditDayFormVisible.value = false;
         isEditDayRequestNow.value = false;
 
@@ -549,7 +509,7 @@ const requests = {
     jobSetPeriodInstance.request(
       '/job/set_period.php',
       'manager',
-      (response) => {
+      () => {
         modalsActions.closeAddPeriodModal();
         helpers.resetError()
 
@@ -582,7 +542,7 @@ const requests = {
     jobSetPeriodInstance.request(
       '/job/set_period.php',
       'manager',
-      (response) => {
+      () => {
         modalsActions.closeDeletePeriodModal();
         helpers.resetActivePeriod();
         helpers.resetError();
@@ -682,13 +642,6 @@ const modalsActions = {
    */
   closeAddDayModal() {
     isAddDayModalVisible.value = false;
-  },
-
-  /**
-   * Закрыть модалку редактирования дня
-   */
-  closeEditDayModal() {
-    isEditDayModalVisible.value = false;
   },
 
   /**

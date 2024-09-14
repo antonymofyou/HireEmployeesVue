@@ -24,7 +24,7 @@
 </template>
 
 <script setup>
-import { ref, computed, watchEffect, onMounted, watch } from 'vue';
+import { ref, computed, watchEffect, onMounted } from 'vue';
 
 /* Модель для обновления, тип инпута (input или textarea), id инпута для связи с label,
 имя label, жирный ли текст инпута, жирный ли label, размер инпута */
