@@ -1,8 +1,9 @@
 <template>
   <div
-    @pointerdown="startGrabbingHandler($event) , defineTargetScale($event)"
+    @pointerdown="startGrabbingHandler"
     @pointermove="moveGrabbingHandler"
     @pointerup="cancelGrabbing"
+    @mousemove="defineTargetScale"
     @contextmenu="cancelGrabbing"
     @wheel.prevent="scaleHandler"
     :style="{ cursor: isGrabbing ? 'grabbing' : 'grab' }"
@@ -45,6 +46,7 @@
             @update-shape="updateShape"
             @select-shape="handleSelectShape"
             @change-mode="changeModeHandler"
+            class="shape"
           />
       </template>
       <TooltipControlButtons
@@ -71,7 +73,7 @@
 
 <script setup>
 
-import {reactive, computed, ref, onBeforeUnmount, onMounted} from 'vue';
+import {reactive, computed, ref, onBeforeUnmount, onMounted, watch} from 'vue';
 
 import TextControlButtons from './components/control-buttons/TextControlButtons.vue';
 import BlockControlButtons from './components/control-buttons/BlockControlButtons.vue';
@@ -213,6 +215,7 @@ let yCoord = ref(0);
 let xLastCoord = ref(0);
 let yLastCoord = ref(0);
 let aimScale = reactive({
+  isShape: false,
   x: 0,
   y: 0,
 });
@@ -409,11 +412,61 @@ const updateEditor = (type, value) => {
   handler(value);
 }
 
-const updateScaleHandler = (value) => {
+const updateScaleHandler = (value) => {  
   scale.value = value;
+}
 
-  xCoord.value = aimScale.x * (scale.value / 100);
-  yCoord.value = aimScale.y * (scale.value / 100);
+watch(() => scale.value, function(newScale, prevScale) {
+  if (!aimScale.isShape) {
+    aimScale.x = xCoord.value / (prevScale / 100);
+    aimScale.y = yCoord.value / (prevScale / 100);
+  }
+
+  xCoord.value = aimScale.x * (newScale / 100);
+  yCoord.value = aimScale.y * (newScale / 100);
+});
+
+const defineTargetScale = (event) => {
+  const shape = event.target.closest('.shape');
+
+  if (!shape) {
+    aimScale.isShape = false;
+    aimScale.x = 0;
+    aimScale.y = 0;
+
+    return;
+  }
+
+  // let xOuterCanvas = xCoord.value > 0 ? 
+  //   clientX < windowInnerWidth.value - (windowInnerWidth.value - xCoord.value) :
+  //   clientX > windowInnerWidth.value + xCoord.value;
+  // let yOuterCanvas = yCoord.value > 0 ?
+  //   clientY < windowInnerHeight.value - (windowInnerHeight.value - yCoord.value) :
+  //   clientY > windowInnerHeight.value + yCoord.value;
+
+  // if (xCoord.value > 0 && xOuterCanvas) {
+  //   xCoordAim = (xCoord.value - clientX) + xCenter;
+  // }
+
+  // if (yCoord.value > 0 && yOuterCanvas) {
+  //   yCoordAim = (yCoord.value - clientY) + yCenter
+  // }
+
+  // if (xCoord.value <= 0 && xOuterCanvas) {
+  //   xCoordAim = (xCoord.value + (windowInnerWidth.value - clientX)) - xCenter;
+  // }
+
+  // if (!xOuterCanvas) {
+  //   xCoordAim = xCenter - (Math.abs(xCoord.value - clientX));
+  // }
+
+  // if (yCoord.value <= 0 && xOuterCanvas) {
+  //   yCoordAim = (yCoord.value + (windowInnerHeight.value - clientY)) - yCenter;
+  // }
+
+  // if (!yOuterCanvas) {
+  //   yCoordAim = yCenter - (Math.abs(yCoord.value - clientY));
+  // }
 }
 
 const startGrabbingHandler = (event) => {
@@ -423,57 +476,6 @@ const startGrabbingHandler = (event) => {
 
   xLastCoord.value = event.clientX;
   yLastCoord.value = event.clientY;
-}
-
-const defineTargetScale = (event) => {
-  if (
-    event.target.closest('.control-buttons-main') ||
-    event.target.closest('.control-buttons-text') || 
-    event.target.closest('.control-buttons-block')
-  ) return;
-
-  let clientX = event.clientX;
-  let clientY = event.clientY;
-  let xCenter = windowInnerWidth.value / 2;
-  let yCenter = windowInnerHeight.value / 2;
-  let xCoordAim = 0;
-  let yCoordAim = 0;
-
-  let xOuterCanvas = xCoord.value > 0 ? 
-    clientX < windowInnerWidth.value - (windowInnerWidth.value - xCoord.value) :
-    clientX > windowInnerWidth.value + xCoord.value;
-  let yOuterCanvas = yCoord.value > 0 ?
-    clientY < windowInnerHeight.value - (windowInnerHeight.value - yCoord.value) :
-    clientY > windowInnerHeight.value + yCoord.value;
-
-  // Координаты x, y относительно canvas
-
-  if (xCoord.value > 0 && xOuterCanvas) {
-    xCoordAim = (xCoord.value - clientX) + xCenter;
-  }
-
-  if (xCoord.value <= 0 && xOuterCanvas) {
-    xCoordAim = (xCoord.value + (windowInnerWidth.value - clientX)) - xCenter;
-  }
-
-  if (!xOuterCanvas) {
-    xCoordAim = xCenter - (Math.abs(xCoord.value - clientX));
-  }
-
-  if (yCoord.value > 0 && yOuterCanvas) {
-    yCoordAim = (yCoord.value - clientY) + yCenter
-  }
-
-  if (yCoord.value <= 0 && xOuterCanvas) {
-    yCoordAim = (yCoord.value + (windowInnerHeight.value - clientY)) - yCenter;
-  }
-
-  if (!yOuterCanvas) {
-    yCoordAim = yCenter - (Math.abs(yCoord.value - clientY));
-  }
-
-  aimScale.x = xCoordAim / (scale.value / 100);
-  aimScale.y = yCoordAim / (scale.value / 100);
 }
 
 const cancelGrabbing = () => {

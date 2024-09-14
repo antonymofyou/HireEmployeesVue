@@ -51,32 +51,18 @@
                 <Marker />
             </template>
         </ColorPicker>
-        <SelectMain
-            :options="optionsHorizontalAlign"
-            :model-value="currentHorizontalAlign"
-            @update:model-value="horizontalAlignSelectHandler"
+        <SelectControlButton 
+            :items="itemsHorizontalAlign"
             title="Горизонтальное выравнивание"
-        >
-            <template #option="{ option }">  
-                <component :is="horizontalAlignIcons[option.id]" :title="option.title"></component>
-            </template>
-            <template #trigger="{ selected }">
-                <component :is="horizontalAlignIcons[selected.id]"></component>
-            </template>
-        </SelectMain>
-        <SelectMain
-            :options="optionsVerticalAlign"
-            :model-value="currentVerticalAlign"
-            @update:model-value="verticalAlignSelectHandler"
+            :item="props.activeShape.editor?.getAttributes('paragraph').textAlign || ''"
+            @update:item="horizontalAlignSelectHandler"
+        />
+        <SelectControlButton 
+            :items="itemsVerticalAlign"
             title="Вертикальное выравнивание"
-        >
-            <template #option="{ option }">  
-                <component :is="verticalAlignIcons[option.id]" :title="option.title"></component>
-            </template>
-            <template #trigger="{ selected }">
-                <component :is="verticalAlignIcons[selected.id]"></component>
-            </template>
-        </SelectMain> 
+            :item="props.activeShape.shape?.textVerticalAlignment || ''"
+            @update:item="verticalAlignSelectHandler"
+        />
         <ValuePicker
             class="control-buttons-button control-buttons-value-picker"
             :value="parseInt(props.activeShape.editor?.getAttributes('textStyle').fontSize) || 0"
@@ -115,7 +101,7 @@ import { defineProps, defineEmits, computed } from 'vue';
 import ControlButton from './ControlButton.vue';
 import ColorPicker from './ColorPicker.vue';
 import ValuePicker from './ValuePicker.vue';
-import SelectMain from '@/components/SelectMain.vue';
+import SelectControlButton from './SelectControlButton.vue';
 import DropdownContent from '@/components/DropdownContent.vue';
 
 // Icons
@@ -186,42 +172,6 @@ const itemsVerticalAlign = [
     },
 ];
 
-const getSelectOptions = (items) => {
-    return items.map(({id, name, title}) => {
-        return {
-            id,
-            name,
-            title
-        }
-    });
-};
-const getSelectIcons = (items) => {
-    return items.reduce((acc, item) => {
-        acc[item.id] = item.icon;
-        
-        return acc;
-    }, {});
-}
-
-const optionsHorizontalAlign = getSelectOptions(itemsHorizontalAlign);
-const optionsVerticalAlign = getSelectOptions(itemsVerticalAlign);
-
-const horizontalAlignIcons = getSelectIcons(itemsHorizontalAlign);
-const verticalAlignIcons = getSelectIcons(itemsVerticalAlign);
-
-const currentHorizontalAlign = computed(() => {
-    const name = props.activeShape.editor?.getAttributes('paragraph').textAlign;
-    const { id } = optionsHorizontalAlign?.filter(item => item.name == name)[0] || {};
-
-    return id || 0;
-});
-const currentVerticalAlign = computed(() => {
-    const name = props.activeShape.shape?.textVerticalAlignment;
-    const { id } = optionsVerticalAlign?.filter(item => item.name == name)[0] || {};
-
-    return id || 0;
-});
-
 function updateEditorHandler(type, value) {
     emits('updateEditor', type, value);
 }
@@ -230,19 +180,11 @@ function updateShapeHandler(key, value) {
     emits('updateShape', props.activeShape.id, key, value);
 }
 
-function verticalAlignSelectHandler(id) {
-    if (!props.activeShape.id) return;
-
-    const { name } = optionsVerticalAlign?.filter(item => item.id == id)[0] || {};
-
+function verticalAlignSelectHandler(name) {
     updateShapeHandler('textVerticalAlignment', name);
 }
 
-function horizontalAlignSelectHandler(id) {
-    if (!props.activeShape.id) return;
-
-    const { name } = optionsHorizontalAlign?.filter(item => item.id == id)[0] || {};
-
+function horizontalAlignSelectHandler(name) {
     updateEditorHandler('horizontalAlign', name);
 }
 
@@ -250,27 +192,6 @@ function horizontalAlignSelectHandler(id) {
 
 <style scoped>
 
-.select-box-main.active:deep(.selected-main) {
-    background-color: var(--transparent-blue);
-    color: var(--milk) !important;
-}
-
-.select-box-main.disabled:deep(.selected-main) {
-    opacity: 0.5;
-}
-
-.select-box-main:deep(.selected-main) {
-    background-color: var(--milk);
-    padding: 6px;
-    color: var(--mine-shaft);
-    transition: 0.2s ease;
-}
-
-.select-box-main:deep(.selected-main::after) {
-    display: none;
-}
-
-.select-box-main:deep(.options-container-main),
 .dropdown:deep(.dropdown__content) {
     top: -8px;
     left: 50% !important;
@@ -278,24 +199,11 @@ function horizontalAlignSelectHandler(id) {
 }
 
 @media (max-width: 768px) {
-    .select-box-main:deep(.options-container-main),
     .dropdown:deep(.dropdown__content) {
         top: auto;
         bottom: -8px;
         transform: translateY(100%) translateX(-50%);
     }
-}
-
-.select-box-main:deep(.option-main) {
-    background-color: var(--milk);
-    border-radius: 8px;
-    color: var(--mine-shaft);
-    transition: 0.2s ease;
-}
-
-.select-box-main:deep(.option-main.selected) {
-    background-color: var(--transparent-blue);
-    color: var(--milk) !important;
 }
 
 </style>

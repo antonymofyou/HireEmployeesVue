@@ -36,21 +36,19 @@
                 px
             </template>
         </ValuePicker>
-        <ValuePicker
-            class="control-buttons-button control-buttons-value-picker"
-            :value="+props.activeShape.shape?.borderWidth || 0"
-            @update:value="updateShapeHandler('borderWidth', +$event)"     
-            v-show="!isArrowShape"
-            :min="0"
-            title="Размер границ"         
+        <SelectControlButton 
+            :items="itemsBorderWidth"
+            title="Размер границ"
+            :item="+props.activeShape.shape?.borderWidth || 0"
+            @update:item="borderWidthSelectHandler"
         >
-            <template #icon>
+            <template #trigger="{ selected }">
                 <FormatLineWeight />
+                <span class="selected-number-main">
+                    {{ selected.name }}
+                </span>
             </template>
-            <template #units>
-                px
-            </template>
-        </ValuePicker>
+        </SelectControlButton>
         <ValuePicker
             class="control-buttons-button control-buttons-value-picker"
             :value="+props.activeShape.shape?.zIndex || 1"
@@ -70,6 +68,7 @@ import { defineProps, defineEmits, computed } from 'vue';
 
 import ColorPicker from './ColorPicker.vue';
 import ValuePicker from './ValuePicker.vue';
+import SelectControlButton from './SelectControlButton.vue';
 
 // Icons
 
@@ -92,11 +91,21 @@ const emits = defineEmits({
 const isArrowShape = computed(() => {
     return Boolean(props.activeShape.shape?.type === 'arrow');
 })
+const itemsBorderWidth = new Array(6).fill({}).map((item, idx) => {
+    return {
+        id: idx,
+        name: (idx + 1) * 2
+    }
+});
 
 // Handlers
 
 function updateShapeHandler(key, value) {
     emits('updateShape', props.activeShape.id, key, value);
+}
+
+function borderWidthSelectHandler(name) {
+    updateShapeHandler('borderWidth', +name);
 }
 
 </script>
