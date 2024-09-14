@@ -54,7 +54,7 @@
               >
                 Длина рабочего дня:
                 <InputSimple
-                  v-model="editDay.spentTime"
+                  v-model.numbers-only="editDay.spentTime"
                   :disabled="!props.isEditing || isRestDisabled"
                   class="day__input"
                   placeholder="Длина рабочего дня"
@@ -75,26 +75,8 @@
                   :disabled="!props.isEditing || isRestDisabled"
                   :is-auto-size="true"
                   input-type="textarea"
-                  size="medium"
                   class="day__input day__input--textarea"
                   placeholder="Текст отчёта"
-                />
-              </label>
-            </div>
-
-            <div class="edit-form__row">
-              <label
-                class="edit-form__label edit-form__label--vertical"
-              >
-                Комментарий:
-                <InputSimple
-                  v-model="editDay.comment"
-                  :disabled="!props.isEditing || isRestDisabled"
-                  :is-auto-size="true"
-                  input-type="textarea"
-                  size="medium"
-                  class="day__input day__input--textarea"
-                  placeholder="Комментарий"
                 />
               </label>
             </div>
@@ -228,7 +210,7 @@ const emit = defineEmits([
 
 // ID для формы и для кнопки отправки
 const currentDayFormId = computed(() => {
-  return `form-edit-day-${props.dayId}`;
+  return `form-edit-day-${props.day.dayId}`;
 });
 
 // Фабрика для нового дня
@@ -236,7 +218,7 @@ const initNewDay = () => ({
   isWeekend: props.day.isWeekend === '1',
   spentTime: String(props.day.spentTime),
   report: props.day.report,
-  comment: props.day.comment
+  // comment: props.day.comment
 });
 
 // Состояние формы
@@ -387,12 +369,11 @@ function formatDate(date) {
 .day__body {
   display: flex;
   flex-direction: column;
-  row-gap: 5px;
+  row-gap: 10px;
   padding-bottom: 10px;
 }
 
 .day__periods {
-  padding-bottom: 10px;
   display: flex;
   gap: 20px;
   flex-wrap: wrap;
@@ -416,13 +397,13 @@ function formatDate(date) {
 :deep(.day__input--textarea) textarea {
   font-size: 14px;
   padding: 5px;
-  height: 100px;
+  overflow: hidden;
 }
 
 /* Edit form */
 .edit-form {
   display: flex;
-  flex-direction: column;
+  /* flex-direction: column;*/
   justify-content: center;
   align-items: center;
   gap: 10px;
@@ -468,6 +449,7 @@ function formatDate(date) {
   flex-direction: column;
   row-gap: 5px;
   width: 100%;
+  max-width: 400px;
 }
 
 /* Period transition group */

@@ -56,7 +56,7 @@
 
             <div class="schedule__actions">
               <TopSquareButton
-                :is-visible="isAllowEditingSchedule"
+                v-show="isAllowEditingSchedule"
                 :icon="plusIcon"
                 class="add-button"
                 @click="callbacks.startAddNewDay"
@@ -294,7 +294,7 @@ const callbacks = {
 
     if (activeDay.value.dayId && dayId === activeDay.value.dayId) {
       isEditDayFormVisible.value = false;
-      activeDay.value.dayId = null;   
+      activeDay.value.dayId = null;
     } else {
       isEditDayFormVisible.value = true;
       activeDay.value.dayId = dayId;

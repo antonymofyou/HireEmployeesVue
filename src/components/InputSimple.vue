@@ -16,6 +16,7 @@
       :placeholder="placeholder"
       class="input__field"
       ref="inputRef"
+      @keypress="applyModifiers"
       @keydown="autoSizeInput"
       @input="updateModelValue($event.target.value)"
     />
@@ -23,7 +24,7 @@
 </template>
 
 <script setup>
-import { ref, computed, watchEffect, onMounted } from 'vue';
+import { ref, computed, watchEffect, onMounted, watch } from 'vue';
 
 /* Модель для обновления, тип инпута (input или textarea), id инпута для связи с label,
 имя label, жирный ли текст инпута, жирный ли label, размер инпута */
@@ -31,6 +32,11 @@ const props = defineProps({
   modelValue: {
     type: String,
     required: true,
+  },
+  modelModifiers: {
+    type: Object,
+    required: false,
+    default: () => ({})
   },
   inputType: {
     type: String,
@@ -70,6 +76,10 @@ const props = defineProps({
 // Обновление селекта в родителе
 const emit = defineEmits(['update:modelValue']);
 
+/**
+ * Обработчик ввода в инпут
+ * @param {String} value - Вводимое значение
+ */
 const updateModelValue = (value) => {
   emit('update:modelValue', value);
 };
@@ -108,12 +118,29 @@ const labelClass = computed(() => ({
 /**
  * Сделать высоту инпута под его содержимое
  */
-function autoSizeInput() {
+const autoSizeInput = () => {
+  if (!props.isAutoSize) return;
+
   window.requestAnimationFrame(() => {
     inputRef.value.style.height = initialHeight.value + 'px';
     inputRef.value.style.height = inputRef.value.scrollHeight + 'px';
   });
-}
+};
+
+/**
+ * Применение модификаторов к вводимому тексту
+ * @param {Event} e - Событие
+ */
+const applyModifiers = (e) => {
+  if (props.modelModifiers['numbers-only']) {
+    const numbersSequense = '0123456789';
+    const enteringKey = e.key;
+  
+    if (!numbersSequense.includes(enteringKey)) {
+      e.preventDefault();
+    }
+  }
+};
 </script>
 
 <style scoped>

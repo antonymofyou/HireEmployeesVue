@@ -71,7 +71,7 @@ const listNavigation = [
     height: 24px;
 }
 
-@media (max-width: 576px) {
+@media (max-width: 640px) {
     .container {
         max-width: 100%;
     }
