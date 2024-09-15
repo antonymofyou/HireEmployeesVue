@@ -12,6 +12,10 @@ const props = defineProps({
     activeShape: {
         type: Object,
         required: true,
+    },
+    scale: {
+        type: Number,
+        default: 1,
     }
 });
 
@@ -39,10 +43,14 @@ const positionTooltips = computed(() => {
         y
     }
 });
+const scaleTooltips = computed(() => {
+    return 1 / props.scale;
+});
 const styleTooltips = computed(() => {
     return {
         top: positionTooltips.value.y + 'px',
         left: positionTooltips.value.x + 'px',
+        transform: `translateY(-${175 + (10 * (scaleTooltips.value / props.scale))}%) translateX(-50%) scale(${scaleTooltips.value})`,
     }
 });
 
@@ -52,7 +60,6 @@ const styleTooltips = computed(() => {
 
 .tooltip-control-buttons {
     position: absolute;
-    transform: translateY(-175%) translateX(-50%);
 }
 
 </style>

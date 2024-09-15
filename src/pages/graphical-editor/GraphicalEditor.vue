@@ -52,6 +52,7 @@
       <TooltipControlButtons
         v-if="windowInnerWidth > breakpoint"
         :active-shape="activeShape"
+        :scale="scale.value / 100"
       >
         <template #content>
           <TextControlButtons
@@ -215,7 +216,7 @@ let yCoord = ref(0);
 let xLastCoord = ref(0);
 let yLastCoord = ref(0);
 let aimScale = reactive({
-  isShape: false,
+  shape: undefined,
   x: 0,
   y: 0,
 });
@@ -417,7 +418,7 @@ const updateScaleHandler = (value) => {
 }
 
 watch(() => scale.value, function(newScale, prevScale) {
-  if (!aimScale.isShape) {
+  if (!aimScale.shape) {
     aimScale.x = xCoord.value / (prevScale / 100);
     aimScale.y = yCoord.value / (prevScale / 100);
   }
@@ -430,43 +431,56 @@ const defineTargetScale = (event) => {
   const shape = event.target.closest('.shape');
 
   if (!shape) {
-    aimScale.isShape = false;
+    aimScale.shape = undefined;
     aimScale.x = 0;
     aimScale.y = 0;
 
     return;
   }
 
-  // let xOuterCanvas = xCoord.value > 0 ? 
-  //   clientX < windowInnerWidth.value - (windowInnerWidth.value - xCoord.value) :
-  //   clientX > windowInnerWidth.value + xCoord.value;
-  // let yOuterCanvas = yCoord.value > 0 ?
-  //   clientY < windowInnerHeight.value - (windowInnerHeight.value - yCoord.value) :
-  //   clientY > windowInnerHeight.value + yCoord.value;
+  if (aimScale.shape == shape) return;
 
-  // if (xCoord.value > 0 && xOuterCanvas) {
-  //   xCoordAim = (xCoord.value - clientX) + xCenter;
-  // }
+  const clientX = event.clientX;
+  const clientY = event.clientY;
+  const xCenter = windowInnerWidth.value / 2;
+  const yCenter = windowInnerHeight.value / 2;
+  let xOuterCanvas = xCoord.value > 0 ? 
+    clientX < windowInnerWidth.value - (windowInnerWidth.value - xCoord.value) :
+    clientX > windowInnerWidth.value + xCoord.value;
+  let yOuterCanvas = yCoord.value > 0 ?
+    clientY < windowInnerHeight.value - (windowInnerHeight.value - yCoord.value) :
+    clientY > windowInnerHeight.value + yCoord.value;
+  let xCoordAim = 0;
+  let yCoordAim = 0;
 
-  // if (yCoord.value > 0 && yOuterCanvas) {
-  //   yCoordAim = (yCoord.value - clientY) + yCenter
-  // }
+  aimScale.shape = shape;
 
-  // if (xCoord.value <= 0 && xOuterCanvas) {
-  //   xCoordAim = (xCoord.value + (windowInnerWidth.value - clientX)) - xCenter;
-  // }
+  if (xCoord.value > 0 && xOuterCanvas) {
+    xCoordAim = xCoord.value + ((xCenter - clientX));
+  }
 
-  // if (!xOuterCanvas) {
-  //   xCoordAim = xCenter - (Math.abs(xCoord.value - clientX));
-  // }
+  if (xCoord.value <= 0 && xOuterCanvas) {
+    xCoordAim = xCoord.value - ((xCenter - (windowInnerWidth.value - clientX)));
+  }
 
-  // if (yCoord.value <= 0 && xOuterCanvas) {
-  //   yCoordAim = (yCoord.value + (windowInnerHeight.value - clientY)) - yCenter;
-  // }
+  if (!xOuterCanvas) {
+    xCoordAim = xCenter - (Math.abs(xCoord.value - clientX));
+  }
 
-  // if (!yOuterCanvas) {
-  //   yCoordAim = yCenter - (Math.abs(yCoord.value - clientY));
-  // }
+  if (yCoord.value > 0 && yOuterCanvas) {
+    yCoordAim = yCoord.value + ((yCenter - clientY));
+  }
+
+  if (yCoord.value <= 0 && xOuterCanvas) {
+    yCoordAim = yCoord.value - ((yCenter - (windowInnerHeight.value - clientY)));
+  }
+
+  if (!yOuterCanvas) {
+    yCoordAim = yCenter - (Math.abs(yCoord.value - clientY));
+  }
+
+  aimScale.x = xCoordAim / (scale.value / 100);
+  aimScale.y = yCoordAim / (scale.value / 100);
 }
 
 const startGrabbingHandler = (event) => {
