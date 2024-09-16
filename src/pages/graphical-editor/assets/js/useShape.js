@@ -18,6 +18,7 @@ export function useShape(emits, props) {
     let resizingFrame;
     let initialAngle = 0;
     let initialMouseAngle = 0;
+    let centerX, centerY;
 
     // Получение трансформаций translate и scale
     const updateCanvasScale = () => {
@@ -175,12 +176,12 @@ export function useShape(emits, props) {
     const startRotating = (event) => {
         event.preventDefault();
         isRotating.value = true;
+        const boundingBox = event.target.getBoundingClientRect();
+        centerX = boundingBox.left + boundingBox.width / 2;
+        centerY = boundingBox.top + boundingBox.height / 2;
 
         const clientX = event.clientX || event.touches[0].clientX;
         const clientY = event.clientY || event.touches[0].clientY;
-        const centerX = (props.params.x + props.params.width / 2);
-        const centerY = (props.params.y + props.params.height / 2);
-
         initialAngle = props.params.rotation || 0;
         initialMouseAngle = Math.atan2(clientY - centerY, clientX - centerX) * (180 / Math.PI);
 
@@ -195,9 +196,6 @@ export function useShape(emits, props) {
         if (isRotating.value) {
             const clientX = event.clientX || event.touches[0].clientX;
             const clientY = event.clientY || event.touches[0].clientY;
-
-            const centerX = (props.params.x + props.params.width / 2);
-            const centerY = (props.params.y + props.params.height / 2);
 
             let currentMouseAngle = Math.atan2(clientY - centerY, clientX - centerX) * (180 / Math.PI);
             let angle = initialAngle + (currentMouseAngle - initialMouseAngle);
