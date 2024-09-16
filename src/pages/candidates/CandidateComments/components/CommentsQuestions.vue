@@ -133,7 +133,7 @@ const showQuestions = () => {
   white-space: pre-wrap;
   font-size: 13px;
   margin-top: 10px;
-  word-break: break-all;
+  word-break: break-word;
 }
 
 /* Transition */
