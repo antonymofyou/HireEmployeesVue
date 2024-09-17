@@ -25,3 +25,30 @@ export function makeDebouncedFn(fn, ms = 1000) {
 
   return { debouncedFn, unSubscribe };
 }
+
+/**
+ * Перевод минут в формат \d\d:\d\d
+ * @param {Number|String} minutes - Минуты
+ * @returns {String} - Отформатированное значение
+ */
+export function convertMinsToHrsMins(minutes) {
+  const correctMinutes = Number(minutes);
+
+  let h = Math.floor(correctMinutes / 60);
+  let m = correctMinutes % 60;
+
+  h = h < 10 ? '0' + h : h; 
+  m = m < 10 ? '0' + m : m; 
+
+  return h + ':' + m;
+}
+
+/**
+ * Перевод формата \d\d:\d\d в формат минут в виде числа
+ * @param {String} - Время вида \d\d:\d\d
+ * @returns {Number} - Минуты
+ */
+export function convertHrsMinsToMins(hoursMinutes) {
+  const [hours, minutes] = hoursMinutes.split(':');
+  return Number(hours) * 60 + Number(minutes);
+}

@@ -1,135 +1,135 @@
 <template>
   <div class="day">
     <div class="day__header">
-      <span class="day__title day__highlight">
-        {{ formatDate(props.day.date) }}
-      </span>
+      <div class="day__general">
+        <div class="day__header-start">
+          <div class="day__date">
+            {{ formatDate(props.day.date) }}
+          </div>
+        </div>
+  
+        <div class="day__weekend-status">
+          <label>
+            Вых.
+            <input
+              :disabled="!props.isEditing"
+              :form="currentDayFormId"
+              v-model="editDay.isWeekend"
+              checked
+              type="checkbox"
+            />
+          </label>
+        </div>
+      </div>
+
+      <div class="day__header-end">
+        <div class="day__spent-time-block">
+          <label>
+            Отработано:
+            <input
+              v-model="editDay.spentTime"
+              :disabled="!props.isEditing"
+              :form="currentDayFormId"
+              pattern="\d\d:\d\d"
+              class="day__time-input"
+              type="text"
+              value="03:10"
+              @keydown="handleSpentTimeKeyDown"
+            >
+          </label>
+        </div>
+
+        <div class="day-actions">
+          <ButtonIcon
+            v-if="props.isEditing"
+            :form="currentDayFormId"
+            class="button-icon"
+          >
+            <template #icon>
+              <SaveIcon
+                class="button-icon__icon button-icon__icon--save"
+              />
+            </template>
+          </ButtonIcon>
+  
+          <ButtonIcon
+            v-else
+            class="button-icon"
+            @click="handleClickEditButton"
+          >
+            <template #icon>
+              <EditIcon
+                class="button-icon__icon"
+              />
+            </template>
+          </ButtonIcon>
+  
+          <ButtonIcon
+            class="button-icon"
+            @click="handleClickDeleteButton"
+          >
+            <template #icon>
+              <DeleteIcon
+                class="button-icon__icon button-icon__icon--delete"
+              />
+            </template>
+          </ButtonIcon>
+        </div>
+      </div>     
     </div>
 
     <div class="day__body">
-      <div class="day__periods">
-        <TransitionGroup name="period-tr-group">
-          <PeriodItem
-            v-for="period in props.periods"
-            :key="period.periodId"
-            :period-id="period.periodId"
-            :start="period.periodStart"
-            :end="period.periodEnd"
-            :is-active="props.activePeriodId === period.periodId"
-            @select="handleSelectPeriodItem"
-            @delete="handleDeletePeriodItem"
+      <div class="day-periods">
+        <span class="day-periods__title">
+          Планируемое время
+        </span>
+
+        <div class="day-periods__list">
+          <TransitionGroup name="period-tr-group">
+            <PeriodItem
+              v-for="period in props.periods"
+              :key="period.periodId"
+              :period-id="period.periodId"
+              :start="period.periodStart"
+              :end="period.periodEnd"
+              :is-active="props.activePeriodId === period.periodId"
+              @select="handleSelectPeriodItem"
+              @delete="handleDeletePeriodItem"
+              />
+  
+            <AddButton
+              key="add-button"
+              @click="handleClickAddButtonPeriod"
             />
-
-          <AddButton
-            key="add-button"
-            @click="handleClickAddButtonPeriod"
-          />
-        </TransitionGroup>
-
+          </TransitionGroup>
+        </div>
       </div>
 
-      <div>
+      <div class="day-info">
+        <span class="day-info__title">
+          Отчёт:
+        </span>
+
         <form
           :id="currentDayFormId"
-          class="edit-form"
           @submit.prevent="handleEditFormSubmit"
         >
-          <div class="edit-form__block edit-form__block--horizontal edit-form__block--items-center">
-            <div class="edit-form__row edit-form__row--extra-small">
-              <label
-                class="edit-form__label"
-              >
-                Выходной:
-                <input
-                  v-model="editDay.isWeekend"
-                  :disabled="!props.isEditing"
-                  type="checkbox"
-                >
-              </label>
-            </div>
-
-            <div class="edit-form__row edit-form__row--small">
-              <label
-                class="edit-form__label edit-form__label--vertical"
-              >
-                Рабочий день (минуты):
-                <InputSimple
-                  v-model.numbers-only="editDay.spentTime"
-                  :disabled="!props.isEditing || isRestDisabled"
-                  class="day__input"
-                  placeholder="Длина рабочего дня"
-                  pattern="\d+"
-                />
-              </label>
-            </div>
-          </div>
-
-          <div class="edit-form__block edit-form__block--horizontal">
-            <div class="edit-form__row">
-              <label
-                class="edit-form__label edit-form__label--vertical"
-              >
-                Текст отчёта:
-                <InputSimple
-                  v-model="editDay.report"
-                  :disabled="!props.isEditing || isRestDisabled"
-                  :is-auto-size="true"
-                  input-type="textarea"
-                  class="day__input day__input--textarea"
-                  placeholder="Текст отчёта"
-                />
-              </label>
-            </div>
-          </div>
-
-          <span
-            v-if="props.errorMessage"
-            class="edit-form__error"
-          >
-            {{ props.errorMessage }}
-          </span>
+          <InputSimple
+            v-model="editDay.report"
+            :disabled="!props.isEditing"
+            :is-auto-size="true"
+            class="day-info__report-input"
+            input-type="textarea"
+          />
         </form>
+
+        <span
+          v-if="props.errorMessage"
+          class="day-info__error"
+        >
+          {{ props.errorMessage }}
+        </span>
       </div>
-    </div>
-
-    <div
-      v-if="props.isAllowEdit"
-      class="day__footer"
-    >
-      <ButtonIcon
-        v-if="props.isEditing"
-        :form="currentDayFormId"
-        class="button-icon"
-      >
-        <template #icon>
-          <SaveIcon
-            class="button-icon__icon button-icon__icon--save"
-          />
-        </template>
-      </ButtonIcon>
-
-      <ButtonIcon
-        v-else
-        class="button-icon"
-        @click="handleClickEditButton"
-      >
-        <template #icon>
-          <EditIcon
-            class="button-icon__icon"
-          />
-        </template>
-      </ButtonIcon>
-
-      <ButtonIcon
-        class="button-icon"
-        @click="handleClickDeleteButton"
-      >
-        <template #icon>
-          <DeleteIcon
-            class="button-icon__icon button-icon__icon--delete"
-          />
-        </template>
-      </ButtonIcon>
     </div>
   </div>
 </template>
@@ -148,6 +148,7 @@ import SaveIcon from '@/assets/icons/save.svg?component';
 import AddButton from '../AddButton.vue';
 import PeriodItem from '../periods/PeriodItem.vue';
 import InputSimple from '@/components/InputSimple.vue';
+import { convertHrsMinsToMins, convertMinsToHrsMins } from '../../js/utils';
 
 const props = defineProps({
   // Объект дня
@@ -216,65 +217,33 @@ const currentDayFormId = computed(() => {
 // Фабрика для нового дня
 const initNewDay = () => ({
   isWeekend: props.day.isWeekend === '1',
-  spentTime: String(props.day.spentTime),
+  spentTime: convertMinsToHrsMins(props.day.spentTime) || '00:00',
   report: props.day.report,
 });
 
 // Состояние формы
 const editDay = ref(null);
 
+// При изменении дня, статуса редиктирования - инитаем новый день заново
 watch([() => props.isEditing, () => props.day], () => {
   editDay.value = initNewDay();
 }, {
   immediate: true
 });
 
-// Дизейблим ли остальные поля, если выбран выходной день
-const isRestDisabled = computed(() => {
-  // return editDay.value.isWeekend;
-  return false;
-});
-
-// Задизейблена ли кнопка отправки формы редактирования дня
-const isSubmitEditButtonDisabled = computed(() => {
-  let result = true;
-  
-  const editDayKeys = Object.keys(editDay.value).filter((key) => {
-    // Если задизейблено всё, кроме выбора выходного - будем проверять только его
-    if (isRestDisabled.value) return key === 'isWeekend';
-    return true;
-  });
-
-  // [x] Если ничего не поменялось - дизейблим
-
-  for (const key of editDayKeys) {
-    const currentValue = editDay.value[key];
-    const oldValue = props[key];
-
-    if (currentValue !== oldValue) {
-      result = false;
-    }
-  }
-
-  // [x] Если хоть что-то пустое - дизейблим
-
-  for (const key of editDayKeys) {
-    const value = editDay.value[key];
-
-    if (typeof value !== 'boolean' && value.length === 0) {
-      result = true;
-      break;
-    }
-  }
-
-  return result;
+// Для масок на инпуты
+watch(() => editDay.value.spentTime, (newVal, prevVal) => {
+  editDay.value.spentTime = maskifyInputValueString(newVal, prevVal);
 });
 
 /**
- * Обработка отправки формы редактирования дня
+ * Обработка подтверждения изменения дня
  */
 function handleEditFormSubmit() {
-  emit('dayEditSubmit', editDay.value);
+  emit('dayEditSubmit', {
+    ...editDay.value,
+    spentTime: convertHrsMinsToMins(editDay.value.spentTime)
+  });
 }
 
 /**
@@ -300,6 +269,45 @@ function handleSelectPeriodItem(periodEmitted) {
     ...periodEmitted,
     dayId: props.day.dayId
   });
+}
+
+/**
+ * Обработчик нажатий клавиш внутри инпута рабочего времени
+ * @param {Event} e - Событие
+ */
+function handleSpentTimeKeyDown(e) {
+  const char = e.key;
+
+  const isCharLetter = char.length === 1 && /\w/.test(char) && !/\d/.test(char);
+  
+  // Если вводимое значение не число - то не даём ввести его
+  if (isCharLetter) {
+    e.preventDefault();
+    return;
+  }
+}
+
+/**
+ * Маска для инпутов времени
+ * @param {String} newVal - Новое значение
+ * @param {String} prevVal - Предыдущее значение
+ * @returns {String} - Маска
+ */
+ function maskifyInputValueString(newVal, prevVal) {
+  // Чтобы нельзя было вводить вида 25:34 и т.д.
+  if (Number(newVal.split(':')[0]) > 23) {
+    return '23:';
+  }
+
+  if (newVal.length === 2 && prevVal.length < newVal.length) {
+    return newVal += ":";
+  }
+
+  if (newVal.length > 5) {
+    return prevVal;
+  }
+
+  return newVal;
 }
 
 /**
@@ -332,9 +340,18 @@ function formatDate(date) {
     year: 'numeric',
     month: '2-digit',
     day: '2-digit',
-    weekday: 'long'
   });
-  return formatter.format(new Date(date));
+
+  const currentDate = new Date(date);
+
+  let result = formatter.format(currentDate);
+
+  const weekDays = ['Вс', 'Пн', 'Вт', 'Ср', 'Чт', 'Пт', 'Сб'];
+  const currentWeekday = weekDays[currentDate.getDay()];
+
+  result += ` (${currentWeekday})`;
+
+  return result;
 }
 </script>
 
@@ -350,38 +367,95 @@ function formatDate(date) {
   font-weight: bold;
 }
 
+/* Header */
 .day__header {
-  text-align: center;
-  margin-bottom: 7px;
-}
-
-.day__title {
-  font-size: 18px;
-}
-
-.day__footer {
   display: flex;
-  justify-content: flex-end;
+  justify-content: space-between;
+  margin-bottom: 20px;
+}
+
+.day__header-end {
+  display: flex;
   gap: 10px;
 }
 
-.day__body {
-  display: flex;
-  flex-direction: column;
-  row-gap: 10px;
-  padding-bottom: 10px;
+.day__spent-time-block {
+  padding-right: 10px;
+  border-right: 1px solid var(--cornflower-blue);
 }
 
-.day__periods {
+/* Day actions */
+.day-actions {
   display: flex;
+  gap: 10px;
+}
+
+.day__date {
+  padding-right: 10px;
+  font-weight: 600;
+  border-right: 1px solid var(--cornflower-blue);
+}
+
+.day__general {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding-right: 10px;
+  border-right: 1px solid var(--cornflower-blue);
+}
+
+.day__time-input {
+  max-width: 60px;
+}
+
+.day__body {
+  display: grid;
+  grid-template-columns: 1.3fr 2fr;
   gap: 20px;
+  margin-bottom: 10px;
+}
+
+/* Day periods */
+.day-periods {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
   flex-wrap: wrap;
 }
 
-.day__info {
+.day-periods__title,
+.day-info__title {
+  font-size: 18px;
+  font-weight: 600;
+}
+
+.day-info__error {
+  font-size: 15px;
+  color: var(--cinnabar);
+}
+
+.day-periods__list {
+  padding: 10px;
+  border: 2px solid var(--cornflower-blue);
+  border-radius: 10px;
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+/* Day info */
+.day-info {
   display: flex;
   flex-direction: column;
-  row-gap: 10px;
+  gap: 10px;
+}
+
+:deep(.day-info__report-input textarea) {
+  outline: 2px solid var(--cornflower-blue);
+}
+
+:deep(.day-info__report-input textarea:focus) {
+  outline: 3px solid var(--cornflower-blue);
 }
 
 .day__text {
