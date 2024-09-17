@@ -24,6 +24,7 @@
         v-model.trim="periodStartTimeModel"
         placeholder="Начало (часы:минуты)"
         pattern="\d{2}:\d{2}"
+        @keydown="handlePeriodTimeKeyDown"
         @input="clearCustomErrors"
         @invalid="showReadableMessage"
       />
@@ -36,6 +37,7 @@
         v-model.trim="periodEndTimeModel"
         placeholder="Конец (часы:минуты)"
         pattern="\d{2}:\d{2}"
+        @keydown="handlePeriodTimeKeyDown"
         @input="clearCustomErrors"
         @invalid="showReadableMessage"
       />
@@ -55,6 +57,8 @@
 
 <script setup>
 import { watch } from 'vue';
+
+import { maskifyValueToTime } from '../../js/utils';
 
 import InputSimple from '@/components/InputSimple.vue';
 import ButtonMain from '@/components/ButtonMain.vue';
@@ -99,11 +103,11 @@ const periodEndTimeModel = defineModel('periodEnd');
 
 // Для масок на инпуты
 watch(periodStartTimeModel, (newVal, prevVal) => {
-  periodStartTimeModel.value = maskifyInputValueString(newVal, prevVal);
+  periodStartTimeModel.value = maskifyValueToTime(newVal, prevVal);
 });
 
 watch(periodEndTimeModel, (newVal, prevVal) => {
-  periodEndTimeModel.value = maskifyInputValueString(newVal, prevVal);
+  periodEndTimeModel.value = maskifyValueToTime(newVal, prevVal);
 });
 
 const emit = defineEmits(['submit']);
@@ -149,26 +153,20 @@ function isFieldDisabled(fieldName) {
 }
 
 /**
- * Маска для инпутов времени
- * @param {String} newVal - Новое значение
- * @param {String} prevVal - Предыдущее значение
- * @returns {String} - Маска
+ * Обработчик нажатий клавиш внутри инпута времени периода
+ * @param {KeyboardEvent} e - Событие
  */
-function maskifyInputValueString(newVal, prevVal) {
-  // Чтобы нельзя было вводить вида 25:34 и т.д.
-  if (Number(newVal.split(':')[0]) > 23) {
-    return '23:';
-  }
+ function handlePeriodTimeKeyDown(e) {
+  const char = e.key;
 
-  if (newVal.length === 2 && prevVal.length < newVal.length) {
-    return newVal += ":";
+  const isInCombination = e.ctrlKey;
+  const isCharLetter = char.length === 1 && /\w/.test(char) && !/\d/.test(char);
+  
+  // Если вводимое значение не число - то не даём ввести его (разрешаем комбинации ctrl + a и т.д.)
+  if (!isInCombination && isCharLetter) {
+    e.preventDefault();
+    return;
   }
-
-  if (newVal.length > 5) {
-    return prevVal;
-  }
-
-  return newVal;
 }
 </script>
 

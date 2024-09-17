@@ -52,3 +52,26 @@ export function convertHrsMinsToMins(hoursMinutes) {
   const [hours, minutes] = hoursMinutes.split(':');
   return Number(hours) * 60 + Number(minutes);
 }
+
+/**
+ * Маска для инпутов времени
+ * @param {String} newVal - Новое значение
+ * @param {String} prevVal - Предыдущее значение
+ * @returns {String} - Маска
+ */
+export function maskifyValueToTime(newVal, prevVal) {
+  // Чтобы нельзя было вводить вида 25:34 и т.д.
+  if (Number(newVal.split(':')[0]) > 23) {
+    return '23:';
+  }
+
+  if (newVal.length === 2 && prevVal.length < newVal.length) {
+    return newVal += ":";
+  }
+
+  if (newVal.length > 5) {
+    return prevVal;
+  }
+
+  return newVal;
+}

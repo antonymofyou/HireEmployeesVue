@@ -15,8 +15,8 @@
               v-model="editDay.isWeekend"
               checked
               type="checkbox"
-            />
-
+              />
+              
             <span class="day__weekend-status-info">
               ({{ editDay.isWeekend ? 'Да' : 'Нет' }})
             </span>
@@ -41,42 +41,12 @@
           </label>
         </div>
 
-        <div class="day-actions">
-          <ButtonIcon
-            v-if="props.isEditing"
-            :form="currentDayFormId"
-            class="button-icon"
-          >
-            <template #icon>
-              <SaveIcon
-                class="button-icon__icon button-icon__icon--save"
-              />
-            </template>
-          </ButtonIcon>
-  
-          <ButtonIcon
-            v-else
-            class="button-icon"
-            @click="handleClickEditButton"
-          >
-            <template #icon>
-              <EditIcon
-                class="button-icon__icon"
-              />
-            </template>
-          </ButtonIcon>
-  
-          <ButtonIcon
-            class="button-icon"
-            @click="handleClickDeleteButton"
-          >
-            <template #icon>
-              <DeleteIcon
-                class="button-icon__icon button-icon__icon--delete"
-              />
-            </template>
-          </ButtonIcon>
-        </div>
+        <DayActions
+          :form-id="currentDayFormId"
+          :is-editing="props.isEditing"
+          @edit-click="handleClickEditButton"
+          @delete-click="handleClickDeleteButton"
+        />
       </div>     
     </div>
 
@@ -97,7 +67,7 @@
               :is-active="props.activePeriodId === period.periodId"
               @select="handleSelectPeriodItem"
               @delete="handleDeletePeriodItem"
-              />
+            />
   
             <AddButton
               :disabled="!props.isEditing"
@@ -142,16 +112,13 @@
 
 import { computed, nextTick, ref, watch } from 'vue';
 
-import ButtonIcon from '@/components/ButtonIcon.vue';
-
-import EditIcon from '@/assets/icons/edit.svg?component';
-import DeleteIcon from '@/assets/icons/delete.svg?component';
-import SaveIcon from '@/assets/icons/save.svg?component';
+import InputSimple from '@/components/InputSimple.vue';
 
 import AddButton from '../AddButton.vue';
 import PeriodItem from '../periods/PeriodItem.vue';
-import InputSimple from '@/components/InputSimple.vue';
-import { convertHrsMinsToMins, convertMinsToHrsMins } from '../../js/utils';
+import DayActions from './DayActions.vue';
+
+import { convertHrsMinsToMins, convertMinsToHrsMins, maskifyValueToTime } from '../../js/utils';
 
 const props = defineProps({
   // Объект дня
@@ -238,7 +205,7 @@ watch([() => props.isEditing, () => props.day], () => {
 watch(() => editDay.value.spentTime, async (newVal, prevVal) => {
   // Дожидаемся ререндера, и потом - меняем обратно
   await nextTick();
-  editDay.value.spentTime = maskifyInputValueString(newVal, prevVal);
+  editDay.value.spentTime = maskifyValueToTime(newVal, prevVal);
 });
 
 /**
@@ -278,41 +245,19 @@ function handleSelectPeriodItem(periodEmitted) {
 
 /**
  * Обработчик нажатий клавиш внутри инпута рабочего времени
- * @param {Event} e - Событие
+ * @param {KeyboardEvent} e - Событие
  */
 function handleSpentTimeKeyDown(e) {
   const char = e.key;
 
+  const isInCombination = e.ctrlKey;
   const isCharLetter = char.length === 1 && /\w/.test(char) && !/\d/.test(char);
   
-  // Если вводимое значение не число - то не даём ввести его
-  if (isCharLetter) {
+  // Если вводимое значение не число - то не даём ввести его (разрешаем комбинации ctrl + a и т.д.)
+  if (!isInCombination && isCharLetter) {
     e.preventDefault();
     return;
   }
-}
-
-/**
- * Маска для инпутов времени
- * @param {String} newVal - Новое значение
- * @param {String} prevVal - Предыдущее значение
- * @returns {String} - Маска
- */
- function maskifyInputValueString(newVal, prevVal) {
-  // Чтобы нельзя было вводить вида 25:34 и т.д.
-  if (Number(newVal.split(':')[0]) > 23) {
-    return '23:';
-  }
-
-  if (newVal.length === 2 && prevVal.length < newVal.length) {
-    return newVal += ":";
-  }
-
-  if (newVal.length > 5) {
-    return prevVal;
-  }
-
-  return newVal;
 }
 
 /**
@@ -423,12 +368,6 @@ function formatDate(date) {
   .day-actions {
     justify-content: center;
   }
-}
-
-/* Day actions */
-.day-actions {
-  display: flex;
-  gap: 10px;
 }
 
 .day__date {
@@ -606,35 +545,5 @@ function formatDate(date) {
 
 .period-tr-group-leave-active {
   position: absolute;
-}
-
-/* Buttons */
-.button-icon:disabled {
-  pointer-events: none;
-}
-
-.button-icon:not(:disabled) {
-  cursor: pointer;
-
-  &:hover {
-    opacity: 0.7;
-  }
-  
-  &:active {
-    opacity: 0.3;
-  }
-}
-
-.button-icon__icon {
-  width: 20px;
-  height: 20px;
-}
-
-.button-icon__icon--save {
-  transform: scale(1.3);
-}
-
-.button-icon__icon--delete {
-  transform: scale(1.3);
 }
 </style>
