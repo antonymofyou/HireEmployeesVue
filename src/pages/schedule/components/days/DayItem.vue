@@ -404,7 +404,6 @@ function formatDate(date) {
   display: grid;
   grid-template-columns: 1.3fr 2fr;
   gap: 20px;
-  margin-bottom: 10px;
 }
 
 @media (max-width: 650px) {
