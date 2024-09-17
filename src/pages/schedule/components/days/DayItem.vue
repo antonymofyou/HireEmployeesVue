@@ -319,10 +319,6 @@ function formatDate(date) {
   }
 }
 
-.day__highlight {
-  font-weight: bold;
-}
-
 /* Header */
 .day__header {
   display: flex;
@@ -473,61 +469,6 @@ function formatDate(date) {
   font-size: 14px;
   padding: 5px;
   overflow: hidden;
-}
-
-/* Edit form */
-.edit-form {
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  gap: 10px;
-  flex-wrap: wrap;
-}
-
-.edit-form__block {
-  width: 100%;
-  flex-wrap: wrap;
-}
-
-.edit-form__block--horizontal {
-  display: flex;
-  justify-content: center;
-  gap: 20px;
-}
-
-.edit-form__block--items-center {
-  align-items: center;
-}
-
-.edit-form__error {
-  color: var(--cinnabar);
-  font-size: 14px;
-}
-
-.edit-form__row {
-  flex-grow: 1;
-  display: flex;
-  justify-content: center;
-}
-
-.edit-form__row--extra-small {
-  max-width: 110px;
-}
-
-.edit-form__row--small {
-  max-width: 170px;
-}
-
-.edit-form__label {
-  font-size: 15px;
-}
-
-.edit-form__label--vertical {
-  display: flex;
-  flex-direction: column;
-  row-gap: 5px;
-  width: 100%;
-  max-width: 400px;
 }
 
 /* Period transition group */

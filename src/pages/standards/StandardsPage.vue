@@ -1,10 +1,10 @@
 <template>
-  <TheHeader />
-  <main>
-      <h1>
-          Стандарты
-      </h1>
-  </main>
+    <TheHeader />
+    <main>
+        <h1>
+            Стандарты
+        </h1>
+    </main>
 </template>
 
 <script setup>
