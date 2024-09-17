@@ -123,12 +123,12 @@ const commentsBlock = ref(null);
 // ID созданного комментария
 const createdCommentId = ref(null);
 
-// Формируем строку вида 'for_otklik:id' или 'for_candidate'
+// Формируем строку вида "for_otklik:id" или "for_candidate"
 const commentFor = computed(
   () => `for_${props.respondId ? 'otklik:' + props.respondId : 'candidate'}`
 );
 
-// Заголовок блока, если передано ID вакансии - 'Комментарии на отклик кандидата', иначе 'Комментарии на кандидата'
+// Заголовок блока, если передано ID вакансии - "Комментарии на отклик кандидата", иначе "Комментарии на кандидата"
 const headingText = computed(() => {
   return props.respondId
     ? 'Комментарии на отклик кандидата'
@@ -184,10 +184,12 @@ const removeCommentObject = reactive({
   dataArg: '',
   callback: (id) => {
     return () => {
-      comments.value = comments.value.filter((comment) => comment.id !== id);
-    };
+      comments.value = comments.value.filter(
+      (comment) => comment.id !== id
+    );
+    }
   },
-});
+})
 
 // Создание комментария
 const createComment = (payload) => {
@@ -244,7 +246,7 @@ const showComments = () => {
   show.value = !show.value;
 };
 
-// При изменении значения свойства 'createdCommentId' обновляем положение скролла в конце блока
+// При изменении значения свойства "createdCommentId" обновляем положение скролла в конце блока
 watch(
   () => props.receivedObject,
   () => {
