@@ -16,7 +16,6 @@
       :placeholder="placeholder"
       class="input__field"
       ref="inputRef"
-      @keypress="applyModifiers"
       @keydown="autoSizeInput"
       @input="updateModelValue($event.target.value)"
     />
@@ -32,11 +31,6 @@ const props = defineProps({
   modelValue: {
     type: String,
     required: true,
-  },
-  modelModifiers: {
-    type: Object,
-    required: false,
-    default: () => ({})
   },
   inputType: {
     type: String,
@@ -125,21 +119,6 @@ const autoSizeInput = () => {
     inputRef.value.style.height = initialHeight.value + 'px';
     inputRef.value.style.height = inputRef.value.scrollHeight + 'px';
   });
-};
-
-/**
- * Применение модификаторов к вводимому тексту
- * @param {Event} e - Событие
- */
-const applyModifiers = (e) => {
-  if (props.modelModifiers['numbers-only']) {
-    const numbersSequense = '0123456789';
-    const enteringKey = e.key;
-  
-    if (!numbersSequense.includes(enteringKey)) {
-      e.preventDefault();
-    }
-  }
 };
 </script>
 

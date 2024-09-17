@@ -2,10 +2,8 @@
   <div class="day">
     <div class="day__header">
       <div class="day__general">
-        <div class="day__header-start">
-          <div class="day__date">
-            {{ formatDate(props.day.date) }}
-          </div>
+        <div class="day__date">
+          {{ formatDate(props.day.date) }}
         </div>
   
         <div class="day__weekend-status">
@@ -18,15 +16,19 @@
               checked
               type="checkbox"
             />
+
+            <span class="day__weekend-status-info">
+              ({{ editDay.isWeekend ? 'Да' : 'Нет' }})
+            </span>
           </label>
         </div>
       </div>
 
       <div class="day__header-end">
         <div class="day__spent-time-block">
-          <label>
+          <label class="day__spent-time-label">
             Отработано:
-            <input
+            <InputSimple
               v-model="editDay.spentTime"
               :disabled="!props.isEditing"
               :form="currentDayFormId"
@@ -35,7 +37,7 @@
               type="text"
               value="03:10"
               @keydown="handleSpentTimeKeyDown"
-            >
+            />
           </label>
         </div>
 
@@ -98,6 +100,7 @@
               />
   
             <AddButton
+              :disabled="!props.isEditing"
               key="add-button"
               @click="handleClickAddButtonPeriod"
             />
@@ -137,7 +140,7 @@
 <script setup>
 /* @component Сущность дня сотрудника */
 
-import { computed, ref, watch } from 'vue';
+import { computed, nextTick, ref, watch } from 'vue';
 
 import ButtonIcon from '@/components/ButtonIcon.vue';
 
@@ -232,7 +235,9 @@ watch([() => props.isEditing, () => props.day], () => {
 });
 
 // Для масок на инпуты
-watch(() => editDay.value.spentTime, (newVal, prevVal) => {
+watch(() => editDay.value.spentTime, async (newVal, prevVal) => {
+  // Дожидаемся ререндера, и потом - меняем обратно
+  await nextTick();
   editDay.value.spentTime = maskifyInputValueString(newVal, prevVal);
 });
 
@@ -363,6 +368,12 @@ function formatDate(date) {
   border-radius: 10px;
 }
 
+@media (max-width: 330px) {
+  .day {
+    padding: 10px;
+  }
+}
+
 .day__highlight {
   font-weight: bold;
 }
@@ -370,8 +381,16 @@ function formatDate(date) {
 /* Header */
 .day__header {
   display: flex;
+  flex-wrap: wrap;
+  column-gap: 20px;
+  row-gap: 15px;
   justify-content: space-between;
   margin-bottom: 20px;
+}
+
+.day__weekend-status-info {
+  font-size: 14px;
+  color: #777777;
 }
 
 .day__header-end {
@@ -384,6 +403,28 @@ function formatDate(date) {
   border-right: 1px solid var(--cornflower-blue);
 }
 
+.day__spent-time-label {
+  display: flex;
+  align-items: center;
+  gap: 15px;
+}
+
+
+@media (max-width: 350px) {
+  .day__spent-time-block {
+    padding: 0;
+    border: none
+  }
+
+  .day__header-end {
+    flex-direction: column;
+  }
+
+  .day-actions {
+    justify-content: center;
+  }
+}
+
 /* Day actions */
 .day-actions {
   display: flex;
@@ -394,6 +435,9 @@ function formatDate(date) {
   padding-right: 10px;
   font-weight: 600;
   border-right: 1px solid var(--cornflower-blue);
+  height: 100%;
+  display: flex;
+  align-items: center;
 }
 
 .day__general {
@@ -404,8 +448,21 @@ function formatDate(date) {
   border-right: 1px solid var(--cornflower-blue);
 }
 
-.day__time-input {
-  max-width: 60px;
+@media (max-width: 710px) {
+  .day__header {
+    justify-content: center;
+  }
+
+  .day__general {
+    padding: 0;
+    border: none;
+  }
+}
+
+:deep(.day__time-input input) {
+  width: 60px;
+  padding: 4px;
+  text-align: center;
 }
 
 .day__body {
@@ -413,6 +470,12 @@ function formatDate(date) {
   grid-template-columns: 1.3fr 2fr;
   gap: 20px;
   margin-bottom: 10px;
+}
+
+@media (max-width: 650px) {
+  .day__body {
+    grid-template-columns: 1fr;
+  }
 }
 
 /* Day periods */
@@ -562,11 +625,16 @@ function formatDate(date) {
   }
 }
 
+.button-icon__icon {
+  width: 20px;
+  height: 20px;
+}
+
 .button-icon__icon--save {
-  transform: scale(1.75);
+  transform: scale(1.3);
 }
 
 .button-icon__icon--delete {
-  transform: scale(1.75);
+  transform: scale(1.3);
 }
 </style>

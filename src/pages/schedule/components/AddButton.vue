@@ -21,6 +21,10 @@ import IconAdd from "@/assets/icons/add.svg?component";
   height: 23px;
 }
 
+.add-button:disabled {
+  pointer-events: none;
+}
+
 .add-button:hover .add-button__icon {
   transform: scale(1.2);
   opacity: 0.8;
