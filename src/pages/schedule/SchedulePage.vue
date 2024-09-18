@@ -339,9 +339,6 @@ onUnmounted(() => {
   document.removeEventListener('click', helpers.resetActivePeriod);
 });
 
-// Границы расписания
-const todayDate = new Date();
-
 onMounted(() => {
   requests.fetchSchedule();
 });
