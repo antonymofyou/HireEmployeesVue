@@ -16,7 +16,6 @@
       :placeholder="placeholder"
       class="input__field"
       ref="inputRef"
-      @keydown="autoSizeInput"
       @input="updateModelValue($event.target.value)"
     />
   </div>
@@ -60,11 +59,6 @@ const props = defineProps({
   placeholder: {
     type: String,
   },
-  isAutoSize: {
-    type: Boolean,
-    required: false,
-    default: false
-  }
 });
 
 // Обновление селекта в родителе
@@ -77,23 +71,6 @@ const emit = defineEmits(['update:modelValue']);
 const updateModelValue = (value) => {
   emit('update:modelValue', value);
 };
-
-// Реф на дом ноду инпута
-const inputRef = ref(null);
-// Изначальная высота ноды инпута
-const initialHeight = ref(null);
-
-// Синхронизируем высоту под содержимое инпута
-watchEffect(() => {
-  if (!inputRef.value || !props.isAutoSize || !props.modelValue) return;
-  autoSizeInput();
-});
-
-// Ставим изначальную высоту
-onMounted(() => {
-  if (!inputRef.value) return;
-  initialHeight.value = inputRef.value.clientHeight;
-});
 
 // Опциональные классы для инпута
 const inputClass = computed(() => ({
@@ -108,18 +85,6 @@ const inputClass = computed(() => ({
 const labelClass = computed(() => ({
   'input__label--bold': props.isLabelBold,
 }))
-
-/**
- * Сделать высоту инпута под его содержимое
- */
-const autoSizeInput = () => {
-  if (!props.isAutoSize) return;
-
-  window.requestAnimationFrame(() => {
-    inputRef.value.style.height = initialHeight.value + 'px';
-    inputRef.value.style.height = inputRef.value.scrollHeight + 'px';
-  });
-};
 </script>
 
 <style scoped>

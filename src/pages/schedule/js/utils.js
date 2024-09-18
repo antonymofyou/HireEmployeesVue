@@ -60,17 +60,51 @@ export function convertHrsMinsToMins(hoursMinutes) {
  * @returns {String} - Маска
  */
 export function maskifyValueToTime(newVal, prevVal) {
-  // Чтобы нельзя было вводить вида 25:34 и т.д.
-  if (Number(newVal.split(':')[0]) > 23) {
-    return '23:';
+  // Часы и минуты как строки
+  const [hours, mins] = newVal.split(':');
+  // Часы и минуты как числа
+  const [hoursNum, minsNum] = [hours, mins].map(Number);
+
+  // Новый вводимый символ
+  const newChar = [hours, mins].find((el) => el?.length > 2)?.at(-1);
+
+  // Чтобы всегда оставалось двоеточие
+  if (!newVal.includes(':') && prevVal.includes(':')) {
+    return `${hours.slice(0, 2)}`;
   }
 
+  // Чтобы не было возможности ввести три цифры в часе
+  if (hours.length > 2) {
+    return `${hours[0]}${hours[1]}:${newChar}`;
+  }
+
+  // Чтобы нельзя было вводить строку вида 25:34 и т.д.
+  if (hoursNum > 23) {
+    if (!mins) {
+      return '23:';
+    } else if (newChar) {
+      return `${hours[0]}${hours[1]}:${newChar}`;
+    }
+  }
+
+  // Автоматическое добавление двоеточия
   if (newVal.length === 2 && prevVal.length < newVal.length) {
     return newVal += ":";
   }
 
+  // Для ограничения по длине строки
   if (newVal.length > 5) {
     return prevVal;
+  }
+
+  // Ввод неверной первой части строки часа
+  if (hours?.[0] > 2) {
+    return '2';
+  }
+
+  // Ввод неверной первой части строки минут
+  if (mins?.[0] > 5) {
+    return `${hours}:5`;
   }
 
   return newVal;

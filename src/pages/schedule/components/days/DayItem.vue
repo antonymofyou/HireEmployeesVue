@@ -15,7 +15,7 @@
               v-model="editDay.isWeekend"
               checked
               type="checkbox"
-              />
+            />
               
             <span class="day__weekend-status-info">
               ({{ editDay.isWeekend ? 'Да' : 'Нет' }})
@@ -30,12 +30,14 @@
             Отработано:
             <InputSimple
               v-model="editDay.spentTime"
+              :placeholder="convertMinsToHrsMins(props.day.spentTime)"
               :disabled="!props.isEditing"
               :form="currentDayFormId"
               pattern="\d\d:\d\d"
               class="day__time-input"
               type="text"
               value="03:10"
+              @input="handleInputSpentTime"
               @keydown="handleSpentTimeKeyDown"
             />
           </label>
@@ -87,12 +89,11 @@
           :id="currentDayFormId"
           @submit.prevent="handleEditFormSubmit"
         >
-          <InputSimple
+          <AutoSizeTextarea
             v-model="editDay.report"
             :disabled="!props.isEditing"
             :is-auto-size="true"
             class="day-info__report-input"
-            input-type="textarea"
           />
         </form>
 
@@ -116,6 +117,8 @@ import InputSimple from '@/components/InputSimple.vue';
 
 import AddButton from '../AddButton.vue';
 import PeriodItem from '../periods/PeriodItem.vue';
+import AutoSizeTextarea from '../AutoSizeTextarea.vue';
+
 import DayActions from './DayActions.vue';
 
 import { convertHrsMinsToMins, convertMinsToHrsMins, maskifyValueToTime } from '../../js/utils';
@@ -205,8 +208,21 @@ watch([() => props.isEditing, () => props.day], () => {
 watch(() => editDay.value.spentTime, async (newVal, prevVal) => {
   // Дожидаемся ререндера, и потом - меняем обратно
   await nextTick();
-  editDay.value.spentTime = maskifyValueToTime(newVal, prevVal);
+  editDay.value.spentTime = maskifyValueToTime(String(newVal), String(prevVal));
 });
+
+/**
+ * Обработка ввода в инпут для отработанного времени
+ * @param {Event} e - Объект события
+ */
+ function handleInputSpentTime(e) {
+  const input = e.target;
+
+  // Есть ошибка в паттерне - ставим свой текст в тултип ошибки
+  if (input.validity.patternMismatch)
+    input.setCustomValidity('Введите время в формате часы:минуты');
+  else input.setCustomValidity('');
+}
 
 /**
  * Обработка подтверждения изменения дня
@@ -416,13 +432,13 @@ function formatDate(date) {
 .day-periods {
   display: flex;
   flex-direction: column;
-  gap: 10px;
+  gap: 5px;
   flex-wrap: wrap;
 }
 
 .day-periods__title,
 .day-info__title {
-  font-size: 18px;
+  font-size: 16px;
   font-weight: 600;
 }
 
@@ -444,7 +460,7 @@ function formatDate(date) {
 .day-info {
   display: flex;
   flex-direction: column;
-  gap: 10px;
+  gap: 5px;
 }
 
 :deep(.day-info__report-input textarea) {
