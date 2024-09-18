@@ -2,7 +2,7 @@
     <div
         @mousedown="startDragging($event), selectRectangle()"
         @touchstart="startDragging($event), selectRectangle()"
-        @dblclick="toggleTextEditMode"
+        @dblclick="enterTextEditMode"
         @touchend="handleTouchEnd"
         @click="selectRectangle"
         :id="props.params.id"
