@@ -8,21 +8,20 @@
       {{ labelName }}: 
     </label>
     <component
-      v-bind="$attrs"
       :is="inputType"
+      class="input__field"
       :class="inputClass"
       :id="id"
+      v-bind="$attrs"
       :value="props.modelValue"
       :placeholder="placeholder"
-      class="input__field"
-      ref="inputRef"
       @input="updateModelValue($event.target.value)"
     />
   </div>
 </template>
 
 <script setup>
-import { ref, computed, watchEffect, onMounted } from 'vue';
+import { computed } from 'vue';
 
 /* Модель для обновления, тип инпута (input или textarea), id инпута для связи с label,
 имя label, жирный ли текст инпута, жирный ли label, размер инпута */
@@ -64,10 +63,6 @@ const props = defineProps({
 // Обновление селекта в родителе
 const emit = defineEmits(['update:modelValue']);
 
-/**
- * Обработчик ввода в инпут
- * @param {String} value - Вводимое значение
- */
 const updateModelValue = (value) => {
   emit('update:modelValue', value);
 };

@@ -8,25 +8,6 @@ export function prettifyTime(time) {
 }
 
 /**
- * Функция debounce для отложенного вызова
- * @param {Function} fn - Функция для отложенного вызова
- * @param {Number} ms - Количество миллисекунд
- * @returns {Object} - Отложенная функция и функция отписки
- */
-export function makeDebouncedFn(fn, ms = 1000) {
-  let timer = null;
-
-  const debouncedFn = (...args) => {
-    clearTimeout(timer);
-    timer = setTimeout(() => fn.apply(this, args), ms);
-  };
-
-  const unSubscribe = () => clearTimeout(timer);
-
-  return { debouncedFn, unSubscribe };
-}
-
-/**
  * Перевод минут в формат \d\d:\d\d
  * @param {Number|String} minutes - Минуты
  * @returns {String} - Отформатированное значение
