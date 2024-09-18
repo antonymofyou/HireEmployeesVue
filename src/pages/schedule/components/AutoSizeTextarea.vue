@@ -6,7 +6,7 @@
   ></textarea>
 </template>
 
-<script setup lang="ts">
+<script setup>
 import { onMounted, ref, watchEffect } from 'vue';
 
 const model = defineModel({ default: '' });

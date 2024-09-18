@@ -37,7 +37,7 @@
   </div>
 </template>
 
-<script setup lang="ts">
+<script setup>
 import ButtonIcon from '@/components/ButtonIcon.vue';
 
 import EditIcon from '@/assets/icons/edit.svg?component';
