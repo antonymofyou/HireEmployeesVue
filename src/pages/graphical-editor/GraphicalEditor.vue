@@ -82,10 +82,12 @@ import MainControlButtons from './components/control-buttons/MainControlButtons.
 import TooltipControlButtons from './components/control-buttons/TooltipControlButtons.vue';
 import TheRectangle from './components/shapes/TheRectangle.vue';
 import TheArrow from './components/shapes/TheArrow.vue';
+import TheTable from './components/shapes/TheTable.vue';
 
 const shapeComponents = {
   'rectangle': TheRectangle,
-  'arrow': TheArrow
+  'arrow': TheArrow,
+  'table': TheTable
 };
 const formattedShapes = reactive({
     1: {
@@ -179,7 +181,194 @@ const formattedShapes = reactive({
         "color": "#330300",
         "zIndex": 3,
         "rotation": 0,
-    }
+    },
+    5: {
+        "id": 5,
+        "type": "table",
+        "x": 170,
+        "y": -200,
+        "width": 200,
+        "height": 100,
+        "zIndex": 1,
+        "table": {
+          "type": "doc",
+          "from": 0,
+          "to": 82,
+          "content": [
+            {
+              "type": "table",
+              "from": 0,
+              "to": 80,
+              "content": [
+                {
+                  "type": "tableRow",
+                  "from": 1,
+                  "to": 26,
+                  "content": [
+                    {
+                      "type": "tableHeader",
+                      "from": 2,
+                      "to": 10,
+                      "attrs": {
+                        "colspan": 1,
+                        "rowspan": 1,
+                        "colwidth": null
+                      },
+                      "content": [
+                        {
+                          "type": "paragraph",
+                          "from": 3,
+                          "to": 9,
+                          "content": [
+                            {
+                              "type": "text",
+                              "from": 4,
+                              "to": 8,
+                              "text": "Name"
+                            }
+                          ]
+                        }
+                      ]
+                    },
+                    {
+                      "type": "tableHeader",
+                      "from": 10,
+                      "to": 25,
+                      "attrs": {
+                        "colspan": 3,
+                        "rowspan": 1,
+                        "colwidth": null
+                      },
+                      "content": [
+                        {
+                          "type": "paragraph",
+                          "from": 11,
+                          "to": 24,
+                          "content": [
+                            {
+                              "type": "text",
+                              "from": 12,
+                              "to": 23,
+                              "text": "Description"
+                            }
+                          ]
+                        }
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "type": "tableRow",
+                  "from": 26,
+                  "to": 79,
+                  "content": [
+                    {
+                      "type": "tableCell",
+                      "from": 27,
+                      "to": 43,
+                      "attrs": {
+                        "colspan": 1,
+                        "rowspan": 1,
+                        "colwidth": null
+                      },
+                      "content": [
+                        {
+                          "type": "paragraph",
+                          "from": 28,
+                          "to": 42,
+                          "content": [
+                            {
+                              "type": "text",
+                              "from": 29,
+                              "to": 41,
+                              "text": "Cyndi Lauper"
+                            }
+                          ]
+                        }
+                      ]
+                    },
+                    {
+                      "type": "tableCell",
+                      "from": 43,
+                      "to": 53,
+                      "attrs": {
+                        "colspan": 1,
+                        "rowspan": 1,
+                        "colwidth": null
+                      },
+                      "content": [
+                        {
+                          "type": "paragraph",
+                          "from": 44,
+                          "to": 52,
+                          "content": [
+                            {
+                              "type": "text",
+                              "from": 45,
+                              "to": 51,
+                              "text": "Singer"
+                            }
+                          ]
+                        }
+                      ]
+                    },
+                    {
+                      "type": "tableCell",
+                      "from": 53,
+                      "to": 67,
+                      "attrs": {
+                        "colspan": 1,
+                        "rowspan": 1,
+                        "colwidth": null
+                      },
+                      "content": [
+                        {
+                          "type": "paragraph",
+                          "from": 54,
+                          "to": 66,
+                          "content": [
+                            {
+                              "type": "text",
+                              "from": 55,
+                              "to": 65,
+                              "text": "Songwriter"
+                            }
+                          ]
+                        }
+                      ]
+                    },
+                    {
+                      "type": "tableCell",
+                      "from": 67,
+                      "to": 78,
+                      "attrs": {
+                        "colspan": 1,
+                        "rowspan": 1,
+                        "colwidth": null
+                      },
+                      "content": [
+                        {
+                          "type": "paragraph",
+                          "from": 68,
+                          "to": 77,
+                          "content": [
+                            {
+                              "type": "text",
+                              "from": 69,
+                              "to": 76,
+                              "text": "Actress"
+                            }
+                          ]
+                        }
+                      ]
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        } 
+    },
 });
 let activeShape = reactive({
     id: undefined,
