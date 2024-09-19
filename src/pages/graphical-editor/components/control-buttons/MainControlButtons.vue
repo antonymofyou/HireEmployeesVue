@@ -55,6 +55,14 @@
                 >
                     <ArrowRightThin />
                 </ControlButton>
+                <DropdownContent title="Добавить таблицу">
+                    <template #trigger>
+                        <TableIcon />
+                    </template>
+                    <template #content="{ close }">
+                        <SchemeTable @create-scheme="addShapeHandler('table', { table: $event }), close()" />
+                    </template>
+                </DropdownContent>
             </template>
         </DropdownContent>
         <ControlButton
@@ -83,6 +91,7 @@ import { defineEmits, computed, ref } from 'vue';
 import ControlButton from './ControlButton.vue';
 import ValuePicker from './ValuePicker.vue';
 import DropdownContent from '@/components/DropdownContent.vue';
+import SchemeTable from './SchemeTable.vue';
 
 // Icons
 
@@ -94,6 +103,7 @@ import MagnifyMinusOutline from 'vue-material-design-icons/MagnifyMinusOutline.v
 import RectangleOutline from 'vue-material-design-icons/RectangleOutline.vue';
 import ArrowRightThin from 'vue-material-design-icons/ArrowRightThin.vue';
 import ShapeOutline from 'vue-material-design-icons/ShapeOutline.vue';
+import TableIcon from 'vue-material-design-icons/Table.vue';
 
 const props = defineProps({
     activeShape: {
@@ -118,8 +128,8 @@ const disabled = computed(() => {
 
 // Handlers
 
-function addShapeHandler(type) {
-    emits('addShape', type);
+function addShapeHandler(type, options) {
+    emits('addShape', type, options);
 }
 
 function deleteShapeHandler() {

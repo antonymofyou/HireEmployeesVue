@@ -9,7 +9,7 @@
             <slot name="trigger"></slot>
         </button>
         <div class="dropdown__content">
-            <slot name="content"></slot>
+            <slot name="content" :close="close"></slot>
         </div>
     </div>
 </template>
@@ -76,7 +76,7 @@ const vClickOutside = {
     opacity: 0;
 }
 
-.dropdown.active .dropdown__content {
+.dropdown.active > .dropdown__content {
     visibility: visible;
     opacity: 1;
 }

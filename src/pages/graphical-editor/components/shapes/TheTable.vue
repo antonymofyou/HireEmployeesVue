@@ -4,7 +4,7 @@
         :id="props.params.id"
         class="table"
     >
-        <EditorContent :editor="editor" />
+        <EditorContent :editor="editor" class="table__editor" />
     </div>
 </template>
 
@@ -63,3 +63,50 @@ const editor = useEditor({
 });
 
 </script>
+
+<style scoped>
+.table {
+    position: absolute;
+}
+
+.table:deep(table) {
+    border-collapse: collapse;
+    table-layout: fixed;
+}
+
+.table:deep(.tiptap) {
+    outline: none;
+}
+
+.table:deep(td),
+.table:deep(th) {
+    border: 1px solid var(--mine-shaft);
+    position: relative;
+}
+
+.table:deep(th) {
+    font-weight: bold;
+}
+
+.selectedCell:after {
+    background: var(--mine-shaft);
+    content: "";
+    left: 0; 
+    right: 0; 
+    top: 0; 
+    bottom: 0;
+    pointer-events: none;
+    position: absolute;
+    z-index: 2;
+}
+
+.column-resize-handle {
+    background-color: var(--transparent-blue);
+    bottom: -2px;
+    pointer-events: none;
+    position: absolute;
+    right: -2px;
+    top: 0;
+    width: 4px;
+}
+</style>

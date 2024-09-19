@@ -185,8 +185,8 @@ const formattedShapes = reactive({
     5: {
         "id": 5,
         "type": "table",
-        "x": 170,
-        "y": -200,
+        "x": 870,
+        "y": 300,
         "width": 200,
         "height": 100,
         "zIndex": 1,
@@ -485,7 +485,7 @@ const generateUniqueId = () => {
 
 
 // Функция для добавления нового прямоугольника
-const addShapeHandler = (type) => {
+const addShapeHandler = (type, options) => {
   const newId = generateUniqueId();
   const shape = {
     arrow() {
@@ -512,10 +512,24 @@ const addShapeHandler = (type) => {
         zIndex: 1,
         padding: 10,
       }
+    },
+    table(options) {
+      const { table } = options;
+
+      return {
+        id: newId,
+        type: 'table',
+        x: 900,
+        y: 600,
+        width: 150,
+        height: 100,
+        zIndex: 1,
+        table,
+      }
     }
   };
 
-  formattedShapes[newId] = shape[type]();
+  formattedShapes[newId] = shape[type](options);
 
   handleSelectShape({
     id: newId,
