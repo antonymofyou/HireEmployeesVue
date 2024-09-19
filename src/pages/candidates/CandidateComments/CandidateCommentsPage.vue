@@ -37,12 +37,15 @@
         :status="respondData.statusCurrent"
         :statusColor="respondData.statusCurrentColor"
         :statuses="respondData.statuses"
+        @sendObject="handleObject"
         class="comments-page__status-block"
       />
       <CommentsBlock
         v-if="respondId && respondData.candidateId"
         :respondId
         :candidateId="respondData.candidateId"
+        :key="reloadKey"
+        :receivedObject="receivedObject"
         class="comments-page__comments-block"
       />
       <CommentsBlock
@@ -84,6 +87,13 @@ const route = useRoute();
 // ID отклика
 const respondId = route.query.otklikId;
 
+// Комментарий из статусов
+const receivedObject = ref(null);
+
+const handleObject = (object) => {
+  receivedObject.value = object;
+}
+
 // Данные отклика: id кандидата, ФИО кандидата, телеграм кандидата, ответы кандидата,
 // id вакансии, текущий статус, цвет текущего статуса, массив всех статусы
 const respondData = ref({
@@ -96,6 +106,14 @@ const respondData = ref({
   statusCurrentColor: '',
   statuses: [],
 });
+
+// Ключ перезагрузки комментариев при изменении статуса
+const reloadKey = ref(0);
+
+// Функция перезагрузки комментариев
+const reloadComments = () => {
+  reloadKey.value += 1;
+}
 
 // Данные вакансии: id, название, описание
 const vacancyData = ref({

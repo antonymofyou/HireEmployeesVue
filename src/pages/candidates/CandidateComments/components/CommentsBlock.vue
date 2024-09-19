@@ -100,6 +100,10 @@ const props = defineProps({
     type: String,
     required: true,
   },
+  receivedObject: {
+    type: Object,
+    required: false,
+  },
 });
 
 // Массив комментариев
@@ -218,6 +222,7 @@ const requestComments = () => {
     (response) => {
       comments.value = response.comments;
       isLoading.value = false;
+      
     },
     () => {
       mainErrorMessage.value = 'Произошла ошибка при получении комментариев';
@@ -231,21 +236,24 @@ const showComments = () => {
   show.value = !show.value;
 };
 
-// При изменении значения свойства "createdCommentId" обновляем положение скролла в конце блока
+// При получении свойства "receivedObject" обновляем положение скролла в конце блока
 watch(
-  () => createdCommentId.value,
+  () =>  props.receivedObject,
   () => {
-    if (commentsBlock.value) {
-      // Добавляем небольшой задержку, чтобы обновление высоты произошло после изменения контента
-      setTimeout(() => {
+    requestComments();
+  }
+);
+watch(
+  () => comments.value,
+  () => {
+      if (commentsBlock.value &&  props.receivedObject) {
         commentsBlock.value.scrollTo({
-          top:
-            commentsBlock.value.scrollHeight - commentsBlock.value.clientHeight,
+          top: commentsBlock.value.scrollHeight,
           behavior: 'smooth',
         });
-      }, 0);
-    }
-  }
+      }
+  },
+  { flush: 'post' } // Устанавливаем flush в 'post'
 );
 
 onMounted(requestComments);

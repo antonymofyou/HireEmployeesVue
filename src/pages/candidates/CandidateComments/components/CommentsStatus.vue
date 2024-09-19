@@ -53,8 +53,23 @@ const props = defineProps({
   statuses: {
     type: Array,
     required: true,
+  },
+  //Функция для обновления ключа, чтобы перезагрузить комментарии
+  reload: {
+    type: Function,
+    required: false,
   }
 });
+
+const emit = defineEmits(['sendObject']);
+
+
+const sendToParent = () => {
+  const object = { 
+    changed : true
+  }
+  emit('sendObject', object);
+}
 
 // Флаг отправки запроса
 const sendRequest = ref(false);
@@ -115,6 +130,7 @@ const changeRespondStatus = () => {
       if (response.success === '1') {
         statusChanged.value = true;
         updateStatuses();
+         sendToParent(); // сюда функцию передачи
         newStatus.value = ''; 
       } else {
         errorMessage.value = response.message;
