@@ -35,6 +35,7 @@ import Modal from '@/components/Modal.vue';
 import DayForm from '../days/DayForm.vue';
 
 const props = defineProps({
+  // Видна ли модалка
   isShow: {
     type: Boolean,
     required: true
@@ -45,10 +46,12 @@ const props = defineProps({
     required: false,
     default: false
   },
+  // Заголовок модалки
   title: {
     type: String,
     required: true
   },
+  // Текст в кнопке
   buttonText: {
     type: String,
     required: false,
@@ -59,6 +62,7 @@ const props = defineProps({
     type: Object,
     required: false
   },
+  // Ошибка
   error: {
     type: String,
     required: false,

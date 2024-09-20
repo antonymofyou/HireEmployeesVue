@@ -86,11 +86,6 @@
               key="add-button"
               @click="handleClickAddButtonPeriod"
             />
-
-            <SpinnerMain
-              v-else-if="props.isEditingLoadNow"
-              class="spinner-loader"
-            />
           </TransitionGroup>
         </div>
       </div>
@@ -109,6 +104,7 @@
             v-model="editDay.report"
             :disabled="!props.isEditing"
             class="day-info__report-input"
+            spellcheck="false"
           />
         </form>
 
@@ -137,7 +133,6 @@ import AutoSizeTextarea from '../AutoSizeTextarea.vue';
 import DayActions from './DayActions.vue';
 
 import { convertHrsMinsToMins, convertMinsToHrsMins, maskifyValueToTime } from '../../js/utils';
-import SpinnerMain from '@/components/SpinnerMain.vue';
 
 const props = defineProps({
   // Объект дня
@@ -536,6 +531,7 @@ function formatDate(date) {
 
 .day-info__form {
   display: flex;
+  margin-bottom: 5px;
 }
 
 /* Period transition group */
