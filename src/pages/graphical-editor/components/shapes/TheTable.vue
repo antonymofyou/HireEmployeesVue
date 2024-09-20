@@ -1,16 +1,20 @@
 <template>
     <div
-        :style="[geometryStyles, sizeStyles]"
+        @pointerdown="selectTable"
+        :style="tableStyles"
         :id="props.params.id"
         class="table"
     >
-        <EditorContent :editor="editor" class="table__editor" />
+        <EditorContent
+            :editor="editor" 
+            class="table__editor" 
+        />
     </div>
 </template>
 
 <script setup>
 
-import { defineProps, defineEmits, computed } from 'vue';
+import { defineProps, defineEmits, computed, onBeforeUnmount } from 'vue';
 
 import { useEditor, EditorContent } from '@tiptap/vue-3'
 import StarterKit from '@tiptap/starter-kit'
@@ -27,23 +31,21 @@ const props = defineProps({
 });
 const emits = defineEmits({
     'updateShape': null,
+    'selectShape': null,
 });
 
-const geometryStyles = computed(() => {
+const tableStyles = computed(() => {
     return {
+        // Geometry
         top: props.params.y + 'px',
         left: props.params.x + 'px',
         zIndex: props.params.zIndex,
         transform: `rotate(${props.params.rotation}deg)`, 
+        // Size
+        width: props.params.width + 'px',
+        height: props.params.height + 'px',
     }
 });
-const sizeStyles = computed(() => {
-    return {
-        width: props.params.width + 'px',
-        height: props.params.height + 'px',  
-    }
-})
-
 const editor = useEditor({
     content: props.params.table,
     extensions: [
@@ -62,11 +64,23 @@ const editor = useEditor({
     },
 });
 
+function selectTable() {
+    emits('selectShape', {
+        id: props.params.id,
+        editor: editor.value,
+    });
+}
+
+onBeforeUnmount(() => {
+    editor.value.destroy();
+});
+
 </script>
 
 <style scoped>
 .table {
     position: absolute;
+    cursor: default;
 }
 
 .table:deep(table) {
@@ -88,24 +102,16 @@ const editor = useEditor({
     font-weight: bold;
 }
 
-.selectedCell:after {
-    background: var(--mine-shaft);
-    content: "";
-    left: 0; 
-    right: 0; 
-    top: 0; 
-    bottom: 0;
-    pointer-events: none;
-    position: absolute;
-    z-index: 2;
+.table:deep(.resize-cursor) {
+    cursor: col-resize;
 }
 
-.column-resize-handle {
+.table:deep(.column-resize-handle) {
     background-color: var(--transparent-blue);
     bottom: -2px;
     pointer-events: none;
     position: absolute;
-    right: -2px;
+    right: -3px;
     top: 0;
     width: 4px;
 }

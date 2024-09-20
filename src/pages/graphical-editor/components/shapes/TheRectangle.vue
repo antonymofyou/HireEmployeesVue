@@ -2,7 +2,7 @@
     <div
         @mousedown="startDragging($event), selectRectangle()"
         @touchstart="startDragging($event), selectRectangle()"
-        @dblclick="toggleTextEditMode"
+        @dblclick="toggleShapeEditMode"
         @touchend="handleTouchEnd"
         @click="selectRectangle"
         :id="props.params.id"
@@ -25,8 +25,8 @@
           @touchstart.stop="startResizing(handle, $event)"
       ></div>
     </div>
-    <div v-show="props.isSelected && isTextMode" :style="resizeHandleStyles" class="text-mode">
-      <FormatText class="text-mode__icon" />
+    <div v-show="props.isSelected && isShapeMode" :style="resizeHandleStyles" class="shape-mode">
+      <FormatText class="shape-mode__icon" />
     </div>
     </div>
 </template>
@@ -72,8 +72,8 @@ const paramsTextVerticalAlignment = {
     'center': 'center',
     'bottom': 'flex-end',
 };
-const isTextMode = computed(() => {
-  return props.mode.value === props.mode._text;
+const isShapeMode = computed(() => {
+  return props.mode.value === props.mode._shape;
 });
 const isEditMode = computed(() => {
   return props.mode.value === props.mode._edit;
@@ -99,7 +99,7 @@ const rectangleStyles = computed(() => {
         justifyContent: paramsTextVerticalAlignment[props.params.textVerticalAlignment],
         // Mode styles
         cursor: isEditMode.value ? 'move' : 'text',
-        userSelect: isTextMode.value ? 'text' : 'none',
+        userSelect: isShapeMode.value ? 'text' : 'none',
     }
 });
 const resizeHandleStyles = computed(() => {
@@ -132,9 +132,9 @@ const editor = useEditor({
 
         emits('updateShape', props.params.id , 'text' , convertTo(json));
     },
-    editable: isTextMode.value,
+    editable: isShapeMode.value,
 });
-watch(() => isTextMode.value, (newValue) => {
+watch(() => isShapeMode.value, (newValue) => {
   if (editor.value) {
     editor.value.setEditable(newValue);
   }
@@ -165,7 +165,7 @@ const handleTouchEnd = (event) => {
   const tapLength = currentTime - lastTap.value;
 
   if (tapLength < 300 && tapLength > 0) {
-    toggleTextEditMode();
+    toggleShapeEditMode();
   }
   lastTap.value = currentTime;
 };
@@ -178,18 +178,13 @@ const selectRectangle = () => {
   });
 };
 
-// Вход в режим редактирования текста
-const enterTextEditMode = () => {
-  emits('change-mode', props.mode._text);
-  editor.value.chain().focus().run();
-};
-
-// Переключение режима текста по двойному клику или тапу
-const toggleTextEditMode = () => {
-  if (props.mode.value === props.mode._text) {
+// Переключение режима по двойному клику или тапу
+const toggleShapeEditMode = () => {
+  if (isShapeMode.value) {
     emits('change-mode', props.mode._edit);
   } else {
-    enterTextEditMode();
+    emits('change-mode', props.mode._shape);
+    editor.value.chain().focus().run();
   }
 };
 
@@ -215,13 +210,13 @@ onBeforeUnmount(() => {
   pointer-events: none;
 }
 
-.text-mode {
+.shape-mode {
   position: absolute;
   border: 1px solid #1A73E8;
   pointer-events: none;
 }
 
-.text-mode__icon {
+.shape-mode__icon {
   position: absolute;
   top: -8px;
   right: 50%;

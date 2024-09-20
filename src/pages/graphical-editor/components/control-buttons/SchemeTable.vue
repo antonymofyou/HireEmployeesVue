@@ -33,8 +33,8 @@ const emits = defineEmits({
     createScheme: null,
 });
 
-const selectedRow = ref(undefined);
-const selectedColumn = ref(undefined);
+const selectedRow = ref(1);
+const selectedColumn = ref(1);
 
 function selectHandler(row, column) {
     selectedRow.value = row;

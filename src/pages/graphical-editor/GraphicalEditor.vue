@@ -14,7 +14,7 @@
         <div class="header__control-buttons">
           <TextControlButtons
             v-if="windowInnerWidth <= breakpoint"
-            v-show="isTextMode && activeShape.id"
+            v-show="isShapeMode && activeShape.id"
             :active-shape="activeShape"
             @update-shape="updateShape"
             @update-editor="updateEditor"
@@ -56,7 +56,7 @@
       >
         <template #content>
           <TextControlButtons
-            v-show="isTextMode"
+            v-show="isShapeMode"
             :active-shape="activeShape"
             @update-shape="updateShape"
             @update-editor="updateEditor"
@@ -378,19 +378,19 @@ let activeShape = reactive({
     }),
 });
 /**
- * edit - перемещение / редактирование
- * text - текст
+ * edit - перемещение, поворот и т.п.
+ * text - редактирование фигуры
  */
 let mode = reactive({
   value: 'edit',
   _edit: 'edit',
-  _text: 'text',
+  _shape: 'shape',
 });
 const isEditMode = computed(() => {
     return mode.value === mode._edit;
 });
-const isTextMode = computed(() => {
-    return mode.value === mode._text && !!activeShape.editor;
+const isShapeMode = computed(() => {
+    return mode.value === mode._shape && !!activeShape.editor;
 });
 let isGrabbing = ref(false);
 let scale = reactive({
@@ -451,6 +451,7 @@ function debounce(callback, delay) {
 const handleDocumentClick = (event) => {
   if (
       !event.target.closest('.rectangle') &&
+      !event.target.closest('.table') &&
       !event.target.closest('.arrow-container') &&
       !event.target.closest('.control-buttons-main') &&
       !event.target.closest('.control-buttons-text') &&
@@ -570,12 +571,11 @@ const updateShape = (id, key, value) => {
 
 // Функция для обработки выбора формы
 const handleSelectShape = ({ id = undefined, editor = undefined } = {}) => {
-  if (activeShape.id !== id && mode.value === mode._text) {
-    mode.value = mode._edit;
-  }
+  if (activeShape.id == id) return;
 
   activeShape.id = id;
   activeShape.editor = editor;
+  mode.value = mode._edit;
 };
 
 // Функция для обработки изменения режима
