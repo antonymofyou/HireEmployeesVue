@@ -1,8 +1,9 @@
 <template>
   <div class="button" :class="alignClass">
     <button
-      class="button__control"
+      v-bind="$attrs"
       :disabled="isButtonDisabled"
+      class="button__control"
     >
       <span v-if="isActive" class="button__spinner"></span>
       <div class="button__icon" v-if="$slots['icon'] && !isActive" >
@@ -71,6 +72,7 @@ const props = defineProps({
 // Выравнивание расположения кнопки и сообщения о выполнении
 const alignClass = computed(() => ({
   'button--align-start': props.align === 'start',
+  'button--align-center': props.align === 'center',
   'button--align-end': props.align === 'end',
 }));
 
@@ -88,6 +90,10 @@ const isButtonDisabled = computed(() => {
 
 .button--align-start {
   align-items: flex-start;
+}
+
+.button--align-center {
+  align-items: center;
 }
 
 .button--align-end {
