@@ -10,25 +10,7 @@
 
     <div class="wrapper">
       <div class="wrapper__inner">
-        <div
-          :class="{
-            'by-visible-toggler': true,
-            'visible': isJobsRequestNow
-          }"
-          class="wrapper__spinner"
-        >
-          <SpinnerMain
-            class="spinner-loader"
-          />
-        </div>
-      
-        <div
-          :class="{
-            'by-visible-toggler': true,
-            'visible': !isJobsRequestNow
-          }"
-          class="schedule"
-        >
+        <div class="schedule">
           <div class="schedule__inner">
             <DaysList
               v-if="days.length"
@@ -56,10 +38,15 @@
 
             <div class="schedule__actions">
               <TopSquareButton
-                v-show="isAllowEditingSchedule"
+                v-if="isAllowEditingSchedule && !isJobsRequestNow"
                 :icon="plusIcon"
                 class="add-button"
                 @click="daysActions.addNewDay"
+              />
+
+              <SpinnerMain
+                v-else-if="isJobsRequestNow"
+                class="spinner-loader"
               />
             </div>
           </div>
@@ -116,7 +103,7 @@
 </template>
 
 <script setup>
-import { computed, onMounted, onUnmounted, ref } from 'vue';
+import { computed, nextTick, onMounted, onUnmounted, ref } from 'vue';
 import { useRouter } from 'vue-router';
 
 import TheHeader from '@/components/TheHeader.vue';
@@ -181,7 +168,7 @@ const errorMessage = ref('');
 
 // Информация о днях работы
 const days = ref([]);
-// Информация о периодах по дням работы. Record<DayId, period>
+// Информация о периодах по дням работы. Record<DayId, Array<Period>>
 const periodsTimes = ref([]);
 // Данные сотрудника
 const staffData = ref({});
@@ -225,8 +212,9 @@ const helpers = {
   /**
    * Сброс активного периода
    */
-  resetActivePeriod() {
+  async resetActivePeriod() {
     if (!activePeriod.value) return;
+
     // Если есть модалки - не сбрасываем
     if (document.querySelectorAll('*[class^="modal"]').length !== 0) return;
   
@@ -411,12 +399,14 @@ const requests = {
     jobSetDayInstance.request(
       '/job/set_day.php',
       'manager',
-      () => {
+      (response) => {
         // Обработка успешного добавления
         modalsActions.closeAddDayModal();
         helpers.resetError();
 
         isAddDayRequestNow.value = false;
+
+        console.log(response);
 
         requests.fetchSchedule(
           () => {
@@ -495,14 +485,23 @@ const requests = {
     jobSetDayInstance.request(
       '/job/set_day.php',
       'manager',
-      () => {
+      (response) => {
         modalsActions.closeDeleteDayModal();
         activeDay.value = initializators.initActiveDay();
         helpers.resetError();
 
         isDeleteDayRequestNow.value = false;
 
-        requests.fetchSchedule();
+        // При успешном запросе - обновляем состояние
+        if (response.success === '1') {
+          const deleteDayIndex = days.value.findIndex((day) => day.dayId === dayId);
+
+          console.log(deleteDayIndex)
+
+          if (deleteDayIndex !== -1) {
+            days.value.splice(deleteDayIndex, 1);
+          }
+        }
       },
       (error) => {
         errorMessage.value = error;
@@ -534,11 +533,16 @@ const requests = {
         console.log(response);
 
         modalsActions.closeAddPeriodModal();
+
         helpers.resetError()
-
+        
         isAddNewPeriodRequestNow.value = false;
-
-        requests.fetchSchedule();
+        
+        // При успешном запросе - меняем состояние периодов
+        if (response.success === '1') {
+          helpers.resetActivePeriod();
+          periodsTimes.value[dayId] = response.periodsTimes[dayId];
+        }
       },
       (error) => {
         errorMessage.value = error;
@@ -702,7 +706,7 @@ const modalsActions = {
 
 /* Spinner */
 .spinner-loader {
-  width: 50px;
+  width: 40px;
 }
 
 .wrapper__spinner:not(.visible) {
@@ -780,16 +784,5 @@ const modalsActions = {
   display: flex;
   justify-content: center;
   width: 100%;
-}
-
-/* Переключатели прозрачности */
-.by-visible-toggler {
-  opacity: 0;
-  pointer-events: none;
-}
-
-.visible {
-  opacity: 1;
-  pointer-events: all;
 }
 </style>

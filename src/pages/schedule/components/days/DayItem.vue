@@ -81,12 +81,15 @@
             />
   
             <AddButton
-              :class="{
-                'add-button': true,
-                'add-button--invisible': !props.isEditing
-              }"
+              v-if="!props.isEditingLoadNow && props.isEditing"
+              class="add-button"
               key="add-button"
               @click="handleClickAddButtonPeriod"
+            />
+
+            <SpinnerMain
+              v-else-if="props.isEditingLoadNow"
+              class="spinner-loader"
             />
           </TransitionGroup>
         </div>
@@ -134,6 +137,7 @@ import AutoSizeTextarea from '../AutoSizeTextarea.vue';
 import DayActions from './DayActions.vue';
 
 import { convertHrsMinsToMins, convertMinsToHrsMins, maskifyValueToTime } from '../../js/utils';
+import SpinnerMain from '@/components/SpinnerMain.vue';
 
 const props = defineProps({
   // Объект дня
@@ -480,6 +484,11 @@ function formatDate(date) {
 
 .day-periods__list--disabled {
   background: rgb(243, 243, 243);
+}
+
+/* Spinner */
+.spinner-loader {
+  width: 20px;
 }
 
 /* Add button */
