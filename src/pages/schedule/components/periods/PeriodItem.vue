@@ -78,7 +78,7 @@ function handleDeleteAction() {
 
 <style scoped>
 .period {
-  box-shadow: 0 1px 10px rgba(112, 103, 103, 0.3);
+  box-shadow: 0 1px 5px rgba(112, 103, 103, 0.3);
   padding: 7px;
   border-radius: 10px;
   display: flex;

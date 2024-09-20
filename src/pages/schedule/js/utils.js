@@ -9,7 +9,7 @@ export function prettifyTime(time) {
 
 /**
  * Перевод минут в формат \d\d:\d\d
- * @param {Number|String} minutes - Минуты
+ * @param {Number | String} minutes - Минуты
  * @returns {String} - Отформатированное значение
  */
 export function convertMinsToHrsMins(minutes) {

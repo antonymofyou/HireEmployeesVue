@@ -40,7 +40,6 @@
               pattern="\d\d:\d\d"
               class="day__time-input"
               type="text"
-              value="03:10"
               @input="handleInputSpentTime"
               @keydown="handleSpentTimeKeyDown"
             />
@@ -90,7 +89,6 @@
               @click="handleClickAddButtonPeriod"
             />
           </TransitionGroup>
-          
         </div>
       </div>
 
@@ -101,12 +99,12 @@
 
         <form
           :id="currentDayFormId"
+          class="day-info__form"
           @submit.prevent="handleEditFormSubmit"
         >
           <AutoSizeTextarea
             v-model="editDay.report"
             :disabled="!props.isEditing"
-            :is-auto-size="true"
             class="day-info__report-input"
           />
         </form>
@@ -455,7 +453,6 @@ function formatDate(date) {
 .day-periods {
   display: flex;
   flex-direction: column;
-  gap: 5px;
   flex-wrap: wrap;
 }
 
@@ -463,6 +460,7 @@ function formatDate(date) {
 .day-info__title {
   font-size: 14px;
   font-weight: 600;
+  margin-bottom: 5px;
 }
 
 .day-info__error {
@@ -471,12 +469,13 @@ function formatDate(date) {
 }
 
 .day-periods__list {
-  padding: 10px;
+  padding: 5px;
   border: 2px solid var(--cornflower-blue);
   border-radius: 10px;
   display: flex;
   gap: 10px;
   flex-wrap: wrap;
+  min-height: 40px;
 }
 
 .day-periods__list--disabled {
@@ -497,11 +496,11 @@ function formatDate(date) {
 .day-info {
   display: flex;
   flex-direction: column;
-  gap: 5px;
 }
 
 :deep(.day-info__report-input textarea) {
   outline: 2px solid var(--cornflower-blue);
+  min-height: 40px;
 }
 
 :deep(.day-info__report-input textarea:focus) {
@@ -521,6 +520,10 @@ function formatDate(date) {
   font-size: 14px;
   padding: 5px;
   overflow: hidden;
+}
+
+.day-info__form {
+  display: flex;
 }
 
 /* Period transition group */

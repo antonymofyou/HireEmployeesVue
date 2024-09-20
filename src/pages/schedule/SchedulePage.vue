@@ -59,7 +59,7 @@
                 v-show="isAllowEditingSchedule"
                 :icon="plusIcon"
                 class="add-button"
-                @click="callbacks.startAddNewDay"
+                @click="daysActions.addNewDay"
               />
             </div>
           </div>
@@ -263,11 +263,9 @@ const callbacks = {
     helpers.resetError();
 
     if (activeDay.value.dayId && dayId === activeDay.value.dayId) {
-      isEditingDayStatus.value = false;
-      activeDay.value.dayId = null;
+      daysActions.resetEditDay();
     } else {
-      isEditingDayStatus.value = true;
-      activeDay.value.dayId = dayId;
+      daysActions.setEditDay(dayId);
     }
   },
 
@@ -349,13 +347,14 @@ onMounted(() => {
 const requests = {
   /**
    * Запрос на получение расписания
+   * @param {Function} onSuccess - Коллбек для успешного завершения
    */
-  fetchSchedule: () => {
+  fetchSchedule: (onSuccess) => {
     isJobsRequestNow.value = true;
 
     const jobGetScheduleInstance = new JobGetShedule();
 
-    jobGetScheduleInstance.request(
+    return jobGetScheduleInstance.request(
       '/job/get_schedule.php',
       'manager',
       (response) => {
@@ -371,6 +370,7 @@ const requests = {
         staffData.value = responseStaffData;
 
         isJobsRequestNow.value = false;
+        onSuccess();
       },
       () => {
         isJobsRequestNow.value = false;
@@ -385,30 +385,52 @@ const requests = {
   fetchAddNewDay: (newDay) => {
     isAddDayRequestNow.value = true;
 
-    const jobSetDayInstance = new JobSetDay();
+    // Берём дату последнего дня в списке
+    const lastDay = days.value.at(-1)?.date ?? new Date().toLocaleDateString('en-CA');
 
-    jobSetDayInstance.action = 'create';
-    jobSetDayInstance.setDay = {
-      date: newDay.date,
-      isWeekend: String(Number(newDay.isWeekend)),
-      comment: newDay.comment
+    // Дата для добавления, манипулируем ей
+    const addDate = new Date(lastDay);
+    addDate.setDate(addDate.getDate() + 1);
+
+    // Отформатированная строка завтрашней даты
+    const tomorrowFormattedDate = addDate.toLocaleDateString('en-CA');
+
+    // Отправляемый на бэк день
+    const tomorrowDay = {
+      date: tomorrowFormattedDate,
+      isWeekend: 0,
+      comment: ''
     };
+
+    const jobSetDayInstance = new JobSetDay();
+    jobSetDayInstance.action = 'create';
+    jobSetDayInstance.setDay = tomorrowDay;
 
     jobSetDayInstance.request(
       '/job/set_day.php',
       'manager',
       () => {
+        console.log('Успех');
         // Обработка успешного добавления
-        periodsTimes.value[newDay.dayId] = [];
-
         modalsActions.closeAddDayModal();
         helpers.resetError();
 
         isAddDayRequestNow.value = false;
 
-        requests.fetchSchedule();
+        requests.fetchSchedule(
+          () => {
+            // Ставим добавленный день в режим редактирования
+            const lastDay = days.value.at(-1);
+
+            // Если нет последнего дня - ничего не делаем
+            if (!lastDay) return;
+
+            daysActions.setEditDay(lastDay.dayId);
+          }
+        );
       },
       (error) => {
+        console.log('Ошибка', error);
         // Обработка ошибки при добавлении
         errorMessage.value = error;
 
@@ -592,6 +614,23 @@ const daysActions = {
     helpers.resetError();
 
     requests.fetchDeleteDay(activeDay.value.dayId);
+  },
+
+  /**
+   * Поставить день в редактируемый
+   * @param {String|Number} dayId - ID редактируемого дня
+   */
+  setEditDay(dayId) {
+    isEditingDayStatus.value = true;
+    activeDay.value.dayId = dayId;
+  },
+
+  /**
+   * Сбросить редактируемый день
+   */
+  resetEditDay() {
+    isEditingDayStatus.value = false;
+    activeDay.value.dayId = null;
   }
 };
 
