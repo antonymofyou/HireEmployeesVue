@@ -12,18 +12,23 @@
 
     <template #body>
       <div class="modal-confirm__footer">
-        <ButtonMain
-          :is-active="props.isLoading"
-          :message="props.error"
-          align="center"
-          @click="handleClickConfirm"
-        >
-          <template #text>{{ props.buttonText }}</template>
-        </ButtonMain>
+        <div class="modal-confirm__actions">
+          <ButtonMain
+            :is-active="props.isLoading"
+            align="center"
+            @click="handleClickConfirm"
+          >
+            <template #text>{{ props.buttonText }}</template>
+          </ButtonMain>
+  
+          <ButtonMain @click="$emit('close')">
+            <template #text>Отмена</template>
+          </ButtonMain>
+        </div>
 
-        <ButtonMain @click="$emit('close')">
-          <template #text>Отмена</template>
-        </ButtonMain>
+        <div class="modal-confirm__error">
+          {{ props.error }}
+        </div>
       </div>
     </template>
   </Modal>
@@ -78,9 +83,21 @@ function handleClickConfirm() {
 
 .modal-confirm__footer {
   display: flex;
-  gap: 10px;
-  justify-content: center;
+  flex-direction: column;
   width: 100%;
   max-width: 220px;
+  row-gap: 10px;
+}
+
+.modal-confirm__actions {
+  display: flex;
+  justify-content: center;
+  gap: 10px;
+}
+
+.modal-confirm__error {
+  font-size: 12px;
+  text-align: center;
+  color: var(--cinnabar);
 }
 </style>

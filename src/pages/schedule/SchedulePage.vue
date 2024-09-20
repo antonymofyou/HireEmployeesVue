@@ -410,7 +410,6 @@ const requests = {
       '/job/set_day.php',
       'manager',
       () => {
-        console.log('Успех');
         // Обработка успешного добавления
         modalsActions.closeAddDayModal();
         helpers.resetError();
@@ -430,7 +429,6 @@ const requests = {
         );
       },
       (error) => {
-        console.log('Ошибка', error);
         // Обработка ошибки при добавлении
         errorMessage.value = error;
 
