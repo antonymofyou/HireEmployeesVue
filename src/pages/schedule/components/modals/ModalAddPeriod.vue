@@ -16,6 +16,7 @@
         :disabled-fields="['date']"
         :error="finalErrorMessage"
         :is-submit-disabled="isSubmitButtonDisabled"
+        :is-loading="props.isLoading"
         :max-width="props.maxFormWidth"
         id="add-period-form"
         @submit="handleSubmitForm"

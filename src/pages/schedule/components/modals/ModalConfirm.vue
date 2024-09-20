@@ -93,6 +93,7 @@ function handleClickConfirm() {
   display: flex;
   justify-content: center;
   gap: 10px;
+  color: #fff;
 }
 
 .modal-confirm__error {

@@ -45,7 +45,7 @@ function autoSizeInput() {
   resize: none;
   overflow: hidden;
   width: 100%;
-  padding: 4px 5px;
+  padding: 5px;
   border-radius: 10px;
   outline: 2px solid var(--cornflower-blue);
   border: none;

@@ -274,6 +274,8 @@ const callbacks = {
    * @param {Number} dayId - ID дня
    */
   handleDayDeleteDaysList(dayId) {
+    daysActions.resetEditDay();
+
     helpers.resetError();
 
     activeDay.value.dayId = dayId;
@@ -528,7 +530,9 @@ const requests = {
     jobSetPeriodInstance.request(
       '/job/set_period.php',
       'manager',
-      () => {
+      (response) => {
+        console.log(response);
+
         modalsActions.closeAddPeriodModal();
         helpers.resetError()
 
@@ -628,7 +632,7 @@ const daysActions = {
    */
   resetEditDay() {
     isEditingDayStatus.value = false;
-    activeDay.value.dayId = null;
+    activeDay.value.dayId = initializators.initActiveDay();
   }
 };
 
@@ -685,6 +689,7 @@ const modalsActions = {
    */
   closeDeleteDayModal() {
     isDeleteDayModalVisible.value = false;
+    activeDay.value.dayId = initializators.initActiveDay();
   }
 };
 </script>

@@ -475,7 +475,7 @@ function formatDate(date) {
   display: flex;
   gap: 10px;
   flex-wrap: wrap;
-  min-height: 40px;
+  min-height: 45px;
 }
 
 .day-periods__list--disabled {
@@ -500,7 +500,7 @@ function formatDate(date) {
 
 :deep(.day-info__report-input textarea) {
   outline: 2px solid var(--cornflower-blue);
-  min-height: 40px;
+  min-height: 45px;
 }
 
 :deep(.day-info__report-input textarea:focus) {
