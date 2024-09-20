@@ -49,7 +49,7 @@ function autoSizeInput() {
   border-radius: 10px;
   outline: 2px solid var(--cornflower-blue);
   border: none;
-  font-size: 16px;
+  font-size: 14px;
 }
 
 .textarea:focus {

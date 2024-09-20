@@ -1,9 +1,12 @@
 <template>
   <div
-    class="period"
+    :class="{
+      'period': true,
+      'period--selectable': props.isAllowSelect
+    }"
     @click.stop="handlePeriodClick"
   >
-    <ActionsButtons
+    <PeriodActions
       v-show="props.isActive"
       class="period__actions"
       @delete="handleDeleteAction"
@@ -18,7 +21,7 @@
 </template>
 
 <script setup>
-import ActionsButtons from '../ActionsButtons.vue';
+import PeriodActions from './PeriodActions.vue';
 import { prettifyTime } from '../../js/utils';
 
 const props = defineProps({
@@ -35,6 +38,12 @@ const props = defineProps({
     required: true
   },
   isActive: {
+    type: Boolean,
+    required: false,
+    default: false
+  },
+  // Разрешено ли выбирать этот период
+  isAllowSelect: {
     type: Boolean,
     required: false,
     default: false
@@ -55,6 +64,7 @@ const emit = defineEmits({
  * Обработка клика по периоду
  */
 function handlePeriodClick() {
+  if (!props.isAllowSelect) return;
   emit('select', { periodId: props.periodId });
 }
 
@@ -69,32 +79,37 @@ function handleDeleteAction() {
 <style scoped>
 .period {
   box-shadow: 0 1px 10px rgba(112, 103, 103, 0.3);
-  padding: 8px;
+  padding: 7px;
   border-radius: 10px;
   display: flex;
   flex-direction: column;
   position: relative;
+  cursor: default;
+  background: #fff;
+}
+
+.period--selectable {
   cursor: pointer;
   transition: opacity ease 0.1s;
 }
 
-.period:hover {
+.period--selectable:hover {
   opacity: 0.8;
 }
 
-.period:active {
+.period--selectable:active {
   opacity: 0.4;
 }
 
 .period__body {
   display: flex;
   gap: 5px;
-  font-size: 14px;
+  font-size: 13px;
 }
 
 .period__actions {
   position: absolute;
   right: 7px;
-  top: -1px;
+  top: -2px;
 }
 </style>

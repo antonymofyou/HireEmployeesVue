@@ -163,12 +163,14 @@ const isAddDayModalVisible = ref(false);
 // Видна ли модалка удаления рабочего дня
 const isDeleteDayModalVisible = ref(false);
 
-// Видна ли форма изменения рабочего дня
-const isEditDayFormVisible = ref(false);
+// Находимся ли в состоянии изменения рабочего дня
+const isEditingDayStatus = ref(false);
 
 // Текущий день на изменение
 const currentEditingDayId = computed(() => {
-  if (!isEditDayFormVisible.value) return null;
+  // Если не находимся в состоянии изменения рабочего дня - не ищем активный день
+  if (!isEditingDayStatus.value) return null;
+
   const findDay = days.value.find((day) => day.dayId === activeDay.value.dayId);
 
   return findDay?.dayId ?? null;
@@ -261,10 +263,10 @@ const callbacks = {
     helpers.resetError();
 
     if (activeDay.value.dayId && dayId === activeDay.value.dayId) {
-      isEditDayFormVisible.value = false;
+      isEditingDayStatus.value = false;
       activeDay.value.dayId = null;
     } else {
-      isEditDayFormVisible.value = true;
+      isEditingDayStatus.value = true;
       activeDay.value.dayId = dayId;
     }
   },
@@ -443,7 +445,7 @@ const requests = {
         activeDay.value = initializators.initActiveDay();
         helpers.resetError();
         
-        isEditDayFormVisible.value = false;
+        isEditingDayStatus.value = false;
         isEditDayRequestNow.value = false;
 
         requests.fetchSchedule();

@@ -7,18 +7,22 @@
         </div>
   
         <div class="day__weekend-status">
-          <label>
+          <label class="day__weekend-status-label">
             Вых.
             <input
+              v-model="editDay.isWeekend"
+              v-show="props.isEditing"
               :disabled="!props.isEditing"
               :form="currentDayFormId"
-              v-model="editDay.isWeekend"
               checked
               type="checkbox"
             />
               
-            <span class="day__weekend-status-info">
-              ({{ editDay.isWeekend ? 'Да' : 'Нет' }})
+            <span
+              v-show="!props.isEditing"
+              class="day__weekend-status-info"
+            >
+              {{ editDay.isWeekend ? 'Да' : 'Нет' }}
             </span>
           </label>
         </div>
@@ -55,10 +59,15 @@
     <div class="day__body">
       <div class="day-periods">
         <span class="day-periods__title">
-          Планируемое время
+          Планируемое время:
         </span>
 
-        <div class="day-periods__list">
+        <div
+          :class="{
+            'day-periods__list': true,
+            'day-periods__list--disabled': !props.isEditing
+          }"
+        >
           <TransitionGroup name="period-tr-group">
             <PeriodItem
               v-for="period in props.periods"
@@ -67,16 +76,21 @@
               :start="period.periodStart"
               :end="period.periodEnd"
               :is-active="props.activePeriodId === period.periodId"
+              :is-allow-select="props.isEditing"
               @select="handleSelectPeriodItem"
               @delete="handleDeletePeriodItem"
             />
   
             <AddButton
-              :disabled="!props.isEditing"
+              :class="{
+                'add-button': true,
+                'add-button--invisible': !props.isEditing
+              }"
               key="add-button"
               @click="handleClickAddButtonPeriod"
             />
           </TransitionGroup>
+          
         </div>
       </div>
 
@@ -190,7 +204,7 @@ const currentDayFormId = computed(() => {
 // Фабрика для нового дня
 const initNewDay = () => ({
   isWeekend: props.day.isWeekend === '1',
-  spentTime: convertMinsToHrsMins(props.day.spentTime) || '00:00',
+  spentTime: props.day.spentTime > 0 ? convertMinsToHrsMins(props.day.spentTime) : '',
   report: props.day.report,
 });
 
@@ -228,9 +242,12 @@ watch(() => editDay.value.spentTime, async (newVal, prevVal) => {
  * Обработка подтверждения изменения дня
  */
 function handleEditFormSubmit() {
+  // Убираем иные значения (наприм: null)
+  const correctSpentTime = String(editDay.value.spentTime);
+
   emit('dayEditSubmit', {
     ...editDay.value,
-    spentTime: convertHrsMinsToMins(editDay.value.spentTime)
+    spentTime: convertHrsMinsToMins(correctSpentTime)
   });
 }
 
@@ -342,11 +359,15 @@ function formatDate(date) {
   column-gap: 20px;
   row-gap: 15px;
   justify-content: space-between;
-  margin-bottom: 20px;
+  margin-bottom: 5px;
+}
+
+.day__weekend-status-label {
+  font-size: 14px;
 }
 
 .day__weekend-status-info {
-  font-size: 14px;
+  font-size: 12px;
   color: #777777;
 }
 
@@ -363,9 +384,9 @@ function formatDate(date) {
 .day__spent-time-label {
   display: flex;
   align-items: center;
-  gap: 15px;
+  gap: 10px;
+  font-size: 14px;
 }
-
 
 @media (max-width: 350px) {
   .day__spent-time-block {
@@ -385,6 +406,7 @@ function formatDate(date) {
 .day__date {
   padding-right: 10px;
   font-weight: 600;
+  font-size: 14px;
   border-right: 1px solid var(--cornflower-blue);
   height: 100%;
   display: flex;
@@ -412,8 +434,9 @@ function formatDate(date) {
 
 :deep(.day__time-input input) {
   width: 60px;
-  padding: 4px;
   text-align: center;
+  font-size: 14px;
+  padding: 0;
 }
 
 .day__body {
@@ -438,7 +461,7 @@ function formatDate(date) {
 
 .day-periods__title,
 .day-info__title {
-  font-size: 16px;
+  font-size: 14px;
   font-weight: 600;
 }
 
@@ -454,6 +477,20 @@ function formatDate(date) {
   display: flex;
   gap: 10px;
   flex-wrap: wrap;
+}
+
+.day-periods__list--disabled {
+  background: rgb(243, 243, 243);
+}
+
+/* Add button */
+.add-button {
+  opacity: 1;
+  transition: opacity ease 0.2s;
+}
+
+.add-button--invisible {
+  opacity: 0;
 }
 
 /* Day info */

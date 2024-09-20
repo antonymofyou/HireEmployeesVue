@@ -68,6 +68,10 @@ const emit = defineEmits(['editClick', 'deleteClick']);
   gap: 10px;
 }
 
+.button-icon {
+  padding: 0;
+}
+
 .button-icon:disabled {
   pointer-events: none;
 }
@@ -85,8 +89,8 @@ const emit = defineEmits(['editClick', 'deleteClick']);
 }
 
 .button-icon__icon {
-  width: 20px;
-  height: 20px;
+  width: 18px;
+  height: 18px;
 }
 
 .button-icon__icon--save {

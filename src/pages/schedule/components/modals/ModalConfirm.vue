@@ -20,6 +20,10 @@
         >
           <template #text>{{ props.buttonText }}</template>
         </ButtonMain>
+
+        <ButtonMain @click="$emit('close')">
+          <template #text>Отмена</template>
+        </ButtonMain>
       </div>
     </template>
   </Modal>
@@ -74,6 +78,7 @@ function handleClickConfirm() {
 
 .modal-confirm__footer {
   display: flex;
+  gap: 10px;
   justify-content: center;
   width: 100%;
   max-width: 220px;
