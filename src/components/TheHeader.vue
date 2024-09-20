@@ -12,6 +12,7 @@ import NavigationMenu from "@/components/NavigationMenu.vue";
 import BookIcon from '@/assets/icons/book.svg?component';
 import PersonIcon from '@/assets/icons/person.svg?component';
 import BriefcaseIcon from '@/assets/icons/briefcase.svg?component';
+import ScheduleIcon from '@/assets/icons/schedule.svg?component';
 import { isAdmin } from "@/js/AuthFunctions";
 
 const listNavigation = [
@@ -31,6 +32,11 @@ const listNavigation = [
         pathName: 'standards',
         icon: BookIcon,
     },
+    {
+        pageName: 'Расписание',
+        pathName: 'schedule',
+        icon: ScheduleIcon
+    }
 ];
 
 </script>
@@ -65,7 +71,7 @@ const listNavigation = [
     height: 24px;
 }
 
-@media (max-width: 576px) {
+@media (max-width: 640px) {
     .container {
         max-width: 100%;
     }
