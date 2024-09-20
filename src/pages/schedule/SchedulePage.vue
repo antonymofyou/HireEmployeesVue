@@ -130,7 +130,7 @@ import ModalDay from './components/modals/ModalDay.vue';
 
 import plusIcon from '@/assets/icons/plus.svg';
 
-import { JobGetShedule, JobSetDay, JobSetPeriod } from './js/ApiClassesStandardsPage';
+import { JobGetShedule, JobSetDay, JobSetPeriod } from './js/ApiClassesSchedulePage';
 import { isManager } from '@/js/AuthFunctions';
 
 const router = useRouter();
