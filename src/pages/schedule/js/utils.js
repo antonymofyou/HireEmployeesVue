@@ -80,7 +80,7 @@ export function maskifyValueToTime(newVal, prevVal) {
 
   // Ввод неверной первой части строки часа
   if (hours?.[0] > 2) {
-    return '2';
+    return `0${hours?.[0]}:`;
   }
 
   // Ввод неверной первой части строки минут

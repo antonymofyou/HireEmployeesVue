@@ -96,14 +96,15 @@
     :is-loading="isDeleteDayRequestNow"
     :error="errorMessage"
     title="Удалить рабочий день?"
-    button-text="Удалить"
+    confirm-text="Удалить"
+    reject-text="Отмена"
     @confirm="daysActions.deleteSelectedDay"
     @close="modalsActions.closeDeleteDayModal"
    />
 </template>
 
 <script setup>
-import { computed, nextTick, onMounted, onUnmounted, ref } from 'vue';
+import { computed, nextTick, onMounted, onUnmounted, ref, watch } from 'vue';
 import { useRouter } from 'vue-router';
 
 import TheHeader from '@/components/TheHeader.vue';
@@ -211,12 +212,20 @@ const activePeriod = ref(initializators.initActivePeriod());
 const helpers = {
   /**
    * Сброс активного периода
+   * @param {Object} config - Конфигурация сброса
+   * @param {Boolean} config.force - Принудительный сброс
    */
-  async resetActivePeriod() {
+  async resetActivePeriod({ force = false } = {}) {
     if (!activePeriod.value) return;
 
+    // Принудительный сброс - делаем сразу и выходим
+    if (force) {
+      activePeriod.value = initializators.initActivePeriod();
+      return;
+    }
+
     // Если есть модалки - не сбрасываем
-    if (document.querySelectorAll('*[class^="modal"]').length !== 0) return;
+    if (isAddPeriodModalVisible) return;
   
     activePeriod.value = initializators.initActivePeriod();
   },
@@ -400,13 +409,13 @@ const requests = {
       '/job/set_day.php',
       'manager',
       (response) => {
+        // @TODO сервер вернёт нужную дату. Вставляем её, а не генерим на клиенте
+
         // Обработка успешного добавления
         modalsActions.closeAddDayModal();
         helpers.resetError();
 
         isAddDayRequestNow.value = false;
-
-        console.log(response);
 
         requests.fetchSchedule(
           () => {
@@ -496,8 +505,6 @@ const requests = {
         if (response.success === '1') {
           const deleteDayIndex = days.value.findIndex((day) => day.dayId === dayId);
 
-          console.log(deleteDayIndex)
-
           if (deleteDayIndex !== -1) {
             days.value.splice(deleteDayIndex, 1);
           }
@@ -530,8 +537,6 @@ const requests = {
       '/job/set_period.php',
       'manager',
       (response) => {
-        console.log(response);
-
         modalsActions.closeAddPeriodModal();
 
         helpers.resetError()
@@ -540,7 +545,7 @@ const requests = {
         
         // При успешном запросе - меняем состояние периодов
         if (response.success === '1') {
-          helpers.resetActivePeriod();
+          helpers.resetActivePeriod({ force: true });
           periodsTimes.value[dayId] = response.periodsTimes[dayId];
         }
       },

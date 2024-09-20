@@ -105,7 +105,7 @@ const newPeriod = ref(initNewDay());
 // Следим за props.forDay, т.к. иначе - newPeriod всегда будет пустым
 watch(() => props.forDay, () => {
   newPeriod.value = initNewDay();
-});
+}, { deep: true });
 
 // Заблокирована ли кнопка отправки формы
 const isSubmitButtonDisabled = computed(() => {
@@ -123,7 +123,7 @@ function handleSubmitForm() {
   );
 
   if (!isTimesCorrect) {
-    localError.value = 'Первое время больше второго!';
+    localError.value = 'Начало периода должно быть меньше конца!';
     return;
   }
 

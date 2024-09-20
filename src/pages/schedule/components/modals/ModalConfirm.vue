@@ -18,11 +18,11 @@
             align="center"
             @click="handleClickConfirm"
           >
-            <template #text>{{ props.buttonText }}</template>
+            <template #text>{{ props.confirmText }}</template>
           </ButtonMain>
   
           <ButtonMain @click="$emit('close')">
-            <template #text>Отмена</template>
+            <template #text>{{ props.rejectText }}</template>
           </ButtonMain>
         </div>
 
@@ -39,28 +39,39 @@ import ButtonMain from '@/components/ButtonMain.vue';
 import Modal from '@/components/Modal.vue';
 
 const props = defineProps({
+  // Показывается ли модалка
   isShow: {
     type: Boolean,
     required: true,
   },
+  // Заголовок
   title: {
     type: String,
     required: true,
   },
-  buttonText: {
-    type: String,
-    required: false,
-    default: 'Подтвердить'
-  },
+  // Статус загрузки
   isLoading: {
     type: Boolean,
     required: false,
     default: false
   },
+  // Ошибка
   error: {
     type: String,
     required: false,
     default: ''
+  },
+  // Текст подтверждения
+  confirmText: {
+    type: String,
+    required: false,
+    default: 'Подтвердить'
+  },
+  // Текст отмены
+  rejectText: {
+    type: String,
+    required: false,
+    default: 'Отмена'
   }
 });
 

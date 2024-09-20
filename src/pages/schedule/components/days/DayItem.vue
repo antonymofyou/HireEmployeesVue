@@ -366,10 +366,13 @@ function formatDate(date) {
 
 .day__weekend-status-label {
   font-size: 14px;
+  display: flex;
+  align-items: center;
+  gap: 5px;
 }
 
 .day__weekend-status-info {
-  font-size: 12px;
+  font-size: 13px;
   color: #777777;
 }
 
