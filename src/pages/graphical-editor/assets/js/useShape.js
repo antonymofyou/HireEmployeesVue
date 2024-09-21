@@ -4,6 +4,7 @@ export function useShape(emits, props) {
     const isDragging = ref(false);
     const isResizing = ref(false);
     const isRotating = ref(false);
+    const isResizingArrow = ref(false);
     const offsetX = ref(0);
     const offsetY = ref(0);
     const startX = ref(0);
@@ -19,6 +20,7 @@ export function useShape(emits, props) {
     let initialAngle = 0;
     let initialMouseAngle = 0;
     let centerX, centerY;
+    let activeHandle = null;
 
     // Получение трансформаций translate и scale
     const updateCanvasScale = () => {
@@ -38,6 +40,84 @@ export function useShape(emits, props) {
     const updateShape = (updates) => {
         Object.entries(updates).forEach(([key, value]) => emits('updateShape', props.params.id, key, value));
     };
+
+    // Начало трансформации стрелки
+    const startResizingArrow = (handle, event) => {
+        event.preventDefault();
+        isResizingArrow.value = true;
+        activeHandle = handle;
+
+        const canvasScale = updateCanvasScale();
+        const clientX = event.clientX || event.touches[0].clientX;
+        const clientY = event.clientY || event.touches[0].clientY;
+
+        const rect = document.getElementById(props.params.id).getBoundingClientRect();
+        const startX = rect.left + props.params.x1;
+        const startY = rect.top + props.params.y1;
+        const endX = rect.left + props.params.x2;
+        const endY = rect.top + props.params.y2;
+
+        if (handle === 'start') {
+            centerX = endX;
+            centerY = endY;
+        } else {
+            centerX = startX;
+            centerY = startY;
+        }
+
+        console.log(`Fixed rotation center: (${centerX}, ${centerY})`);
+
+        offsetX.value = (clientX / canvasScale) - centerX;
+        offsetY.value = (clientY / canvasScale) - centerY;
+
+        document.addEventListener('mousemove', onResizingArrow);
+        document.addEventListener('touchmove', onResizingArrow);
+        document.addEventListener('mouseup', stopResizingArrow);
+        document.addEventListener('touchend', stopResizingArrow);
+    };
+
+    // Функция трансформации стрелки
+    const onResizingArrow = (event) => {
+        if (isResizingArrow.value && activeHandle) {
+            cancelAnimationFrame(resizingFrame);
+
+            resizingFrame = requestAnimationFrame(() => {
+                const canvasScale = updateCanvasScale();
+                const clientX = event.clientX || event.touches[0].clientX;
+                const clientY = event.clientY || event.touches[0].clientY;
+
+                const adjustedClientX = clientX / canvasScale;
+                const adjustedClientY = clientY / canvasScale;
+
+                const deltaX = adjustedClientX - centerX;
+                const deltaY = adjustedClientY - centerY;
+
+                console.log(`Delta relative to center: (${deltaX}, ${deltaY})`);
+
+                let angle = Math.atan2(deltaY, deltaX) * (180 / Math.PI);
+                if (event.shiftKey) {
+                    angle = Math.round(angle / 15) * 15;
+                }
+                angle = (angle % 360 + 360) % 360;
+
+                updateShape({
+                    rotation: angle,
+                });
+
+                console.log(`New rotation angle: ${angle}`);
+            });
+        }
+    };
+
+    // Завершение трансформации стрелки
+    const stopResizingArrow = () => {
+        isResizingArrow.value = false;
+        document.removeEventListener('mousemove', onResizingArrow);
+        document.removeEventListener('touchmove', onResizingArrow);
+        document.removeEventListener('mouseup', stopResizingArrow);
+        document.removeEventListener('touchend', stopResizingArrow);
+    };
+
 
     // Начало перемещения
     const startDragging = (event) => {
@@ -226,6 +306,8 @@ export function useShape(emits, props) {
         stopResizing,
         startRotating,
         stopRotating,
+        startResizingArrow,
+        stopResizingArrow,
         isDragging,
         isResizing,
         isRotating

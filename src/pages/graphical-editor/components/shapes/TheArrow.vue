@@ -39,8 +39,10 @@
         </marker>
       </defs>
       <line
-          :x1="0"
-          :x2="props.params.width"
+          :x1="props.params.x1"
+          :y1="props.params.y1"
+          :x2="props.params.x2"
+          :y2="props.params.y2"
           marker-end="url(#arrowhead)"
           stroke-width="2"
       />
@@ -48,11 +50,15 @@
     <!-- Показать манипуляторы только если объект выбран -->
     <div v-if="props.isSelected && isEditMode" class="resize-handles">
       <div
-          v-for="handle in handles"
-          :key="handle.position"
-          :class="['handle', handle.position]"
-          @mousedown.stop="startResizing(handle, $event)"
-          @touchstart.stop="startResizing(handle, $event)"
+          class="handle start"
+          @mousedown.stop="startResizingArrow('start', $event)"
+          @touchstart.stop="startResizingArrow('start', $event)"
+      ></div>
+      <div
+          class="handle end"
+          :style="{ left: props.params.x2 + 'px', top: props.params.y2 + 'px'}"
+          @mousedown.stop="startResizingArrow('end', $event)"
+          @touchstart.stop="startResizingArrow('end', $event)"
       ></div>
     </div>
   </div>
@@ -96,14 +102,7 @@ const arrowStyles = computed(() => {
     }
 });
 
-// Список манипуляторов
-const handles = [
-  { position: 'left', cursor: 'ew-resize' },
-  { position: 'right', cursor: 'ew-resize' },
-  { position: 'rotate', cursor: 'url("@/assets/icons/rotate.svg?component"), auto', isRotateHandle: true },
-];
-
-const { startDragging, stopDragging, startResizing, stopResizing, stopRotating} = useShape(emits, props);
+const { startDragging, stopDragging, startResizingArrow, stopResizingArrow} = useShape(emits, props);
 
 const selectArrow = () => {
   emits('select-shape', {
@@ -113,8 +112,7 @@ const selectArrow = () => {
 
 onBeforeUnmount(() => {
   stopDragging();
-  stopResizing();
-  stopRotating();
+  stopResizingArrow();
 });
 </script>
   
@@ -140,14 +138,15 @@ onBeforeUnmount(() => {
   position: absolute;
   width: 10px;
   height: 10px;
+  border-radius: 50%;
   background-color: white;
   border: 1px solid black;
   pointer-events: all;
   cursor: pointer;
 }
 
-.handle.left { top: calc(50% - 5px); left: -5px; cursor: ew-resize; }
-.handle.right { top: calc(50% - 5px); right: -5px; cursor: ew-resize; }
+.handle.start { top: 0; left: 0; cursor: ew-resize; transform: translate(50%, 50%);}
+.handle.end { top: calc(50% - 5px); right: -5px; cursor: ew-resize; transform: translate(50%, 50%);}
 
 .handle.rotate {
   top: -30px;
