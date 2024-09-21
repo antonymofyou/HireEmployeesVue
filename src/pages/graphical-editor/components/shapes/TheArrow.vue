@@ -6,6 +6,8 @@
       @click="selectArrow"
       @mousedown="startDragging($event), selectArrow()"
       @touchstart="startDragging($event), selectArrow()"
+      @dblclick="toggleShapeEditMode"
+      @touchend="handleTouchEnd"
   >
     <svg
         :height="props.params.height"
@@ -59,7 +61,7 @@
 </template>
   
 <script setup>
-import {computed, onBeforeUnmount} from 'vue';
+import {computed, onBeforeUnmount, ref} from 'vue';
 import { useShape } from '../../assets/js/useShape';
 
 const props = defineProps({
@@ -76,8 +78,11 @@ const props = defineProps({
       required: true,
     }
 });
-const emits = defineEmits(['updateShape', 'select-shape']);
+const emits = defineEmits(['updateShape', 'select-shape', 'change-mode']);
 
+const isShapeMode = computed(() => {
+  return props.mode.value === props.mode._shape;
+});
 const isEditMode = computed(() => {
   return props.mode.value === props.mode._edit;
 });
@@ -110,6 +115,35 @@ const selectArrow = () => {
     id: props.params.id,
   });
 }
+
+/**
+ * 
+ * Логика смены режимов
+ * 
+ */
+
+ const lastTap = ref(0);
+
+// Обработка двойного тапа для смены режимов
+const handleTouchEnd = (event) => {
+  const currentTime = new Date().getTime();
+  const tapLength = currentTime - lastTap.value;
+
+  if (tapLength < 300 && tapLength > 0) {
+    toggleShapeEditMode();
+  }
+  lastTap.value = currentTime;
+};
+
+// Переключение режима по двойному клику или тапу
+const toggleShapeEditMode = () => {
+  if (isShapeMode.value) {
+    emits('change-mode', props.mode._edit);
+  } else {
+    emits('change-mode', props.mode._shape);
+  }
+};
+
 
 onBeforeUnmount(() => {
   stopDragging();

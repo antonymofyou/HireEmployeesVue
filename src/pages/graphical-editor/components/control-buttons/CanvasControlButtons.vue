@@ -1,7 +1,7 @@
 <template>
-    <div class="control-buttons-main">
+    <div class="control-buttons">
         <ValuePicker
-            class="control-buttons-button control-buttons-value-picker"
+            class="scale-value-picker"
             :value="props.scale.value"
             :step="props.scale._step"
             :min="props.scale._min"
@@ -14,7 +14,6 @@
             </template>
         </ValuePicker>
         <ControlButton
-            class="control-buttons-button"
             @pointerdown.prevent="updateScaleHandler('inc')"
             @pointerup.prevent="resetMouseClamped"
             title="Увеличить масштаб (+10%)"
@@ -22,7 +21,6 @@
             <MagnifyPlusOutline />
         </ControlButton>
         <ControlButton
-            class="control-buttons-button"
             @pointerdown.prevent="updateScaleHandler('dec')"
             @pointerup.prevent="resetMouseClamped"
             title="Уменьшить масштаб (-10%)"
@@ -30,7 +28,6 @@
             <MagnifyMinusOutline />
         </ControlButton>
         <ControlButton
-            class="control-buttons-button"
             @pointerdown="updateScaleHandler('reset')"
             title="Сбросить масштаб (100%)"
         >
@@ -42,14 +39,12 @@
             </template>
             <template #content>
                 <ControlButton 
-                    class="control-buttons-button"
                     @click="addShapeHandler('rectangle')"
                     title="Прямоугольник"
                 >
                     <RectangleOutline />
                 </ControlButton>
                 <ControlButton 
-                    class="control-buttons-button"
                     @click="addShapeHandler('arrow')"
                     title="Стрелка"
                 >
@@ -66,18 +61,14 @@
             </template>
         </DropdownContent>
         <ControlButton
-            class="control-buttons-button"
             @pointerdown="deleteShapeHandler"
-            :disabled="disabled"
             title="Удалить фигуру"
         >
             <DeleteOutline />
         </ControlButton>
         <ControlButton
-            class="control-buttons-button"
             @pointerdown="copyShapeHandler"
-            :disabled="disabled"
-            :title="disabled ? 'Копировать фигуру (недоступно)' : 'Копировать фигуру'"
+            title="Копировать фигуру"
         >
             <ContentCopy />
         </ControlButton>
@@ -86,15 +77,15 @@
 
 <script setup>
 
-import { defineEmits, computed, ref } from 'vue';
+import { defineProps, defineEmits, ref } from 'vue';
 
-import ControlButton from './ControlButton.vue';
 import ValuePicker from './ValuePicker.vue';
+import ControlButton from './ControlButton.vue';
 import DropdownContent from '@/components/DropdownContent.vue';
-import SchemeTable from './SchemeTable.vue';
 
 // Icons
 
+import SchemeTable from './SchemeTable.vue';
 import RestoreIcon from 'vue-material-design-icons/Restore.vue';
 import ContentCopy from 'vue-material-design-icons/ContentCopy.vue';
 import DeleteOutline from 'vue-material-design-icons/DeleteOutline.vue';
@@ -120,10 +111,6 @@ const emits = defineEmits({
     copyShape: null,
     deleteShape: null,
     updateScale: null,
-});
-
-const disabled = computed(() => {
-    return !props.activeShape.id;
 });
 
 // Handlers
@@ -189,28 +176,14 @@ function updateScaleHandler(handler, value) {
 
 <style scoped>
 
-.control-buttons-value-picker:deep(input::-webkit-outer-spin-button),
-.control-buttons-value-picker:deep(input::-webkit-inner-spin-button) {
+.scale-value-picker:deep(input::-webkit-outer-spin-button),
+.scale-value-picker:deep(input::-webkit-inner-spin-button) {
   -webkit-appearance: none;
   margin: 0;
 }
 
-.control-buttons-value-picker:deep(input) {
+.scale-value-picker:deep(input) {
   -moz-appearance: textfield;
-}
-
-.dropdown:deep(.dropdown__content) {
-    bottom: -8px;
-    transform: translateY(100%) translateX(-50%);
-    left: 50%;
-}
-
-@media (max-width: 768px) {
-    .dropdown:deep(.dropdown__content) {
-        bottom: 50%;
-        transform: translateY(50%) translateX(-100%);
-        left: -8px;
-    }
 }
 
 </style>

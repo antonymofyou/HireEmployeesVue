@@ -13,25 +13,20 @@
           class="text-editor"
           :editor="editor"
       />
-      <!-- @mousedown.stop="enterTextEditMode" обработчик клика по тексту без перехода в EditMode, находится в EditorContent -->
-
-    <!-- Показать манипуляторы только если объект выбран -->
-    <div v-if="props.isSelected && isEditMode" class="resize-handles" :style="resizeHandleStyles">
-      <div
-          v-for="handle in handles"
-          :key="handle.position"
-          :class="['handle', handle.position]"
-          @mousedown.stop="startResizing(handle, $event)"
-          @touchstart.stop="startResizing(handle, $event)"
-      ></div>
-    </div>
-    <div v-show="props.isSelected && isShapeMode" :style="resizeHandleStyles" class="shape-mode">
-      <FormatText class="shape-mode__icon" />
-    </div>
+      <div v-if="props.isSelected && isEditMode" class="resize-handles" :style="resizeHandleStyles">
+        <div
+            v-for="handle in handles"
+            :key="handle.position"
+            :class="['handle', handle.position]"
+            @mousedown.stop="startResizing(handle, $event)"
+            @touchstart.stop="startResizing(handle, $event)"
+        ></div>
+      </div>
     </div>
 </template>
 
 <script setup>
+
 import {computed, onBeforeUnmount, watch, ref} from 'vue';
 import { useEditor, EditorContent } from '@tiptap/vue-3'
 import { useShape } from '../../assets/js/useShape';
@@ -42,15 +37,9 @@ import { Color } from '@tiptap/extension-color'
 import TextStyle from '@tiptap/extension-text-style'
 import FontSize from 'tiptap-extension-font-size';
 import Highlight from '@tiptap/extension-highlight';
-import FormatText from 'vue-material-design-icons/FormatText.vue'
 
 import { convertTo, convertFrom } from '../../assets/js/convert';
 
-/**
- *
- * Объект с параметрами фигуры { width: 100, height: 200 ... }
- *
- */
 const props = defineProps({
     params: {
         type: Object,
@@ -102,16 +91,6 @@ const rectangleStyles = computed(() => {
         userSelect: isShapeMode.value ? 'text' : 'none',
     }
 });
-const resizeHandleStyles = computed(() => {
-  const borderWidth = parseFloat(rectangleStyles.value.borderWidth) || 0;
-
-  return {
-    width: rectangleStyles.value.width,
-    height: rectangleStyles.value.height,
-    top: `-${borderWidth}px`,
-    left: `-${borderWidth}px`,
-  };
-});
 const editor = useEditor({
     content: convertFrom(props.params.text),
     extensions: [
@@ -134,10 +113,34 @@ const editor = useEditor({
     },
     editable: isShapeMode.value,
 });
+
 watch(() => isShapeMode.value, (newValue) => {
   if (editor.value) {
     editor.value.setEditable(newValue);
   }
+});
+const selectRectangle = () => {
+  emits('select-shape', {
+    id: props.params.id,
+    editor: editor.value,
+  });
+};
+
+/**
+ * 
+ * Логика перемещения , поворота
+ * 
+ */
+
+const resizeHandleStyles = computed(() => {
+  const borderWidth = parseFloat(rectangleStyles.value.borderWidth) || 0;
+
+  return {
+    width: rectangleStyles.value.width,
+    height: rectangleStyles.value.height,
+    top: `-${borderWidth}px`,
+    left: `-${borderWidth}px`,
+  };
 });
 
 // Список манипуляторов
@@ -157,6 +160,12 @@ const handles  = computed(() => {
 
 const { startDragging, stopDragging, startResizing, stopResizing, stopRotating} = useShape(emits, props);
 
+/**
+ * 
+ * Логика смены режимов
+ * 
+ */
+
 const lastTap = ref(0);
 
 // Обработка двойного тапа для смены режимов
@@ -168,14 +177,6 @@ const handleTouchEnd = (event) => {
     toggleShapeEditMode();
   }
   lastTap.value = currentTime;
-};
-
-// Выбор объекта
-const selectRectangle = () => {
-  emits('select-shape', {
-    id: props.params.id,
-    editor: editor.value,
-  });
 };
 
 // Переключение режима по двойному клику или тапу
@@ -208,19 +209,6 @@ onBeforeUnmount(() => {
   position: absolute;
   border: 1px solid #1A73E8;
   pointer-events: none;
-}
-
-.shape-mode {
-  position: absolute;
-  border: 1px solid #1A73E8;
-  pointer-events: none;
-}
-
-.shape-mode__icon {
-  position: absolute;
-  top: -8px;
-  right: 50%;
-  transform: translateY(-100%) translateX(50%);
 }
 
 .handle {

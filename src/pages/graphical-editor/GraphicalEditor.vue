@@ -12,26 +12,21 @@
     <header class="header">
       <div class="container">
         <div class="header__control-buttons">
-          <TextControlButtons
+          <StyleControlButtons
             v-if="windowInnerWidth <= breakpoint"
-            v-show="isShapeMode && activeShape.id"
             :active-shape="activeShape"
             @update-shape="updateShape"
             @update-editor="updateEditor"
+            class="style-control-buttons"
           />
-          <BlockControlButtons
-            v-if="windowInnerWidth <= breakpoint"
-            v-show="isEditMode && activeShape.id"
-            :active-shape="activeShape"
-            @update-shape="updateShape"
-          />
-          <MainControlButtons
+          <CanvasControlButtons 
             :active-shape="activeShape"
             :scale="scale"
             @add-shape="addShapeHandler"
             @delete-shape="deleteShapeHandler"
             @copy-shape="copyShapeHandler"
             @update-scale="updateScaleHandler"
+            class="canvas-control-buttons"
           />
         </div>
       </div>
@@ -55,16 +50,11 @@
         :scale="scale.value / 100"
       >
         <template #content>
-          <TextControlButtons
-            v-show="isShapeMode"
+          <StyleControlButtons
             :active-shape="activeShape"
             @update-shape="updateShape"
             @update-editor="updateEditor"
-          />
-          <BlockControlButtons
-            v-show="isEditMode"
-            :active-shape="activeShape"
-            @update-shape="updateShape"
+            class="style-control-buttons"
           />
         </template>
       </TooltipControlButtons>
@@ -76,19 +66,14 @@
 
 import {reactive, computed, ref, onBeforeUnmount, onMounted, watch} from 'vue';
 
-import TextControlButtons from './components/control-buttons/TextControlButtons.vue';
-import BlockControlButtons from './components/control-buttons/BlockControlButtons.vue';
-import MainControlButtons from './components/control-buttons/MainControlButtons.vue';
+import StyleControlButtons from './components/control-buttons/StyleControlButtons.vue';
+import CanvasControlButtons from './components/control-buttons/CanvasControlButtons.vue';
 import TooltipControlButtons from './components/control-buttons/TooltipControlButtons.vue';
 import TheRectangle from './components/shapes/TheRectangle.vue';
 import TheArrow from './components/shapes/TheArrow.vue';
 import TheTable from './components/shapes/TheTable.vue';
+import debounce from './assets/js/debounce';
 
-const shapeComponents = {
-  'rectangle': TheRectangle,
-  'arrow': TheArrow,
-  'table': TheTable
-};
 const formattedShapes = reactive({
     1: {
         "id": 1,
@@ -370,6 +355,11 @@ const formattedShapes = reactive({
         } 
     },
 });
+const shapeComponents = {
+  'rectangle': TheRectangle,
+  'arrow': TheArrow,
+  'table': TheTable
+};
 let activeShape = reactive({
     id: undefined,
     editor: undefined,
@@ -377,21 +367,67 @@ let activeShape = reactive({
         return formattedShapes[activeShape.id];
     }),
 });
-/**
- * edit - перемещение, поворот и т.п.
- * text - редактирование фигуры
- */
 let mode = reactive({
   value: 'edit',
-  _edit: 'edit',
-  _shape: 'shape',
+  _edit: 'edit', // перемещение , поворот и т.п.
+  _shape: 'shape', // редактирование фигуры
 });
-const isEditMode = computed(() => {
-    return mode.value === mode._edit;
+// Ширина экрана
+let windowInnerWidth = ref(window.innerWidth);
+// Высота экрана
+let windowInnerHeight = ref(window.innerHeight);
+// Ширина экрана при которой будет скрываться TooltipControlButtons
+let breakpoint = 768;
+
+// Функция для обновления ширины экрана
+const updateWindowInnerWidth = debounce(function() {
+  windowInnerWidth.value = window.innerWidth;
+  windowInnerHeight.value = window.innerHeight;
+}, 400);
+
+// Добавление обработчика клика по документу
+const handleDocumentClick = (event) => {
+  if (
+      !event.target.closest('.rectangle') &&
+      !event.target.closest('.table') &&
+      !event.target.closest('.arrow-container') &&
+      !event.target.closest('.control-buttons')
+  ) {
+    activeShape.id = null;
+    activeShape.editor = undefined;
+    mode.value = mode._edit;
+  }
+};
+
+// Функция для обработки выбора формы
+const handleSelectShape = ({ id = undefined, editor = undefined } = {}) => {
+  if (activeShape.id == id) return;
+
+  activeShape.id = id;
+  activeShape.editor = editor;
+  mode.value = mode._edit;
+};
+
+// Функция для обработки изменения режима
+const changeModeHandler = (event) => {
+  mode.value = event;
+}
+
+onMounted(() => {
+  document.addEventListener('click', handleDocumentClick);
+  window.addEventListener('resize', updateWindowInnerWidth);
 });
-const isShapeMode = computed(() => {
-    return mode.value === mode._shape && !!activeShape.editor;
-});
+onBeforeUnmount(() => {
+  document.removeEventListener('click', handleDocumentClick);
+  window.removeEventListener('resize', updateWindowInnerWidth);
+})
+
+/**
+ * 
+ * Логика масштабирования
+ * 
+*/
+
 let isGrabbing = ref(false);
 let scale = reactive({
   value: 100,
@@ -414,222 +450,13 @@ const canvasStyle = computed(() => {
     transform: `translate(${xCoord.value}px, ${yCoord.value}px) scale(${(scale.value / 100).toFixed(1)})`,
   };
 });
-// Ширина экрана
-let windowInnerWidth = ref(window.innerWidth);
-// Высота экрана
-let windowInnerHeight = ref(window.innerHeight);
-// Ширина экрана при которой будет скрываться TooltipControlButtons
-let breakpoint = 768;
 
-// Функция для обновления ширины экрана
-const updateWindowInnerWidth = debounce(function() {
-  windowInnerWidth.value = window.innerWidth;
-  windowInnerHeight.value = window.innerHeight;
-}, 400);
-
-/**
- *
- * Результат декоратора debounce(callback, delay) – это обёртка, которая откладывает вызовы callback,
- * пока не пройдёт delay миллисекунд бездействия (без вызовов),
- * а затем вызывает callback один раз с последними аргументами.
- *
-*/
-
-function debounce(callback, delay) {
-  let timer;
-
-  return function (...args) {
-    clearTimeout(timer);
-
-    timer = setTimeout(() => {
-      callback.apply(this, args);
-    }, delay);
-  };
-}
-
-// Добавление обработчика клика по документу
-const handleDocumentClick = (event) => {
-  if (
-      !event.target.closest('.rectangle') &&
-      !event.target.closest('.table') &&
-      !event.target.closest('.arrow-container') &&
-      !event.target.closest('.control-buttons-main') &&
-      !event.target.closest('.control-buttons-text') &&
-      !event.target.closest('.control-buttons-block') &&
-      !event.target.closest('.tooltip-control-buttons')
-  ) {
-    activeShape.id = null;
-    activeShape.editor = undefined;
-    mode.value = mode._edit;
-  }
-};
-
-onMounted(() => {
-  document.addEventListener('click', handleDocumentClick);
-  window.addEventListener('resize', updateWindowInnerWidth);
-});
-onBeforeUnmount(() => {
-  document.removeEventListener('click', handleDocumentClick);
-  window.removeEventListener('resize', updateWindowInnerWidth);
-})
-
-// Функция для генерации уникального ID для новой формы
-const generateUniqueId = () => {
-  const ids = Object.keys(formattedShapes).map(id => Number(id));
-
-  if (ids.length > 0) {
-    return Math.max(...ids) + 1;
-  } else {
-    return Date.now();
-  }
-}
-
-
-// Функция для добавления нового прямоугольника
-const addShapeHandler = (type, options) => {
-  const newId = generateUniqueId();
-  const shape = {
-    arrow() {
-      return {
-        id: newId,
-        type: 'arrow',
-        x: 0,
-        y: 0,
-        width: 150,
-        height: 10,
-        color: '#000000',
-        zIndex: 1,
-      }
-    },
-    rectangle() {
-      return {
-        id: newId,
-        type: 'rectangle',
-        x: 0,
-        y: 0,
-        width: 150,
-        height: 100,
-        color: '#000000',
-        zIndex: 1,
-        padding: 10,
-      }
-    },
-    table(options) {
-      const { table } = options;
-
-      return {
-        id: newId,
-        type: 'table',
-        x: 900,
-        y: 600,
-        width: 150,
-        height: 100,
-        zIndex: 1,
-        table,
-      }
-    }
-  };
-
-  formattedShapes[newId] = shape[type](options);
-
-  handleSelectShape({
-    id: newId,
-  });
-}
-
-// Функция для удаления фигуры
-const deleteShapeHandler = (id) => {
-  handleSelectShape();
-
-  delete formattedShapes[id];
-}
-
-// Функция для копирования активной фигуры
-const copyShapeHandler = () => {
-  if (!activeShape.shape) return;
-
-  const copyShape = {
-    ...activeShape.shape,
-  };
-  const id = generateUniqueId();
-
-  copyShape.id = id;
-  copyShape.x = 0;
-  copyShape.y = 0;
-
-  formattedShapes[id] = copyShape;
-
-  handleSelectShape({
-    id: id,
-  });
-}
-
-// Функция для обновления свойств формы
-const updateShape = (id, key, value) => {
-    formattedShapes[id][key] = value;
-}
-
-// Функция для обработки выбора формы
-const handleSelectShape = ({ id = undefined, editor = undefined } = {}) => {
-  if (activeShape.id == id) return;
-
-  activeShape.id = id;
-  activeShape.editor = editor;
-  mode.value = mode._edit;
-};
-
-// Функция для обработки изменения режима
-const changeModeHandler = (event) => {
-  mode.value = event;
-}
-
-// Функция для обновления св-в текстового редактора
-const updateEditor = (type, value) => {
-  const handlers = {
-    boldStyle() {
-      activeShape.editor?.chain().focus().toggleBold().run();
-    },
-    italicStyle() {
-      activeShape.editor?.chain().focus().toggleItalic().run();
-    },
-    underlineStyle() {
-      activeShape.editor?.chain().focus().toggleUnderline().run();
-    },
-    colorText(color) {
-      activeShape.editor?.chain().focus().setColor(color).blur().run();
-    },
-    sizeText(size) {
-      activeShape.editor?.chain().setFontSize(size + 'px').run();
-    },
-    addHighlight(color) {
-      activeShape.editor?.chain().focus().setHighlight({ color: color }).blur().run();
-    },
-    removeHighlight() {
-      activeShape.editor?.chain().focus().unsetHighlight().blur().run();
-    },
-    horizontalAlign(name) {
-      activeShape.editor?.chain().focus().setTextAlign(name).run();
-    },
-  };
-  const handler = handlers[type];
-
-  handler(value);
-}
-
+// Обработчик обновления значения масштабиирования
 const updateScaleHandler = (value) => {  
   scale.value = value;
 }
 
-watch(() => scale.value, function(newScale, prevScale) {
-  if (!aimScale.shape) {
-    aimScale.x = xCoord.value / (prevScale / 100);
-    aimScale.y = yCoord.value / (prevScale / 100);
-  }
-
-  xCoord.value = aimScale.x * (newScale / 100);
-  yCoord.value = aimScale.y * (newScale / 100);
-});
-
+// Функция для определения точки масштабирования
 const defineTargetScale = (event) => {
   const shape = event.target.closest('.shape');
 
@@ -686,6 +513,7 @@ const defineTargetScale = (event) => {
   aimScale.y = yCoordAim / (scale.value / 100);
 }
 
+// Обработчик начала перемещения
 const startGrabbingHandler = (event) => {
   if (activeShape.id) return;
 
@@ -695,10 +523,12 @@ const startGrabbingHandler = (event) => {
   yLastCoord.value = event.clientY;
 }
 
+// Обработчик завершения перемещения
 const cancelGrabbing = () => {
   isGrabbing.value = false;
 }
 
+// Обработчик перемещения
 const moveGrabbingHandler = (event) => {
   if (!isGrabbing.value) return;
 
@@ -715,7 +545,8 @@ const moveGrabbingHandler = (event) => {
   yLastCoord.value = event.clientY;
 }
 
-function scaleHandler(event) {
+// Обработчик масштабирования по колесику мыши
+const scaleHandler = (event) => {
   let delta = event.deltaY || event.detail || event.wheelDelta;
 
   if (delta > 0) {
@@ -725,6 +556,150 @@ function scaleHandler(event) {
   }
 
   updateScaleHandler(scale.value <= scale._min ? scale.value : scale.value - scale._step);
+}
+
+watch(() => scale.value, function(newScale, prevScale) {
+  if (!aimScale.shape) {
+    aimScale.x = xCoord.value / (prevScale / 100);
+    aimScale.y = yCoord.value / (prevScale / 100);
+  }
+
+  xCoord.value = aimScale.x * (newScale / 100);
+  yCoord.value = aimScale.y * (newScale / 100);
+});
+
+/**
+ * 
+ * Обработчики кнопок управления
+ * 
+*/
+
+// Функция для генерации уникального ID новой фигуры
+const generateUniqueId = () => {
+  const ids = Object.keys(formattedShapes).map(id => Number(id));
+
+  if (ids.length > 0) {
+    return Math.max(...ids) + 1;
+  } else {
+    return Date.now();
+  }
+}
+
+// Обработчик добавления новой фигуры
+const addShapeHandler = (type, options) => {
+  const newId = generateUniqueId();
+  const shape = {
+    arrow() {
+      return {
+        id: newId,
+        type: 'arrow',
+        x: 0,
+        y: 0,
+        width: 150,
+        height: 10,
+        color: '#000000',
+        zIndex: 1,
+      }
+    },
+    rectangle() {
+      return {
+        id: newId,
+        type: 'rectangle',
+        x: 0,
+        y: 0,
+        width: 150,
+        height: 100,
+        color: '#000000',
+        zIndex: 1,
+        padding: 10,
+      }
+    },
+    table(options) {
+      const { table } = options;
+
+      return {
+        id: newId,
+        type: 'table',
+        x: 900,
+        y: 600,
+        width: 150,
+        height: 100,
+        zIndex: 1,
+        table,
+      }
+    }
+  };
+
+  formattedShapes[newId] = shape[type](options);
+
+  handleSelectShape({
+    id: newId,
+  });
+}
+
+// Обработчик удаления фигуры
+const deleteShapeHandler = (id) => {
+  handleSelectShape();
+
+  delete formattedShapes[id];
+}
+
+// Обработчик копирования активной фигуры
+const copyShapeHandler = () => {
+  if (!activeShape.shape) return;
+
+  const copyShape = {
+    ...activeShape.shape,
+  };
+  const id = generateUniqueId();
+
+  copyShape.id = id;
+  copyShape.x = 0;
+  copyShape.y = 0;
+
+  formattedShapes[id] = copyShape;
+
+  handleSelectShape({
+    id: id,
+  });
+}
+
+// Функция для обновления свойств фигуры
+const updateShape = (id, key, value) => {
+    formattedShapes[id][key] = value;
+}
+
+// Функция для обновления св-в текстового редактора
+const updateEditor = (type, value) => {
+  const handlers = {
+    boldStyle() {
+      activeShape.editor?.chain().focus().toggleBold().run();
+    },
+    italicStyle() {
+      activeShape.editor?.chain().focus().toggleItalic().run();
+    },
+    underlineStyle() {
+      activeShape.editor?.chain().focus().toggleUnderline().run();
+    },
+    colorText(color) {
+      activeShape.editor?.chain().focus().setColor(color).blur().run();
+    },
+    sizeText(size) {
+      activeShape.editor?.chain().setFontSize(size + 'px').run();
+    },
+    addHighlight(color) {
+      activeShape.editor?.chain().focus().setHighlight({ color: color }).blur().run();
+    },
+    removeHighlight() {
+      activeShape.editor?.chain().focus().unsetHighlight().blur().run();
+    },
+    horizontalAlign(name) {
+      activeShape.editor?.chain().focus().setTextAlign(name).run();
+    },
+  };
+  const handler = handlers[type];
+
+  handler(value);
 }
 
 </script>
@@ -761,57 +736,6 @@ function scaleHandler(event) {
   gap: 16px 48px;
 }
 
-.header .control-buttons-main ,
-.header .control-button-text ,
-.header .control-buttons-block {
-  position: relative;
-  z-index: 999;
-}
-
-.header__control-buttons > * {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 16px;
-}
-
-.control-buttons-main {
-  margin-left: auto;
-}
-
-:deep(.control-buttons-button),
-:deep(.control-buttons-value-picker),
-:deep(.dropdown__trigger) {
-  background-color: var(--milk);
-  padding: 6px;
-  border-radius: 8px;
-}
-
-:deep(.material-design-icon__svg){
-  display: block;
-  width: 21px;
-  height: 21px;
-  transition: .2s color;
-}
-
-:deep(.control-buttons-value-picker input) {
-  width: 50px;
-}
-
-:deep(.select-box-main){
-  flex: 0 0 32px;
-}
-
-:deep(.dropdown .dropdown__content),
-:deep(.select-box-main .options-container-main) {
-    display: flex;
-    gap: 8px;
-    box-shadow: 0px 2.5px 5px 1px rgba(34, 60, 80, 0.2);
-    border: none;
-    background-color: var(--milk);
-    padding: 6px;
-    border-radius: 8px;
-}
-
 .tooltip-control-buttons {
   box-shadow: 0px 5px 10px 2px var(--milk);
   background-color: var(--white);
@@ -820,13 +744,68 @@ function scaleHandler(event) {
   z-index: 999;
 }
 
-.tooltip-control-buttons .control-buttons-text,
-.tooltip-control-buttons .control-buttons-block {
+/* Общие стили для кнопок управления */
+
+.control-buttons {
+  position: relative;
+  z-index: 999;
   display: flex;
+  align-items: flex-start;
   gap: 16px;
 }
 
-@media (max-width: 768px) {
+.canvas-control-buttons {
+  margin-left: auto;
+}
+
+.canvas-control-buttons:deep(.dropdown .dropdown__content) {
+  bottom: -8px;
+  transform: translateY(100%) translateX(-50%);
+  left: 50%;
+}
+
+.style-control-buttons:deep(.dropdown .dropdown__content),
+.style-control-buttons:deep(.select-box-main .options-container-main) {
+  top: -8px;
+  left: 50% !important;
+  transform: translateY(-100%) translateX(-50%);
+}
+
+.control-buttons:deep(.control-button),
+.control-buttons:deep(.value-picker),
+.control-buttons:deep(.dropdown__trigger) {
+  background-color: var(--milk);
+  padding: 6px;
+  border-radius: 8px;
+}
+
+.control-buttons:deep(.material-design-icon__svg){
+  display: block;
+  width: 21px;
+  height: 21px;
+  transition: .2s color;
+}
+
+.control-buttons:deep(.value-picker input) {
+  width: 50px;
+}
+
+.control-buttons:deep(.select-box-main){
+  flex: 0 0 32px;
+}
+
+.control-buttons:deep(.dropdown .dropdown__content),
+.control-buttons:deep(.select-box-main .options-container-main) {
+  display: flex;
+  gap: 8px;
+  box-shadow: 0px 2.5px 5px 1px rgba(34, 60, 80, 0.2);
+  border: none;
+  background-color: var(--milk);
+  padding: 6px;
+  border-radius: 8px;
+}
+
+/* @media (max-width: 768px) {
   .header__control-buttons,
   .header__control-buttons > * {
     gap: 8px;
@@ -849,6 +828,22 @@ function scaleHandler(event) {
 
 }
 
+@media (max-width: 768px) {
+    .dropdown:deep(.dropdown__content) {
+        top: auto;
+        bottom: -8px;
+        transform: translateY(100%) translateX(-50%);
+    }
+}
+
+@media (max-width: 768px) {
+    .dropdown:deep(.dropdown__content) {
+        bottom: 50%;
+        transform: translateY(50%) translateX(-100%);
+        left: -8px;
+    }
+}
+
 @media (hover: hover) and (pointer: fine) {
   :deep(.control-button),
   :deep(.dropdown__trigger),
@@ -865,6 +860,6 @@ function scaleHandler(event) {
   :deep(.option-main:hover) {
     box-shadow: 0px 2.5px 5px 1px rgba(34, 60, 80, 0.2);
   }
-}
+} */
 
 </style>

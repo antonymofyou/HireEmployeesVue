@@ -1,6 +1,8 @@
 <template>
     <div
         @pointerdown="selectTable"
+        @dblclick="toggleShapeEditMode"
+        @touchend="handleTouchEnd"
         :style="tableStyles"
         :id="props.params.id"
         class="table"
@@ -14,9 +16,9 @@
 
 <script setup>
 
-import { defineProps, defineEmits, computed, onBeforeUnmount } from 'vue';
+import { defineProps, defineEmits, computed, onBeforeUnmount, watch, ref } from 'vue';
 
-import { useEditor, EditorContent } from '@tiptap/vue-3'
+import { useEditor, EditorContent, extensions } from '@tiptap/vue-3'
 import StarterKit from '@tiptap/starter-kit'
 import Table from '@tiptap/extension-table'
 import TableCell from '@tiptap/extension-table-cell'
@@ -27,13 +29,24 @@ const props = defineProps({
     params: {
         type: Object,
         required: true
-    }
+    },
+    mode: {
+      type: Object,
+      required: true
+    },
 });
 const emits = defineEmits({
     'updateShape': null,
     'selectShape': null,
+    'change-mode': null,
 });
 
+const isShapeMode = computed(() => {
+  return props.mode.value === props.mode._shape;
+});
+const isEditMode = computed(() => {
+  return props.mode.value === props.mode._edit;
+});
 const tableStyles = computed(() => {
     return {
         // Geometry
@@ -44,6 +57,9 @@ const tableStyles = computed(() => {
         // Size
         width: props.params.width + 'px',
         height: props.params.height + 'px',
+        // Mode styles
+        cursor: isEditMode.value ? 'move' : 'text',
+        userSelect: isShapeMode.value ? 'text' : 'none',
     }
 });
 const editor = useEditor({
@@ -62,14 +78,49 @@ const editor = useEditor({
 
         emits('updateShape', props.params.id , 'text' , json);
     },
+    editable: isShapeMode.value,
 });
 
+watch(() => isShapeMode.value, (newValue) => {
+  if (editor.value) {
+    editor.value.setEditable(newValue);
+  }
+});
 function selectTable() {
     emits('selectShape', {
         id: props.params.id,
         editor: editor.value,
     });
 }
+
+/**
+ * 
+ * Логика смены режимов
+ * 
+ */
+
+const lastTap = ref(0);
+
+// Обработка двойного тапа для смены режимов
+const handleTouchEnd = (event) => {
+  const currentTime = new Date().getTime();
+  const tapLength = currentTime - lastTap.value;
+
+  if (tapLength < 300 && tapLength > 0) {
+    toggleShapeEditMode();
+  }
+  lastTap.value = currentTime;
+};
+
+// Переключение режима по двойному клику или тапу
+const toggleShapeEditMode = () => {
+  if (isShapeMode.value) {
+    emits('change-mode', props.mode._edit);
+  } else {
+    emits('change-mode', props.mode._shape);
+    editor.value.chain().focus().run();
+  }
+};
 
 onBeforeUnmount(() => {
     editor.value.destroy();

@@ -1,12 +1,66 @@
 <template>
-    <div class="control-buttons-text">
+    <div class="control-buttons">
+        <ColorPicker
+            :color="props.activeShape.shape?.color || '#000000'"
+            @reset-color="updateShapeHandler('color', '#000000')"
+            @update:color="updateShapeHandler('color', $event)"
+            title="Заливка"
+        >
+            <template #icon>
+                <FormatPaint />
+            </template>
+        </ColorPicker>
+        <ColorPicker
+            :color="props.activeShape.shape?.borderColor || '#000000'"
+            @reset-color="updateShapeHandler('borderColor', '#000000')"
+            @update:color="updateShapeHandler('borderColor', $event)"
+            title="Цвет границ"
+        >
+            <template #icon>
+                <BorderColor />
+            </template>
+        </ColorPicker>
+        <ValuePicker
+            :value="+props.activeShape.shape?.cornerRadius || 0"
+            @update:value="updateShapeHandler('cornerRadius', +$event)"
+            :min="0"
+            title="Закругление границ" 
+        >
+            <template #icon>
+                <BorderRadius />
+            </template>
+            <template #units>
+                px
+            </template>
+        </ValuePicker>
+        <SelectControlButton 
+            :items="itemsBorderWidth"
+            title="Размер границ"
+            :item="+props.activeShape.shape?.borderWidth || 0"
+            @update:item="borderWidthSelectHandler"
+        >
+            <template #trigger="{ selected }">
+                <FormatLineWeight />
+                <span class="selected-number-main">
+                    {{ selected.name }}
+                </span>
+            </template>
+        </SelectControlButton>
+        <ValuePicker
+            :value="+props.activeShape.shape?.zIndex || 1"
+            @update:value="updateShapeHandler('zIndex', +$event)"
+            title="Z-ось"    
+        >
+            <template #icon>
+                <AlphaZBoxOutline />
+            </template>
+        </ValuePicker>
         <DropdownContent title="Форматирование текста">
             <template #trigger>
                 <FormatFont />
             </template>
             <template #content>
                 <ControlButton 
-                    class="control-buttons-button"
                     :active="props.activeShape.editor?.isActive('bold')"
                     @click="updateEditorHandler('boldStyle')"
                     title="Выделение"
@@ -14,7 +68,6 @@
                     <BoldIcon />
                 </ControlButton>
                 <ControlButton 
-                    class="control-buttons-button"
                     :active="props.activeShape.editor?.isActive('italic')"
                     @click="updateEditorHandler('italicStyle')"
                     title="Курсив"
@@ -22,7 +75,6 @@
                     <ItalicIcon />
                 </ControlButton>
                 <ControlButton 
-                    class="control-buttons-button"
                     :active="props.activeShape.editor?.isActive('underline')"
                     @click="updateEditorHandler('underlineStyle')"
                     title="Подчеркивание"
@@ -64,7 +116,6 @@
             @update:item="verticalAlignSelectHandler"
         />
         <ValuePicker
-            class="control-buttons-button control-buttons-value-picker"
             :value="parseInt(props.activeShape.editor?.getAttributes('textStyle').fontSize) || 0"
             @update:value="updateEditorHandler('sizeText', $event)"
             :min="0"
@@ -78,7 +129,6 @@
             </template>
         </ValuePicker>
         <ValuePicker
-            class="control-buttons-button control-buttons-value-picker"
             :value="+props.activeShape.shape?.padding || 0"
             @update:value="updateShapeHandler('padding', +$event)"     
             :min="0"
@@ -96,16 +146,21 @@
 
 <script setup>
 
-import { defineProps, defineEmits, computed } from 'vue';
+import { defineProps, defineEmits } from 'vue';
 
-import ControlButton from './ControlButton.vue';
 import ColorPicker from './ColorPicker.vue';
 import ValuePicker from './ValuePicker.vue';
 import SelectControlButton from './SelectControlButton.vue';
+import ControlButton from './ControlButton.vue';
 import DropdownContent from '@/components/DropdownContent.vue';
 
 // Icons
 
+import FormatPaint from 'vue-material-design-icons/FormatPaint.vue'
+import BorderColor from 'vue-material-design-icons/BorderColor.vue';
+import BorderRadius from 'vue-material-design-icons/BorderRadius.vue';
+import FormatLineWeight from 'vue-material-design-icons/FormatLineWeight.vue';
+import AlphaZBoxOutline from 'vue-material-design-icons/AlphaZBoxOutline.vue'
 import BoldIcon from 'vue-material-design-icons/FormatBold.vue'
 import ItalicIcon from 'vue-material-design-icons/FormatItalic.vue'
 import UnderlineIcon from 'vue-material-design-icons/FormatUnderline.vue'
@@ -124,13 +179,19 @@ const props = defineProps({
     activeShape: {
         type: Object,
         required: true,
-    }
+    },
 });
 const emits = defineEmits({
     updateShape: null,
-    updateEditor: null
+    updateEditor: null,
 });
 
+const itemsBorderWidth = new Array(6).fill({}).map((item, idx) => {
+    return {
+        id: idx,
+        name: (idx + 1) * 2
+    }
+});
 const itemsHorizontalAlign = [
     {
         id: 0,
@@ -172,12 +233,18 @@ const itemsVerticalAlign = [
     },
 ];
 
-function updateEditorHandler(type, value) {
-    emits('updateEditor', type, value);
-}
+// Handlers
 
 function updateShapeHandler(key, value) {
     emits('updateShape', props.activeShape.id, key, value);
+}
+
+function borderWidthSelectHandler(name) {
+    updateShapeHandler('borderWidth', +name);
+}
+
+function updateEditorHandler(type, value) {
+    emits('updateEditor', type, value);
 }
 
 function verticalAlignSelectHandler(name) {
@@ -189,21 +256,3 @@ function horizontalAlignSelectHandler(name) {
 }
 
 </script>
-
-<style scoped>
-
-.dropdown:deep(.dropdown__content) {
-    top: -8px;
-    left: 50% !important;
-    transform: translateY(-100%) translateX(-50%);
-}
-
-@media (max-width: 768px) {
-    .dropdown:deep(.dropdown__content) {
-        top: auto;
-        bottom: -8px;
-        transform: translateY(100%) translateX(-50%);
-    }
-}
-
-</style>
