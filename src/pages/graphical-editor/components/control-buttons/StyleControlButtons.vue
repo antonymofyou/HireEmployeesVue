@@ -1,6 +1,7 @@
 <template>
     <div class="control-buttons">
         <ColorPicker
+            v-if="renderTable.color"
             :color="props.activeShape.shape?.color || '#000000'"
             @reset-color="updateShapeHandler('color', '#000000')"
             @update:color="updateShapeHandler('color', $event)"
@@ -11,6 +12,7 @@
             </template>
         </ColorPicker>
         <ColorPicker
+            v-if="renderTable.borderColor"
             :color="props.activeShape.shape?.borderColor || '#000000'"
             @reset-color="updateShapeHandler('borderColor', '#000000')"
             @update:color="updateShapeHandler('borderColor', $event)"
@@ -21,6 +23,7 @@
             </template>
         </ColorPicker>
         <ValuePicker
+            v-if="renderTable.cornerRadius"
             :value="+props.activeShape.shape?.cornerRadius || 0"
             @update:value="updateShapeHandler('cornerRadius', +$event)"
             :min="0"
@@ -33,7 +36,8 @@
                 px
             </template>
         </ValuePicker>
-        <SelectControlButton 
+        <SelectControlButton
+            v-if="renderTable.borderWidth"
             :items="itemsBorderWidth"
             title="Размер границ"
             :item="+props.activeShape.shape?.borderWidth || 0"
@@ -47,6 +51,7 @@
             </template>
         </SelectControlButton>
         <ValuePicker
+            v-if="renderTable.zIndex"
             :value="+props.activeShape.shape?.zIndex || 1"
             @update:value="updateShapeHandler('zIndex', +$event)"
             title="Z-ось"    
@@ -55,7 +60,10 @@
                 <AlphaZBoxOutline />
             </template>
         </ValuePicker>
-        <DropdownContent title="Форматирование текста">
+        <DropdownContent
+            v-if="renderTable.formattedText"
+            title="Форматирование текста"
+        >
             <template #trigger>
                 <FormatFont />
             </template>
@@ -84,6 +92,7 @@
             </template>
         </DropdownContent>
         <ColorPicker
+            v-if="renderTable.colorText"
             :color="props.activeShape.editor?.getAttributes('textStyle').color || '#000000'"
             @reset-color="updateEditorHandler('colorText', '#000000')"
             @update:color="updateEditorHandler('colorText', $event)"         
@@ -94,6 +103,7 @@
             </template>
         </ColorPicker>
         <ColorPicker
+            v-if="renderTable.highlight"
             :color="props.activeShape.editor?.getAttributes('highlight').color || '#000000'"
             @reset-color="updateEditorHandler('removeHighlight')"
             @update:color="updateEditorHandler('addHighlight', $event)"            
@@ -103,19 +113,22 @@
                 <Marker />
             </template>
         </ColorPicker>
-        <SelectControlButton 
+        <SelectControlButton
+            v-if="renderTable.horizontalAlign"
             :items="itemsHorizontalAlign"
             title="Горизонтальное выравнивание"
             :item="props.activeShape.editor?.getAttributes('paragraph').textAlign || ''"
             @update:item="horizontalAlignSelectHandler"
         />
-        <SelectControlButton 
+        <SelectControlButton
+            v-if="renderTable.verticalAlign"
             :items="itemsVerticalAlign"
             title="Вертикальное выравнивание"
             :item="props.activeShape.shape?.textVerticalAlignment || ''"
             @update:item="verticalAlignSelectHandler"
         />
         <ValuePicker
+            v-if="renderTable.sizeText"
             :value="parseInt(props.activeShape.editor?.getAttributes('textStyle').fontSize) || 0"
             @update:value="updateEditorHandler('sizeText', $event)"
             :min="0"
@@ -129,6 +142,7 @@
             </template>
         </ValuePicker>
         <ValuePicker
+            v-if="renderTable.padding"
             :value="+props.activeShape.shape?.padding || 0"
             @update:value="updateShapeHandler('padding', +$event)"     
             :min="0"
@@ -141,12 +155,90 @@
                 px
             </template>
         </ValuePicker>
+        <DropdownContent
+            v-if="renderTable.columnControl"
+            title="Управление колонками"
+        >
+            <template #trigger>
+                <TableColumn />
+            </template>
+            <template #content>
+                <ControlButton 
+                    @click="updateEditorHandler('addColumnBefore')"
+                    title="Добавить колонку до"
+                >
+                    <TableColumnPlusBefore />
+                </ControlButton>
+                <ControlButton 
+                    @click="updateEditorHandler('addColumnAfter')"
+                    title="Добавить колонку после"
+                >
+                    <TableColumnPlusAfter />
+                </ControlButton>
+                <ControlButton 
+                    @click="updateEditorHandler('deleteColumn')"
+                    title="Удалить колонку"
+                >
+                    <TableColumnRemove />
+                </ControlButton>
+            </template>
+        </DropdownContent>
+        <DropdownContent
+            v-if="renderTable.rowControl"
+            title="Управление строками"
+        >
+            <template #trigger>
+                <TableRow />
+            </template>
+            <template #content>
+                <ControlButton 
+                    @click="updateEditorHandler('addRowBefore')"
+                    title="Добавить строку до"
+                >
+                    <TableRowPlusBefore />
+                </ControlButton>
+                <ControlButton 
+                    @click="updateEditorHandler('addRowAfter')"
+                    title="Добавить строку после"
+                >
+                    <TableRowPlusAfter />
+                </ControlButton>
+                <ControlButton 
+                    @click="updateEditorHandler('deleteRow')"
+                    title="Удалить строку"
+                >
+                    <TableRowRemove />
+                </ControlButton>
+            </template>
+        </DropdownContent>
+        <DropdownContent
+            v-if="renderTable.cellControl"
+            title="Управление ячейками"
+        >
+            <template #trigger>
+                <CodeBrackets />
+            </template>
+            <template #content>
+                <ControlButton 
+                    @click="updateEditorHandler('mergeCells')"
+                    title="Объединить ячейки"
+                >
+                    <TableMergeCells />
+                </ControlButton>
+                <ControlButton 
+                    @click="updateEditorHandler('splitCell')"
+                    title="Разъединить ячейки"
+                >
+                    <TableSplitCell />
+                </ControlButton>
+            </template>
+        </DropdownContent>
     </div>
 </template>
 
 <script setup>
 
-import { defineProps, defineEmits } from 'vue';
+import { defineProps, defineEmits, computed } from 'vue';
 
 import ColorPicker from './ColorPicker.vue';
 import ValuePicker from './ValuePicker.vue';
@@ -174,12 +266,31 @@ import FormatText from 'vue-material-design-icons/FormatText.vue'
 import Marker from 'vue-material-design-icons/Marker.vue'
 import FormatFont from 'vue-material-design-icons/FormatFont.vue';
 import FitToPageOutline from 'vue-material-design-icons/FitToPageOutline.vue';
+import TableColumn from 'vue-material-design-icons/TableColumn.vue';
+import TableColumnPlusBefore from 'vue-material-design-icons/TableColumnPlusBefore.vue';
+import TableColumnPlusAfter from 'vue-material-design-icons/TableColumnPlusAfter.vue';
+import TableColumnRemove from 'vue-material-design-icons/TableColumnRemove.vue';
+import TableRow from 'vue-material-design-icons/TableRow.vue';
+import TableRowPlusBefore from 'vue-material-design-icons/TableRowPlusBefore.vue';
+import TableRowPlusAfter from 'vue-material-design-icons/TableRowPlusAfter.vue';
+import TableRowRemove from 'vue-material-design-icons/TableRowRemove.vue';
+import CodeBrackets from 'vue-material-design-icons/CodeBrackets.vue';
+import TableSplitCell from 'vue-material-design-icons/TableSplitCell.vue';
+import TableMergeCells from 'vue-material-design-icons/TableMergeCells.vue';
 
 const props = defineProps({
     activeShape: {
         type: Object,
         required: true,
     },
+    mode: {
+        type: Object,
+        required: true,
+    },
+    shapes: {
+        type: Object,
+        required: true,
+    }
 });
 const emits = defineEmits({
     updateShape: null,
@@ -232,6 +343,45 @@ const itemsVerticalAlign = [
         title: 'По верхнему краю',
     },
 ];
+const isShapeMode = computed(() => {
+  return props.mode.value === props.mode._shape;
+});
+const isEditMode = computed(() => {
+  return props.mode.value === props.mode._edit;
+});
+const currentShape = computed(() => {
+    return props.activeShape.shape?.type || '';
+});
+const isRectangle = computed(() => {
+    return currentShape.value === props.shapes.rectangle;
+});
+const isArrow = computed(() => {
+    return currentShape.value === props.shapes.arrow;
+});
+const isTable = computed(() => {
+    return currentShape.value === props.shapes.table;
+});
+const renderTable = computed(() => {
+    return {
+        color: isEditMode.value,
+        zIndex: isEditMode.value,
+        borderColor: (isEditMode.value && isRectangle.value) || (isEditMode.value && isTable.value),
+        cornerRadius: (isEditMode.value && isRectangle.value),
+        borderWidth: (isEditMode.value && isRectangle.value) || (isEditMode.value && isTable.value),
+        // Управление текстом
+        formattedText: (isShapeMode.value && isRectangle.value) || (isShapeMode.value && isTable.value),
+        colorText: (isShapeMode.value && isRectangle.value) || (isShapeMode.value && isTable.value),
+        highlight: (isShapeMode.value && isRectangle.value) || (isShapeMode.value && isTable.value),
+        horizontalAlign: (isShapeMode.value && isRectangle.value),
+        verticalAlign: (isShapeMode.value && isRectangle.value),
+        sizeText: (isShapeMode.value && isRectangle.value) || (isShapeMode.value && isTable.value),
+        padding: (isShapeMode.value && isRectangle.value),
+        // Управление таблицей
+        columnControl: (isShapeMode.value && isTable.value),
+        rowControl: (isShapeMode.value && isTable.value),
+        cellControl: (isShapeMode.value && isTable.value),
+    }
+});
 
 // Handlers
 

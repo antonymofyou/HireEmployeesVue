@@ -15,6 +15,8 @@
           <StyleControlButtons
             v-if="windowInnerWidth <= breakpoint"
             :active-shape="activeShape"
+            :mode="mode"
+            :shapes="nameShapes"
             @update-shape="updateShape"
             @update-editor="updateEditor"
             class="style-control-buttons"
@@ -34,7 +36,7 @@
     <main :style="canvasStyle" class="canvas">
       <template v-for="shape of formattedShapes" :key="shape.id">
         <component 
-            :is="shapeComponents[shape.type]"
+            :is="shapes[shape.type].component"
             :params="shape"
             :mode="mode"
             :is-selected="activeShape.id == shape.id"
@@ -52,6 +54,8 @@
         <template #content>
           <StyleControlButtons
             :active-shape="activeShape"
+            :mode="mode"
+            :shapes="nameShapes"
             @update-shape="updateShape"
             @update-editor="updateEditor"
             class="style-control-buttons"
@@ -172,8 +176,8 @@ const formattedShapes = reactive({
         "type": "table",
         "x": 870,
         "y": 300,
-        "width": 200,
-        "height": 100,
+        "width": 400,
+        "height": 128,
         "zIndex": 1,
         "table": {
           "type": "doc",
@@ -355,11 +359,25 @@ const formattedShapes = reactive({
         } 
     },
 });
-const shapeComponents = {
-  'rectangle': TheRectangle,
-  'arrow': TheArrow,
-  'table': TheTable
+const shapes = {
+  rectangle: {
+    name: 'rectangle',
+    component: TheRectangle,
+  },
+  arrow: {
+    name: 'arrow',
+    component: TheArrow,
+  },
+  table: {
+    name: 'table',
+    component: TheTable,
+  }
 };
+const nameShapes = Object.keys(shapes).reduce((acc, item) => {
+  acc[item] = shapes[item].name;
+
+  return acc;
+}, {});
 let activeShape = reactive({
     id: undefined,
     editor: undefined,
@@ -592,7 +610,7 @@ const addShapeHandler = (type, options) => {
     arrow() {
       return {
         id: newId,
-        type: 'arrow',
+        type: shapes.arrow.name,
         x: 0,
         y: 0,
         width: 150,
@@ -604,7 +622,7 @@ const addShapeHandler = (type, options) => {
     rectangle() {
       return {
         id: newId,
-        type: 'rectangle',
+        type: shapes.rectangle.name,
         x: 0,
         y: 0,
         width: 150,
@@ -619,7 +637,7 @@ const addShapeHandler = (type, options) => {
 
       return {
         id: newId,
-        type: 'table',
+        type: shapes.table.name,
         x: 900,
         y: 600,
         width: 150,
@@ -696,6 +714,30 @@ const updateEditor = (type, value) => {
     horizontalAlign(name) {
       activeShape.editor?.chain().focus().setTextAlign(name).run();
     },
+    addColumnBefore() {
+      activeShape.editor?.chain().focus().addColumnBefore().run();
+    },
+    addColumnAfter() {
+      activeShape.editor?.chain().focus().addColumnAfter().run();
+    },
+    deleteColumn() {
+      activeShape.editor?.chain().focus().deleteColumn().run();
+    },
+    addRowBefore() {
+      activeShape.editor?.chain().focus().addRowBefore().run();
+    },
+    addRowAfter() {
+      activeShape.editor?.chain().focus().addRowAfter().run();
+    },
+    deleteRow() {
+      activeShape.editor?.chain().focus().deleteRow().run();
+    },
+    mergeCells() {
+      activeShape.editor?.chain().focus().mergeCells().run();
+    },
+    splitCell() {
+      activeShape.editor?.chain().focus().splitCell().run();
+    }
   };
   const handler = handlers[type];
 
