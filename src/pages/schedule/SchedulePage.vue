@@ -20,7 +20,8 @@
               :is-allow-edit="isAllowEditingSchedule"
               :is-editing-day-now="isEditDayRequestNow"
               :editing-day-id="currentEditingDayId"
-              :editErrorMessage="errorMessage"
+              :edit-error-message="errorMessage"
+              :requestsEditDaysNow="requestsEditForDaysInProcess"
               @day-edit="callbacks.handleDayEditDaysList"
               @day-edit-submit="daysActions.editActiveDay"
               @day-delete="callbacks.handleDayDeleteDaysList"
@@ -164,6 +165,9 @@ const currentEditingDayId = computed(() => {
   return findDay?.dayId ?? null;
 });
 
+// По каким дням были отправлены запросы на изменение
+const requestsEditForDaysInProcess = ref([]);
+
 // Сообщение об ошибке (запросы к серверу и т.д.)
 const errorMessage = ref('');
 
@@ -247,6 +251,14 @@ const helpers = {
    */
   resetError() {
     errorMessage.value = '';
+  },
+
+  /**
+   * Удалить день из тех, за которыми сейчас идут запросы
+   * @param {String | Number} dayId - ID дня для удаления
+   */
+  deleteRequestDayId(dayId) {
+    requestsEditForDaysInProcess.value = requestsEditForDaysInProcess.value.filter((id) => id !== dayId);
   }
 };
 
@@ -259,11 +271,7 @@ const callbacks = {
   handleDayEditDaysList(dayId) {
     helpers.resetError();
 
-    if (activeDay.value.dayId && dayId === activeDay.value.dayId) {
-      daysActions.resetEditDay();
-    } else {
-      daysActions.setEditDay(dayId);
-    }
+    daysActions.setEditDay(dayId);
   },
 
   /**
@@ -409,6 +417,8 @@ const requests = {
       '/job/set_day.php',
       'manager',
       (response) => {
+        console.log('Добавление дня: ', response);
+
         // @TODO сервер вернёт нужную дату. Вставляем её, а не генерим на клиенте
 
         // Обработка успешного добавления
@@ -445,6 +455,10 @@ const requests = {
    */
   fetchEditDay: async (dayId, editedDay) => {
     isEditDayRequestNow.value = true;
+    
+    requestsEditForDaysInProcess.value.push(dayId);
+
+    await new Promise((resolve) => setTimeout(resolve, 3000));
 
     // Запрос на изменение дня
     const jobSetDayInstance = new JobSetDay();
@@ -462,18 +476,28 @@ const requests = {
     jobSetDayInstance.request(
       '/job/set_day.php',
       'manager',
-      () => {
+      (response) => {
+        console.log('Изменение дня: ', response);
+        
         activeDay.value = initializators.initActiveDay();
         helpers.resetError();
         
         isEditingDayStatus.value = false;
-        isEditDayRequestNow.value = false;
-
+        
         requests.fetchSchedule();
+        
+        helpers.deleteRequestDayId(dayId);
+
+        // Больше нет запросов за днями - убираем статус запроса
+        if (requestsEditForDaysInProcess.value.length === 0) {
+          isEditDayRequestNow.value = false;
+        }
       },
       (error) => {
         errorMessage.value = error;
         isEditDayRequestNow.value = false;
+
+        helpers.deleteRequestDayId(dayId);
       }
     );
   },
@@ -606,11 +630,10 @@ const daysActions = {
   },
 
   /**
-   * Изменение выбранного дня
+   * Изменение выбранного дня (с конкретными изменёнными значениями)
    * @param {Object} editedDay - Изменённый день
    */
   async editActiveDay(editedDay) {
-    if (isEditDayRequestNow.value) return;
     helpers.resetError();
 
     // Отправляем запрос на изменение дня
@@ -621,9 +644,9 @@ const daysActions = {
    * Удаление выбранного дня
    */
   async deleteSelectedDay() {
-    if (isDeleteDayRequestNow.value) return;
     helpers.resetError();
 
+    // Отправляем запрос на удаление дня
     requests.fetchDeleteDay(activeDay.value.dayId);
   },
 

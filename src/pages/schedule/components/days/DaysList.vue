@@ -9,7 +9,7 @@
       :active-period-id="props.activePeriodId"
       :is-allow-edit="props.isAllowEdit"
       :is-editing="day.dayId === props.editingDayId"
-      :is-editing-load-now="props.isEditingDayNow && day.dayId === props.editingDayId"
+      :is-editing-request-now="props.isEditingDayNow && props.requestsEditDaysNow.includes(day.dayId)"
       :error-message="day.dayId === props.editingDayId ? props.editErrorMessage : ''"
       @day-edit="handleDayEditDayItem"
       @day-edit-submit="handleDayEditSubmitDayItem"
@@ -70,6 +70,13 @@ const props = defineProps({
     type: String,
     required: false,
     default: '',
+  },
+
+  // Дни, за которыми идут запросы за изменением
+  requestsEditDaysNow: {
+    type: Array,
+    required: false,
+    default: () => []
   }
 });
 

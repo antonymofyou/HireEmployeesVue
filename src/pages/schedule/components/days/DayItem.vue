@@ -35,7 +35,7 @@
             <InputSimple
               v-model="editDay.spentTime"
               :placeholder="convertMinsToHrsMins(props.day.spentTime)"
-              :disabled="!props.isEditing"
+              :disabled="!props.isEditing || props.isEditingRequestNow"
               :form="currentDayFormId"
               pattern="\d\d:\d\d"
               class="day__time-input"
@@ -81,7 +81,7 @@
             />
   
             <AddButton
-              v-if="!props.isEditingLoadNow && props.isEditing"
+              v-if="!props.isEditingRequestNow && props.isEditing"
               class="add-button"
               key="add-button"
               @click="handleClickAddButtonPeriod"
@@ -116,6 +116,8 @@
         </span>
       </div>
     </div>
+
+    <DayProgressLoader :show="props.isEditingRequestNow" />
   </div>
 </template>
 
@@ -131,6 +133,7 @@ import PeriodItem from '../periods/PeriodItem.vue';
 import AutoSizeTextarea from '../AutoSizeTextarea.vue';
 
 import DayActions from './DayActions.vue';
+import DayProgressLoader from './DayProgressLoader.vue';
 
 import { convertHrsMinsToMins, convertMinsToHrsMins, maskifyValueToTime } from '../../js/utils';
 
@@ -170,7 +173,7 @@ const props = defineProps({
   },
 
   // Статус - идёт ли запрос за обновлением дня
-  isEditingLoadNow: {
+  isEditingRequestNow: {
     type: Boolean,
     required: false,
     default: false
@@ -341,6 +344,7 @@ function formatDate(date) {
   background: #fff;
   padding: 10px 30px;
   border-radius: 10px;
+  position: relative;
 }
 
 @media (max-width: 330px) {
@@ -482,11 +486,6 @@ function formatDate(date) {
 
 .day-periods__list--disabled {
   background: rgb(243, 243, 243);
-}
-
-/* Spinner */
-.spinner-loader {
-  width: 20px;
 }
 
 /* Add button */
