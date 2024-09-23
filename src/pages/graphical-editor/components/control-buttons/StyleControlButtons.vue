@@ -363,8 +363,8 @@ const isTable = computed(() => {
 });
 const renderTable = computed(() => {
     return {
-        color: isEditMode.value,
-        zIndex: isEditMode.value,
+        color: isEditMode.value && currentShape.value,
+        zIndex: isEditMode.value && currentShape.value,
         borderColor: (isEditMode.value && isRectangle.value) || (isEditMode.value && isTable.value),
         cornerRadius: (isEditMode.value && isRectangle.value),
         borderWidth: (isEditMode.value && isRectangle.value) || (isEditMode.value && isTable.value),

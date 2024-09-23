@@ -176,8 +176,8 @@ const formattedShapes = reactive({
         "type": "table",
         "x": 870,
         "y": 300,
-        "width": 400,
-        "height": 128,
+        "width": 500,
+        "height": 100,
         "zIndex": 1,
         "table": {
           "type": "doc",
@@ -792,6 +792,7 @@ const updateEditor = (type, value) => {
   position: relative;
   z-index: 999;
   display: flex;
+  flex-wrap: wrap;
   align-items: flex-start;
   gap: 16px;
 }
@@ -847,44 +848,39 @@ const updateEditor = (type, value) => {
   border-radius: 8px;
 }
 
-/* @media (max-width: 768px) {
-  .header__control-buttons,
-  .header__control-buttons > * {
+@media (max-width: 768px) {
+  .control-buttons {
     gap: 8px;
   }
 
-  .control-buttons-main {
+  .canvas-control-buttons {
     flex-direction: column;
     align-items: flex-end;
   }
 
-  :deep(.dropdown .dropdown__content),
-  :deep(.select-box-main .options-container-main) {
+  .style-control-buttons:deep(.dropdown .dropdown__content),
+  .style-control-buttons:deep(.select-box-main .options-container-main) {
     flex-direction: column;
     max-width: max-content !important;
+    top: auto;
+    bottom: -8px;
+    transform: translateY(100%) translateX(-50%);
   }
 
-  :deep(.control-buttons-value-picker input) {
+  .canvas-control-buttons:deep(.dropdown .dropdown__content),
+  .canvas-control-buttons:deep(.select-box-main .options-container-main) {
+    bottom: 50%;
+    transform: translateY(50%) translateX(-100%);
+    left: -8px;
+  }
+
+  .control-buttons:deep(.value-picker input) {
     width: 40px;
   }
-
 }
 
-@media (max-width: 768px) {
-    .dropdown:deep(.dropdown__content) {
-        top: auto;
-        bottom: -8px;
-        transform: translateY(100%) translateX(-50%);
-    }
-}
 
-@media (max-width: 768px) {
-    .dropdown:deep(.dropdown__content) {
-        bottom: 50%;
-        transform: translateY(50%) translateX(-100%);
-        left: -8px;
-    }
-}
+/*
 
 @media (hover: hover) and (pointer: fine) {
   :deep(.control-button),

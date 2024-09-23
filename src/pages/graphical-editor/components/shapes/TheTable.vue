@@ -75,7 +75,11 @@ const editor = useEditor({
     content: props.params.table,
     extensions: [
         StarterKit,
-        Table,
+        Table.configure({
+            HTMLAttributes: {
+                class: 'table-editor',
+            },
+        }),
         TableRow,
         TableHeader,
         TableCell,
@@ -89,7 +93,10 @@ const editor = useEditor({
     ],
     onUpdate: () => {
         const json = editor.value.getJSON();
+        const { offsetWidth, offsetHeight } = editor.value.$node('table')?.element?.closest('.table-editor') || {};
 
+        emits('updateShape', props.params.id, 'width', offsetWidth);
+        emits('updateShape', props.params.id, 'height', offsetHeight);
         emits('updateShape', props.params.id , 'text' , json);
     },
     editable: isShapeMode.value,
@@ -150,10 +157,20 @@ onBeforeUnmount(() => {
     cursor: default;
 }
 
+.table * {
+    margin: 0;
+}
+
+.table:deep(.table__editor),
+.table:deep(.tiptap) {
+    height: 100%;
+}
+
 .table:deep(table) {
     border-collapse: collapse;
     table-layout: fixed;
     width: 100%;
+    height: 100%;
     background-color: var(--backgroundColorTable);
 }
 
@@ -175,13 +192,17 @@ onBeforeUnmount(() => {
     cursor: col-resize;
 }
 
-.table:deep(.column-resize-handle) {
-    background-color: var(--transparent-blue);
-    bottom: -2px;
+.table:deep(.selectedCell::after) {
+    background: var(--backgroundColorTable);
+    content: "";
+    left: 0; 
+    right: 0; 
+    top: 0; 
+    bottom: 0;
     pointer-events: none;
     position: absolute;
-    right: -3px;
-    top: 0;
-    width: 4px;
+    z-index: 2;
+    opacity: 0.25;
+    filter: invert(1);
 }
 </style>
