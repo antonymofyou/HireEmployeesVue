@@ -74,6 +74,7 @@ const vClickOutside = {
     transition-duration: 0.2s;
     visibility: hidden;
     opacity: 0;
+    z-index: 1;
 }
 
 .dropdown.active > .dropdown__content {

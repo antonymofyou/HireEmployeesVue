@@ -7,6 +7,7 @@
         @click="selectRectangle"
         :id="props.params.id"
         :style="rectangleStyles"
+        :class="{ 'shape-mode' : props.isSelected && isShapeMode }"
         class="rectangle"
     >
       <EditorContent
@@ -203,6 +204,20 @@ onBeforeUnmount(() => {
     position: absolute;
     display: flex;
     flex-direction: column;
+}
+
+.rectangle.shape-mode::before {
+  content: '\A1';
+  position: absolute;
+  top: 0;
+  left: 50%;
+  padding: 1px 8px 4px 7px;
+  font-size: 12px;
+  color: var(--white);
+  justify-content: center;
+  transform: translateX(-50%) translateY(-150%);
+  background-color: var(--transparent-blue);
+  border-radius: 100%;
 }
 
 .resize-handles {
