@@ -21,7 +21,10 @@
             <template #text>{{ props.confirmText }}</template>
           </ButtonMain>
   
-          <ButtonMain @click="$emit('close')">
+          <ButtonMain
+            :is-disabled="props.isLoading"
+            @click="$emit('close')"
+          >
             <template #text>{{ props.rejectText }}</template>
           </ButtonMain>
         </div>

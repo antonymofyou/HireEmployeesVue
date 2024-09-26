@@ -416,6 +416,9 @@ const requests = {
       '/job/set_day.php',
       'manager',
       (response) => {
+        // Сервер отдаёт добавляемый день
+        const addedDay = response.day;
+
         // Обработка успешного добавления
         modalsActions.closeAddDayModal();
         helpers.resetError();
@@ -423,8 +426,8 @@ const requests = {
         isAddDayRequestNow.value = false;
 
         // Сервер возвращает нужный день - добавляем его в состояние
-        days.value.push(response.day);
-        daysActions.setEditDay(response.day.dayId);
+        days.value.push(addedDay);
+        daysActions.setEditDay(addedDay.dayId);
       },
       (error) => {
         // Обработка ошибки при добавлении
@@ -462,14 +465,16 @@ const requests = {
       '/job/set_day.php',
       'manager',
       (response) => {
-        console.log('Изменение дня: ', response);
-        
+        // Сервер отдаёт изменённый день
+        const changedDay = response.day;
+
+        const findDayIndex = days.value.findIndex((day) => day.dayId == changedDay.dayId);
+        days.value[findDayIndex] = changedDay;
+
         activeDay.value = initializators.initActiveDay();
         helpers.resetError();
         
         isEditingDayStatus.value = false;
-        
-        requests.fetchSchedule();
         
         helpers.deleteRequestDayId(dayId);
 

@@ -101,16 +101,19 @@ const props = defineProps({
     required: false,
     default: false
   },
+  // Текст на кнопке
   buttonText: {
     type: String,
     required: false,
     default: 'Подтвердить'
   },
+  // Текст ошибки
   error: {
     type: String,
     required: false,
     default: ''
   },
+  // Статус дизейбла кнопки
   isSubmitDisabled: {
     type: Boolean,
     required: false,

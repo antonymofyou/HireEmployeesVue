@@ -123,8 +123,6 @@
 </template>
 
 <script setup>
-/* @component Сущность дня сотрудника */
-
 import { computed, nextTick, ref, watch } from 'vue';
 
 import InputSimple from '@/components/InputSimple.vue';
