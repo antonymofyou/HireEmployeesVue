@@ -425,7 +425,7 @@ const requests = {
 
         isAddDayRequestNow.value = false;
 
-        // Сервер возвращает нужный день - добавляем его в состояние
+        // Добавляем новый день в состояние
         days.value.push(addedDay);
         daysActions.setEditDay(addedDay.dayId);
       },
@@ -553,7 +553,7 @@ const requests = {
       (response) => {
         modalsActions.closeAddPeriodModal();
 
-        helpers.resetError()
+        helpers.resetError();
         
         isAddNewPeriodRequestNow.value = false;
         

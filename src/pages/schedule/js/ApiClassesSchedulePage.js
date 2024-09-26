@@ -1,4 +1,4 @@
-import { MainRequestClass, MainResponseClass } from '@/js/RootClasses';
+import { MainRequestClass } from '@/js/RootClasses';
 
 // метод: /app/api/job/get_schedule.php
 
