@@ -35,7 +35,7 @@
             <InputSimple
               v-model="editDay.spentTime"
               :placeholder="convertMinsToHrsMins(props.day.spentTime)"
-              :disabled="!props.isEditing || props.isEditingRequestNow"
+              :disabled="!props.isEditing || props.isEditingRequestCurrent"
               :form="currentDayFormId"
               pattern="\d\d:\d\d"
               class="day__time-input"
@@ -49,6 +49,7 @@
         <DayActions
           :form-id="currentDayFormId"
           :is-editing="props.isEditing"
+          :disabled="props.isEditingRequestGeneral"
           @edit-click="handleClickEditButton"
           @delete-click="handleClickDeleteButton"
         />
@@ -81,7 +82,7 @@
             />
   
             <AddButton
-              v-if="!props.isEditingRequestNow && props.isEditing"
+              v-if="!props.isEditingRequestCurrent && props.isEditing"
               class="add-button"
               key="add-button"
               @click="handleClickAddButtonPeriod"
@@ -117,7 +118,7 @@
       </div>
     </div>
 
-    <DayProgressLoader :show="props.isEditingRequestNow" />
+    <DayProgressLoader :show="props.isEditingRequestCurrent" />
   </div>
 </template>
 
@@ -172,8 +173,15 @@ const props = defineProps({
     default: false
   },
 
-  // Статус - идёт ли запрос за обновлением дня
-  isEditingRequestNow: {
+  // Статус - идёт ли запрос за обновлением какого-либо дня в списке
+  isEditingRequestGeneral: {
+    type: Boolean,
+    required: false,
+    default: false
+  },
+
+  // Статус - идёт ли запрос за обновлением данного дня
+  isEditingRequestCurrent: {
     type: Boolean,
     required: false,
     default: false

@@ -2,6 +2,7 @@
   <div class="day-actions">
     <ButtonIcon
       v-if="props.isEditing"
+      :disabled="props.disabled"
       :form="props.formId"
       class="button-icon"
     >
@@ -14,6 +15,7 @@
 
     <ButtonIcon
       v-else
+      :disabled="props.disabled"
       class="button-icon"
       @click="$emit('editClick')"
     >
@@ -25,6 +27,7 @@
     </ButtonIcon>
 
     <ButtonIcon
+      :disabled="props.disabled"
       class="button-icon"
       @click="$emit('deleteClick')"
     >
@@ -51,11 +54,19 @@ const props = defineProps({
     required: false,
     default: false
   },
+
   // ID формы для связи кнопки сохранения изменений
   formId: {
     type: [String, null],
     required: false,
     default: null
+  },
+
+  // Задизейблены ли кнопки
+  disabled: {
+    type: Boolean,
+    required: false,
+    default: false
   }
 });
 
@@ -74,6 +85,8 @@ const emit = defineEmits(['editClick', 'deleteClick']);
 
 .button-icon:disabled {
   pointer-events: none;
+  color: #000;
+  fill: currentColor;
 }
 
 .button-icon:not(:disabled) {

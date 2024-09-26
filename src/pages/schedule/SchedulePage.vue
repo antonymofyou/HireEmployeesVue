@@ -39,14 +39,14 @@
 
             <div class="schedule__actions">
               <TopSquareButton
-                v-if="isAllowEditingSchedule && !isJobsRequestNow"
+                v-if="isAllowEditingSchedule && !isAddDayRequestNow"
                 :icon="plusIcon"
                 class="add-button"
                 @click="daysActions.addNewDay"
               />
 
               <SpinnerMain
-                v-else-if="isJobsRequestNow"
+                v-else-if="isAddDayRequestNow"
                 class="spinner-loader"
               />
             </div>
@@ -387,9 +387,8 @@ const requests = {
 
   /**
    * Запрос на добавление нового дня
-   * @param {Object} newDay - Новый день
    */
-  fetchAddNewDay: (newDay) => {
+  fetchAddNewDay: () => {
     isAddDayRequestNow.value = true;
 
     // Берём дату последнего дня в списке
@@ -417,27 +416,15 @@ const requests = {
       '/job/set_day.php',
       'manager',
       (response) => {
-        console.log('Добавление дня: ', response);
-
-        // @TODO сервер вернёт нужную дату. Вставляем её, а не генерим на клиенте
-
         // Обработка успешного добавления
         modalsActions.closeAddDayModal();
         helpers.resetError();
 
         isAddDayRequestNow.value = false;
 
-        requests.fetchSchedule(
-          () => {
-            // Ставим добавленный день в режим редактирования
-            const lastDay = days.value.at(-1);
-
-            // Если нет последнего дня - ничего не делаем
-            if (!lastDay) return;
-
-            daysActions.setEditDay(lastDay.dayId);
-          }
-        );
+        // Сервер возвращает нужный день - добавляем его в состояние
+        days.value.push(response.day);
+        daysActions.setEditDay(response.day.dayId);
       },
       (error) => {
         // Обработка ошибки при добавлении
@@ -457,8 +444,6 @@ const requests = {
     isEditDayRequestNow.value = true;
     
     requestsEditForDaysInProcess.value.push(dayId);
-
-    await new Promise((resolve) => setTimeout(resolve, 3000));
 
     // Запрос на изменение дня
     const jobSetDayInstance = new JobSetDay();
