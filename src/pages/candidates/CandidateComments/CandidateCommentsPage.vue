@@ -48,12 +48,6 @@
         :receivedObject="receivedObject"
         class="comments-page__comments-block"
       />
-      <CommentsBlock
-        v-if="respondData.candidateId"
-        :candidateId="respondData.candidateId"
-        class="comments-page__comments-block"
-        data-candidate
-      />
     </template>
   </section>
 

@@ -1,9 +1,13 @@
 <template>
   <div class="comment-creation">
     <label class="comment-creation__label">
-      <div>Создать комментарий</div>
+      <div class="comment-creation__for-box">
+        <div>Создать комментарий</div>
+        <input type="checkbox" v-model="commentFor" @change="updateCommentFor" />
+        <div>(Общий комментарий)</div>
+      </div>
       <textarea
-        :value="modelValue"
+        v-model="comment"
         class="comment-creation__textarea"
         ref="textarea"
         :rows="calculateRows"
@@ -23,7 +27,7 @@ import { computed, ref } from 'vue';
 //Пропс комментария
 const props = defineProps({
   modelValue: {
-    type: String,
+    type: Object,
     required: true,
   },
   // Сообщение об ошибке
@@ -35,14 +39,21 @@ const props = defineProps({
 });
 
 //События изменения значения в текстовом поле и создания комментария
-const emit = defineEmits(['createComment', 'update:modelValue']);
+const emit = defineEmits(['update:modelValue', 'createComment']);
+
+const comment = ref(''); 
+const commentFor = ref(props.modelValue.commentFor);
 
 //Нода текстового поля
 const textarea = ref(null);
 
+const updateCommentFor = () => {
+  emit('update:modelValue', { comment: comment.value, commentFor: !commentFor.value });
+};
+
 //Высота текстового поля в строках. По умолчанию 1(36px). При переносе курсора rows увеличивается только после ввода символа на новой строке
 const calculateRows = computed(() => {
-  const rows = props.modelValue.split('\n').length;
+  const rows = comment.value.split('\n').length;
   return Math.max(1, rows);
 });
 
@@ -61,20 +72,19 @@ const onInput = (event) => {
   if (event.target.value === '') {
     textarea.value.style.height = '36px';
   }
-
-  //Вызов события изменения пропса комментария
-  emit('update:modelValue', event.target.value);
 };
 
 //Вызов события создания комментария
 const sendComment = () => {
-  emit('createComment');
+  emit('createComment', { comment: comment.value, commentFor: commentFor.value });
 
   //Сброс высоты текстового поля
   setTimeout(() => {
     textarea.value.style.height = '36px';
   });
 };
+
+
 </script>
 
 <style scoped>
@@ -118,5 +128,9 @@ const sendComment = () => {
 .comment-creation__textarea:focus {
   outline-width: 2px;
   outline-color: var(--cornflower-blue);
+}
+.comment-creation__for-box{
+  display: flex;
+  gap: 10px;
 }
 </style>
