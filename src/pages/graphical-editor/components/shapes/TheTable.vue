@@ -112,11 +112,18 @@ const editor = useEditor({
     ],
     onUpdate: () => {
         const json = editor.value.getJSON();
-        const { offsetWidth, offsetHeight } = editor.value.$node('table')?.element?.closest('.table-editor') || {};
 
-        emits('updateShape', props.params.id, 'width', offsetWidth);
-        emits('updateShape', props.params.id, 'height', offsetHeight);
         emits('updateShape', props.params.id , 'text' , json);
+
+        syncSize();
+    },
+    onCreate: () => {
+        syncSize();
+
+        if (props.isSelected) {
+            selectTable();
+        }
+
     },
     editable: isShapeMode.value,
 });
@@ -126,6 +133,13 @@ watch(() => isShapeMode.value, (newValue) => {
     editor.value.setEditable(newValue);
   }
 });
+
+function syncSize() {
+    const { offsetWidth, offsetHeight } = editor.value.$node('table')?.element?.closest('.table-editor') || {};
+
+    emits('updateShape', props.params.id, 'width', offsetWidth);
+    emits('updateShape', props.params.id, 'height', offsetHeight);
+}
 
 function selectTable() {
     emits('selectShape', {
@@ -238,6 +252,7 @@ onBeforeUnmount(() => {
 .table:deep(table) {
     border-collapse: collapse;
     table-layout: auto;
+    min-width: 100%;
     width: 100%;
     height: 100%;
     background-color: var(--backgroundColorTable);
@@ -251,6 +266,7 @@ onBeforeUnmount(() => {
 .table:deep(th) {
     border: var(--borderWidthTable) solid var(--borderColorTable);
     position: relative;
+    min-width: 25px;
 }
 
 .table:deep(th) {

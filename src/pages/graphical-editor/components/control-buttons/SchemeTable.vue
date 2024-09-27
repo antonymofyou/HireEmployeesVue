@@ -1,30 +1,66 @@
 <template>
-    <table class="scheme-table">
-        <tr v-for="(row, rowIdx) in props.row" :key="rowIdx" class="scheme-table__row">
-            <td 
-                v-for="(column, columnIdx) in props.column" 
-                :key="columnIdx"
-                @mousemove="selectHandler(row, column)"
-                @pointerdown="selectHandler(row, column), createSchemeHandler()"
-                :class="{
-                    'active': selectedRow >= row && selectedColumn >= column 
-                }"
-                class="scheme-table__cell">
-            </td>
-        </tr>
-    </table>
+    <div class="scheme-table">
+        <table class="scheme-table__table">
+            <tr v-for="(row, rowIdx) in props.rowScheme" :key="rowIdx" class="scheme-table__row">
+                <td 
+                    v-for="(column, columnIdx) in props.columnScheme" 
+                    :key="columnIdx"
+                    @mousemove="selectHandler(row, column)"
+                    @pointerdown="selectHandler(row, column), createSchemeHandler()"
+                    :class="{
+                        'active': selectedRow >= row && selectedColumn >= column 
+                    }"
+                    class="scheme-table__cell">
+                </td>
+            </tr>
+        </table>
+        <ValuePicker
+            :value="selectedColumn"
+            @update:value="selectedColumn = +$event"
+            :min="1"
+            title="Кол-во колонок" 
+        >
+            <template #icon>
+                <TableColumn />
+            </template>
+        </ValuePicker>
+        <ValuePicker
+            :value="selectedRow"
+            @update:value="selectedRow = +$event"
+            :min="1"
+            title="Кол-во строк" 
+        >
+            <template #icon>
+                <TableRow />
+            </template>
+        </ValuePicker>
+        <ControlButton 
+            @click="createSchemeHandler()"
+            title="Создать таблицу"
+        >
+            <PlusIcon />
+        </ControlButton>
+    </div>
 </template>
 
 <script setup>
 
-import { defineProps, defineEmits, ref } from 'vue';
+import { defineProps, defineEmits, ref } from 'vue'
+import ValuePicker from './ValuePicker.vue';
+import ControlButton from './ControlButton.vue';
+
+// icons
+
+import TableColumn from 'vue-material-design-icons/TableColumn.vue';
+import TableRow from 'vue-material-design-icons/TableRow.vue';
+import PlusIcon from 'vue-material-design-icons/Plus.vue'
 
 const props = defineProps({
-    column: {
+    columnScheme: {
         type: Number,
         default: 5,
     },
-    row: {
+    rowScheme: {
         type: Number,
         default: 5,
     }
@@ -48,7 +84,7 @@ function createSchemeHandler() {
         body += '<tr>';
 
         for (let column = 0; column < selectedColumn.value; column++) {
-            body += '<td>Ячейка</td>';
+            body += '<td></td>';
         }
 
         body += '</tr>';
@@ -62,6 +98,13 @@ function createSchemeHandler() {
 <style scoped>
 
 .scheme-table {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 8px;
+}
+
+.scheme-table__table {
     display: flex;
     flex-direction: column;
     gap: 3px;

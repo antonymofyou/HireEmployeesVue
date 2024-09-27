@@ -112,6 +112,11 @@ const editor = useEditor({
 
         emits('updateShape', props.params.id , 'text' , convertTo(json));
     },
+    onCreate: () => {
+      if (props.isSelected) {
+          selectRectangle();
+      }
+    },
     editable: isShapeMode.value,
 });
 

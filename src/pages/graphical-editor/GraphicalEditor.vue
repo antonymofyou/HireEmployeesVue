@@ -419,7 +419,7 @@ const handleDocumentClick = (event) => {
 
 // Функция для обработки выбора формы
 const handleSelectShape = ({ id = undefined, editor = undefined } = {}) => {
-  if (activeShape.id == id) return;
+  if (activeShape.id == id && activeShape.editor == editor) return;
 
   activeShape.id = id;
   activeShape.editor = editor;
@@ -640,8 +640,8 @@ const addShapeHandler = (type, options) => {
         type: shapes.table.name,
         x: 900,
         y: 600,
-        width: 150,
-        height: 100,
+        width: 1,
+        height: 1,
         zIndex: 1,
         table,
       }
