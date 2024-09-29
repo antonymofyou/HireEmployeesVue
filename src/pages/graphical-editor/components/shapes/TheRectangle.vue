@@ -209,6 +209,7 @@ onBeforeUnmount(() => {
     position: absolute;
     display: flex;
     flex-direction: column;
+    font-size: 14px;
 }
 
 .rectangle.shape-mode::before {
