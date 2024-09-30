@@ -1,6 +1,6 @@
 import {computed, ref} from 'vue';
 
-export function useShape(emits, props) {
+export function useShape(emits, props, calculateMinTableSize) {
     const isDragging = ref(false);
     const isResizing = ref(false);
     const isRotating = ref(false);
@@ -10,6 +10,7 @@ export function useShape(emits, props) {
     const startY = ref(0);
     const startWidth = ref(0);
     const startHeight = ref(0);
+    const minTableDimensions = ref({minWidth: 0, minHeight: 0});
     let resizingHandle = null;
 
     const isEditMode = computed(() => props.mode.value === props.mode._edit);
@@ -32,6 +33,13 @@ export function useShape(emits, props) {
         }
 
         return canvasScale;
+    };
+
+    // Нахождение минимального размера таблицы
+    const updateMinTableDimensions = () => {
+        if (props.params.type === 'table') {
+            minTableDimensions.value = calculateMinTableSize();
+        }
     };
 
     // Функция для обновления свойств фигуры
@@ -105,6 +113,9 @@ export function useShape(emits, props) {
             offsetX.value = clientX / canvasScale;
             offsetY.value = clientY / canvasScale;
 
+            // Вызов функции для определения минимальных размеров
+            updateMinTableDimensions();
+
             document.addEventListener('mousemove', onResizing);
             document.addEventListener('touchmove', onResizing);
             document.addEventListener('mouseup', stopResizing);
@@ -133,31 +144,53 @@ export function useShape(emits, props) {
                 // Обработка изменения размера по горизонтали
                 if (resizingHandle.position.includes('left')) {
                     newWidth = startWidth.value - (adjustedClientX - offsetX.value);
-                    newX = newWidth > 0 ? startX.value + (adjustedClientX - offsetX.value) : startX.value + startWidth.value;
-                    newWidth = Math.abs(newWidth);
+                    if (props.params.type === 'table') {
+                        // Проверка, чтобы ширина не была меньше минимальной
+                        newWidth = Math.max(newWidth, minTableDimensions.value.minWidth);
+                        newX = startX.value + (startWidth.value - newWidth); // Обновляем X только для таблицы
+                    } else {
+                        newX = newWidth > 0 ? startX.value + (adjustedClientX - offsetX.value) : startX.value + startWidth.value;
+                        newWidth = Math.abs(newWidth);
+                    }
                 } else if (resizingHandle.position.includes('right')) {
                     newWidth = startWidth.value + (adjustedClientX - offsetX.value);
-                    if (newWidth < 0) {
-                        newX = startX.value + newWidth;
-                        newWidth = Math.abs(newWidth);
+                    if (props.params.type === 'table') {
+                        newWidth = Math.max(newWidth, minTableDimensions.value.minWidth); // Обеспечиваем, что ширина не меньше минимальной для таблицы
+                    } else {
+                        if (newWidth < 0) {
+                            newX = startX.value + newWidth;
+                            newWidth = Math.abs(newWidth);
+                        }
                     }
                 }
 
                 // Обработка изменения размера по вертикали
                 if (resizingHandle.position.includes('top')) {
                     newHeight = startHeight.value - (adjustedClientY - offsetY.value);
-                    newY = newHeight > 0 ? startY.value + (adjustedClientY - offsetY.value) : startY.value + startHeight.value;
-                    newHeight = Math.abs(newHeight);
+                    if (props.params.type === 'table') {
+                        // Проверка, чтобы высота не была меньше минимальной
+                        newHeight = Math.max(newHeight, minTableDimensions.value.minHeight);
+                        newY = startY.value + (startHeight.value - newHeight); // Обновляем Y только для таблицы
+                    } else {
+                        newY = newHeight > 0 ? startY.value + (adjustedClientY - offsetY.value) : startY.value + startHeight.value;
+                        newHeight = Math.abs(newHeight);
+                    }
                 } else if (resizingHandle.position.includes('bottom')) {
                     newHeight = startHeight.value + (adjustedClientY - offsetY.value);
-                    if (newHeight < 0) {
-                        newY = startY.value + newHeight;
-                        newHeight = Math.abs(newHeight);
+                    if (props.params.type === 'table') {
+                        newHeight = Math.max(newHeight, minTableDimensions.value.minHeight); // Обеспечиваем, что высота не меньше минимальной для таблицы
+                    } else {
+                        if (newHeight < 0) {
+                            newY = startY.value + newHeight;
+                            newHeight = Math.abs(newHeight);
+                        }
                     }
                 }
 
-                // Обновляем свойства фигуры
-                updateShape({width: newWidth, height: newHeight, x: newX, y: newY});
+                // Обновляем свойства фигуры только при необходимости
+                if (newWidth !== props.params.width || newHeight !== props.params.height || newX !== props.params.x || newY !== props.params.y) {
+                    updateShape({width: newWidth, height: newHeight, x: newX, y: newY});
+                }
             });
         }
     };
