@@ -89,6 +89,7 @@ const tableStyles = computed(() => {
         userSelect: isShapeMode.value ? 'text' : 'none',
     }
 });
+const cellMinWidth = 25;
 const editor = useEditor({
     content: props.params.table,
     extensions: [
@@ -97,7 +98,7 @@ const editor = useEditor({
             HTMLAttributes: {
                 class: 'table-editor',
             },
-            cellMinWidth: 0,
+            cellMinWidth,
         }),
         TableRow,
         TableHeader,
@@ -116,6 +117,8 @@ const editor = useEditor({
         emits('updateShape', props.params.id , 'text' , json);
 
         syncSize();
+
+        updateTableMinWidth();
     },
     onCreate: () => {
         syncSize();
@@ -190,10 +193,22 @@ function calculateMinTableSize() {
 }
 
 function syncSize() {
-    const { offsetWidth, offsetHeight } = editor.value.$node('table')?.element?.closest('.table-editor') || {};
+    const table = editor.value.$node('table')?.element?.closest('.table-editor') || {};
 
-    emits('updateShape', props.params.id, 'width', offsetWidth);
-    emits('updateShape', props.params.id, 'height', offsetHeight);
+    emits('updateShape', props.params.id, 'width', table.offsetWidth);
+    emits('updateShape', props.params.id, 'height', table.offsetHeight);
+}
+
+function updateTableMinWidth() {
+    const table = editor.value.$node('table')?.element?.closest('.table-editor') || {};
+    const jsonTable = editor.value.getJSON().content.filter((item) => item.type === 'table')[0].content;
+    const amountColumn = jsonTable[0].content.reduce((acc, item) => {
+        acc += item.attrs.colspan;
+
+        return acc;
+    }, 0);
+    
+    table.style.minWidth = `${amountColumn * cellMinWidth}px`;
 }
 
 function selectTable() {
@@ -273,6 +288,7 @@ onBeforeUnmount(() => {
 .table {
     position: absolute;
     cursor: default;
+    font-size: 14px;
 }
 
 .table.shape-mode::before {
@@ -300,8 +316,7 @@ onBeforeUnmount(() => {
 
 .table:deep(table) {
     border-collapse: collapse;
-    table-layout: auto;
-    min-width: 100%;
+    table-layout: fixed;
     width: 100%;
     height: 100%;
     background-color: var(--backgroundColorTable);
@@ -315,7 +330,6 @@ onBeforeUnmount(() => {
 .table:deep(th) {
     border: var(--borderWidthTable) solid var(--borderColorTable);
     position: relative;
-    min-width: 25px;
 }
 
 .table:deep(th) {

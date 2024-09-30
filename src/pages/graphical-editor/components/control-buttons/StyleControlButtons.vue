@@ -129,7 +129,7 @@
         />
         <ValuePicker
             v-if="renderTable.sizeText"
-            :value="parseInt(props.activeShape.editor?.getAttributes('textStyle').fontSize) || 0"
+            :value="parseInt(props.activeShape.editor?.getAttributes('textStyle').fontSize) || 14"
             @update:value="updateEditorHandler('sizeText', $event)"
             :min="0"
             title="Размер текста"           
