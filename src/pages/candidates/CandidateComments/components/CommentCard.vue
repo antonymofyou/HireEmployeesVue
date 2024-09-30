@@ -66,7 +66,7 @@
       v-if="props.comment.commentFor == 'for_candidate'"
       class="comment__for"
     >
-      Общий комментарий
+      Комментарий к кандидату
     </div>
     <div class="comment__date">{{ formattedDate }}</div>
 

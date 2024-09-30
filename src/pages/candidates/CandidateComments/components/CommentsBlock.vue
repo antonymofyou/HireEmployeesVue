@@ -37,7 +37,6 @@
       </div>
 
       <CommentAddition
-        v-model="newComment"
         :errorMessage="errorMessageCreate"
         @create-comment="createComment"
       />
@@ -83,11 +82,6 @@ const isLoading = ref(false);
 const mainErrorMessage = ref('');
 const errorMessageCreate = ref('');
 const errorMessageControls = ref('');
-// Значение нового комментария
-const newComment = ref({
-  comment:"",
-  commentFor: false
-});
 
 // Флаг показа комментариев
 const show = ref(false);
@@ -161,20 +155,17 @@ const removeCommentObject = reactive({
 
 // Создание комментария
 const createComment = (payload) => {
-  console.log(payload)
-  /* if (payload.comment) {
+  if (payload.comment) {
     commentForCandidate.value = payload.commentFor
     // Перезапрос комментариев, очистка поля для нового комментария
     const onCreateSuccess = (res) => {
       createdCommentId.value = res.comment.id;
       comments.value.push(res.comment);
-      newComment.value = '';
     };
-    console.log("asdasd")
     // Функция для запроса на создание комментария
     const requestFn = dispatchComments('create', payload);
     requestFn(onCreateSuccess);
-  } */
+  }
 };
 
 // Запрос комментариев
