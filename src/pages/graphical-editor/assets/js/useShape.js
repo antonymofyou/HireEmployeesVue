@@ -114,7 +114,7 @@ export function useShape(emits, props, calculateMinTableSize) {
             offsetY.value = clientY / canvasScale;
 
             // Вызов функции для определения минимальных размеров
-            updateMinTableDimensions();
+            // updateMinTableDimensions();
 
             document.addEventListener('mousemove', onResizing);
             document.addEventListener('touchmove', onResizing);

@@ -71,6 +71,7 @@ const emits = defineEmits({
 
 const selectedRow = ref(1);
 const selectedColumn = ref(1);
+const cellMinWidth = 75;
 
 function selectHandler(row, column) {
     selectedRow.value = row;
@@ -84,7 +85,7 @@ function createSchemeHandler() {
         body += '<tr>';
 
         for (let column = 0; column < selectedColumn.value; column++) {
-            body += '<td></td>';
+            body += `<td colwidth='${cellMinWidth}'></td>`;
         }
 
         body += '</tr>';

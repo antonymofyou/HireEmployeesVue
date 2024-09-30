@@ -78,7 +78,6 @@ const tableStyles = computed(() => {
         zIndex: props.params.zIndex,
         transform: `rotate(${props.params.rotation}deg)`, 
         // Size
-        width: props.params.width + 'px',
         height: props.params.height + 'px',
         // Style
         '--backgroundColorTable': props.params.color || '#fff',
@@ -89,16 +88,14 @@ const tableStyles = computed(() => {
         userSelect: isShapeMode.value ? 'text' : 'none',
     }
 });
-const cellMinWidth = 25;
+const cellMinWidth = 75;
 const editor = useEditor({
     content: props.params.table,
     extensions: [
         StarterKit,
         Table.configure({
-            HTMLAttributes: {
-                class: 'table-editor',
-            },
             cellMinWidth,
+            resizable: true 
         }),
         TableRow,
         TableHeader,
@@ -117,25 +114,41 @@ const editor = useEditor({
         emits('updateShape', props.params.id , 'text' , json);
 
         syncSize();
-
-        updateTableMinWidth();
     },
     onCreate: () => {
-        syncSize();
-
         if (props.isSelected) {
             selectTable();
         }
-      calculateMinTableSize();
+        
+        syncSize();
+    
+        // calculateMinTableSize();
     },
-    editable: isShapeMode.value,
 });
 
-watch(() => isShapeMode.value, (newValue) => {
-  if (editor.value) {
-    editor.value.setEditable(newValue);
-  }
-});
+function syncSize() {
+    const table = editor.value.$node('table')?.element?.closest('table') || {};
+    
+    emits('updateShape', props.params.id, 'width', table.offsetWidth);
+    emits('updateShape', props.params.id, 'height', table.offsetHeight);
+}
+
+function calculateWidthCell() {
+    const table = editor.value.getJSON().content.filter((item) => item.type === 'table')[0].content;
+    const currentWidth = table[0].content.reduce((acc, item) => {
+        acc += item.attrs.colwidth.reduce((sum, item) => sum += item);
+
+        return acc;
+    }, 0);
+
+    if (currentWidth < props.params.width) {
+        // логика для уменьшения
+
+        return;
+    }
+
+    // логика для увеличения
+}
 
 // Функция нахождения минимальных размеров таблицы
 function calculateMinTableSize() {
@@ -192,25 +205,6 @@ function calculateMinTableSize() {
   return { minWidth, minHeight };
 }
 
-function syncSize() {
-    const table = editor.value.$node('table')?.element?.closest('.table-editor') || {};
-
-    emits('updateShape', props.params.id, 'width', table.offsetWidth);
-    emits('updateShape', props.params.id, 'height', table.offsetHeight);
-}
-
-function updateTableMinWidth() {
-    const table = editor.value.$node('table')?.element?.closest('.table-editor') || {};
-    const jsonTable = editor.value.getJSON().content.filter((item) => item.type === 'table')[0].content;
-    const amountColumn = jsonTable[0].content.reduce((acc, item) => {
-        acc += item.attrs.colspan;
-
-        return acc;
-    }, 0);
-    
-    table.style.minWidth = `${amountColumn * cellMinWidth}px`;
-}
-
 function selectTable() {
     emits('selectShape', {
         id: props.params.id,
@@ -232,6 +226,7 @@ function selectTable() {
     height: tableStyles.value.height,
     top: `-${borderWidth}px`,
     left: `-${borderWidth}px`,
+    width: props.params.width + 'px',
   };
 });
 
@@ -250,7 +245,8 @@ const handles  = computed(() => {
 ]
 });
 
-const { startDragging, stopDragging, startResizing, stopResizing, stopRotating } = useShape(emits, props, calculateMinTableSize);
+// const { startDragging, stopDragging, startResizing, stopResizing, stopRotating } = useShape(emits, props, calculateMinTableSize);
+const { startDragging, stopDragging, startResizing, stopResizing, stopRotating } = useShape(emits, props);
 
 const lastTap = ref(0);
 
@@ -310,14 +306,14 @@ onBeforeUnmount(() => {
 }
 
 .table:deep(.table__editor),
-.table:deep(.tiptap) {
+.table:deep(.tiptap),
+.table:deep(.tableWrapper) {
     height: 100%;
 }
 
 .table:deep(table) {
     border-collapse: collapse;
     table-layout: fixed;
-    width: 100%;
     height: 100%;
     background-color: var(--backgroundColorTable);
 }
