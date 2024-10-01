@@ -453,8 +453,8 @@ const addShapeHandler = (type, options) => {
         type: shapes.table.name,
         x: 900,
         y: 600,
-        width: 1,
-        height: 1,
+        width: undefined,
+        height: undefined,
         zIndex: 1,
         table,
       }

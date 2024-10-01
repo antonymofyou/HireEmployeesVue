@@ -122,7 +122,7 @@ const editor = useEditor({
         
         syncSize();
     
-        // calculateMinTableSize();
+        calculateMinTableSize();
     },
 });
 
@@ -133,76 +133,19 @@ function syncSize() {
     emits('updateShape', props.params.id, 'height', table.offsetHeight);
 }
 
-function calculateWidthCell() {
-    const table = editor.value.getJSON().content.filter((item) => item.type === 'table')[0].content;
-    const currentWidth = table[0].content.reduce((acc, item) => {
-        acc += item.attrs.colwidth.reduce((sum, item) => sum += item);
+function calculateMinTableSize() {
+    const editorContentJson = editor.value.getJSON();
+    const tableContentJson = editorContentJson.content[0].content;
+    const amountColumnTable = tableContentJson[0].content.reduce((acc, item) => {
+        acc += item.attrs.colspan;
 
         return acc;
     }, 0);
 
-    if (currentWidth < props.params.width) {
-        // логика для уменьшения
+    const minWidth = amountColumnTable * cellMinWidth;
+    const minHeight = 0;
 
-        return;
-    }
-
-    // логика для увеличения
-}
-
-// Функция нахождения минимальных размеров таблицы
-function calculateMinTableSize() {
-  const tableElement = editor.value.$node('table')?.element?.closest('.table-editor');
-
-  if (!tableElement) return { minWidth: 0, minHeight: 0 };
-
-  const rows = tableElement.querySelectorAll('tr');
-
-  let columnWidths = [];
-  let maxHeight = 0;
-  const context = document.createElement('canvas').getContext('2d');
-
-  const fontSize = window.getComputedStyle(tableElement).fontSize;
-  const fontFamily = window.getComputedStyle(tableElement).fontFamily;
-  context.font = `${fontSize} ${fontFamily}`;
-
-  const minCellWidth = 25;
-
-  rows.forEach(row => {
-    const cells = row.querySelectorAll('td, th');
-    cells.forEach((cell, index) => {
-      const textContent = cell.textContent.trim();
-      const cellWidth = context.measureText(textContent).width;
-
-      const paddingLeft = parseFloat(window.getComputedStyle(cell).paddingLeft) || 0;
-      const paddingRight = parseFloat(window.getComputedStyle(cell).paddingRight) || 0;
-      const borderLeft = parseFloat(window.getComputedStyle(cell).borderLeftWidth) || 0;
-      const borderRight = parseFloat(window.getComputedStyle(cell).borderRightWidth) || 0;
-      const totalCellWidth = cellWidth + paddingLeft + paddingRight + borderLeft + borderRight;
-
-      const paddingTop = parseFloat(window.getComputedStyle(cell).paddingTop) || 0;
-      const paddingBottom = parseFloat(window.getComputedStyle(cell).paddingBottom) || 0;
-      const borderTop = parseFloat(window.getComputedStyle(cell).borderTopWidth) || 0;
-      const borderBottom = parseFloat(window.getComputedStyle(cell).borderBottomWidth) || 0;
-      const totalCellHeight = paddingTop + paddingBottom + borderTop + borderBottom + parseFloat(fontSize) * 1.2;
-
-      if (columnWidths[index] === undefined) {
-        columnWidths[index] = 0;
-      }
-
-      columnWidths[index] = Math.max(columnWidths[index], totalCellWidth, minCellWidth);
-      maxHeight = Math.max(maxHeight, totalCellHeight);
-    });
-  });
-
-  const totalWidth = columnWidths.reduce((sum, width) => sum + width, 0);
-  const borderWidth = parseFloat(getComputedStyle(tableElement).borderWidth) || 0;
-  const padding = parseFloat(getComputedStyle(tableElement).padding) || 0;
-
-  const minWidth = Math.ceil(totalWidth + 2 * borderWidth + 2 * padding);
-  const minHeight = Math.ceil(maxHeight * rows.length + 2 * borderWidth + 2 * padding);
-
-  return { minWidth, minHeight };
+    return { minWidth, minHeight };
 }
 
 function selectTable() {
@@ -211,6 +154,31 @@ function selectTable() {
         editor: editor.value,
     });
 }
+
+watch(() => props.params.width, (newWidth, oldWidth) => {
+    const table = editor.value.$node('table')?.element?.closest('table');
+    const tableWidth = parseInt(table.style.width);
+
+    if (!newWidth || !oldWidth || tableWidth == newWidth) return;
+
+    const editorContentJson = editor.value.getJSON();
+    const tableContentJson = editorContentJson.content[0].content;
+
+    editorContentJson.content[0].content = tableContentJson.map((row) => {
+        return {
+            type: 'tableRow',
+            content: row.content.map((cell) => {
+                cell.attrs.colwidth = cell.attrs.colwidth.map((cellWidth) => {
+                    return ((cellWidth / oldWidth * 100) * newWidth / 100).toFixed(1);
+                });
+
+                return cell
+            })
+        }
+    });
+
+    editor.value.commands.setContent(editorContentJson);
+});
 
 /**
  * 
@@ -245,8 +213,7 @@ const handles  = computed(() => {
 ]
 });
 
-// const { startDragging, stopDragging, startResizing, stopResizing, stopRotating } = useShape(emits, props, calculateMinTableSize);
-const { startDragging, stopDragging, startResizing, stopResizing, stopRotating } = useShape(emits, props);
+const { startDragging, stopDragging, startResizing, stopResizing, stopRotating } = useShape(emits, props, calculateMinTableSize);
 
 const lastTap = ref(0);
 
