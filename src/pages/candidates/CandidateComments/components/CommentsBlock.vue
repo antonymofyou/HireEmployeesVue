@@ -16,7 +16,6 @@
     <div v-if="mainErrorMessage && !isLoading" class="comments__error">
       {{ mainErrorMessage }}
     </div>
-
     <template v-else>
       <div class="comments__list" ref="commentsBlock">
         <div v-if="isLoading" class="comments__spinner-wrapper">
@@ -35,13 +34,11 @@
         </template>
         <div v-if="!isLoading && !comments.length">Нет комментариев</div>
       </div>
-
       <CommentAddition
         :errorMessage="errorMessageCreate"
         @create-comment="createComment"
       />
     </template>
-
   </div>
 </template>
 
@@ -82,16 +79,14 @@ const isLoading = ref(false);
 const mainErrorMessage = ref('');
 const errorMessageCreate = ref('');
 const errorMessageControls = ref('');
-
 // Флаг показа комментариев
 const show = ref(false);
 // Ref для блока с комментариями
 const commentsBlock = ref(null);
 // ID созданного комментария
 const createdCommentId = ref(null);
-
+//переменная для проверки является ли комментарий общим 
 const commentForCandidate = ref(false)
-
 // Формируем строку вида "for_otklik:id" или "for_candidate"
 const commentFor = computed(
   () => `for_${!commentForCandidate.value ? "otklik:" + props.respondId : "candidate"}`

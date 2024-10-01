@@ -43,15 +43,10 @@ const newComment = ref({
 });
 //События изменения значения в текстовом поле и создания комментария
 const emit = defineEmits(['createComment']);
- 
-
 // Флаг, отслеживающий состояние кнопки
 const isButtonActive = ref(false);
-
-
 //Нода текстового поля
 const textarea = ref(null);
-
 // Функция для обновления значения commentFor
 const updateCommentFor = () => {
   newComment.value.commentFor = !newComment.value.commentFor;
@@ -63,7 +58,6 @@ const calculateRows = computed(() => {
   return Math.max(1, rows);
 });
 
-
 //Перевычисление высоты текстового поля при заполнении
 const setHeight = () => {
   textarea.value.style.height = 'auto';
@@ -74,12 +68,10 @@ const setHeight = () => {
 const onInput = (event) => {
   //Если поле не пустое - перевычисляем высоту при заполнении и переносе
   setHeight();
-
   //Если поле пустое - устанавливаем высоту в 36px
   if (event.target.value === '') {
     textarea.value.style.height = '36px';
   }
-
   newComment.value.comment = event.target.value; // Обновляем значение вручную
 };
 
@@ -88,10 +80,8 @@ const sendComment = () => {
   // Проверяем состояние кнопки
   if (!isButtonActive.value) {
     isButtonActive.value = true; // Устанавливаем флаг в true
-
     // Передаем объект newComment в emit
     emit('createComment', newComment.value);
-
     // Сброс высоты текстового поля
     setTimeout(() => {
       textarea.value.style.height = '36px';
@@ -101,8 +91,6 @@ const sendComment = () => {
     }, );
   }
 };
-
-
 </script>
 
 <style scoped>
