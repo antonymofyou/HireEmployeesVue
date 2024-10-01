@@ -178,11 +178,8 @@ const formattedShapes = reactive({
         "y1":0,
         "x2":150,
         "y2":0,
-        "width": 150,
-        "height": 10,
         "color": "#330300",
         "zIndex": 3,
-        "rotation": 0,
     }
 });
 let activeShape = reactive({

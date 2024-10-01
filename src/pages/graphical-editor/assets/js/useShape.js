@@ -65,8 +65,6 @@ export function useShape(emits, props) {
             centerY = startY;
         }
 
-        console.log(`Fixed rotation center: (${centerX}, ${centerY})`);
-
         offsetX.value = (clientX / canvasScale) - centerX;
         offsetY.value = (clientY / canvasScale) - centerY;
 
@@ -92,19 +90,38 @@ export function useShape(emits, props) {
                 const deltaX = adjustedClientX - centerX;
                 const deltaY = adjustedClientY - centerY;
 
-                console.log(`Delta relative to center: (${deltaX}, ${deltaY})`);
+                let angle = Math.atan2(deltaY, deltaX);
 
-                let angle = Math.atan2(deltaY, deltaX) * (180 / Math.PI);
+                // Если удерживается shift, округляем угол до ближайших 15 градусов
                 if (event.shiftKey) {
-                    angle = Math.round(angle / 15) * 15;
+                    angle = Math.round((angle * (180 / Math.PI)) / 15) * 15 * (Math.PI / 180);
                 }
-                angle = (angle % 360 + 360) % 360;
 
+                const length = Math.sqrt(deltaX ** 2 + deltaY ** 2);
+
+                let newX1, newY1, newX2, newY2;
+                const rect = document.getElementById(props.params.id).getBoundingClientRect();
+                if (activeHandle === 'start') {
+                    newX1 = centerX + Math.cos(angle) * length;
+                    newY1 = centerY + Math.sin(angle) * length;
+
+                    newX2 = centerX;
+                    newY2 = centerY;
+                } else {
+                    newX2 = centerX + Math.cos(angle) * length;
+                    newY2 = centerY + Math.sin(angle) * length;
+
+                    newX1 = centerX;
+                    newY1 = centerY;
+                }
+
+                // Обновляем координаты линии
                 updateShape({
-                    rotation: angle,
+                    x1: newX1 - rect.left,
+                    y1: newY1 - rect.top,
+                    x2: newX2 - rect.left,
+                    y2: newY2 - rect.top,
                 });
-
-                console.log(`New rotation angle: ${angle}`);
             });
         }
     };

@@ -8,8 +8,8 @@
       @touchstart="startDragging($event), selectArrow()"
   >
     <svg
-        :height="props.params.height"
-        :width="props.params.width"
+        :height="svgHeight"
+        :width="svgWidth"
         class="arrow"
     >
       <defs>
@@ -51,6 +51,7 @@
     <div v-if="props.isSelected && isEditMode" class="resize-handles">
       <div
           class="handle start"
+          :style="{ left: props.params.x1 + 'px', top: props.params.y1 + 'px'}"
           @mousedown.stop="startResizingArrow('start', $event)"
           @touchstart.stop="startResizingArrow('start', $event)"
       ></div>
@@ -63,7 +64,7 @@
     </div>
   </div>
 </template>
-  
+
 <script setup>
 import {computed, onBeforeUnmount} from 'vue';
 import { useShape } from '../../assets/js/useShape';
@@ -87,16 +88,17 @@ const emits = defineEmits(['updateShape', 'select-shape']);
 const isEditMode = computed(() => {
   return props.mode.value === props.mode._edit;
 });
+
+// Рассчитываем ширину и высоту SVG-контейнера
+const svgWidth = computed(() => Math.abs(props.params.x2 - props.params.x1) || 2);
+const svgHeight = computed(() => Math.abs(props.params.y2 - props.params.y1) || 2);
+
 const arrowStyles = computed(() => {
     return {
         // Geometry
         top: props.params.y + 'px',
         left: props.params.x + 'px',
         zIndex: props.params.zIndex,
-        transform: `rotate(${props.params.rotation}deg)`,
-        // Size
-        width: props.params.width + 'px',
-        height: props.params.height + 'px',
         // Style
         stroke: props.params.color,
     }
@@ -115,7 +117,7 @@ onBeforeUnmount(() => {
   stopResizingArrow();
 });
 </script>
-  
+
 <style scoped>
 .arrow-container {
     position: absolute;
@@ -148,12 +150,4 @@ onBeforeUnmount(() => {
 .handle.start { top: 0; left: 0; cursor: ew-resize; transform: translate(50%, 50%);}
 .handle.end { top: calc(50% - 5px); right: -5px; cursor: ew-resize; transform: translate(50%, 50%);}
 
-.handle.rotate {
-  top: -30px;
-  left: 50%;
-  transform: translateX(-50%);
-  cursor: url("@/assets/icons/rotate.svg?component"), auto;
-  border-radius: 8px;
-  pointer-events: all;
-}
 </style>
