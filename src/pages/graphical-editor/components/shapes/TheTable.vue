@@ -122,7 +122,7 @@ const editor = useEditor({
         
         syncSize();
     
-        calculateMinTableSize();
+        calculateMinTableSize(); 
     },
 });
 
@@ -156,28 +156,17 @@ function selectTable() {
 }
 
 watch(() => props.params.width, (newWidth, oldWidth) => {
-    const table = editor.value.$node('table')?.element?.closest('table');
-    const tableWidth = parseInt(table.style.width);
+    const table = editor.value.$node('table');
+    const cells = table.querySelectorAll('tableCell');
 
-    if (!newWidth || !oldWidth || tableWidth == newWidth) return;
+    cells.forEach((cell) => {
+        // должно работать (наверно) , но не работает
+        cell.setAttribute({
+            cellwidth: [100],
+        });
 
-    const editorContentJson = editor.value.getJSON();
-    const tableContentJson = editorContentJson.content[0].content;
-
-    editorContentJson.content[0].content = tableContentJson.map((row) => {
-        return {
-            type: 'tableRow',
-            content: row.content.map((cell) => {
-                cell.attrs.colwidth = cell.attrs.colwidth.map((cellWidth) => {
-                    return ((cellWidth / oldWidth * 100) * newWidth / 100).toFixed(1);
-                });
-
-                return cell
-            })
-        }
-    });
-
-    editor.value.commands.setContent(editorContentJson);
+        console.log(cell.attributes);
+    })
 });
 
 /**
