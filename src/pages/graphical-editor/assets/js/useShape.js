@@ -145,9 +145,8 @@ export function useShape(emits, props, calculateMinTableSize) {
                 if (resizingHandle.position.includes('left')) {
                     newWidth = startWidth.value - (adjustedClientX - offsetX.value);
                     if (props.params.type === 'table') {
-                        // Проверка, чтобы ширина не была меньше минимальной
                         newWidth = Math.max(newWidth, minTableDimensions.value.minWidth);
-                        newX = startX.value + (startWidth.value - newWidth); // Обновляем X только для таблицы
+                        newX = startX.value + (startWidth.value - newWidth);
                     } else {
                         newX = newWidth > 0 ? startX.value + (adjustedClientX - offsetX.value) : startX.value + startWidth.value;
                         newWidth = Math.abs(newWidth);
@@ -155,7 +154,7 @@ export function useShape(emits, props, calculateMinTableSize) {
                 } else if (resizingHandle.position.includes('right')) {
                     newWidth = startWidth.value + (adjustedClientX - offsetX.value);
                     if (props.params.type === 'table') {
-                        newWidth = Math.max(newWidth, minTableDimensions.value.minWidth); // Обеспечиваем, что ширина не меньше минимальной для таблицы
+                        newWidth = Math.max(newWidth, minTableDimensions.value.minWidth);
                     } else {
                         if (newWidth < 0) {
                             newX = startX.value + newWidth;
@@ -168,9 +167,8 @@ export function useShape(emits, props, calculateMinTableSize) {
                 if (resizingHandle.position.includes('top')) {
                     newHeight = startHeight.value - (adjustedClientY - offsetY.value);
                     if (props.params.type === 'table') {
-                        // Проверка, чтобы высота не была меньше минимальной
                         newHeight = Math.max(newHeight, minTableDimensions.value.minHeight);
-                        newY = startY.value + (startHeight.value - newHeight); // Обновляем Y только для таблицы
+                        newY = startY.value + (startHeight.value - newHeight);
                     } else {
                         newY = newHeight > 0 ? startY.value + (adjustedClientY - offsetY.value) : startY.value + startHeight.value;
                         newHeight = Math.abs(newHeight);
@@ -178,7 +176,7 @@ export function useShape(emits, props, calculateMinTableSize) {
                 } else if (resizingHandle.position.includes('bottom')) {
                     newHeight = startHeight.value + (adjustedClientY - offsetY.value);
                     if (props.params.type === 'table') {
-                        newHeight = Math.max(newHeight, minTableDimensions.value.minHeight); // Обеспечиваем, что высота не меньше минимальной для таблицы
+                        newHeight = Math.max(newHeight, minTableDimensions.value.minHeight);
                     } else {
                         if (newHeight < 0) {
                             newY = startY.value + newHeight;
@@ -198,7 +196,6 @@ export function useShape(emits, props, calculateMinTableSize) {
     // Завершение процесса изменения размера
     const stopResizing = () => {
         isResizing.value = false;
-        resizingHandle = null;
         document.removeEventListener('mousemove', onResizing);
         document.removeEventListener('touchmove', onResizing);
         document.removeEventListener('mouseup', stopResizing);
