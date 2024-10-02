@@ -262,7 +262,6 @@ export function useShape(emits, props) {
     // Завершение процесса изменения размера
     const stopResizing = () => {
         isResizing.value = false;
-        resizingHandle = null;
         document.removeEventListener('mousemove', onResizing);
         document.removeEventListener('touchmove', onResizing);
         document.removeEventListener('mouseup', stopResizing);
