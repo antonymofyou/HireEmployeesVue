@@ -70,6 +70,9 @@ const isShapeMode = computed(() => {
 const isEditMode = computed(() => {
   return props.mode.value === props.mode._edit;
 });
+const borderWidth = computed(() => {
+    return props.params.borderWidth || 2;
+});
 const tableStyles = computed(() => {
     return {
         // Geometry
@@ -82,7 +85,7 @@ const tableStyles = computed(() => {
         // Style
         '--backgroundColorTable': props.params.color || '#fff',
         '--borderColorTable': props.params.borderColor || "#000",
-        '--borderWidthTable': (props.params.borderWidth || 2) + 'px',
+        '--borderWidthTable': borderWidth.value + 'px',
         // Mode styles
         cursor: isEditMode.value ? 'move' : 'text',
         userSelect: isShapeMode.value ? 'text' : 'none',
@@ -155,17 +158,27 @@ function selectTable() {
     });
 }
 
-watch(() => props.params.width, (newWidth, oldWidth) => {
+watch(() => props.params.width, (currentWidth) => {
     const table = editor.value.$node('table');
     const cells = table.querySelectorAll('tableCell');
+    const colwidthList = table.querySelector('tableRow').querySelectorAll('tableCell').reduce((acc, item) => {
+        acc.push(...item.attributes.colwidth || [ cellMinWidth ]);
+
+        return acc;
+    }, []);
+    const prevWidth = colwidthList.reduce((acc, val) => acc + val, 0);
+
+    if (Math.round(prevWidth) == Math.round(currentWidth - borderWidth.value)) {
+        return;
+    }
 
     cells.forEach((cell) => {
-        // должно работать (наверно) , но не работает
-        cell.setAttribute({
-            cellwidth: [100],
-        });
+        // Здесь должна быть функция для перерасчёта colwidth
+        const colwidth = cell.attributes.colwidth || [ cellMinWidth ];
+        
+        cell.attributes.colwidth = colwidth;
 
-        console.log(cell.attributes);
+        cell.element.setAttribute('colwidth', colwidth.join(','));
     })
 });
 
