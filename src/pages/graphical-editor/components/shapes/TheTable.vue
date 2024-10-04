@@ -158,27 +158,66 @@ function selectTable() {
     });
 }
 
-watch(() => props.params.width, (currentWidth) => {
+// TODO : ref
+
+watch(() => props.params.width, () => {
     const table = editor.value.$node('table');
-    const cells = table.querySelectorAll('tableCell');
+    const rows = table.querySelectorAll('tableRow');
     const colwidthList = table.querySelector('tableRow').querySelectorAll('tableCell').reduce((acc, item) => {
         acc.push(...item.attributes.colwidth || [ cellMinWidth ]);
 
         return acc;
     }, []);
-    const prevWidth = colwidthList.reduce((acc, val) => acc + val, 0);
+    const prevWidth = Math.round(colwidthList.reduce((acc, val) => acc + val, 0));
+    const currentWidth = Math.round(props.params.width - borderWidth.value);
 
-    if (Math.round(prevWidth) == Math.round(currentWidth - borderWidth.value)) {
-        return;
+    if (prevWidth == currentWidth) return;
+
+    let recalculateColwidthList;
+
+    // Увеличение ширины
+
+    if (prevWidth < currentWidth) {
+        recalculateColwidthList = colwidthList.map((colwidth) => {
+            const newColwidth = +((((colwidth / prevWidth) * 100) * currentWidth) / 100).toFixed(1);
+
+            return newColwidth;
+        });
     }
 
-    cells.forEach((cell) => {
-        // Здесь должна быть функция для перерасчёта colwidth
-        const colwidth = cell.attributes.colwidth || [ cellMinWidth ];
-        
-        cell.attributes.colwidth = colwidth;
+    // Уменьшение ширины
 
-        cell.element.setAttribute('colwidth', colwidth.join(','));
+    if (prevWidth > currentWidth) {
+        const minProp = cellMinWidth / currentWidth;
+        const prop = colwidthList.map((item) => item / prevWidth).map((item) => Math.max(item, minProp));
+        const sumProp = prop.reduce((acc, item) => acc += item, 0);
+
+        let rest = +(sumProp - 1).toPrecision(2);
+        const filteredProp = prop.filter((item) => item > minProp)
+
+        recalculateColwidthList = prop.map((item) => {
+            if (item == minProp) {
+                return item * currentWidth;
+            }
+
+            const step = rest / filteredProp.length;
+
+            if (item - step >= minProp) {
+                return (item - step) * currentWidth;
+            } else {
+                return (item - (item - minProp)) * currentWidth;
+            }
+        });
+    }
+
+    rows.forEach((row) => {
+        row.querySelectorAll('tableCell').forEach((cell, idx) => {
+            const colwidth = [recalculateColwidthList[idx]];
+            
+            cell.attributes.colwidth = colwidth;
+
+            cell.element.setAttribute('colwidth', colwidth.join(','));
+        });
     })
 });
 
