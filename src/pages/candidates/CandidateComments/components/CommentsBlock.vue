@@ -213,6 +213,18 @@ watch(
   },
   { flush: 'post' } // Устанавливаем flush в 'post'
 );
+watch(
+  () => createdCommentId.value,
+  () => {
+      if (commentsBlock.value) {
+        commentsBlock.value.scrollTo({
+          top: commentsBlock.value.scrollHeight,
+          behavior: 'smooth',
+        });
+      }
+  },
+  { flush: 'post' } // Устанавливаем flush в 'post'
+);
 
 onMounted(requestComments);
 </script>
