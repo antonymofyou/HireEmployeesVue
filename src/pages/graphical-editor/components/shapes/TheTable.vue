@@ -71,7 +71,7 @@ const isEditMode = computed(() => {
   return props.mode.value === props.mode._edit;
 });
 const borderWidth = computed(() => {
-    return props.params.borderWidth || 2;
+    return props.params.borderWidth || 1;
 });
 const tableStyles = computed(() => {
     return {
@@ -116,24 +116,85 @@ const editor = useEditor({
 
         emits('updateShape', props.params.id , 'text' , json);
 
-        syncSize();
+        updateSize();
     },
     onCreate: () => {
         if (props.isSelected) {
             selectTable();
         }
         
-        syncSize();
+        updateSize();
     
         calculateMinTableSize(); 
     },
 });
 
-function syncSize() {
+function selectTable() {
+    emits('selectShape', {
+        id: props.params.id,
+        editor: editor.value,
+    });
+}
+
+function updateSize() {
     const table = editor.value.$node('table')?.element?.closest('table') || {};
-    
+
     emits('updateShape', props.params.id, 'width', table.offsetWidth);
     emits('updateShape', props.params.id, 'height', table.offsetHeight);
+}
+
+function recalculateSize() {
+    const table = editor.value.$node('table');
+    const rows = table.querySelectorAll('tableRow');
+    const colwidthList = table.querySelector('tableRow').querySelectorAll('tableCell').reduce((acc, item) => {
+        acc.push(...item.attributes.colwidth || [ cellMinWidth ]);
+
+        return acc;
+    }, []);
+    const prevWidth = Math.round(colwidthList.reduce((acc, val) => acc + val, 0));
+    const currentWidth = Math.round(props.params.width);
+
+    if (prevWidth == currentWidth) return;
+
+    const recalculateColwidthList = prevWidth < currentWidth ? incWidthHandler() : decWidthHandler();
+
+    rows.forEach((row) => {
+        let idx = 0;
+
+        row.querySelectorAll('tableCell').forEach((cell) => {
+            const colspan = cell.attributes.colspan;
+            const colwidth = colspan == 1 ? [ recalculateColwidthList[idx] ] : [ ...recalculateColwidthList.slice(idx, idx + colspan) ]
+
+            idx += colspan;
+            
+            cell.attributes.colwidth = colwidth;
+
+            cell.element.setAttribute('colwidth', colwidth.join(','));
+        });
+    })
+
+    function incWidthHandler() {
+        return colwidthList.map((colwidth) => {
+            const newColwidth = +((((colwidth / prevWidth) * 100) * currentWidth) / 100).toFixed(1);
+
+            return newColwidth;
+        });
+    }
+
+    function decWidthHandler() {
+        const minProp = cellMinWidth / currentWidth;
+        const prop = colwidthList.map((item) => item / prevWidth).map((item) => Math.max(item, minProp));
+        const sumProp = prop.reduce((acc, item) => acc += item, 0);
+        const rest = +(sumProp - 1).toPrecision(2);
+        const filteredProp = prop.filter((item) => item > minProp).sort((a,b) => a - b);
+        const step = rest / filteredProp.length;
+
+        return prop.map((item) => {
+            const newProp = item == minProp ? item : item - step >= minProp ? item - step : (item - (item - minProp));
+
+            return newProp * currentWidth;
+        });
+    }
 }
 
 function calculateMinTableSize() {
@@ -151,75 +212,7 @@ function calculateMinTableSize() {
     return { minWidth, minHeight };
 }
 
-function selectTable() {
-    emits('selectShape', {
-        id: props.params.id,
-        editor: editor.value,
-    });
-}
-
-// TODO : ref
-
-watch(() => props.params.width, () => {
-    const table = editor.value.$node('table');
-    const rows = table.querySelectorAll('tableRow');
-    const colwidthList = table.querySelector('tableRow').querySelectorAll('tableCell').reduce((acc, item) => {
-        acc.push(...item.attributes.colwidth || [ cellMinWidth ]);
-
-        return acc;
-    }, []);
-    const prevWidth = Math.round(colwidthList.reduce((acc, val) => acc + val, 0));
-    const currentWidth = Math.round(props.params.width - borderWidth.value);
-
-    if (prevWidth == currentWidth) return;
-
-    let recalculateColwidthList;
-
-    // Увеличение ширины
-
-    if (prevWidth < currentWidth) {
-        recalculateColwidthList = colwidthList.map((colwidth) => {
-            const newColwidth = +((((colwidth / prevWidth) * 100) * currentWidth) / 100).toFixed(1);
-
-            return newColwidth;
-        });
-    }
-
-    // Уменьшение ширины
-
-    if (prevWidth > currentWidth) {
-        const minProp = cellMinWidth / currentWidth;
-        const prop = colwidthList.map((item) => item / prevWidth).map((item) => Math.max(item, minProp));
-        const sumProp = prop.reduce((acc, item) => acc += item, 0);
-
-        let rest = +(sumProp - 1).toPrecision(2);
-        const filteredProp = prop.filter((item) => item > minProp)
-
-        recalculateColwidthList = prop.map((item) => {
-            if (item == minProp) {
-                return item * currentWidth;
-            }
-
-            const step = rest / filteredProp.length;
-
-            if (item - step >= minProp) {
-                return (item - step) * currentWidth;
-            } else {
-                return (item - (item - minProp)) * currentWidth;
-            }
-        });
-    }
-
-    rows.forEach((row) => {
-        row.querySelectorAll('tableCell').forEach((cell, idx) => {
-            const colwidth = [recalculateColwidthList[idx]];
-            
-            cell.attributes.colwidth = colwidth;
-
-            cell.element.setAttribute('colwidth', colwidth.join(','));
-        });
-    })
-});
+watch(() => props.params.width, recalculateSize);
 
 /**
  * 
@@ -231,11 +224,10 @@ watch(() => props.params.width, () => {
   const borderWidth = parseFloat(tableStyles.value.borderWidth) || 0;
 
   return {
-    width: tableStyles.value.width,
+    width: props.params.width + 'px',
     height: tableStyles.value.height,
     top: `-${borderWidth}px`,
     left: `-${borderWidth}px`,
-    width: props.params.width + 'px',
   };
 });
 
@@ -332,8 +324,9 @@ onBeforeUnmount(() => {
 
 .table:deep(td),
 .table:deep(th) {
-    border: var(--borderWidthTable) solid var(--borderColorTable);
+    outline: var(--borderWidthTable) solid var(--borderColorTable);
     position: relative;
+    padding: 0;
 }
 
 .table:deep(th) {
