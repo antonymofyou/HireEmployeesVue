@@ -87,6 +87,9 @@ const statusCurrent = ref({
 // Новый статус
 const newStatus = ref('');
 
+// Флаг, отслеживающий состояние кнопки
+const isButtonActive = ref(false);
+
 // Обновление списка статусов
 const updateStatuses = () => {
   getStatusesFromServer((response) => {
@@ -118,7 +121,6 @@ const changeRespondStatus = () => {
   const requestInstance = new CandidatesSetOtklikStatus();
   requestInstance.otklikId = props.respondId;
   requestInstance.toStatusName = newStatus.value;
-
   errorMessage.value = '';
   statusChanged.value = false;
   sendRequest.value = true;
@@ -129,6 +131,7 @@ const changeRespondStatus = () => {
     (response) => {
       if (response.success === '1') {
         statusChanged.value = true;
+        isButtonActive.value = false; // Сбрасываем флаг в false
         updateStatuses();
          sendToParent(); // сюда функцию передачи
         newStatus.value = ''; 
@@ -138,6 +141,7 @@ const changeRespondStatus = () => {
       sendRequest.value = false;
     },
     (err) => {
+      isButtonActive.value = false; // Сбрасываем флаг в false
       errorMessage.value = err;
       sendRequest.value = false;
     }
@@ -159,7 +163,10 @@ const getStatusesFromServer = (successCallback, errorCallback) => {
 
 // Вызов функции изменения статуса
 const changeStatus = () => {
-  changeRespondStatus();
+  if (!isButtonActive.value) {
+    isButtonActive.value = true; // Устанавливаем флаг в true
+    changeRespondStatus();
+  }
 };
 
 watch(

@@ -62,6 +62,12 @@
       </div>
     </div>
 
+    <div
+      v-if="props.comment.commentFor == 'for_candidate'"
+      class="comment__for"
+    >
+      Комментарий к кандидату
+    </div>
     <div class="comment__date">{{ formattedDate }}</div>
 
     <ModalConfirmation
@@ -299,5 +305,11 @@ watch(
 .comment__date {
   font-size: 10px;
   text-align: right;
+}
+.comment__for {
+  text-align: right;
+  color: red;
+  font-size: 11px;
+  margin-bottom: 3px;
 }
 </style>

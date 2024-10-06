@@ -1,7 +1,7 @@
 <template>
   <div class="comments">
     <div class="comments__header">
-      <div class="comments__header-title">{{ headingText }}</div>
+      <div class="comments__header-title"> Комментарии</div>
       <ButtonIcon v-if="!respondId" @click="showComments"
         ><template #icon>
           <ArrowIcon
@@ -16,63 +16,28 @@
     <div v-if="mainErrorMessage && !isLoading" class="comments__error">
       {{ mainErrorMessage }}
     </div>
-
     <template v-else>
-      <template v-if="!respondId">
-        <!-- Открытие/сокрытие комментариев -->
-        <Transition v-if="show">
-          <div>
-            <div class="comments__list" ref="commentsBlock">
-              <div v-if="show && isLoading" class="comments__spinner-wrapper">
-                <SpinnerMain class="comments__spinner" />
-              </div>
-              <template v-if="comments.length">
-                <CommentCard
-                  v-for="comment in comments"
-                  :comment
-                  :key="comment.id"
-                  class="comments__comment"
-                  @update-comment="updateComment"
-                  :removeRequestObject="dataPropsDelete"
-                />
-              </template>
-              <p v-if="!isLoading && !comments.length">Нет комментариев</p>
-            </div>
-
-            <CommentAddition
-              v-model.trim="newComment"
-              :errorMessage="errorMessageCreate"
-              @create-comment="createComment({ comment: newComment })"
-            />
-          </div>
-        </Transition>
-      </template>
-
-      <template v-else>
-        <div class="comments__list" ref="commentsBlock">
-          <div v-if="isLoading" class="comments__spinner-wrapper">
-            <SpinnerMain class="comments__spinner" />
-          </div>
-          <template v-if="comments.length">
-            <CommentCard
-              v-for="comment in comments"
-              :comment
-              :key="comment.id"
-              class="comments__comment"
-              @update-comment="updateComment"
-              :errorMessage="errorMessageControls"
-              :removeRequestObject="removeCommentObject"
-            />
-          </template>
-          <div v-if="!isLoading && !comments.length">Нет комментариев</div>
+      <div class="comments__list" ref="commentsBlock">
+        <div v-if="isLoading" class="comments__spinner-wrapper">
+          <SpinnerMain class="comments__spinner" />
         </div>
-
-        <CommentAddition
-          v-model.trim="newComment"
-          :errorMessage="errorMessageCreate"
-          @create-comment="createComment({ comment: newComment })"
-        />
-      </template>
+        <template v-if="comments.length">
+          <CommentCard
+            v-for="comment in comments"
+            :comment
+            :key="comment.id"
+            class="comments__comment"
+            @update-comment="updateComment"
+            :errorMessage="errorMessageControls"
+            :removeRequestObject="removeCommentObject"
+          />
+        </template>
+        <div v-if="!isLoading && !comments.length">Нет комментариев</div>
+      </div>
+      <CommentAddition
+        :errorMessage="errorMessageCreate"
+        @create-comment="createComment"
+      />
     </template>
   </div>
 </template>
@@ -114,26 +79,18 @@ const isLoading = ref(false);
 const mainErrorMessage = ref('');
 const errorMessageCreate = ref('');
 const errorMessageControls = ref('');
-// Значение нового комментария
-const newComment = ref('');
 // Флаг показа комментариев
 const show = ref(false);
 // Ref для блока с комментариями
 const commentsBlock = ref(null);
 // ID созданного комментария
 const createdCommentId = ref(null);
-
+//переменная для проверки является ли комментарий общим 
+const commentForCandidate = ref(false)
 // Формируем строку вида "for_otklik:id" или "for_candidate"
 const commentFor = computed(
-  () => `for_${props.respondId ? 'otklik:' + props.respondId : 'candidate'}`
+  () => `for_${!commentForCandidate.value ? "otklik:" + props.respondId : "candidate"}`
 );
-
-// Заголовок блока, если передано ID вакансии - "Комментарии на отклик кандидата", иначе "Комментарии на кандидата"
-const headingText = computed(() => {
-  return props.respondId
-    ? 'Комментарии на отклик кандидата'
-    : 'Комментарии на кандидата';
-});
 
 // Функция для работы с комментариями, принимает action ('create', 'update', 'delete') и payload {id, comment}
 const dispatchComments = (action, payload) => {
@@ -194,11 +151,11 @@ const removeCommentObject = reactive({
 // Создание комментария
 const createComment = (payload) => {
   if (payload.comment) {
+    commentForCandidate.value = payload.commentFor
     // Перезапрос комментариев, очистка поля для нового комментария
     const onCreateSuccess = (res) => {
       createdCommentId.value = res.comment.id;
       comments.value.push(res.comment);
-      newComment.value = '';
     };
     // Функция для запроса на создание комментария
     const requestFn = dispatchComments('create', payload);
@@ -209,8 +166,9 @@ const createComment = (payload) => {
 // Запрос комментариев
 const requestComments = () => {
   const requestInstance = new CandidateGetCandidateComments();
-  requestInstance.commentFor = commentFor.value;
+  requestInstance.commentFor = `for_otklik:${props.respondId}`
   requestInstance.candidateId = props.candidateId;
+  requestInstance.withForCandidateComments = 1;
 
   // При старте запроса состояние загрузки меняется на true и обнуляется значение сообщения об ошибке
   isLoading.value = true;
@@ -247,6 +205,18 @@ watch(
   () => comments.value,
   () => {
       if (commentsBlock.value &&  props.receivedObject) {
+        commentsBlock.value.scrollTo({
+          top: commentsBlock.value.scrollHeight,
+          behavior: 'smooth',
+        });
+      }
+  },
+  { flush: 'post' } // Устанавливаем flush в 'post'
+);
+watch(
+  () => createdCommentId.value,
+  () => {
+      if (commentsBlock.value) {
         commentsBlock.value.scrollTo({
           top: commentsBlock.value.scrollHeight,
           behavior: 'smooth',

@@ -18,6 +18,7 @@ export class CandidateGetCandidateComments extends MainRequestClass {
   commentFor = '';
   // текст комментария
   candidateId = '';
+  withForCandidateComments = '';
 }
 
 export class VacanciesGetAllVacancyById extends MainRequestClass {

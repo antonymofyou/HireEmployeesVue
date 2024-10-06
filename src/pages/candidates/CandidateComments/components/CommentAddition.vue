@@ -1,9 +1,15 @@
 <template>
   <div class="comment-creation">
     <label class="comment-creation__label">
-      <div>Создать комментарий</div>
+      <div class="comment-creation__label-box">
+        <div>Создать комментарий</div>
+        <div class="comment-creation__for-box">
+          <input type="checkbox" :checked="newComment.commentFor" @change="updateCommentFor" />  
+          <div>Комментарий к кандидату</div>
+        </div>
+      </div>
       <textarea
-        :value="modelValue"
+        :value="newComment.comment"
         class="comment-creation__textarea"
         ref="textarea"
         :rows="calculateRows"
@@ -22,10 +28,6 @@ import { computed, ref } from 'vue';
 
 //Пропс комментария
 const props = defineProps({
-  modelValue: {
-    type: String,
-    required: true,
-  },
   // Сообщение об ошибке
   errorMessage: {
     type: String,
@@ -34,15 +36,25 @@ const props = defineProps({
   }
 });
 
+// Используем ref для newComment
+const newComment = ref({
+  comment: '',
+  commentFor: false
+});
 //События изменения значения в текстовом поле и создания комментария
-const emit = defineEmits(['createComment', 'update:modelValue']);
-
+const emit = defineEmits(['createComment']);
+// Флаг, отслеживающий состояние кнопки
+const isButtonActive = ref(false);
 //Нода текстового поля
 const textarea = ref(null);
+// Функция для обновления значения commentFor
+const updateCommentFor = () => {
+  newComment.value.commentFor = !newComment.value.commentFor;
+};
 
 //Высота текстового поля в строках. По умолчанию 1(36px). При переносе курсора rows увеличивается только после ввода символа на новой строке
 const calculateRows = computed(() => {
-  const rows = props.modelValue.split('\n').length;
+  const rows = newComment.value.comment.split('\n').length;
   return Math.max(1, rows);
 });
 
@@ -56,24 +68,28 @@ const setHeight = () => {
 const onInput = (event) => {
   //Если поле не пустое - перевычисляем высоту при заполнении и переносе
   setHeight();
-
   //Если поле пустое - устанавливаем высоту в 36px
   if (event.target.value === '') {
     textarea.value.style.height = '36px';
   }
-
-  //Вызов события изменения пропса комментария
-  emit('update:modelValue', event.target.value);
+  newComment.value.comment = event.target.value; // Обновляем значение вручную
 };
 
 //Вызов события создания комментария
 const sendComment = () => {
-  emit('createComment');
-
-  //Сброс высоты текстового поля
-  setTimeout(() => {
-    textarea.value.style.height = '36px';
-  });
+  // Проверяем состояние кнопки
+  if (!isButtonActive.value) {
+    isButtonActive.value = true; // Устанавливаем флаг в true
+    // Передаем объект newComment в emit
+    emit('createComment', newComment.value);
+    // Сброс высоты текстового поля
+    setTimeout(() => {
+      textarea.value.style.height = '36px';
+      isButtonActive.value = false; // Сбрасываем флаг в false
+      newComment.value.comment = ""
+      newComment.value. commentFor =  false
+    }, );
+  }
 };
 </script>
 
@@ -118,5 +134,14 @@ const sendComment = () => {
 .comment-creation__textarea:focus {
   outline-width: 2px;
   outline-color: var(--cornflower-blue);
+}
+.comment-creation__label-box{
+  display: flex;
+  justify-content: space-between;
+  gap: 10px;
+}
+.comment-creation__for-box{
+  display: flex;
+  gap: 10px;
 }
 </style>
