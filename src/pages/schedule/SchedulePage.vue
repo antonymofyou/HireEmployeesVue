@@ -362,7 +362,7 @@ const requests = {
     const jobGetScheduleInstance = new JobGetShedule();
 
     return jobGetScheduleInstance.request(
-      '/job/get_schedule.php',
+      '/staff_reports/get_schedule.php',
       'manager',
       (response) => {
         const { 
@@ -413,7 +413,7 @@ const requests = {
     jobSetDayInstance.setDay = tomorrowDay;
 
     jobSetDayInstance.request(
-      '/job/set_day.php',
+      '/staff_reports/set_day.php',
       'manager',
       (response) => {
         // Сервер отдаёт добавляемый день
@@ -462,7 +462,7 @@ const requests = {
     };
 
     jobSetDayInstance.request(
-      '/job/set_day.php',
+      '/staff_reports/set_day.php',
       'manager',
       (response) => {
         // Сервер отдаёт изменённый день
@@ -506,7 +506,7 @@ const requests = {
     jobSetDayInstance.dayId = dayId;
 
     jobSetDayInstance.request(
-      '/job/set_day.php',
+      '/staff_reports/set_day.php',
       'manager',
       (response) => {
         modalsActions.closeDeleteDayModal();
@@ -548,7 +548,7 @@ const requests = {
     jobSetPeriodInstance.periodEnd = newPeriod.periodEnd;
 
     jobSetPeriodInstance.request(
-      '/job/set_period.php',
+      '/staff_reports/set_period.php',
       'manager',
       (response) => {
         modalsActions.closeAddPeriodModal();
@@ -586,7 +586,7 @@ const requests = {
     jobSetPeriodInstance.periodId = periodId;
 
     jobSetPeriodInstance.request(
-      '/job/set_period.php',
+      '/staff_reports/set_period.php',
       'manager',
       () => {
         modalsActions.closeDeletePeriodModal();

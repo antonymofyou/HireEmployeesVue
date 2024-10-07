@@ -1,6 +1,6 @@
 import { MainRequestClass } from '@/js/RootClasses';
 
-// метод: /app/api/job/get_schedule.php
+// метод: /app/api/staff_reports/get_schedule.php
 
 export class JobGetShedule extends MainRequestClass {
   staffId = ''; // ID менеджера, по которому нужно вывести расписание, при пустом значении выводится расписание текущего пользователя
@@ -10,7 +10,7 @@ export class JobGetShedule extends MainRequestClass {
 	filterEndDate = ''; // Дата конца за какой период нужно вывести расписание в формате yyyy-mm-dd
 }
 
-// метод: /app/api/job/set_day.php
+// метод: /app/api/staff_reports/set_day.php
 
 export class JobSetDay extends MainRequestClass {
 	/** @type {'create' | 'delete' | 'update'} */
@@ -29,7 +29,7 @@ export class JobSetDay extends MainRequestClass {
 	setDay = ''; // Данные для создания/обновления дня (при $action == 'delete' пустой словарь)
 }
 
-// метод: /app/api/job/set_period.php
+// метод: /app/api/staff_reports/set_period.php
 
 export class JobSetPeriod extends MainRequestClass {
 	action = ''; // Действие, которое нужно сделать (доступные значения: 'create' - создать период; 'delete' - удалить период)
