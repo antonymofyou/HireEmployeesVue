@@ -16,7 +16,7 @@
         @input="onInput"
       ></textarea>
     </label>
-    <ButtonMain class="comment-creation__button" :message="errorMessage" @click="sendComment">
+    <ButtonMain class="comment-creation__button" :isActive="isLoadingCreate" :message="errorMessage" @click="sendComment">
       <template #text>Добавить комментарий</template>
     </ButtonMain>
   </div>
@@ -33,6 +33,11 @@ const props = defineProps({
     type: String,
     default: '',
     required: false,
+  },
+  isLoadingCreate:{
+    type: Boolean,
+    default: false,
+    required: true,
   }
 });
 

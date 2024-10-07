@@ -36,6 +36,7 @@
       </div>
       <CommentAddition
         :errorMessage="errorMessageCreate"
+        :isLoadingCreate="isLoadingCreate"
         @create-comment="createComment"
       />
     </template>
@@ -75,6 +76,8 @@ const props = defineProps({
 const comments = ref([]);
 // Состояние загрузки
 const isLoading = ref(false);
+// Состояние загрузки при создании комментария
+const isLoadingCreate = ref(false);
 // Сообщение об ошибках
 const mainErrorMessage = ref('');
 const errorMessageCreate = ref('');
@@ -103,7 +106,9 @@ const dispatchComments = (action, payload) => {
 
   errorMessageCreate.value = '';
   errorMessageControls.value = '';
-
+  if (action === 'create') {
+    isLoadingCreate.value = true
+  };
   return (onSuccess, errCallback) =>
     requestInstance.request(
       '/candidates/set_candidate_comment.php',
@@ -154,6 +159,7 @@ const createComment = (payload) => {
     commentForCandidate.value = payload.commentFor
     // Перезапрос комментариев, очистка поля для нового комментария
     const onCreateSuccess = (res) => {
+      isLoadingCreate.value = false,
       createdCommentId.value = res.comment.id;
       comments.value.push(res.comment);
     };
