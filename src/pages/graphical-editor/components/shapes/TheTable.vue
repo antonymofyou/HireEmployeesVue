@@ -197,17 +197,61 @@ function recalculateSize() {
     }
 }
 
+// Функция для извлечения текста из ячейки таблицы
+function extractTextFromCell(cell) {
+  return cell.content?.map(paragraph =>
+      paragraph.content?.map(textNode => textNode.text).join('') || ''
+  ).join('\n') || '';
+}
+
+// Функция для вычисления высоты текста в зависимости от его ширины и стилей
+function getTextHeight(text, width, styles) {
+  if (!text) {
+    return 17; // Минимальная высота
+  }
+
+  const canvas = document.createElement('canvas');
+  const context = canvas.getContext('2d');
+  context.font = `${styles.fontSize || '16px'} ${styles.fontFamily || 'Arial'}`;
+
+  let lines = [];
+  let currentLine = '';
+
+  // Проходим по каждому символу в тексте
+  for (let char of text) {
+    const testLine = currentLine + char;
+    if (context.measureText(testLine).width > width && currentLine) {
+      lines.push(currentLine);
+      currentLine = char;
+    } else {
+      currentLine = testLine;
+    }
+  }
+
+  if (currentLine) lines.push(currentLine);
+  return 17 + (lines.length - 1) * 17;
+}
+
+// Функция для вычисления минимального размера таблицы
 function calculateMinTableSize() {
     const editorContentJson = editor.value.getJSON();
-    const tableContentJson = editorContentJson.content[0].content;
-    const amountColumnTable = tableContentJson[0].content.reduce((acc, item) => {
-        acc += item.attrs.colspan;
+    const tableContentJson = editorContentJson.content?.[0]?.content;
+    const amountColumnTable = tableContentJson[0].content.reduce((acc, item) => acc + (item.attrs.colspan || 1), 0);
 
-        return acc;
-    }, 0);
+    if (!tableContentJson) {
+      return { minWidth: 0, minHeight: 0 };
+    }
 
     const minWidth = amountColumnTable * cellMinWidth;
-    const minHeight = 0;
+
+    const minHeight = tableContentJson.reduce((total, row) => {
+      const rowHeight = Math.max(...row.content.map(cell => {
+        const cellText = extractTextFromCell(cell);
+        const cellStyles = cell.attrs?.style || {};
+        return getTextHeight(cellText, cellMinWidth, cellStyles);
+      }));
+      return total + rowHeight;
+    }, 0);
 
     return { minWidth, minHeight };
 }
