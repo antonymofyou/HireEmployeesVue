@@ -29,7 +29,7 @@
 
 <script setup>
 
-import { defineProps, defineEmits, computed, onBeforeUnmount, watch, ref } from 'vue';
+import { defineProps, defineEmits, computed, onBeforeUnmount, watch, nextTick, ref } from 'vue';
 
 import { useEditor, EditorContent } from '@tiptap/vue-3'
 import StarterKit from '@tiptap/starter-kit'
@@ -151,7 +151,7 @@ function recalculateSize() {
 
         return acc;
     }, []);
-    const prevWidth = Math.round(colwidthList.reduce((acc, val) => acc + val, 0));
+    const prevWidth = Math.round(colwidthList.reduce((acc, val) => acc + val, 0)) + borderWidth.value;
     const currentWidth = Math.round(props.params.width);
 
     if (prevWidth == currentWidth) return;
@@ -258,6 +258,13 @@ function calculateMinTableSize() {
 
 watch(() => props.params.width, recalculateSize);
 
+// Todo : ref
+watch(() => props.params.borderWidth, () => {
+    nextTick().then(() => {
+        updateSize()
+    });
+});
+
 /**
  * 
  * Логика перемещения , поворота
@@ -357,6 +364,8 @@ onBeforeUnmount(() => {
 
 .table:deep(table) {
     border-collapse: collapse;
+    margin: 0;
+    overflow: hidden;
     table-layout: fixed;
     height: 100%;
     background-color: var(--backgroundColorTable);
@@ -368,7 +377,8 @@ onBeforeUnmount(() => {
 
 .table:deep(td),
 .table:deep(th) {
-    outline: var(--borderWidthTable) solid var(--borderColorTable);
+    border: var(--borderWidthTable) solid var(--borderColorTable);
+    box-sizing: border-box;
     position: relative;
     padding: 0;
 }
