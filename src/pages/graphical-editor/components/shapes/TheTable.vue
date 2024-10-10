@@ -71,7 +71,7 @@ const isEditMode = computed(() => {
   return props.mode.value === props.mode._edit;
 });
 const borderWidth = computed(() => {
-    return props.params.borderWidth || 1;
+    return props.params.borderWidth || 4;
 });
 const tableStyles = computed(() => {
     return {
@@ -151,10 +151,10 @@ function recalculateSize() {
 
         return acc;
     }, []);
-    const prevWidth = Math.round(colwidthList.reduce((acc, val) => acc + val, 0)) + borderWidth.value;
-    const currentWidth = Math.round(props.params.width);
+    const prevWidth = Math.round(colwidthList.reduce((acc, val) => acc + val, 0));
+    const currentWidth = Math.round(props.params.width) - borderWidth.value;
 
-    if (prevWidth == currentWidth) return;
+    if (currentWidth == prevWidth) return;
 
     const recalculateColwidthList = prevWidth < currentWidth ? incWidthHandler() : decWidthHandler();
 
@@ -242,16 +242,19 @@ function calculateMinTableSize() {
       return { minWidth: 0, minHeight: 0 };
     }
 
-    const minWidth = amountColumnTable * cellMinWidth;
-
-    const minHeight = tableContentJson.reduce((total, row) => {
+    let minWidth = amountColumnTable * cellMinWidth;
+    let minHeight = tableContentJson.reduce((total, row) => {
       const rowHeight = Math.max(...row.content.map(cell => {
         const cellText = extractTextFromCell(cell);
         const cellStyles = cell.attrs?.style || {};
-        return getTextHeight(cellText, cellMinWidth, cellStyles);
+
+        return getTextHeight(cellText, cellMinWidth, cellStyles) + borderWidth.value;
       }));
       return total + rowHeight;
     }, 0);
+
+    minWidth = minWidth + borderWidth.value;
+    minHeight = minHeight + borderWidth.value;
 
     return { minWidth, minHeight };
 }
@@ -272,13 +275,11 @@ watch(() => props.params.borderWidth, () => {
  */
 
  const resizeHandleStyles = computed(() => {
-  const borderWidth = parseFloat(tableStyles.value.borderWidth) || 0;
-
   return {
     width: props.params.width + 'px',
-    height: tableStyles.value.height,
-    top: `-${borderWidth}px`,
-    left: `-${borderWidth}px`,
+    height: props.params.height + 'px',
+    top: 0,
+    left: 0,
   };
 });
 
@@ -407,7 +408,7 @@ onBeforeUnmount(() => {
 
 .resize-handles {
     position: absolute;
-    border: 1px solid #1A73E8;
+    outline: 1px solid #1A73E8;
     pointer-events: none;
 }
 
