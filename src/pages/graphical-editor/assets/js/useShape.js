@@ -128,6 +128,9 @@ export function useShape(emits, props, calculateMinTableSize) {
         if (isResizing.value && resizingHandle) {
             cancelAnimationFrame(resizingFrame);
 
+            // Вызов функции для определения минимальных размеров
+            updateMinTableDimensions();
+
             resizingFrame = requestAnimationFrame(() => {
                 const canvasScale = updateCanvasScale();
 

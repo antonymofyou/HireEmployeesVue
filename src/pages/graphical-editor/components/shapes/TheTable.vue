@@ -197,71 +197,31 @@ function recalculateSize() {
     }
 }
 
-// Функция для извлечения текста из ячейки таблицы
-function extractTextFromCell(cell) {
-  return cell.content?.map(paragraph =>
-      paragraph.content?.map(textNode => textNode.text).join('') || ''
-  ).join('\n') || '';
-}
-
-// Функция для вычисления высоты текста в зависимости от его ширины и стилей
-function getTextHeight(text, width, styles) {
-  if (!text) {
-    return 17; // Минимальная высота
-  }
-
-  const canvas = document.createElement('canvas');
-  const context = canvas.getContext('2d');
-  context.font = `${styles.fontSize || '16px'} ${styles.fontFamily || 'Arial'}`;
-
-  let lines = [];
-  let currentLine = '';
-
-  // Проходим по каждому символу в тексте
-  for (let char of text) {
-    const testLine = currentLine + char;
-    if (context.measureText(testLine).width > width && currentLine) {
-      lines.push(currentLine);
-      currentLine = char;
-    } else {
-      currentLine = testLine;
-    }
-  }
-
-  if (currentLine) lines.push(currentLine);
-  return 17 + (lines.length - 1) * 17;
-}
-
-// Функция для вычисления минимального размера таблицы
 function calculateMinTableSize() {
     const editorContentJson = editor.value.getJSON();
     const tableContentJson = editorContentJson.content?.[0]?.content;
     const amountColumnTable = tableContentJson[0].content.reduce((acc, item) => acc + (item.attrs.colspan || 1), 0);
-
-    if (!tableContentJson) {
-      return { minWidth: 0, minHeight: 0 };
-    }
+    const rows = editor.value.$node('table').querySelectorAll('tableRow');
 
     let minWidth = amountColumnTable * cellMinWidth;
-    let minHeight = tableContentJson.reduce((total, row) => {
-      const rowHeight = Math.max(...row.content.map(cell => {
-        const cellText = extractTextFromCell(cell);
-        const cellStyles = cell.attrs?.style || {};
+    let minHeight = rows.reduce((height, row) => {
+        const heightsCells = row.querySelectorAll('tableCell').map((cell) => {
+            return cell.children.reduce((acc, item) => acc += item.element.offsetHeight, 0);
+        });
 
-        return getTextHeight(cellText, cellMinWidth, cellStyles) + borderWidth.value;
-      }));
-      return total + rowHeight;
+        height += (Math.max(...heightsCells) + borderWidth.value)
+
+        return height;
     }, 0);
-
-    minWidth = minWidth + borderWidth.value;
+    
     minHeight = minHeight + borderWidth.value;
+    minWidth = minWidth + borderWidth.value;
 
     return { minWidth, minHeight };
 }
 
 watch(() => props.params.width, recalculateSize);
 
-// Todo : ref
 watch(() => props.params.borderWidth, () => {
     nextTick().then(() => {
         updateSize()
