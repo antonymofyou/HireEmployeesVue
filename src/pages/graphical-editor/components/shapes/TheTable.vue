@@ -185,15 +185,9 @@ function recalculateSize() {
         const minProp = cellMinWidth / currentWidth;
         const prop = colwidthList.map((item) => item / prevWidth).map((item) => Math.max(item, minProp));
         const sumProp = prop.reduce((acc, item) => acc += item, 0);
-        const rest = +(sumProp - 1).toPrecision(2);
-        const filteredProp = prop.filter((item) => item > minProp).sort((a,b) => a - b);
-        const step = rest / filteredProp.length;
+        const step = (+(sumProp - 1).toPrecision(2)) / (prop.filter((item) => item > minProp).length);
 
-        return prop.map((item) => {
-            const newProp = item == minProp ? item : item - step >= minProp ? item - step : (item - (item - minProp));
-
-            return newProp * currentWidth;
-        });
+        return prop.map((item) => (item - step >= minProp ? item - step : minProp) * currentWidth);
     }
 }
 
