@@ -1,7 +1,6 @@
 <template>
   <div class="button" :class="alignClass">
     <button
-      v-bind="$attrs"
       :disabled="isButtonDisabled"
       class="button__control"
     >
