@@ -89,7 +89,7 @@
     :updateStandard="updateStandardAfterCancel" 
   />
 
-  <!-- <EditStandard 
+  <EditStandard 
     v-if="editMode" 
     :closePopUp="closeEdit" 
     :closeMainPopUp="closeMainPopUp" 
@@ -97,7 +97,7 @@
     :updateStandards="updateStandards" 
     action="update" 
   />
- -->
+
 </template>
   
 <script setup>
@@ -113,7 +113,7 @@ import UserComment from '../UserComment.vue';
 import IframeContent from '../IframeContent.vue';
 import SetStandardLearned from './SetStandardLearned.vue';
 import CancelComment from './CancelComment.vue';
-// import EditStandard from './EditStandard.vue';
+import EditStandard from './EditStandard.vue';
 
 import '../TextEditor/css/editor-content.css';
 

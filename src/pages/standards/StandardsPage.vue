@@ -5,7 +5,14 @@
         <ErrorNotification v-else-if="isError" :message="errorMessage" />
         <section v-else class="standards">
             <h1 class="standards__lead">Стандарты</h1>
-            <EditProcessAccess 
+            <EditStandard 
+                v-if="isOpenCreatePopUp" 
+                :closePopUp="toggleCreatePopUp" 
+                :standardData="emptyStandardData"
+                :updateStandards="updateData" 
+                action="create" 
+            />
+            <EditProcessAccess
                 v-if="pickedProcessName" 
                 :closePopUp="() => pickedProcessName = ''" 
                 :processName="pickedProcessName"
@@ -23,7 +30,52 @@
                             :treeFormat="true"
                             :pickProcess="(processName) => pickProcess(processName)" 
                         />
+                        <AddIcon 
+                            v-if="avaliableStandards.length === 0 || avaliableStandards[0].canEdit !== '0'" 
+                            @click="toggleCreatePopUp"
+                            class="standards__create-btn" 
+                        />
                     </Card>
+                </div>
+                <div>
+                    <h2 class="standards__title">
+                        Необходимо изучить мне
+                    </h2>
+                    <Card>
+                        <p v-if="didntLearnStandards.length === 0">Нет неизученных стандартов</p>
+                        <ProcessesList 
+                            v-else 
+                            :standards="didntLearnStandards" 
+                            :updateStandards="updateData" 
+                            :treeFormat="false" 
+                        />
+                    </Card>
+                </div>
+                <div>
+                    <h2 class="standards__title">
+                        Не изучили стандарты
+                    </h2>
+                    <Card>
+                        <p v-if="usersDidntLearn.length === 0">Все пользователи изучили стандарты</p>
+                        <DidntLearnUsers
+                            v-else
+                            :users="usersDidntLearn" 
+                            :updateStandards="updateData" 
+                        />
+                    </Card>
+                </div>
+                <div v-if="learnedComments">
+                    <Accordion :defActive="true">
+                        <template v-slot:accordion-title>
+                            <h2 class="standards__title">Последние 50</h2>
+                        </template>
+                        <template v-slot:accordion-list>
+                            <LearnedComments 
+                                :comments="learnedComments" 
+                                :updateStandards="updateData" 
+                            />
+                        </template>
+                    </Accordion>
                 </div>
             </div>
         </section>
@@ -33,13 +85,18 @@
 <script setup>
 import { ref, onMounted } from 'vue';
 import { GetStandards, GetUsersDidntLearnStandard, GetLearnedComments } from './js/StandardsApiClasses';
+import AddIcon from './img/add.svg?component';
 // Components
 import TheHeader from '@/components/TheHeader.vue';
 import SpinnerMain from "@/components/SpinnerMain.vue";
 import ErrorNotification from "@/components/ErrorNotification.vue";
+import EditStandard from './components/PopUps/EditStandard.vue';
 import EditProcessAccess from './components/PopUps/EditProcessAccess.vue';
 import Card from './components/UI/Card.vue';
 import ProcessesList from './components/ProcessesList.vue';
+import DidntLearnUsers from './components/DidntLearnUsers.vue';
+import Accordion from './components/UI/Accordion.vue';
+import LearnedComments from './components/LearnedComments.vue';
 
 // Все стандарты
 const avaliableStandards = ref([]);
@@ -133,6 +190,18 @@ const handleGetLearnedComments = (successCallback) => {
     )
 }
 
+// Статус открытия модального окна создания нового стандарта
+const isOpenCreatePopUp = ref(false);
+// Изменение статуса открытия модального окна
+const toggleCreatePopUp = () => isOpenCreatePopUp.value = !isOpenCreatePopUp.value;
+// Пустая структура нового стандарта
+const emptyStandardData = {
+    name: '',
+    process: '',
+    link: '',
+    updatedAt: '',
+}
+
 // Название выбранного процесса
 const pickedProcessName = ref('');
 // Функция выбора процесса
@@ -224,8 +293,6 @@ main {
     margin: 0 0 16px;
 }
 
-/* Ref */
-
 .standards__create-btn {
   color: var(--transparent-blue);
   margin-top: 10px;
@@ -236,6 +303,8 @@ main {
 .standards__create-btn:hover {
   transform: scale(1.1);
 }
+
+/* ref */
 
 .items {
   display: flex;
