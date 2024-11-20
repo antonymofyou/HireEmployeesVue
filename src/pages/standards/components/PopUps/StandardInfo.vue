@@ -45,13 +45,13 @@
 
       <Accordion 
         v-if="commentsData.length && standardData.canEdit" 
-        :defActive="commentsListActive"
+        :initial-value="commentsListActive"
         class="popup-standard__learned-comments-list"
       >
-        <template v-slot:accordion-title>
+        <template v-slot:title>
           <h4>Как поняли изменения</h4>
         </template>
-        <template v-slot:accordion-list>
+        <template v-slot:content>
           <div class="popup-standard__comments">
             <template v-for="(comment, index) in commentsData">
               <UserComment
@@ -105,7 +105,7 @@ import { ref, computed, onMounted } from 'vue';
 import { GetStandardById, GetLearnedComments } from '../../js/StandardsApiClasses';
 import Popup from '../UI/Popup.vue';
 import ButtonCommon from '../UI/ButtonCommon.vue';
-import Accordion from '../UI/Accordion.vue';
+import Accordion from '@/components/Accordion.vue';
 import EditIcon from '../../img/edit.svg?component';
 import SpinnerMain from "@/components/SpinnerMain.vue";
 import ErrorNotification from "@/components/ErrorNotification.vue";

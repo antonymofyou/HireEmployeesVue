@@ -5,6 +5,60 @@
         <ErrorNotification v-else-if="isError" :message="errorMessage" />
         <section v-else class="standards">
             <h1 class="standards__lead">Стандарты</h1>
+            <div class="standards__list">
+                <div class="standards__item">
+                    <h2 class="standards__title">
+                        Доступные стандарты
+                    </h2>
+                    <ProcessesList 
+                        :standards="avaliableStandards" 
+                        :updateStandards="updateData" 
+                        :treeFormat="true"
+                        :pickProcess="(processName) => pickProcess(processName)" 
+                    />
+                    <AddIcon 
+                        v-if="avaliableStandards.length === 0 || avaliableStandards[0].canEdit !== '0'" 
+                        @click="toggleCreatePopUp"
+                        class="standards__create-btn" 
+                    />
+                </div>
+                <div class="standards__item">
+                    <h2 class="standards__title">
+                        Необходимо изучить мне
+                    </h2>
+                    <p v-if="didntLearnStandards.length === 0">Нет неизученных стандартов</p>
+                    <ProcessesList 
+                        v-else 
+                        :standards="didntLearnStandards" 
+                        :updateStandards="updateData" 
+                        :treeFormat="false" 
+                    />
+                </div>
+                <div class="standards__item">
+                    <h2 class="standards__title">
+                        Не изучили стандарты
+                    </h2>
+                    <p v-if="usersDidntLearn.length === 0">Все пользователи изучили стандарты</p>
+                    <DidntLearnUsers
+                        v-else
+                        :users="usersDidntLearn" 
+                        :updateStandards="updateData" 
+                    />
+                </div>
+                <div v-if="learnedComments" class="standards__item">
+                    <Accordion :initial-value="true">
+                        <template v-slot:title>
+                            <span class="standards__title">Последние 50</span>
+                        </template>
+                        <template v-slot:content>
+                            <LearnedComments 
+                                :comments="learnedComments" 
+                                :updateStandards="updateData" 
+                            />
+                        </template>
+                    </Accordion>
+                </div>
+            </div>
             <EditStandard 
                 v-if="isOpenCreatePopUp" 
                 :closePopUp="toggleCreatePopUp" 
@@ -18,85 +72,30 @@
                 :processName="pickedProcessName"
                 :updateStandards="updateData"  
             />
-            <div class="standards__list">
-                <div>
-                    <h2 class="standards__title">
-                        Доступные стандарты
-                    </h2>
-                    <Card>
-                        <ProcessesList 
-                            :standards="avaliableStandards" 
-                            :updateStandards="updateData" 
-                            :treeFormat="true"
-                            :pickProcess="(processName) => pickProcess(processName)" 
-                        />
-                        <AddIcon 
-                            v-if="avaliableStandards.length === 0 || avaliableStandards[0].canEdit !== '0'" 
-                            @click="toggleCreatePopUp"
-                            class="standards__create-btn" 
-                        />
-                    </Card>
-                </div>
-                <div>
-                    <h2 class="standards__title">
-                        Необходимо изучить мне
-                    </h2>
-                    <Card>
-                        <p v-if="didntLearnStandards.length === 0">Нет неизученных стандартов</p>
-                        <ProcessesList 
-                            v-else 
-                            :standards="didntLearnStandards" 
-                            :updateStandards="updateData" 
-                            :treeFormat="false" 
-                        />
-                    </Card>
-                </div>
-                <div>
-                    <h2 class="standards__title">
-                        Не изучили стандарты
-                    </h2>
-                    <Card>
-                        <p v-if="usersDidntLearn.length === 0">Все пользователи изучили стандарты</p>
-                        <DidntLearnUsers
-                            v-else
-                            :users="usersDidntLearn" 
-                            :updateStandards="updateData" 
-                        />
-                    </Card>
-                </div>
-                <div v-if="learnedComments">
-                    <Accordion :defActive="true">
-                        <template v-slot:accordion-title>
-                            <h2 class="standards__title">Последние 50</h2>
-                        </template>
-                        <template v-slot:accordion-list>
-                            <LearnedComments 
-                                :comments="learnedComments" 
-                                :updateStandards="updateData" 
-                            />
-                        </template>
-                    </Accordion>
-                </div>
-            </div>
         </section>
     </main>
 </template>
 
 <script setup>
 import { ref, onMounted } from 'vue';
+import { useRouter } from 'vue-router';
+import { isManager } from '@/js/AuthFunctions';
 import { GetStandards, GetUsersDidntLearnStandard, GetLearnedComments } from './js/StandardsApiClasses';
 import AddIcon from './img/add.svg?component';
-// Components
 import TheHeader from '@/components/TheHeader.vue';
 import SpinnerMain from "@/components/SpinnerMain.vue";
 import ErrorNotification from "@/components/ErrorNotification.vue";
 import EditStandard from './components/PopUps/EditStandard.vue';
 import EditProcessAccess from './components/PopUps/EditProcessAccess.vue';
-import Card from './components/UI/Card.vue';
 import ProcessesList from './components/ProcessesList.vue';
 import DidntLearnUsers from './components/DidntLearnUsers.vue';
-import Accordion from './components/UI/Accordion.vue';
+import Accordion from '@/components/Accordion.vue';
 import LearnedComments from './components/LearnedComments.vue';
+
+const router = useRouter();
+
+//Проверка авторизации пользователя
+if (!isManager()) router.push({ name: 'managerAuth' });
 
 // Все стандарты
 const avaliableStandards = ref([]);
@@ -288,50 +287,31 @@ main {
     padding: 0 20px;
 }
 
-.standards__title {
-    font-size: 16px;
+.standards__item {
+    padding: 20px;
+    border: 1px solid var(--milk);
+    border-radius: 16px;
+    width: 100%;
+    color: var(--tundora);
+}
+
+.standards__item > *:not(:last-child) {
     margin: 0 0 16px;
+}
+
+.standards__title {
+    font-size: 18px;
+    font-weight: 700;
+    color: var(--tundora);
 }
 
 .standards__create-btn {
   color: var(--transparent-blue);
-  margin-top: 10px;
   cursor: pointer;
   transition: 0.15s all;
 }
 
 .standards__create-btn:hover {
   transform: scale(1.1);
-}
-
-/* ref */
-
-.items {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 10px;
-}
-
-.item {
-  background-color: var(--dark-gray-color);
-  border: 2px solid var(--light-gray-color);
-  width: max-content;
-  padding: 8px 16px;
-  border-radius: 16px;
-  display: flex;
-  align-items: end;
-  gap: 5px;
-}
-
-.link {
-  color: var(--transparent-blue);
-  font-size: 12px;
-}
-
-.h5 {
-  font-size: 16px;
-  margin-bottom: 5px;
-  margin-top: 15px;
-  color: var(--transparent-blue);
 }
 </style>

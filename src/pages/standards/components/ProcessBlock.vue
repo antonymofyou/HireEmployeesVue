@@ -1,18 +1,38 @@
 <template>
     <div class="process">
-        <div class="process__header">
-            <span class="process__name">{{ processName }}</span>
-        </div>
-        <div class="process__standards">
-            <div v-for="standard in process" @click="() => pickStandard(standard.id)" class="process__standard-item">
-                <PageIcon class="process__standard-page-icon" width="13" height="13" />
-                <span>{{ standard.name ? standard.name : `id${standard.id}` }}</span>
-            </div>
-        </div>
+        <button
+            v-if="treeFormat && process[0].canEdit !== '0'"
+            @pointerdown="pickProcess(processName)"
+            @keydown.enter.space="pickProcess(processName)"
+            class="process__users"
+        >
+            <UserIcon class="process__user-icon" />
+        </button>
+        <Accordion 
+            :disabled="!treeFormat" 
+            :initial-value="!treeFormat"
+        >
+            <template #title>{{ processName }}</template>
+            <template #content>
+                <div class="process__list">
+                    <button 
+                        v-for="standard in process"
+                        @pointerdown="pickStandard(standard.id)"
+                        @keydown.enter.space="pickStandard(standard.id)"
+                        class="process__item"
+                    >
+                        <PageIcon class="process__page-icon" />
+                        <span>{{ standard.name ? standard.name : `id${standard.id}` }}</span>
+                    </button>
+                </div>
+            </template>
+        </Accordion>
     </div>
 </template>
   
 <script setup>
+import Accordion from '@/components/Accordion.vue';
+import UserIcon from '../img/user.svg?component';
 import PageIcon from '../img/page.svg?component';
 
 // Массив процесса (стандарты, входящие в процесс), название процесса, функция выбора стандарта
@@ -29,47 +49,81 @@ const props = defineProps({
         type: Function,
         required: true,
     },
+    pickProcess: {
+        type: Function,
+        required: false,
+        default: undefined,
+    },
+    treeFormat: {
+        type: Boolean,
+        required: false,
+        default: false,
+    }
 });
 </script>
   
 <style scoped>
-.process__header {
+
+.process {
     display: flex;
-    align-items: baseline;
-    gap: 7px;
-    word-break: break-word;
+    gap: 8px;
 }
-  
-.process__name {
-    font-size: 16px;
-    font-weight: 700;
-    color: var(--transparent-blue)
-}
-  
-.process__standards {
-    font-size: 15px;
-    display: flex;
-    flex-direction: column;
-    gap: 10px;
-  
-    margin-top: 5px;
-    padding-left: 24px;
-}
-  
-.process__standard-item {
-    display: flex;
-    gap: 5px;
+
+.process__users {
+    width: 18px;
+    height: 18px;
     cursor: pointer;
-    transition: 0.1s all;
-    line-height: 1;
-    word-break: break-word;
+    background-color: transparent;
+    outline: none;
+    border: none;
+    padding: 0;
 }
-  
-.process__standard-item:hover {
+
+.process__user-icon {
+    fill: currentColor;
+    transition: color .15s;
+}
+
+.process__users:hover {
     color: var(--transparent-blue);
 }
-  
-.process__standard-page-icon {
-    flex-shrink: 0;
+
+.process:deep(.accordion__trigger) {
+    justify-content: flex-start;
+    font-size: 16px;
+    font-weight: 700;
+    color: var(--transparent-blue);
+}
+
+.process:deep(.accordion__arrow) {
+    width: 10px;
+    height: 10px;
+    fill: var(--transparent-blue);
+}
+
+.process__list {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.process__page-icon {
+    width: 13px;
+    height: 13px;
+    margin: 0 6px 0 0;
+}
+
+.process__item {
+    cursor: pointer;
+    word-break: break-word;
+    background-color: transparent;
+    outline: none;
+    border: none;
+    text-align: start;
+    padding: 0 0 0 16px;
+}
+
+.process__item:hover {
+    color: var(--transparent-blue);
 }
 </style>

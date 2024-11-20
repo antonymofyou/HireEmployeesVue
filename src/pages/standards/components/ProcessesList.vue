@@ -1,22 +1,13 @@
 <template>
     <div class="processes">
-        <template v-if="treeFormat">
-            <ProcessTreeBlock 
-                v-for="(process, processName) in formattedStandards" 
-                :process="process" 
-                :processName="processName"
-                :pickStandard="pickStandard" 
-                :pickProcess="pickProcess" 
-            />
-        </template>
-        <template v-else>
-            <ProcessBlock 
-                v-for="(process, processName) in formattedStandards" 
-                :process="process" 
-                :processName="processName" 
-                :pickStandard="pickStandard" 
-            />
-        </template>
+        <ProcessBlock 
+            v-for="(process, processName) in formattedStandards" 
+            :process="process" 
+            :processName="processName"
+            :pickStandard="pickStandard" 
+            :pickProcess="pickProcess"
+            :treeFormat="treeFormat"
+        />
         <StandardInfo 
             v-if="pickedStandardId" 
             :id="pickedStandardId" 
@@ -28,7 +19,6 @@
   
 <script setup>
 import { ref, computed } from 'vue';
-import ProcessTreeBlock from './ProcessTreeBlock.vue';
 import ProcessBlock from './ProcessBlock.vue';
 import StandardInfo from './PopUps/StandardInfo.vue';
 
@@ -44,11 +34,13 @@ const props = defineProps({
     },
     treeFormat: {
         type: Boolean,
-        required: true,
+        required: false,
+        defaul: false,
     },
     pickProcess: {
         type: Function,
         required: false,
+        default: undefined,
     }
 });
 
