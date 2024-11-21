@@ -68,8 +68,8 @@ const props = defineProps({
 }
 
 .process__users {
-    width: 18px;
-    height: 18px;
+    width: 19px;
+    height: 19px;
     cursor: pointer;
     background-color: transparent;
     outline: none;
@@ -94,7 +94,7 @@ const props = defineProps({
 }
 
 .process:deep(.accordion__arrow) {
-    width: 10px;
+    width: 14px;
     height: 10px;
     fill: var(--transparent-blue);
 }

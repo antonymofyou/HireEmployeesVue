@@ -56,6 +56,7 @@ function toggle() {
     outline: none;
     border: none;
     cursor: pointer;
+    padding: 0;
 }
 
 .accordion__arrow {

@@ -16,7 +16,7 @@
         ({{ standardData.process }})
       </p>
       <div class="popup-standard__content">
-        <IframeContent v-if="standardData.htmlDescription" :content="standardData.htmlDescription" class="editor-content popup-standard__description" />
+        <IframeContent v-if="standardData.htmlDescription" :content="standardData.htmlDescription" class="editor-content popup-standard__description card" />
         <a v-if="standardData.link" class="popup-standard__link" :href="standardData.link" target="_blank">Ссылка</a>
         <iframe v-if="formattedLink" class="popup-standard__presentation" :src="formattedLink" frameborder="0" allowfullscreen="true" mozallowfullscreen="true" webkitallowfullscreen="true"></iframe>
       </div>
@@ -46,7 +46,7 @@
       <Accordion 
         v-if="commentsData.length && standardData.canEdit" 
         :initial-value="commentsListActive"
-        class="popup-standard__learned-comments-list"
+        class="popup-standard__learned-comments-list card"
       >
         <template v-slot:title>
           <h4>Как поняли изменения</h4>
@@ -316,7 +316,7 @@ onMounted(() => handleGetStandard())
   font-size: 11px;
 }
 
-.popup-standard__description {
+.card {
   border: 1px solid var(--link-water);
   padding: 16px;
   border-radius: 16px;
