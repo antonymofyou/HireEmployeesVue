@@ -2,8 +2,7 @@
     <div class="process">
         <button
             v-if="treeFormat && process[0].canEdit !== '0'"
-            @pointerdown="pickProcess(processName)"
-            @keydown.enter.space="pickProcess(processName)"
+            @click="pickProcess(processName)"
             class="process__users"
         >
             <UserIcon class="process__user-icon" />
@@ -17,8 +16,7 @@
                 <div class="process__list">
                     <button 
                         v-for="standard in process"
-                        @pointerdown="pickStandard(standard.id)"
-                        @keydown.enter.space="pickStandard(standard.id)"
+                        @click="pickStandard(standard.id)"
                         class="process__item"
                     >
                         <PageIcon class="process__page-icon" />

@@ -4,8 +4,7 @@
         class="accordion"
     >
         <button 
-            @pointerdown="toggle"
-            @keydown.enter.space="toggle"
+            @click="toggle"
             :aria-expanded="isActive"
             class="accordion__trigger"
         >

@@ -269,7 +269,7 @@ onMounted(() => updateData())
 
 <style scoped>
 main {
-    padding: 60px 80px;
+    padding: 60px 0 80px;
 }
 
 .loader {
