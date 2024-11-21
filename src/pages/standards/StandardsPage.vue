@@ -276,6 +276,17 @@ main {
     text-align: center;
 }
 
+.standards {
+    max-width: 80%;
+    margin: 0 auto;
+}
+
+@media (max-width: 992px) {
+    .standards {
+        max-width: 100%;
+    }
+}
+
 .standards__lead {
     text-align: center;
 }
