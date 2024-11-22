@@ -1,18 +1,21 @@
 <template>
     <div class="process">
-        <button
-            v-if="treeFormat && process[0].canEdit !== '0'"
-            @click="pickProcess(processName)"
-            class="process__users"
-        >
-            <UserIcon class="process__user-icon" />
-        </button>
         <Accordion 
             :disabled="!treeFormat" 
             :initial-value="!treeFormat"
         >
             <template #title>{{ processName }}</template>
-            <template #content>
+            <template #icon><ArrowIcon class="process__arrow-icon" /></template>
+            <template #header>
+                <button
+                    v-if="treeFormat && process[0].canEdit !== '0'"
+                    @click="pickProcess(processName)"
+                    class="process__users"
+                >
+                    <UserIcon class="process__user-icon" />
+                </button>
+            </template>
+            <template #body>
                 <div class="process__list">
                     <button 
                         v-for="standard in process"
@@ -32,6 +35,7 @@
 import Accordion from '@/components/Accordion.vue';
 import UserIcon from '../img/user.svg?component';
 import PageIcon from '../img/page.svg?component';
+import ArrowIcon from '../img/arrow.svg?component';
 
 // Массив процесса (стандарты, входящие в процесс), название процесса, функция выбора стандарта
 const props = defineProps({
@@ -86,17 +90,34 @@ const props = defineProps({
     color: var(--transparent-blue);
 }
 
+.process:deep(.accordion__header) {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
 .process:deep(.accordion__trigger) {
-    justify-content: flex-start;
+    width: auto;
+    justify-content: flex-end;
+    flex-direction: row-reverse;
     font-size: 16px;
     font-weight: 700;
     color: var(--transparent-blue);
 }
 
-.process:deep(.accordion__arrow) {
-    width: 14px;
-    height: 10px;
-    fill: var(--transparent-blue);
+.process:deep(.accordion__icon) {
+    width: 10px;
+    height: 19px;
+}
+
+.process:deep(.accordion.isActive .accordion__icon) {
+    transform: rotate(90deg);
+}
+
+.process__arrow-icon {
+    display: block;
+    width: 100%;
+    height: 100%;
 }
 
 .process__list {

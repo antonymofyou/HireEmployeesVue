@@ -51,7 +51,7 @@
         <template v-slot:title>
           <h4>Как поняли изменения</h4>
         </template>
-        <template v-slot:content>
+        <template v-slot:body>
           <div class="popup-standard__comments">
             <template v-for="(comment, index) in commentsData">
               <UserComment

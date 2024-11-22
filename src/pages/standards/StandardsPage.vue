@@ -50,7 +50,7 @@
                         <template v-slot:title>
                             <span class="standards__title">Последние 50</span>
                         </template>
-                        <template v-slot:content>
+                        <template v-slot:body>
                             <LearnedComments 
                                 :comments="learnedComments" 
                                 :updateStandards="updateData" 
