@@ -29,10 +29,15 @@ import { RouterView } from 'vue-router';
 
 }
 * {
-  font-family: Verdana, Tahoma, sans-serif;
-
+  font-family: 'Nunito', sans-serif;
+  font-weight: 300;
   box-sizing: border-box;
 }
+
+h1, h2, h3, h4, h5, h6, b, strong{
+  font-weight: 700
+}
+
 body {
   margin: 0;
 }
@@ -42,7 +47,6 @@ main {
 }
 
 h1 {
-  font-weight: 400;
   font-size: 22px;
 }
 

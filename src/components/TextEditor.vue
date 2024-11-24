@@ -174,7 +174,6 @@ const editor = useEditor({
   border-radius: 10px;
   outline: 1px solid var(--light-gray);
   padding: 10px;
-  font-family: Arial, sans-serif;
   cursor: text;
 }
 
@@ -218,7 +217,6 @@ const editor = useEditor({
   border-radius: 0.5rem;
   border: none;
   color: var(--shark);
-  font-family: inherit;
   font-size: .875rem;
   font-weight: 500;
   line-height: 1.15;

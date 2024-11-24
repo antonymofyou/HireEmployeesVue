@@ -60,7 +60,6 @@ const buttonClass = computed(() => ({
 .button-main {
   position: relative;
   font-size: 14px;
-  font-family: inherit;
   font-weight: bold;
 
   display: flex;

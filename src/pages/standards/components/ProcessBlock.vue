@@ -4,7 +4,7 @@
             :disabled="!treeFormat" 
             :initial-value="!treeFormat"
         >
-            <template #title>{{ processName }}</template>
+            <template #title><span class="process__name">{{ processName }}</span></template>
             <template #icon><ArrowIcon class="process__arrow-icon" /></template>
             <template #header>
                 <button
@@ -118,6 +118,10 @@ const props = defineProps({
     display: block;
     width: 100%;
     height: 100%;
+}
+
+.process__name {
+    font-weight: 700;
 }
 
 .process__list {
