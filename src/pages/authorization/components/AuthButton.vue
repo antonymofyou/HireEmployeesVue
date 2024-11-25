@@ -63,7 +63,6 @@
 
 .VkIdWebSdk__button_text {
     display: flex;
-    font-family: -apple-system, system-ui, "Helvetica Neue", Roboto, sans-serif;
     flex: 1;
     justify-content: center;
     color: var(--white);
