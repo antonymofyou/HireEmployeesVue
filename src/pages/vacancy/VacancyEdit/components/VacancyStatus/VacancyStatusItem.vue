@@ -287,6 +287,7 @@ onUnmounted(() => {
 
 .statuslist__list-items {
   display: flex;
+  flex-wrap: wrap;
   gap: 10px;
   align-items: center;
   user-select: none;
@@ -333,6 +334,7 @@ onUnmounted(() => {
 }
 .statuslist__list-transfers {
   display: flex;
+  flex-wrap: wrap;
   gap: 5px;
   cursor: pointer;
 }
