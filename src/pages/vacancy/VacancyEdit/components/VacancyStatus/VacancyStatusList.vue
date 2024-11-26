@@ -129,7 +129,7 @@ const onVacancyStatusItemUpdate = (status) => {
 .statuslist__list-box {
   display: flex;
   flex-direction: column;
-  gap: 5px;
+  gap: 10px;
 }
 .drag-over {
   visibility: hidden;
