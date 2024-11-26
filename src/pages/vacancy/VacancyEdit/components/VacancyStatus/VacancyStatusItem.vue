@@ -372,7 +372,7 @@ onBeforeUnmount(() => {
   min-height: 25px;
   color: white;
   border-radius: 10px;
-  padding: 5px 12px;
+  padding: 7px 14px;
   cursor: pointer;
 }
 
