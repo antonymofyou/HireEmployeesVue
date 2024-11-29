@@ -1,126 +1,132 @@
 <template>
-  <div class="statuslist__list-items">
-    <div
-        class="statuslist__list-status"
-        :ref="`status-${status.statusName}`"
-        @click="toggleStatus(status, 'handlers')"
-    >
+  <div class="statuslist__wrapper">
     <div class="status-item__arrows">
-      <button @click.stop="moveStatus('up')" :disabled="isFirst" class="arrow top" :class="{ 'disabled-class': isFirst }">
-      </button>
-      <button @click.stop="moveStatus('down')" :disabled="isLast" class="arrow bottom" :class="{ 'disabled-class': isLast }">
-      </button>
-    </div>
-      <div class="status-container" :style="{ backgroundColor: status.statusColor }">
-        <StatusColored
-            :statusText="status.statusName"
-            :statusColor="status.statusColor"
-            class="status-colored-full-width"
-        />
-        <ButtonIcon
-          class="statuslist__list-btn"
-          @click="onEditButtonClick"
-        >
-          <template v-slot:icon
-          ><IconEdit
-              :class="getIconClass(status, 'edit')"
-          /></template>
-        </ButtonIcon>
-        <ButtonIcon
-            class="statuslist__list-btn"
-            @click="handleModification(status.statusName, 'delete')"
-        >
-          <template v-slot:icon
-          ><IconDelete
-              :class="getIconClass(status, 'delete')"
-          /></template>
-        </ButtonIcon>
-        <div
-            class="statuslist__list-comment-tooltip"
-        >
-          {{ status.statusComment || 'Нет комментария' }}
-        </div>
-      </div>
-    </div>
-    <div v-if="statusList.transferStatuses[status.statusName].length">
-      <IconArrowSharp class="statuslist__list-arrow" />
-    </div>
-    <div
-        v-if="statusList.transferStatuses[status.statusName].length"
-        class="statuslist__list-transfers"
-        :ref="`transfers-${status.statusName}`"
-    >
-      <div
-          class="statuslist__list-transfers-box"
-          v-for="transfer in statusList.transferStatuses[status.statusName]"
-          :key="transfer"
+      <button 
+        @click.stop="moveStatus('up')" 
+        :disabled="isFirst" 
+        :class="{ 'disabled-class': isFirst }"
+        class="arrow top"
       >
-        <div
-            class="statuslist__list-transfers-item"
-            :style="{
-                backgroundColor: statusList.statuses.find(
-                  (s) => s.statusName === transfer
-                ).statusColor,
-              }"
-            @click="() => { toggleStatus(status, 'transfer'); setActiveTransfer(status.statusName, transfer); }"
+      </button>
+      <button 
+        @click.stop="moveStatus('down')" 
+        :disabled="isLast"
+        :class="{ 'disabled-class': isLast }"
+        class="arrow bottom"
+      >
+      </button>
+    </div>
+    <div class="statuslist__list-items">
+      <div
+          @click="toggleStatus(status, 'handlers')"
+          :style="{ backgroundColor: status.statusColor }"
+          class="statuslist-element status-container"
         >
           <StatusColored
-              :statusText="transfer"
-              :statusColor="statusList.statuses.find((s) => s.statusName === transfer).statusColor"
+              :statusText="status.statusName"
+              :statusColor="status.statusColor"
               class="status-colored-full-width"
           />
           <ButtonIcon
-              v-if="statusMod.activeTransfer === transfer && statusMod.name === status.statusName"
+            class="statuslist__list-btn"
+            @click="onEditButtonClick"
+          >
+            <template v-slot:icon
+            ><IconEdit
+                :class="getIconClass(status, 'edit')"
+            /></template>
+          </ButtonIcon>
+          <ButtonIcon
               class="statuslist__list-btn"
-              @click="
-                  handleModification(
-                    status.statusName,
-                    'delete',
-                    true,
-                    transfer
-                  )
-                "
+              @click="handleModification(status.statusName, 'delete')"
           >
             <template v-slot:icon
             ><IconDelete
-                :class="getIconClass(status, 'transfer')"
+                :class="getIconClass(status, 'delete')"
             /></template>
           </ButtonIcon>
-        </div>
+          <div
+              class="statuslist__list-comment-tooltip"
+          >
+            {{ status.statusComment || 'Нет комментария' }}
+          </div>
       </div>
+      <div v-if="statusList.transferStatuses[status.statusName].length">
+        <IconArrowSharp class="statuslist__list-arrow" />
+      </div>
+      <template v-if="statusList.transferStatuses[status.statusName].length">
+        <div
+            class="statuslist-element statuslist__list-transfers-box"
+            v-for="transfer in statusList.transferStatuses[status.statusName]"
+            :key="transfer"
+        >
+          <div
+              class="statuslist__list-transfers-item"
+              :style="{
+                  backgroundColor: statusList.statuses.find(
+                    (s) => s.statusName === transfer
+                  ).statusColor,
+                }"
+              @click="() => { toggleStatus(status, 'transfer'); setActiveTransfer(status.statusName, transfer); }"
+          >
+            <StatusColored
+                :statusText="transfer"
+                :statusColor="statusList.statuses.find((s) => s.statusName === transfer).statusColor"
+                class="status-colored-full-width"
+            />
+            <ButtonIcon
+                v-if="statusMod.activeTransfer === transfer && statusMod.name === status.statusName"
+                class="statuslist__list-btn"
+                @click="
+                    handleModification(
+                      status.statusName,
+                      'delete',
+                      true,
+                      transfer
+                    )
+                  "
+            >
+              <template v-slot:icon
+              ><IconDelete
+                  :class="getIconClass(status, 'transfer')"
+              /></template>
+            </ButtonIcon>
+          </div>
+        </div>
+      </template>
+      <ButtonIcon
+          class="statuslist__list-btn"
+          @click="
+            handleStatusClick(status)
+            "
+      >
+        <template v-slot:icon
+        ><IconAdd class="statuslist__list-icon"
+        /></template>
+      </ButtonIcon>
+      <SelectMain
+          v-if="indicators.isTransfer && statusMod.name === status.statusName"
+          class="statuslist__list-select"
+          v-model="statusMod.toName"
+          :options="
+              statusList.statusesSelect.filter(
+                (el) =>
+                  el.id !== status.statusName &&
+                  statusList.transferStatuses[status.statusName].indexOf(
+                    el.id
+                  ) === -1
+              )
+            "
+          @update:model-value="
+              handleModification(status.statusName, 'create', true)
+            "
+      />
     </div>
-    <ButtonIcon
-        class="statuslist__list-btn"
-        @click="
-           handleStatusClick(status)
-          "
-    >
-      <template v-slot:icon
-      ><IconAdd class="statuslist__list-icon"
-      /></template>
-    </ButtonIcon>
-    <SelectMain
-        v-if="indicators.isTransfer && statusMod.name === status.statusName"
-        class="statuslist__list-select"
-        v-model="statusMod.toName"
-        :options="
-            statusList.statusesSelect.filter(
-              (el) =>
-                el.id !== status.statusName &&
-                statusList.transferStatuses[status.statusName].indexOf(
-                  el.id
-                ) === -1
-            )
-          "
-        @update:model-value="
-            handleModification(status.statusName, 'create', true)
-          "
-    />
   </div>
 </template>
 
 <script setup>
-import { ref, onMounted, onUnmounted, computed } from 'vue';
+import { onMounted, onBeforeUnmount, computed } from 'vue';
 import ButtonIcon from '@/components/ButtonIcon.vue';
 import StatusColored from '@/components/StatusColored.vue';
 import IconEdit from '@/assets/icons/edit.svg?component';
@@ -168,9 +174,6 @@ const props = defineProps({
 });
 const emit = defineEmits(['startUpdate']);
 
-const statusRefs = ref({});
-const transferRefs = ref({});
-
 /**
  * Обработка клика по кнопке изменения статуса
  */
@@ -205,22 +208,6 @@ const toggleStatus = (status, type) => {
     }
   }
   props.statusMod.name = status.statusName;
-  updateRefs();
-  document.addEventListener('click', handleOutsideClick);
-};
-// Обрабатывает клики вне области статусов и трансферов.
-const handleOutsideClick = (event) => {
-  const isClickOutside = (element) => element && !element.contains(event.target);
-
-  const allStatusClickedOutside = Object.values(statusRefs.value).every(isClickOutside);
-  const allTransferClickedOutside = Object.values(transferRefs.value).every(isClickOutside);
-
-  if (allStatusClickedOutside && allTransferClickedOutside) {
-    props.indicators.activeHandlers = false;
-    props.indicators.activeTransfer = false;
-    props.statusMod.activeTransfer = '';
-    document.removeEventListener('click', handleOutsideClick);
-  }
 };
 // Обрабатывает клики по статусу, переключая отображение трансферов.
 const handleStatusClick = (status) => {
@@ -230,8 +217,6 @@ const handleStatusClick = (status) => {
     props.indicators.isTransfer = !props.indicators.isTransfer;
     props.statusMod.name = status.statusName;
     props.statusMod.activeTransfer = '';
-    updateRefs();
-    document.addEventListener('click', handleOutsideClick);
   }
 };
 
@@ -253,29 +238,41 @@ const setActiveTransfer = (statusName, transfer) => {
   props.statusMod.name = statusName;
   props.statusMod.activeTransfer = transfer;
 };
-// Обновляет ссылки на элементы статусов и трансферов в DOM.
-const updateRefs = () => {
-  statusRefs.value = Object.fromEntries(
-      Array.from(document.querySelectorAll('.statuslist__list-status'))
-          .map(el => [el.querySelector('.status-container').innerText.trim(), el])
-  );
 
-  transferRefs.value = Object.fromEntries(
-      Array.from(document.querySelectorAll('.statuslist__list-transfers'))
-          .map(el => [el.parentElement.querySelector('.status-container').innerText.trim(), el])
-  );
-};
+let selectedElement = undefined;
+
+const outsideClickHandler = (event = undefined) => {
+  if (!event || !event.target) return;
+
+  const element = event.target.closest('.statuslist-element');
+
+  if ((!element && selectedElement) || (selectedElement == element)) {
+    props.indicators.activeHandlers = false;
+    props.indicators.activeTransfer = false;
+    props.statusMod.activeTransfer = '';
+    selectedElement = undefined;
+
+    return;
+  };
+
+  selectedElement = element;
+}
 
 onMounted(() => {
-  updateRefs();
+  document.addEventListener('click', outsideClickHandler);
+})
+
+onBeforeUnmount(() => {
+  document.removeEventListener('click', outsideClickHandler);
 });
 
-onUnmounted(() => {
-  document.removeEventListener('click', handleOutsideClick);
-});
 </script>
 
 <style scoped>
+
+.statuslist__wrapper {
+  display: flex;
+}
 
 .statuslist__list-arrow {
   height: fit-content;
@@ -286,16 +283,12 @@ onUnmounted(() => {
 }
 
 .statuslist__list-items {
+  flex-grow: 1;
   display: flex;
   flex-wrap: wrap;
   gap: 10px;
   align-items: center;
   user-select: none;
-}
-
-.statuslist__list-status {
-  display: flex;
-  cursor: pointer;
 }
 
 .arrow{
@@ -332,24 +325,11 @@ onUnmounted(() => {
   flex-direction: column;
   margin: 6px 10px;
 }
-.statuslist__list-transfers {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 5px;
-  cursor: pointer;
-}
 
 .statuslist__list-transfers-box {
   display: flex;
   align-items: end;
-
-  &::after {
-    content: ',';
-  }
-
-  &:last-child::after {
-    content: '';
-  }
+  cursor: pointer;
 }
 
 .statuslist__list-transfers-item {
@@ -385,19 +365,15 @@ onUnmounted(() => {
   font-size: 12px;
 }
 
-.status-container:hover .statuslist__list-comment-tooltip {
-  /*visibility: visible;*/
-}
-
 .status-container {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  width: 100%;
   min-height: 25px;
   color: white;
   border-radius: 10px;
-  padding: 5px 12px;
+  padding: 7px 14px;
+  cursor: pointer;
 }
 
 .statuslist__list-btn {
