@@ -4,7 +4,7 @@
   <section class="schedule-section">
     <div class="schedule-section__header">
       <h1 class="schedule-section__title">
-        График работы сотрудника
+        Мой график работы
       </h1>
     </div>
 
