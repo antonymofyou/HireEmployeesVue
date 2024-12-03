@@ -25,7 +25,7 @@
 }
 
 .editor-content blockquote {
-  border-left: 4px solid var(--light-gray);
+  border-left: 4px solid var(--transparent-blue);
   padding-left: 10px;
   color: var(--tundora);
   margin-left: 0;
@@ -61,7 +61,7 @@
 }
 
 .editor-content td, .editor-content th {
-  border: 2px solid var(--cinnabar);
+  border: 2px solid var(--mine-shaft);
   box-sizing: border-box;
   min-width: 1em;
   padding: 3px 5px;

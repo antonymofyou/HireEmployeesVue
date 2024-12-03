@@ -101,7 +101,6 @@ const resetColor = () => {
     padding: 4px;
     background: none;
     border: none;
-    color: var(--tundora);
     cursor: pointer;
     transition: all .15s ease-in-out;
     margin-top: 2px;

@@ -120,15 +120,13 @@ const actionNames = {
   padding: 4px;
   background: none;
   border: none;
-  color: var(--tundora);
   margin: 0;
   cursor: pointer;
   transition: all .15s ease-in-out;
 }
 
 .table-button:hover {
-  background: var(--light-gray);
-  color: var(--shark);
+  background: var(--milk);
 }
 
 .table-menu {
@@ -156,6 +154,6 @@ const actionNames = {
 }
 
 .table-menu-btn:hover {
-  background-color: var(--tundora);
+  background-color: var(--milk);
 }
 </style>

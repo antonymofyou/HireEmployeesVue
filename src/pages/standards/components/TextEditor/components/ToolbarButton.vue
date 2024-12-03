@@ -38,7 +38,6 @@ const props = defineProps({
   padding: 4px;
   background: none;
   border: none;
-  color: var(--tundora);
   margin: 0;
   cursor: pointer;
   transition: all .15s ease-in-out;
@@ -50,12 +49,10 @@ const props = defineProps({
 }
 
 .toolbar-button:not([disabled]):hover {
-  background: var(--light-gray);
-  color: var(--shark);
+  background: var(--milk);
 }
 
 .toolbar-button--active {
   background: var(--milk);
-  color: var(--shark);
 }
 </style>

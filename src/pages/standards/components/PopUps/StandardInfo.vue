@@ -295,7 +295,6 @@ onMounted(() => handleGetStandard())
 }
 
 .popup-standard__subtitle {
-  color: var(--tundora);
   text-align: center;
 }
 
@@ -312,12 +311,11 @@ onMounted(() => handleGetStandard())
 }
 
 .popup-standard__id {
-  color: var(--tundora);
   font-size: 11px;
 }
 
 .card {
-  border: 1px solid var(--link-water);
+  border: 1px solid var(--milk);
   padding: 16px;
   border-radius: 16px;
 }

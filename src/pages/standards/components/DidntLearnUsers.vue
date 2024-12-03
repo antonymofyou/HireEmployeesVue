@@ -82,7 +82,6 @@ const pickStandard = (id) => pickedStandardId.value = id;
   
   .didnt-learn-users-standard__id {
     font-size: 11px;
-    color: var(--tundora);
     margin-left: 3px;
   }
   
@@ -108,7 +107,7 @@ const pickStandard = (id) => pickedStandardId.value = id;
   .didnt-learn-users-standard__user {
     width: max-content;
     padding: 4px 16px;
-    border: 2px solid var(--light-violet);
+    border: 2px solid var(--transparent-blue);
     border-radius: 16px;
     display: flex;
     align-items: center;

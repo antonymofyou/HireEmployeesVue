@@ -303,7 +303,6 @@ main {
     border: 1px solid var(--milk);
     border-radius: 16px;
     width: 100%;
-    color: var(--tundora);
 }
 
 .standards__item > *:not(:last-child) {
@@ -313,7 +312,6 @@ main {
 .standards__title {
     font-size: 18px;
     font-weight: 700;
-    color: var(--tundora);
 }
 
 .standards__create-btn {
