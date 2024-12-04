@@ -4,10 +4,10 @@
       <p class="link-popup__title">Редактирование ссылки</p>
       <input v-model="linkLocal" placeholder="Ссылка..." class="link-popup__input" />
       <div class="link-popup__controls">
-        <ButtonCommon buttonColor="var(--cinnabar)" hoverColor="var(--your-pink)" @click="removeLink">
+        <ButtonCommon buttonColor="var(--cinnabar)" hoverColor="var(--error-color)" @click="removeLink">
           <template v-slot:text>Удалить</template>
         </ButtonCommon>
-        <ButtonCommon buttonColor="var(--ronchi)" hoverColor="var(--apple)" @click="saveLink">
+        <ButtonCommon buttonColor="var(--success-color)" hoverColor="var(--apple)" @click="saveLink">
           <template v-slot:text>Сохранить</template>
         </ButtonCommon>
       </div>
@@ -86,14 +86,9 @@ const removeLink = () => {
   width: 100%;
   border-radius: 16px;
   padding: 16px 20px;
-  border: 1px solid var(--light-violet);
+  border: 1px solid var(--transparent-blue);
   background-color: var(--white);
   font-size: 16px;
-  color: var(--mine-shaft);
-}
-
-.link-popup__input::placeholder {
-  color: var(--trundora);
 }
 
 .link-popup__input:focus {

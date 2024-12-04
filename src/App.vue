@@ -16,6 +16,7 @@ import { RouterView } from 'vue-router';
   --transparent-blue: #0000fc99;
   --light-violet: #8d6dd7;
   --cornflower-blue: #6666fd;
+  --cornflower-blue-opacity-08: rgba(102, 102, 253, 0.8);
   --cinnabar: #e94141;
   --link-water: #ece9f9;
   --apple: #49bf49;

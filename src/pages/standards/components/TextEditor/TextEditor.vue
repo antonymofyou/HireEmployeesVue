@@ -252,7 +252,7 @@ onBeforeUnmount(() => {
 <style scoped>
 .text-editor__container {
   border: 0;
-  outline: 1px solid var(--light-violet);
+  outline: 1px solid var(--transparent-blue);
   border-radius: 16px;
   padding: 10px;
   cursor: text;
@@ -279,7 +279,7 @@ onBeforeUnmount(() => {
 }
 
 .text-editor__container:deep(iframe) {
-  border: 1px solid var(--light-violet);
+  border: 1px solid var(--transparent-blue);
   border-radius: 16px;
   padding: 10px;
 }

@@ -44,6 +44,8 @@ const updateIframeContent = () => {
         --cinnabar: #e94141;
         --tundora: #4e4b4b;
         --light-gray: #d4d4d4;
+        --transparent-blue: #0000fc99;
+        --mine-shaft: #212121;
       }
     `;
   const content = props.content.replace(/<code[^>]*>/g, '').replace(/<\/code>/g, '');

@@ -2,7 +2,7 @@
     <Popup :visibleClBtn="true" @clPopup="closePopUp" class="remove-standard-popup">
       <p class="remove-standard-popup__title">Вы уверены, что хотите удалить стандарт?</p>
       <div class="remove-standard-popup__btn">
-        <ButtonCommon buttonColor="var(--cinnabar)" hoverColor="var(--your-pink)" :isActive="isActiveRemove" @click="removeStandard">
+        <ButtonCommon buttonColor="var(--cinnabar)" hoverColor="var(--error-color)" :isActive="isActiveRemove" @click="removeStandard">
           <template v-slot:text>Удалить</template>
         </ButtonCommon>
         <ButtonFeedback :success="successRemove" :message="messageRemove" />

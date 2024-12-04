@@ -93,7 +93,6 @@ const formattedDate = computed(() => {
 
 .comment__standard-id {
   font-size: 10px;
-  color: var(--tundora);
   margin-left: 5px;
 }
 
@@ -104,7 +103,6 @@ const formattedDate = computed(() => {
 
 .comment__date {
   font-size: 11px;
-  color: var(--tundora);
 }
 
 .comment__text {

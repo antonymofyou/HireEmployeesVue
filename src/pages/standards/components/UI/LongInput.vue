@@ -30,9 +30,8 @@ export default {
 .input {
     padding: 20px;
     border-radius: 16px;
-    border: 1px solid var(--light-violet);
+    border: 1px solid var(--transparent-blue);
     background-color: var(--white);
-    color: var(--shark);
     font-size: 16px;
     font-weight: 400;
     min-height: 107px;
@@ -42,7 +41,6 @@ export default {
 .input::placeholder {
     font-size: 16px;
     font-weight: 400;
-    color: var(--nobel);
 }
 
 .input:focus {

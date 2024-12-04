@@ -30,12 +30,12 @@ const props = defineProps({
   },
   buttonColor: {
     type: String,
-    default: 'var(--transparent-blue)',
+    default: 'var(--cornflower-blue)',
     required: false,
   },
   hoverColor: {
     type: String,
-    default: 'var(--light-violet)',
+    default: 'var(--cornflower-blue-opacity-08)',
     required: false,
   },
   textColor: {
