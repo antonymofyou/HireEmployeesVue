@@ -2,7 +2,7 @@
     <Popup :visibleClBtn="true" @clPopup="closePopUp" class="cancel-comment-popup">
         <p class="cancel-comment-popup__title">Отменить изучение стандарта?</p>
         <div class="cancel-comment-popup__btn">
-            <ButtonCommon buttonColor="var(--cinnabar)" hoverColor="var(--your-pink)" :isActive="isActiveCancel" @click="cancelComment">
+            <ButtonCommon buttonColor="var(--cinnabar)" hoverColor="var(--error-color)" :isActive="isActiveCancel" @click="cancelComment">
                 <template v-slot:text>Отменить</template>
             </ButtonCommon>
             <ButtonFeedback :success="successCancel" :message="messageCancel" />

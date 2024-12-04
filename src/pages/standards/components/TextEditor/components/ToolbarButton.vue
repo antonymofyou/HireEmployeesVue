@@ -38,7 +38,6 @@ const activeClass = computed(() => {
   padding: 4px;
   background: none;
   border: none;
-  color: var(--tundora);
   margin: 0;
   cursor: pointer;
   transition: all .15s ease-in-out;

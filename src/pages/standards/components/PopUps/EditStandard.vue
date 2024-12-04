@@ -288,7 +288,6 @@ onMounted(() => getProcesses());
 }
 
 .popup-edit-standard__id {
-    color: var(--tundora);
     font-size: 11px;
 }
 
@@ -316,7 +315,7 @@ onMounted(() => getProcesses());
 }
 
 .edit-standard__set-current-date:hover {
-    color: var(--primary-light);
+    color: var(--apple);
 }
 
 .edit-standard__label {
@@ -363,11 +362,10 @@ input[type="datetime-local"]::after {
     border-radius: 16px;
     padding: 12px 16px;
     width: 100%;
-    border: 1px solid var(--light-violet);
+    border: 1px solid var(--transparent-blue);
     background-color: var(--white);
     font-size: 16px;
     font-weight: 400;
-    color: var(--mine-shaft);
 }
 
 .edit-standard__input:focus {

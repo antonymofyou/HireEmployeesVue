@@ -52,7 +52,7 @@ watch(selectedAccess, (newValue) => {
     font-size: 14px;
     width: max-content;
     padding: 4px 16px;
-    border: 2px solid var(--light-violet);
+    border: 2px solid var(--transparent-blue);
     border-radius: 16px;
 
     display: flex;

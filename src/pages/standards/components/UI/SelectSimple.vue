@@ -136,7 +136,6 @@ const vClickOutside = {
 }
 
 .options-container-main {
-    color: var(--mine-shaft);
     min-width: fit-content;
 
     transition: all 0.4s;
@@ -233,7 +232,7 @@ const vClickOutside = {
 }
 
 .option-main:hover {
-    background-color: var(--link-water);
+    background-color: var(--black-squeeze);
 }
 
 .option-main label {
