@@ -4,7 +4,7 @@ export default function CustomCell(instance) {
           return {
             ...this.parent?.(),
             backgroundColor: {
-              default: null,
+              default: 'transparent',
               parseHTML: (element) => element.getAttribute('background-color'),
               renderHTML: (attributes) => {
                 return {
@@ -14,7 +14,7 @@ export default function CustomCell(instance) {
               }
             },
             borderColor: {
-              default: null,
+              default: '#212121',
               parseHTML: (element) => element.getAttribute('border-color'),
               renderHTML: (attributes) => {
                 return {

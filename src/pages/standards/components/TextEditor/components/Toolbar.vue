@@ -83,7 +83,7 @@
     <ColorPicker
       v-show="button.borderColor.show"
       :color="button.borderColor.active.value"
-      @reset-color="button.borderColor.handler(defaultColor)"
+      @reset-color="button.borderColor.handler"
       @update:color="button.borderColor.handler"
       title="Цвет границ"
     >
@@ -94,7 +94,7 @@
     <ColorPicker
       v-show="button.backgroundTable.show"
       :color="button.backgroundTable.active.value"
-      @reset-color="button.backgroundTable.handler(defaultColor)"
+      @reset-color="button.backgroundTable.handler"
       @update:color="button.backgroundTable.handler"
       title="Заливка таблицы"
     >
@@ -408,7 +408,7 @@ const button = computed(() => {
       show: !props.isCode,
     },
     backgroundTable: {
-      handler: (color) => {
+      handler: (color = 'transparent') => {
         editor.value.chain().focus().setCellAttribute('backgroundColor', color).run();
       },
       active: computed(() => {
@@ -416,7 +416,7 @@ const button = computed(() => {
           editor.value.getAttributes('tableCell').backgroundColor || 
           editor.value.getAttributes('tableHeader').backgroundColor;
 
-        if (backgroundColor) {
+        if (backgroundColor && backgroundColor !== 'transparent') {
           return backgroundColor.startsWith('rgb(') ? rgbToHex(backgroundColor) : backgroundColor;
         }
 
@@ -425,7 +425,7 @@ const button = computed(() => {
       show: !props.isCode && editor.value.isActive('table'),
     },
     borderColor: {
-      handler: (color) => {
+      handler: (color = 'transparent') => {
         editor.value.chain().focus().setCellAttribute('borderColor', color).run();
       },
       active: computed(() => {
@@ -433,7 +433,7 @@ const button = computed(() => {
           editor.value.getAttributes('tableCell').borderColor || 
           editor.value.getAttributes('tableHeader').borderColor;
 
-        if (borderColor) {
+        if (borderColor && borderColor !== 'transparent') {
           return borderColor.startsWith('rgb(') ? rgbToHex(borderColor) : borderColor;
         }
 
