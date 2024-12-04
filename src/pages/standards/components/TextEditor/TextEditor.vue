@@ -29,6 +29,8 @@ import TextStyle from '@tiptap/extension-text-style';
 import Color from '@tiptap/extension-color';
 import FontSize from 'tiptap-extension-font-size';
 import IframeNode from './extensions/IframeNode';
+import TextAlign from '@tiptap/extension-text-align';
+import CustomCell from './extensions/CustomCell';
 
 import './css/editor-content.css';
 import editorStyles from './css/editor-content.css?inline';
@@ -131,15 +133,18 @@ const editor = useEditor({
       }),
     Table.configure({
       resizable: true,
-      cellMinWidth: 75,
+      cellMinWidth: 25,
     }),
     TableRow,
-    TableHeader,
-    TableCell,
+    CustomCell(TableHeader),
+    CustomCell(TableCell),
     TextStyle,
     Color,
     FontSize,
     IframeNode,
+    TextAlign.configure({
+      types: ['paragraph'],
+    }),
   ],
   editorProps: {
     attributes: {
