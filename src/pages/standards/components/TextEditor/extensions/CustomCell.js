@@ -14,7 +14,7 @@ export default function CustomCell(instance) {
               }
             },
             borderColor: {
-              default: '#212121',
+              default: 'inherit',
               parseHTML: (element) => element.getAttribute('border-color'),
               renderHTML: (attributes) => {
                 return {

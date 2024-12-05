@@ -425,7 +425,7 @@ const button = computed(() => {
       show: !props.isCode && editor.value.isActive('table'),
     },
     borderColor: {
-      handler: (color = 'transparent') => {
+      handler: (color) => {
         editor.value.chain().focus().setCellAttribute('borderColor', color).run();
       },
       active: computed(() => {
@@ -433,7 +433,7 @@ const button = computed(() => {
           editor.value.getAttributes('tableCell').borderColor || 
           editor.value.getAttributes('tableHeader').borderColor;
 
-        if (borderColor && borderColor !== 'transparent') {
+        if (borderColor) {
           return borderColor.startsWith('rgb(') ? rgbToHex(borderColor) : borderColor;
         }
 
