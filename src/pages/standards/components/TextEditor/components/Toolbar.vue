@@ -83,7 +83,7 @@
     <ColorPicker
       v-show="button.borderColor.show"
       :color="button.borderColor.active.value"
-      @reset-color="button.borderColor.handler"
+      @reset-color="button.borderColor.handler(defaultColor)"
       @update:color="button.borderColor.handler"
       title="Цвет границ"
     >
