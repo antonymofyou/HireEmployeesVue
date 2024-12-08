@@ -4,7 +4,7 @@
             <h4 class="didnt-learn-users-standard__title" @click="() => pickStandard(standardId)">
                 <PageIcon class="didnt-learn-users-standard__page-icon" width="13" height="13" />
                 {{ standardsData[standardId].name }}
-                <small>({{ standardsData[standardId].updatedAt }})</small>
+                <small>(изм. {{ standardsData[standardId].updatedAt }})</small>
                 <span v-if="standardsData[standardId].process" class="didnt-learn-users-standard__process">
                     ({{ standardsData[standardId].process }})
                 </span>
@@ -49,11 +49,11 @@ const props = defineProps({
 const formatDate = (date) => {
   return new Date(date).toLocaleString('ru', {
     year: 'numeric',
-    month: 'long',
+    month: 'numeric',
     day: 'numeric',
     hour: '2-digit',
     minute: '2-digit',
-  });
+  }).replace(',', '');
 }
 
 // Данные стандартов
