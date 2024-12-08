@@ -75,11 +75,19 @@
         https://vk.com/id{{ formData.userVkId }}
       </a>
       <div
-        v-if="vkErrorMessage != undefined"
+        v-if="vkErrorMessage"
         class="employees-edit__errorMessage"
       >
         {{ vkErrorMessage }}
       </div>
+      <InputSimple
+        v-model="formData.tgNickname"
+        id="tgNickname"
+        labelName="TG никнейм сотрудника"
+        inputType="input"
+        :isLabelBold="true"
+        :isTextBold="true"
+      />
       <div>
         <h1 class="employee-edit__SelectlabelName">Роль сотрудника:</h1>
         <SelectMain v-model="formData.type" :options="SelectOptions" />
@@ -173,6 +181,7 @@ const formData = ref({
   type: "",
   userVkId: "",
   managerId: "",
+  tgNickname: "",
 });
 
 const handleVkId = ref({
@@ -193,6 +202,7 @@ onMounted(() => {
           managerId: employee.managerId,
           type:
             SelectOptions.find((item) => item.name === employee.type)?.id || "",
+          tgNickname: employee.tgNickname,
         };
         handleVkId.value.userVklink = `https://vk.com/id${formData.value.userVkId}`;
       });
@@ -224,6 +234,7 @@ const fillManagerData = () => {
       userVkId: formData.value.userVkId, // Из formData
       type: roleName.name, // id из найденного объекта
       name: formData.value.name, // Из formData
+      tgNickname: formData.value.tgNickname.replace(/@/g, ''), // Из formData
     };
     return result;
   } else {

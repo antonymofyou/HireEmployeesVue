@@ -89,6 +89,14 @@
         <div v-if="errorMessage != undefined" class="employees__errorMessage">
           {{ errorMessage }}
         </div>
+        <InputSimple
+          v-model="formData.tgNickname"
+          id="tgNickname"
+          labelName="TG никнейм сотрудника"
+          inputType="input"
+          :isLabelBold="true"
+          :isTextBold="true"
+        />
         <h1 class="employees__SelectlabelName">Роль сотрудника:</h1>
         <SelectMain v-model="formData.type" :options="SelectOptions" />
       </template>
@@ -156,11 +164,12 @@ const navigateToEdit = (createdEmployeeId) => {
   });
 };
 
-// Данные Сотрудника: Имя, роль, id VK
+// Данные Сотрудника: Имя, роль, id VK, id TG
 const formData = ref({
   name: "",
   type: "",
   userVklink: "",
+  tgNickname: "",
 });
 
 const handleVkId = ref({
@@ -186,6 +195,7 @@ const fillManagerData = () => {
       userVkId: handleVkId.value.userVkId.toString(), // Из formData
       type: roleName.name, // id из найденного объекта
       name: formData.value.name, // Из formData
+      tgNickname: formData.value.tgNickname.replace(/@/g, ''), // Из formData
     };
     return result;
   } else {
