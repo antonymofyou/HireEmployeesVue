@@ -5,12 +5,22 @@
         <div class="employee__name">
           {{ employee.name }}
           <a
-            class="employee__vk-link"
+            v-if="employee.userVkId"
+            class="employee__social-link"
             :href="`https://vk.com/id${employee.userVkId}`"
             target="_blank"
             rel="noopener noreferrer"
           >
             vk
+          </a>
+          <a
+            v-if="employee.tgNickname"
+            class="employee__social-link"
+            :href="`https://t.me/${employee.tgNickname}`"
+            target="_blank" 
+            rel="noopener noreferrer"
+          >
+          tg
           </a>
         </div>
         <div class="employee__type" :style="{ color: getColor(employee.type) }">
@@ -111,7 +121,7 @@ const getColor = (type) => {
   display: flex;
   gap: 10px;
 }
-.employee__vk-link {
+.employee__social-link {
   text-decoration: none;
   font-size: 14px;
   color: blue;
@@ -119,7 +129,7 @@ const getColor = (type) => {
   white-space: pre-wrap;
   word-break: break-word;
 }
-.employee__vk-link:hover {
+.employee__social-link:hover {
   text-decoration: underline;
 }
 .employee__right-side {
