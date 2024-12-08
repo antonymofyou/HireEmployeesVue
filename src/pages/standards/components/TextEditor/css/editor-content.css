@@ -56,17 +56,16 @@
   overflow-wrap: break-word;
 }
 
-.editor-content th {
-  text-align: left;
-}
-
 .editor-content td, .editor-content th {
-  border: 2px solid var(--mine-shaft);
+  border-width: 2px;
+  border-style: solid;
   box-sizing: border-box;
   min-width: 1em;
   padding: 3px 5px;
   position: relative;
   vertical-align: top;
+  font-weight: 300;
+  text-align: left;
 }
 
 .editor-content .selectedCell:after {

@@ -9,7 +9,9 @@
                 :style="{ color: option.color || '' }"
                 @click="setSelected(option)"
             >
-                <label>{{ option.name }}</label>
+                <slot name="item" :item="option">
+                    <label>{{ option.name }}</label>
+                </slot>
             </div>
         </div>
     </Transition>
@@ -20,7 +22,9 @@
           :data-id="selected.id"
           :style="{ color: selected.color || '' }"
         >
-          {{ selected.name }}
+            <slot name="selected" :item="selected">
+                {{ selected.name }}
+            </slot>
         </span>
         <svg class="arrow" xmlns="http://www.w3.org/2000/svg" width="10" height="10" viewBox="0 0 10 10" fill="none">
           <path

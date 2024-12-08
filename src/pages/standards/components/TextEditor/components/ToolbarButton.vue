@@ -1,34 +1,34 @@
 <template>
-  <button @click="action" class="toolbar-button" :class="{ 'toolbar-button--active': isActive && isActive() }" :disabled="disabled && disabled()" v-show="isShow()">
-    <component :is="icon" />
+  <button 
+      class="toolbar-button" 
+      :disabled="props.disabled" 
+      :class="activeClass"
+  >
+      <slot></slot>
   </button>
 </template>
 
 <script setup>
-// Иконка, действие по кнопке, активна ли кнопка, отключена ли кнопка
+
+import { computed } from 'vue';
+
 const props = defineProps({
-  icon: {
-    type: Object,
-    required: true,
-  },
-  action: {
-    type: Function,
-    required: true,
-  },
-  isActive: {
-    type: Function,
-    required: false,
-  },
-  disabled: {
-    type: Function,
-    required: false,
-  },
-  isShow: {
-    type: Function,
-    required: false,
-    default: () => true,
-  },
+    disabled: {
+        type: Boolean,
+        default: false
+    },
+    active: {
+        type: Boolean,
+        default: false,
+    }
 });
+
+const activeClass = computed(() => {
+    return {
+        'toolbar-button--active': props.active,
+    }
+});
+
 </script>
 
 <style scoped>
