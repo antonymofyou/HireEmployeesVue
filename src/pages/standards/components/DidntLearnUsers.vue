@@ -4,6 +4,7 @@
             <h4 class="didnt-learn-users-standard__title" @click="() => pickStandard(standardId)">
                 <PageIcon class="didnt-learn-users-standard__page-icon" width="13" height="13" />
                 {{ standardsData[standardId].name }}
+                <small>({{ standardsData[standardId].updatedAt }})</small>
                 <span v-if="standardsData[standardId].process" class="didnt-learn-users-standard__process">
                     ({{ standardsData[standardId].process }})
                 </span>
@@ -44,9 +45,24 @@ const props = defineProps({
     },
 });
 
+// Форматирование даты
+const formatDate = (date) => {
+  return new Date(date).toLocaleString('ru', {
+    year: 'numeric',
+    month: 'long',
+    day: 'numeric',
+    hour: '2-digit',
+    minute: '2-digit',
+  });
+}
+
 // Данные стандартов
 const standardsData = computed(() => props.users.reduce((acc, user) => {
-    acc[user.standardId] ? '' : acc[user.standardId] = { name: user.standardName, process: user.standardProcess };
+    acc[user.standardId] ? '' : acc[user.standardId] = { 
+      name: user.standardName, 
+      process: user.standardProcess,
+      updatedAt: formatDate(user.standardUpdatedAt),
+    };
     return acc;
 }, {}));
 
@@ -68,6 +84,10 @@ const pickStandard = (id) => pickedStandardId.value = id;
     margin-bottom: 5px;
     cursor: pointer;
     word-break: break-word;
+  }
+
+  .didnt-learn-users-standard__title small {
+    font-size: 12px;
   }
   
   .didnt-learn-users-standard__page-icon {
