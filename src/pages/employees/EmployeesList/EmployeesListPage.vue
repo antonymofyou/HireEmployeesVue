@@ -86,9 +86,6 @@
         >
           https://vk.com/id{{ handleVkId.userVkId }}
         </a>
-        <div v-if="errorMessage != undefined" class="employees__errorMessage">
-          {{ errorMessage }}
-        </div>
         <InputSimple
           v-model="formData.tgNickname"
           id="tgNickname"
@@ -99,6 +96,9 @@
         />
         <h1 class="employees__SelectlabelName">Роль сотрудника:</h1>
         <SelectMain v-model="formData.type" :options="SelectOptions" />
+        <div v-if="errorMessage" class="employees__errorMessage">
+          {{ errorMessage }}
+        </div>
       </template>
       <template #footer-control-buttons>
         <div class="modal__submit" v-if="handleVkId.checked">
@@ -108,11 +108,6 @@
         </div>
       </template>
     </Modal>
-    <!-- Вывод сообщения о ошибке -->
-    <ErrorNotification
-      v-if="errorMessage && modalSuccess"
-      :message="errorMessage"
-    />
   </Teleport>
 </template>
 
@@ -125,7 +120,6 @@ import plusIcon from "@/assets/icons/plus.svg";
 import CheckIcon from "@/assets/icons/check.svg?component";
 import EmployeeCard from "./components/EmployeeCard.vue";
 import TopSquareButton from "@/components/TopSquareButton.vue";
-import ErrorNotification from "@/components/ErrorNotification.vue";
 import SpinnerMain from "@/components/SpinnerMain.vue";
 import ButtonMain from "@/components/ButtonMain.vue";
 import Modal from "@/components/Modal.vue";
