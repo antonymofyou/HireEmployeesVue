@@ -59,7 +59,6 @@
 .editor-content td, .editor-content th {
   border-width: 2px;
   border-style: solid;
-  border-color: inherit;
   box-sizing: border-box;
   min-width: 1em;
   padding: 3px 5px;
