@@ -1,5 +1,8 @@
 <template>
-  <tgAuth v-if="!isLoggedIn" v-model:isLoggedIn="isLoggedIn"/>
+  <template v-if="!isLoggedIn">
+    <tempAuth v-if="route.name == 'IdvacancyTemp'" v-model:isLoggedIn="isLoggedIn"/>
+    <tgAuth v-if="route.name == 'IdvacancyTG'" v-model:isLoggedIn="isLoggedIn"/>
+  </template>
   <div v-else-if="isLoaded && isSuccessfulLoad" class="content vacancy">
     <header class="vacancy__header">
       <div class="vacancy__auth">
@@ -109,6 +112,7 @@
 import { ref, computed, watch, onMounted, reactive } from 'vue';
 import { useRoute } from 'vue-router';
 
+import tempAuth from './components/tempAuth.vue';
 import tgAuth from './components/tgAuth/tgAuth.vue';
 
 import { isSeeker, logOut } from "@/js/AuthFunctions";

@@ -89,7 +89,12 @@ const router = createRouter({
     },
     {
       path: "/vac/:id",
-      name: "Idvacancy",
+      name: "IdvacancyTG",
+      component: VacancyIdPage,
+    },
+    {
+      path: "/vacancy/:id",
+      name: "IdvacancyTemp",
       component: VacancyIdPage,
     },
   ],
