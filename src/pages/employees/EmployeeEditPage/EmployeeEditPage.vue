@@ -22,6 +22,7 @@
       :message="successMessage"
       :align="'end'"
       :isDisabled="!changedVK"
+      :isActive="saveLoad"
     >
       <template v-slot:text>Сохранить</template>
       <template v-slot:icon>
