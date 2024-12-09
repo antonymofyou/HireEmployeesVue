@@ -74,15 +74,23 @@
       >
         https://vk.com/id{{ formData.userVkId }}
       </a>
-      <div
-        v-if="vkErrorMessage != undefined"
-        class="employees-edit__errorMessage"
-      >
-        {{ vkErrorMessage }}
-      </div>
+      <InputSimple
+        v-model="formData.tgNickname"
+        id="tgNickname"
+        labelName="TG никнейм сотрудника"
+        inputType="input"
+        :isLabelBold="true"
+        :isTextBold="true"
+      />
       <div>
         <h1 class="employee-edit__SelectlabelName">Роль сотрудника:</h1>
         <SelectMain v-model="formData.type" :options="SelectOptions" />
+      </div>
+      <div
+        v-if="errorMessage"
+        class="employees-edit__errorMessage"
+      >
+        {{ errorMessage }}
       </div>
     </div>
     <ButtonMain
@@ -104,10 +112,6 @@
         :show="saveLoad"
       />
     </Teleport>
-    <Teleport to="body">
-      <!-- Вывод сообщения о ошибке -->
-      <ErrorNotification v-if="errorMessage" :message="errorMessage" />
-    </Teleport>
   </section>
 </template>
 
@@ -128,7 +132,6 @@ import SaveIcon from "@/assets/icons/save.svg?component";
 import ButtonMain from "@/components/ButtonMain.vue";
 import InputSimple from "@/components/InputSimple.vue";
 import SelectMain from "@/components/SelectMain.vue";
-import ErrorNotification from "@/components/ErrorNotification.vue";
 import ModalConfirmation from "@/components/ModalConfirmation.vue";
 import SpinnerMain from "@/components/SpinnerMain.vue";
 import ButtonIcon from "@/components/ButtonIcon.vue";
@@ -143,9 +146,6 @@ const successMessage = ref(""); // текст успешного сохране�
 
 // Отображение ошибки
 const errorMessage = ref("");
-
-// Отображение ошибки
-const vkErrorMessage = ref("");
 
 // индикаторы загрузок для кнопок
 let saveLoad = ref(false); // true когда идет сохранение
@@ -173,6 +173,7 @@ const formData = ref({
   type: "",
   userVkId: "",
   managerId: "",
+  tgNickname: "",
 });
 
 const handleVkId = ref({
@@ -193,6 +194,7 @@ onMounted(() => {
           managerId: employee.managerId,
           type:
             SelectOptions.find((item) => item.name === employee.type)?.id || "",
+          tgNickname: employee.tgNickname,
         };
         handleVkId.value.userVklink = `https://vk.com/id${formData.value.userVkId}`;
       });
@@ -224,6 +226,7 @@ const fillManagerData = () => {
       userVkId: formData.value.userVkId, // Из formData
       type: roleName.name, // id из найденного объекта
       name: formData.value.name, // Из formData
+      tgNickname: formData.value.tgNickname.replace(/@/g, ''), // Из formData
     };
     return result;
   } else {
@@ -284,16 +287,16 @@ function getEmployeeVkId() {
         handleVkId.value.checked = true;
         changedVK.value = true;
         isVkidLoading.value = false;
-        vkErrorMessage.value = "";
+        errorMessage.value = "";
       } else {
-        vkErrorMessage.value = err;
+        errorMessage.value = err;
         isVkidLoading.value = false;
         handleVkId.value.checked = false;
       }
     },
     function (err) {
       //неуспешный результат
-      vkErrorMessage.value = err;
+      errorMessage.value = err;
       isVkidLoading.value = false;
       handleVkId.value.checked = false;
     }
@@ -438,6 +441,7 @@ watch(
 .employees-edit__errorMessage {
   color: var(--error-color);
   font-size: 15px;
+  text-align: end;
 }
 .employees-edit__vk-link {
   max-width: 270px;
