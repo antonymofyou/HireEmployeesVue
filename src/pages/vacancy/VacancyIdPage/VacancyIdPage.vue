@@ -1,5 +1,8 @@
 <template>
-  <tgAuth v-if="!isLoggedIn" v-model:isLoggedIn="isLoggedIn"/>
+  <template v-if="!isLoggedIn">
+    <tempAuth v-if="route.name == 'IdvacancyTemp'" v-model:isLoggedIn="isLoggedIn"/>
+    <tgAuth v-if="route.name == 'IdvacancyTG'" v-model:isLoggedIn="isLoggedIn"/>
+  </template>
   <div v-else-if="isLoaded && isSuccessfulLoad" class="content vacancy">
     <header class="vacancy__header">
       <div class="vacancy__auth">
@@ -59,6 +62,16 @@
             placeholder="Введите ваше ФИО..."
             :disabled="!statusData.isAnswering"
           />
+          <InputSimple
+            :modelValue="candidateData.user.nickname"
+            @update:modelValue="updateUserNickname"
+            id="tgNickname"
+            labelName="TG никнейм"
+            inputType="input"
+            :isLabelBold=true
+            placeholder="Введите ваш никнейм в TG..."
+            :disabled="!statusData.isAnswering"
+          />
           <VacancyIdQuestion
             v-for="(question, index) in candidateData.vacancy.questions"
             :title="`Вопрос №${index + 1}`"
@@ -109,6 +122,7 @@
 import { ref, computed, watch, onMounted, reactive } from 'vue';
 import { useRoute } from 'vue-router';
 
+import tempAuth from './components/tempAuth.vue';
 import tgAuth from './components/tgAuth/tgAuth.vue';
 
 import { isSeeker, logOut } from "@/js/AuthFunctions";
@@ -168,6 +182,11 @@ const updateUserFIO = (value) => {
   candidateData.value.user.fio = value;
 };
 
+// Обновление ТГ пользователя
+const updateUserNickname = (value) => {
+  candidateData.value.user.nickname = value.replace(/@/g, '');
+}
+
 //Заполнение vacancyData данными с сервера
 const fetchCandidateData = (callback) => {
   getVacancyDataSeeker((vacResp) => {
@@ -176,7 +195,7 @@ const fetchCandidateData = (callback) => {
 
     getCandidateFromServer((userResp) => {
       // Получение ника и ФИО пользователя
-      const { tgNickname, fio } = userResp;
+      const { tgNickname = '', fio = '' } = userResp;
 
       // Формирование объекта со всеми данными по кандидату (вакансии и пользователе)
       const dataFromServer = {
@@ -243,7 +262,6 @@ onMounted(() => {
       // Загрузка завершена успешно
       isLoaded.value = true;
       if (!errorMessage.value) {
-        console.log(errorMessage.value);
         isSuccessfulLoad.value = true;
       }
     });
@@ -318,6 +336,7 @@ const submitAnswers = (successCallback, errorCallback, { force = 0, finish = 0 }
     requestClass.answers = formattedAnswers;
     requestClass.userInfo = {
       fio: candidateData.value.user.fio,
+      tgNickname: candidateData.value.user.nickname,
     };
     requestClass.forceSave = force;
     requestClass.finish = finish;
