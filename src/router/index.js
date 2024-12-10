@@ -89,14 +89,15 @@ const router = createRouter({
     },
     {
       path: "/vac/:id",
-      name: "IdvacancyTG",
-      component: VacancyIdPage,
-    },
-    {
-      path: "/vacancy/:id",
+      //name: "IdvacancyTG", сделали пока без авторизации
       name: "IdvacancyTemp",
       component: VacancyIdPage,
     },
+    // {
+    //   path: "/vacancy/:id",
+    //   name: "IdvacancyTemp",
+    //   component: VacancyIdPage,
+    // },
   ],
 });
 

@@ -7,7 +7,7 @@
         >
             <template v-slot:text>Заполнить анкету</template>
         </ButtonMain>
-        <div class="temp-auth__message">*будет создана временная учётная запись чтобы с вами связаться</div>
+        <div class="temp-auth__message">Тестовое задание в анкете - первый этап собеседования.</div>
         <p v-if="errorMessage" class="temp-auth__error">
             Ошибка: {{ errorMessage }}
         </p>
